@@ -1,12 +1,15 @@
 // neuralBackground.js
-const canvas = document.getElementById('neural-bg');
-const ctx = canvas?.getContext('2d');
+function initNeuralBackground() {
+  const canvas = document.getElementById('neural-bg');
+  const ctx = canvas?.getContext('2d');
 
-if (!canvas || !ctx) {
-  // Abort quietly when the background canvas isn't present on the page.
-  // (Some legacy pages import this module but don't render the canvas.)
-  console.warn('neuralBackground: #neural-bg not found; skipping render.');
-} else {
+  if (!canvas || !ctx) {
+    // Abort quietly when the background canvas isn't present on the page.
+    // (Some legacy pages import this module but don't render the canvas.)
+    console.warn('neuralBackground: #neural-bg not found; skipping render.');
+    return;
+  }
+
   let width, height;
   let nodes = [];
 
@@ -105,4 +108,10 @@ if (!canvas || !ctx) {
   // Initialize nodes and start animation
   for (let i = 0; i < 80; i++) nodes.push(new Node(i + 1));
   animate();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNeuralBackground, { once: true });
+} else {
+  initNeuralBackground();
 }
