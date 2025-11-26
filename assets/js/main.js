@@ -9,29 +9,30 @@
 //   ✔ Synapse view (synapse.js)
 // ======================================================================
 
-// 1) Wait for Supabase safely (prevents early execution)
-async function waitForSupabase() {
-  while (!window.supabase) {
-    await new Promise(res => setTimeout(res, 20));
-  }
-  return window.supabase;
-}
+import { supabase } from "./supabaseClient.js";
 
-// 2) Main bootstrap
+// 1) Main bootstrap
 async function initMain() {
-  console.log("⏳ Waiting for Supabase...");
-  const supabase = await waitForSupabase();
-  console.log("✅ Supabase ready");
+  console.log("✅ Supabase loaded via ES module");
   console.log("📦 Supabase object:", supabase);
 
   console.log("📌 Main Controller Loaded");
 
   // NOW setup login AFTER Supabase is ready
   console.log("📥 Importing login module...");
-  const loginModule = await import("./login.js");
+  let loginModule;
+  try {
+    loginModule = await import("./login.js");
+  } catch (err) {
+    console.error("❌ Failed to import login.js:", err);
+    throw err;
+  }
   console.log("✅ Login module imported:", loginModule);
-  
+
   const { setupLoginDOM, initLoginSystem } = loginModule;
+  if (typeof setupLoginDOM !== "function" || typeof initLoginSystem !== "function") {
+    throw new Error("login.js did not export setupLoginDOM/initLoginSystem");
+  }
   
   console.log("🎨 Setting up login DOM...");
   setupLoginDOM();

@@ -237,22 +237,8 @@
   </footer>
 
 
-<!-- Supabase core -->
-<script type="module" src="assets/js/supabaseClient.js"></script>
-
-<!-- Globals next -->
-<script type="module" src="assets/js/globals.js"></script>
-
-<!-- Login system (MUST come before main.js) -->
-<script type="module" src="assets/js/login.js"></script>
-
-<!-- Main controller (depends on login.js + globals.js) -->
+<!-- Main controller (loads Supabase, globals, and feature modules) -->
 <script type="module" src="assets/js/main.js"></script>
-
-<!-- Feature controllers -->
-<script type="module" src="assets/js/profile.js"></script>
-<script type="module" src="assets/js/searchEngine.js"></script>
-<script type="module" src="assets/js/synapse.js"></script>
 
 <!-- Visual background -->
 <script type="module" src="assets/js/neuralBackground.js"></script>
