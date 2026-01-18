@@ -429,12 +429,15 @@
       // ---- Enhanced session fetch with retry logic ----
       let sessionAttempts = 0;
       const maxSessionAttempts = 3;
-      
+
+      // Give Supabase a moment to fully initialize before first attempt
+      await sleep(300);
+
       while (sessionAttempts < maxSessionAttempts) {
         try {
           sessionAttempts++;
           log(`🔍 Attempting to get session (attempt ${sessionAttempts}/${maxSessionAttempts})...`);
-          
+
           const {
             data: { session },
           } = await window.supabase.auth.getSession();
@@ -463,7 +466,20 @@
           }
         } catch (e) {
           err(`❌ ERROR in session attempt ${sessionAttempts}:`, e);
-          
+
+          // Special handling for AbortError - this happens when Supabase is still initializing
+          const isAbortError = e?.name === 'AbortError' || e?.message?.includes('signal is aborted');
+
+          if (isAbortError) {
+            warn("⚠️ Supabase auth still initializing - waiting longer before retry...");
+            // Wait longer for Supabase to fully initialize (don't count as failed attempt)
+            if (sessionAttempts < maxSessionAttempts) {
+              sessionAttempts--; // Don't count this as a real attempt
+              await sleep(2000); // Wait 2 seconds for init to complete
+              continue;
+            }
+          }
+
           if (sessionAttempts === maxSessionAttempts) {
             cancelSessionTimer();
             // If we already booted via auth event, don't override.
@@ -502,7 +518,7 @@
 
   if (autostart) boot();
 
-  log("✅ auth.js loaded (v4) — awaiting main.js to boot");
+  log("✅ auth.js loaded (v6 - AbortError fix) — awaiting main.js to boot");
 })();
 
 // ================================================================
@@ -515,6 +531,16 @@ window.addEventListener('error', (event) => {
 });
 
 window.addEventListener('unhandledrejection', (event) => {
+  // Suppress AbortErrors during Supabase initialization - these are expected
+  const isAbortError = event.reason?.name === 'AbortError' ||
+                       event.reason?.message?.includes('signal is aborted');
+
+  if (isAbortError) {
+    // Silently prevent these expected errors from cluttering the console
+    event.preventDefault();
+    return;
+  }
+
   console.error('❌ Unhandled promise rejection:', event.reason);
   // Optional: Send to error tracking service
   // trackError(event.reason);
