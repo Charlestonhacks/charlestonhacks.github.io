@@ -651,23 +651,17 @@
   </script>
 
   <!-- EventsFeed loader (keeps your improved async import pattern) -->
-  <script type="module">
-    async function loadEventsFeedWhenReady() {
-      while (!document.getElementById("events-list")) {
-        await new Promise(r => setTimeout(r, 40));
-      }
-
-      try {
-        const module = await import("/assets/js/eventsFeed.js");
-        if (module.loadEvents) window.loadEvents = module.loadEvents;
-      } catch (error) {
-        console.error("Failed to import eventsFeed.js:", error);
-      }
+ <script type="module">
+  window.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const module = await import("/assets/js/eventsFeed.js");
+      if (module.loadEvents) window.loadEvents = module.loadEvents;
+    } catch (error) {
+      console.error("Failed to import eventsFeed.js:", error);
     }
-
-    window.addEventListener("DOMContentLoaded", loadEventsFeedWhenReady);
-  </script>
-
+  });
+</script>
+  
   <!-- Modal Controls -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
