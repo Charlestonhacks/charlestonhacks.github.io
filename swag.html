@@ -4,7 +4,13 @@
   <meta charset="utf-8" />
   <title>CharlestonHacks Swag Voting</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Britannic+Bold:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- ✅ FIX: "Britannic Bold" is not a Google Font, so that URL returns HTML and triggers CORB.
+       Use a real Google Font instead (Montserrat), and keep Britannic Bold as a fallback if it exists locally. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <style>
@@ -21,7 +27,8 @@
       background: var(--background-color);
       color: var(--text-color);
       min-height: 100vh;
-      font-family: 'Britannic Bold', Arial, sans-serif;
+      /* ✅ FIX: use a web-safe Google Font + keep Britannic as a local fallback */
+      font-family: "Montserrat", "Britannic Bold", "Arial Black", Arial, sans-serif;
       text-align: center;
       margin: 0;
     }
@@ -288,7 +295,7 @@
       { name: "Hat2", img: "icons/hat2.webp" },
       { name: "Hoodie", img: "icons/hoodie.webp" },
       { name: "Mug", img: "icons/mug1.webp" },
-       { name: "Mug", img: "icons/mug2.webp" },
+      { name: "Mug", img: "icons/mug2.webp" },
       { name: "Gauntlet", img: "icons/gauntlet.webp" }
     ];
 
@@ -356,11 +363,26 @@
     async function voteForSwag(swagName) {
       try {
         const { data, error } = await supabase.from('swag_votes').select('*').eq('swag', swagName).single();
+        if (error && error.code !== "PGRST116") {
+          // PGRST116 = No rows found (depends on PostgREST version); treat other errors as real
+          console.warn("Select error:", error);
+        }
+
         let currentVotes = data?.votes || 0;
-        if (data)
-          await supabase.from('swag_votes').update({ votes: currentVotes + 1 }).eq('swag', swagName);
-        else
-          await supabase.from('swag_votes').insert([{ swag: swagName, votes: 1 }]);
+
+        if (data) {
+          const { error: upErr } = await supabase
+            .from('swag_votes')
+            .update({ votes: currentVotes + 1 })
+            .eq('swag', swagName);
+          if (upErr) throw upErr;
+        } else {
+          const { error: insErr } = await supabase
+            .from('swag_votes')
+            .insert([{ swag: swagName, votes: 1 }]);
+          if (insErr) throw insErr;
+        }
+
         showVoteOverlay(swagName);
         loadLeaderboard();
       } catch (err) {
@@ -388,6 +410,7 @@
       const counts = {};
       swagItems.forEach(i => counts[i.name] = 0);
       data?.forEach(r => counts[r.swag] = r.votes);
+
       leaderboardRows.innerHTML = Object.entries(counts)
         .sort((a,b) => b[1]-a[1])
         .map(([s,c],i)=>`
