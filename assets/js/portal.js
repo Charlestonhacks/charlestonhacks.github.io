@@ -6,18 +6,63 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v1-20260223";
+  const VERSION = "portal-js-v2-aria-inert-20260223";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
-  // -----------------------------
+  // ------------------------------------------------
   // DOM helpers
-  // -----------------------------
+  // ------------------------------------------------
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // -----------------------------
+  // Cache DOM once (performance + consistency)
+  const DOM = {
+    body: document.body,
+
+    // overlays
+    splash: $("#splash-overlay"),
+    tutorial: $("#tutorial-overlay"),
+    discovery: $("#discovery-tracker"),
+
+    // splash buttons
+    communityBtn: $("#community-site-btn"),
+    publicBtn: $("#public-site-btn"),
+    dontShowAgain: $("#dont-show-again"),
+    skipTutorial: $("#skip-tutorial"),
+
+    // portal UI
+    mediaContainer: $(".media-container"),
+    infoLine: $("#infoLine"),
+    infoText: $("#infoText"),
+
+    // events modal
+    openCalendarBtn: $("#open-calendar"),
+    eventsOverlay: $("#events-overlay"),
+    eventsCloseBtn: $("#close-overlay"),
+
+    // BTC overlay
+    btcOverlay: $("#matrix-btc-overlay"),
+    btcCloseBtn: $("#close-matrix-btc"),
+    btcDataContainer: $("#btc-data-container"),
+    btcLoading: $("#btc-loading"),
+    btcContent: $("#btc-content"),
+
+    // BTC value elements
+    btcMainPrice: $("#btc-main-price"),
+    btc24hChange: $("#btc-24h-change"),
+    btc24hHigh: $("#btc-24h-high"),
+    btc24hLow: $("#btc-24h-low"),
+    btcMarketCap: $("#btc-market-cap"),
+    btcVolume: $("#btc-volume"),
+    btcLastUpdate: $("#btc-last-update"),
+
+    // Matrix canvas
+    matrixCanvas: $("#matrix-canvas"),
+  };
+
+  // ------------------------------------------------
   // Audio (lazy)
-  // -----------------------------
+  // ------------------------------------------------
   function playSoundById(id) {
     const el = document.getElementById(id);
     if (!el) return;
@@ -26,82 +71,75 @@
     if (el.preload === "none" && el.readyState === 0) {
       try { el.load(); } catch (_) {}
     }
+
     try {
       el.currentTime = 0;
       el.play().catch(() => {});
     } catch (_) {}
   }
 
-  // Optional shared hook for other scripts
   window.__CH_PLAY_SOUND_ID__ = playSoundById;
 
-  // -----------------------------
+  // ------------------------------------------------
   // Splash + Tutorial
-  // -----------------------------
+  // ------------------------------------------------
   const SPLASH_KEY = "chs_splash_seen_once";
   const TUTORIAL_KEY = "chs_tutorial_completed";
 
-  function hideSplash(immediate = false) {
-    const splash = $("#splash-overlay");
-    if (!splash) return;
+  function startDiscovery() {
+    setTimeout(() => {
+      DOM.discovery?.classList.add("visible");
+      DOM.mediaContainer?.classList.add("idle");
+    }, 500);
+  }
 
-    splash.classList.add("fade-out");
-    document.body.classList.remove("splash-active");
+  function checkTutorial() {
+    if (!DOM.tutorial) return;
+
+    if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
+      setTimeout(() => DOM.tutorial.classList.add("active"), 300);
+    } else {
+      startDiscovery();
+    }
+  }
+
+  function hideSplash(immediate = false) {
+    if (!DOM.splash) return;
+
+    DOM.splash.classList.add("fade-out");
+    DOM.body.classList.remove("splash-active");
 
     setTimeout(() => {
-      splash.style.display = "none";
+      if (DOM.splash) DOM.splash.style.display = "none";
       checkTutorial();
     }, immediate ? 0 : 600);
   }
 
-  function checkTutorial() {
-    const tutorial = $("#tutorial-overlay");
-    if (!tutorial) return;
-
-    if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
-      setTimeout(() => tutorial.classList.add("active"), 300);
-    } else {
-      startDiscovery();
-    }
-  }
-
-  function startDiscovery() {
-    setTimeout(() => {
-      $("#discovery-tracker")?.classList.add("visible");
-      $(".media-container")?.classList.add("idle");
-    }, 500);
-  }
-
   function initSplashTutorial() {
-    const splash = $("#splash-overlay");
-    const tutorial = $("#tutorial-overlay");
-    const cBtn = $("#community-site-btn");
-    const pBtn = $("#public-site-btn");
-    const skipBtn = $("#skip-tutorial");
-    const box = $("#dont-show-again");
+    const splashSeen = localStorage.getItem(SPLASH_KEY) === "true";
 
     function dismissSplash() {
-      if (box?.checked) localStorage.setItem(SPLASH_KEY, "true");
+      if (DOM.dontShowAgain?.checked) localStorage.setItem(SPLASH_KEY, "true");
       hideSplash(false);
     }
 
     function closeTutorial() {
-      tutorial?.classList.remove("active");
+      DOM.tutorial?.classList.remove("active");
       localStorage.setItem(TUTORIAL_KEY, "true");
       startDiscovery();
     }
 
-    skipBtn?.addEventListener("click", closeTutorial);
+    DOM.skipTutorial?.addEventListener("click", closeTutorial);
 
-    if (localStorage.getItem(SPLASH_KEY) === "true") {
+    if (splashSeen) {
       hideSplash(true);
     } else {
-      if (splash) {
-        splash.style.display = "flex";
-        document.body.classList.add("splash-active");
+      if (DOM.splash) {
+        DOM.splash.style.display = "flex";
+        DOM.body.classList.add("splash-active");
       }
-      cBtn && (cBtn.onclick = (e) => { e.preventDefault(); dismissSplash(); });
-      pBtn && (pBtn.onclick = (e) => {
+      DOM.communityBtn && (DOM.communityBtn.onclick = (e) => { e.preventDefault(); dismissSplash(); });
+      DOM.publicBtn && (DOM.publicBtn.onclick = (e) => {
         e.preventDefault();
         dismissSplash();
         window.location.href = "https://charlestonhacks.mailchimpsites.com/";
@@ -109,16 +147,19 @@
     }
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && tutorial?.classList.contains("active")) closeTutorial();
+      if (e.key === "Escape" && DOM.tutorial?.classList.contains("active")) closeTutorial();
     });
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // Discovery Progress
-  // -----------------------------
+  // ------------------------------------------------
   const DISCOVERED_KEY = "chs_discovered_portals";
   const TOTAL_PORTALS = 9;
-  const discoveredPortals = new Set(JSON.parse(localStorage.getItem(DISCOVERED_KEY) || "[]"));
+
+  const discoveredPortals = new Set(
+    JSON.parse(localStorage.getItem(DISCOVERED_KEY) || "[]")
+  );
 
   function updateProgressUI() {
     const count = discoveredPortals.size;
@@ -126,11 +167,12 @@
 
     const countEl = $("#portals-count");
     const fillEl = $("#progress-fill");
+
     if (countEl) countEl.textContent = String(count);
     if (fillEl) fillEl.style.width = pct + "%";
 
     if (count === TOTAL_PORTALS) {
-      const tracker = $("#discovery-tracker");
+      const tracker = DOM.discovery;
       if (!tracker) return;
       tracker.style.borderColor = "var(--gold)";
       tracker.style.boxShadow = "0 0 30px var(--gold-glow)";
@@ -140,22 +182,24 @@
 
   function markDiscovered(portalId) {
     if (!portalId) return;
+
     if (!discoveredPortals.has(portalId)) {
       discoveredPortals.add(portalId);
-      localStorage.setItem(DISCOVERED_KEY, JSON.stringify([...discoveredPortals]));
+      try {
+        localStorage.setItem(DISCOVERED_KEY, JSON.stringify([...discoveredPortals]));
+      } catch (_) {}
       updateProgressUI();
       playSoundById("chimeSound");
     }
   }
 
-  // Expose a tiny API if you want
   window.charlestonHacks = window.charlestonHacks || {};
   window.charlestonHacks.markDiscovered = markDiscovered;
   window.charlestonHacks.getProgress = () => discoveredPortals.size;
 
-  // -----------------------------
+  // ------------------------------------------------
   // BTC cache
-  // -----------------------------
+  // ------------------------------------------------
   const BTC_CACHE_KEY = "chs_btc_cache_v1";
   const BTC_CACHE_TTL_MS = 60 * 1000;
 
@@ -183,47 +227,55 @@
     const details = payload?.details || {};
     if (!btc) return;
 
-    $("#btc-main-price").textContent =
-      "$" + btc.usd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (DOM.btcMainPrice) {
+      DOM.btcMainPrice.textContent =
+        "$" + btc.usd.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
     const changePercent = btc.usd_24h_change || 0;
-    const changeElem = $("#btc-24h-change");
-    changeElem.textContent = (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
-    changeElem.className = "btc-stat-value " + (changePercent >= 0 ? "positive" : "negative");
+    if (DOM.btc24hChange) {
+      DOM.btc24hChange.textContent =
+        (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
+      DOM.btc24hChange.className =
+        "btc-stat-value " + (changePercent >= 0 ? "positive" : "negative");
+    }
 
     const high = details?.high_24h?.usd;
     const low = details?.low_24h?.usd;
 
-    $("#btc-24h-high").textContent =
-      (typeof high === "number")
-        ? "$" + high.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : "--";
+    if (DOM.btc24hHigh) {
+      DOM.btc24hHigh.textContent =
+        (typeof high === "number")
+          ? "$" + high.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : "--";
+    }
 
-    $("#btc-24h-low").textContent =
-      (typeof low === "number")
-        ? "$" + low.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        : "--";
+    if (DOM.btc24hLow) {
+      DOM.btc24hLow.textContent =
+        (typeof low === "number")
+          ? "$" + low.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+          : "--";
+    }
 
     const marketCap = btc.usd_market_cap || 0;
-    $("#btc-market-cap").textContent = "$" + (marketCap / 1e9).toFixed(2) + "B";
+    if (DOM.btcMarketCap) DOM.btcMarketCap.textContent = "$" + (marketCap / 1e9).toFixed(2) + "B";
 
     const volume = btc.usd_24h_vol || 0;
-    $("#btc-volume").textContent = "$" + (volume / 1e9).toFixed(2) + "B";
+    if (DOM.btcVolume) DOM.btcVolume.textContent = "$" + (volume / 1e9).toFixed(2) + "B";
 
     const updateTime = new Date((btc.last_updated_at || 0) * 1000);
-    $("#btc-last-update").textContent =
-      updateTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    if (DOM.btcLastUpdate) {
+      DOM.btcLastUpdate.textContent =
+        updateTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    }
   }
 
   async function fetchBTCData() {
-    const loading = $("#btc-loading");
-    const content = $("#btc-content");
-
     const cached = getCachedBTC();
     if (cached) {
       renderBTC(cached);
-      if (loading) loading.style.display = "none";
-      if (content) content.style.display = "block";
+      if (DOM.btcLoading) DOM.btcLoading.style.display = "none";
+      if (DOM.btcContent) DOM.btcContent.style.display = "block";
       return;
     }
 
@@ -243,7 +295,7 @@
         );
         const detailData = await detailResponse.json();
         details = detailData?.market_data || null;
-      } catch (_) {
+      } catch {
         details = null;
       }
 
@@ -252,46 +304,47 @@
       renderBTC(merged);
 
       setTimeout(() => {
-        if (loading) loading.style.display = "none";
-        if (content) content.style.display = "block";
+        if (DOM.btcLoading) DOM.btcLoading.style.display = "none";
+        if (DOM.btcContent) DOM.btcContent.style.display = "block";
       }, 200);
     } catch (err) {
       console.error("[PORTAL] Error fetching BTC data:", err);
-      if (loading) loading.textContent = "ERROR LOADING DATA";
+      if (DOM.btcLoading) DOM.btcLoading.textContent = "ERROR LOADING DATA";
+
       setTimeout(() => {
-        if (loading) loading.style.display = "none";
-        if (content) content.style.display = "block";
-        $("#btc-main-price").textContent = "DATA UNAVAILABLE";
+        if (DOM.btcLoading) DOM.btcLoading.style.display = "none";
+        if (DOM.btcContent) DOM.btcContent.style.display = "block";
+        if (DOM.btcMainPrice) DOM.btcMainPrice.textContent = "DATA UNAVAILABLE";
       }, 400);
     }
   }
 
   window.fetchBTCData = fetchBTCData;
 
-  // -----------------------------
+  // ------------------------------------------------
   // Matrix animation (RAF + pause)
-  // -----------------------------
+  // ------------------------------------------------
   let matrixRaf = null;
   let matrixRunning = false;
   let matrixCtx = null;
-  let matrixCanvas = null;
   let drops = [];
   let columns = 0;
+
   const btcChars = "₿$0123456789BITCOIN.";
 
   function matrixResize() {
-    if (!matrixCanvas) return;
-    matrixCanvas.width = window.innerWidth;
-    matrixCanvas.height = window.innerHeight;
-    columns = Math.floor(matrixCanvas.width / 20);
+    if (!DOM.matrixCanvas) return;
+    DOM.matrixCanvas.width = window.innerWidth;
+    DOM.matrixCanvas.height = window.innerHeight;
+    columns = Math.floor(DOM.matrixCanvas.width / 20);
     drops = Array(columns).fill(1);
   }
 
   function matrixFrame() {
-    if (!matrixRunning || !matrixCtx || !matrixCanvas) return;
+    if (!matrixRunning || !matrixCtx || !DOM.matrixCanvas) return;
 
     matrixCtx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+    matrixCtx.fillRect(0, 0, DOM.matrixCanvas.width, DOM.matrixCanvas.height);
 
     matrixCtx.fillStyle = "#00ff00";
     matrixCtx.font = "15px Courier New";
@@ -300,7 +353,7 @@
       const text = btcChars[Math.floor(Math.random() * btcChars.length)];
       matrixCtx.fillText(text, i * 20, drops[i] * 20);
 
-      if (drops[i] * 20 > matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
+      if (drops[i] * 20 > DOM.matrixCanvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
 
@@ -308,17 +361,16 @@
   }
 
   function startMatrixRain() {
-    matrixCanvas = $("#matrix-canvas");
-    if (!matrixCanvas) return;
+    if (!DOM.matrixCanvas) return;
 
-    matrixCtx = matrixCanvas.getContext("2d");
+    matrixCtx = DOM.matrixCanvas.getContext("2d");
     matrixResize();
 
     matrixRunning = true;
     if (matrixRaf) cancelAnimationFrame(matrixRaf);
     matrixRaf = requestAnimationFrame(matrixFrame);
 
-    setTimeout(() => $("#btc-data-container")?.classList.add("visible"), 1500);
+    setTimeout(() => DOM.btcDataContainer?.classList.add("visible"), 1500);
   }
 
   function stopMatrixRain() {
@@ -327,12 +379,31 @@
     matrixRaf = null;
   }
 
-  function openMatrixBTC() {
-    const overlay = $("#matrix-btc-overlay");
-    if (!overlay) return;
+  // ------------------------------------------------
+  // BTC Overlay: inert + focus restore (fixes aria-hidden warning)
+  // ------------------------------------------------
+  let btcLastFocusEl = null;
 
-    overlay.classList.add("active");
-    overlay.setAttribute("aria-hidden", "false");
+  function isBTCOpen() {
+    return !!(DOM.btcOverlay && !DOM.btcOverlay.hidden && DOM.btcOverlay.classList.contains("active"));
+  }
+
+  function openMatrixBTC(triggerEl) {
+    if (!DOM.btcOverlay) return;
+    if (isBTCOpen()) return;
+
+    btcLastFocusEl = triggerEl || document.activeElement;
+
+    // Make visible + interactive
+    DOM.btcOverlay.hidden = false;
+    DOM.btcOverlay.inert = false;
+    DOM.btcOverlay.classList.add("active");
+    DOM.btcOverlay.setAttribute("aria-hidden", "false");
+
+    // Focus close
+    requestAnimationFrame(() => {
+      try { DOM.btcCloseBtn?.focus(); } catch (_) {}
+    });
 
     playSoundById("cardflipSound");
     startMatrixRain();
@@ -340,28 +411,40 @@
   }
 
   function closeMatrixBTC() {
-    const overlay = $("#matrix-btc-overlay");
-    overlay?.classList.remove("active");
-    overlay?.setAttribute("aria-hidden", "true");
+    if (!DOM.btcOverlay) return;
+    if (!isBTCOpen()) return;
 
+    // Stop animation first
     stopMatrixRain();
 
-    setTimeout(() => {
-      $("#btc-data-container")?.classList.remove("visible");
-      const loading = $("#btc-loading");
-      const content = $("#btc-content");
-      if (loading) { loading.style.display = "block"; loading.textContent = "LOADING BTC DATA..."; }
-      if (content) content.style.display = "none";
+    // Move focus OUT before hiding/inerting
+    try {
+      if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
+      else document.body?.focus?.();
+    } catch (_) {}
 
-      const canvas = $("#matrix-canvas");
-      if (canvas) canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+    // Hide interaction
+    DOM.btcOverlay.classList.remove("active");
+    DOM.btcOverlay.setAttribute("aria-hidden", "true");
+    DOM.btcOverlay.inert = true;
+
+    // Reset UI after transition
+    setTimeout(() => {
+      DOM.btcOverlay.hidden = true;
+
+      DOM.btcDataContainer?.classList.remove("visible");
+      if (DOM.btcLoading) { DOM.btcLoading.style.display = "block"; DOM.btcLoading.textContent = "LOADING BTC DATA..."; }
+      if (DOM.btcContent) DOM.btcContent.style.display = "none";
+
+      if (DOM.matrixCanvas) {
+        DOM.matrixCanvas.getContext("2d")?.clearRect(0, 0, DOM.matrixCanvas.width, DOM.matrixCanvas.height);
+      }
     }, 250);
   }
 
-  // pause matrix if tab hidden while overlay open
+  // Pause matrix if tab hidden while overlay open
   document.addEventListener("visibilitychange", () => {
-    const overlayActive = $("#matrix-btc-overlay")?.classList.contains("active");
-    if (!overlayActive) return;
+    if (!isBTCOpen()) return;
     if (document.hidden) stopMatrixRain();
     else startMatrixRain();
   });
@@ -370,9 +453,9 @@
     if (matrixRunning) matrixResize();
   });
 
-  // -----------------------------
+  // ------------------------------------------------
   // Events feed loader (no polling)
-  // -----------------------------
+  // ------------------------------------------------
   async function loadEventsFeedModule() {
     if (typeof window.loadEvents === "function") return window.loadEvents;
 
@@ -384,15 +467,12 @@
     return null;
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // Portal interactions
-  // -----------------------------
+  // ------------------------------------------------
   function initPortals() {
-    const infoLine = $("#infoLine");
-    const infoText = $("#infoText");
     const areas = $$(".clickable-area");
-
-    areas.forEach(a => a.setAttribute("tabindex", "0"));
+    areas.forEach((a) => a.setAttribute("tabindex", "0"));
 
     areas.forEach((area) => {
       const portalId = area.dataset.portal;
@@ -400,12 +480,12 @@
       if (discoveredPortals.has(portalId)) area.classList.add("discovered");
 
       area.addEventListener("mouseenter", () => {
-        if (!infoLine || !infoText) return;
-        infoText.textContent = area.dataset.info || "";
-        infoLine.classList.add("visible");
+        if (!DOM.infoLine || !DOM.infoText) return;
+        DOM.infoText.textContent = area.dataset.info || "";
+        DOM.infoLine.classList.add("visible");
       });
 
-      area.addEventListener("mouseleave", () => infoLine?.classList.remove("visible"));
+      area.addEventListener("mouseleave", () => DOM.infoLine?.classList.remove("visible"));
 
       area.addEventListener("click", (e) => {
         e.preventDefault();
@@ -416,7 +496,7 @@
 
         // center portal opens BTC
         if (portalId === "center") {
-          openMatrixBTC();
+          openMatrixBTC(area); // pass trigger for focus restore
           return;
         }
 
@@ -433,17 +513,15 @@
     });
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // Events modal controls
-  // -----------------------------
+  // ------------------------------------------------
   function initEventsModal() {
-    const openCalendarBtn = $("#open-calendar");
-    const eventsOverlay = $("#events-overlay");
-    const closeBtn = $("#close-overlay");
+    if (!DOM.openCalendarBtn || !DOM.eventsOverlay) return;
 
-    openCalendarBtn?.addEventListener("click", async (e) => {
+    DOM.openCalendarBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      eventsOverlay?.classList.add("active");
+      DOM.eventsOverlay.classList.add("active");
 
       try {
         const fn = await loadEventsFeedModule();
@@ -453,39 +531,48 @@
       }
     });
 
-    closeBtn?.addEventListener("click", () => eventsOverlay?.classList.remove("active"));
+    DOM.eventsCloseBtn?.addEventListener("click", () => DOM.eventsOverlay?.classList.remove("active"));
 
-    eventsOverlay?.addEventListener("click", (e) => {
-      if (e.target === eventsOverlay) eventsOverlay.classList.remove("active");
+    DOM.eventsOverlay.addEventListener("click", (e) => {
+      if (e.target === DOM.eventsOverlay) DOM.eventsOverlay.classList.remove("active");
     });
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // BTC overlay close controls
-  // -----------------------------
+  // ------------------------------------------------
   function initBTCModalControls() {
-    $("#close-matrix-btc")?.addEventListener("click", closeMatrixBTC);
+    DOM.btcCloseBtn?.addEventListener("click", closeMatrixBTC);
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeMatrixBTC();
+      if (e.key !== "Escape") return;
+      if (!isBTCOpen()) return;
+      closeMatrixBTC();
     });
 
-    $("#matrix-btc-overlay")?.addEventListener("click", (e) => {
-      if (e.target && e.target.id === "matrix-btc-overlay") closeMatrixBTC();
+    DOM.btcOverlay?.addEventListener("click", (e) => {
+      if (e.target === DOM.btcOverlay) closeMatrixBTC();
     });
   }
 
-  // -----------------------------
+  // ------------------------------------------------
   // Boot
-  // -----------------------------
-  window.addEventListener("DOMContentLoaded", async () => {
+  // ------------------------------------------------
+  window.addEventListener("DOMContentLoaded", () => {
     initSplashTutorial();
     updateProgressUI();
     initPortals();
     initEventsModal();
     initBTCModalControls();
 
-    // Optional: warm-load events module after idle, but don't block paint
+    // Ensure BTC overlay is safely inert/hidden when not active (in case HTML changed)
+    if (DOM.btcOverlay && !DOM.btcOverlay.classList.contains("active")) {
+      DOM.btcOverlay.hidden = true;
+      DOM.btcOverlay.inert = true;
+      DOM.btcOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    // Warm-load events module after idle, but don't block paint
     if ("requestIdleCallback" in window) {
       requestIdleCallback(() => loadEventsFeedModule().catch(() => {}), { timeout: 1500 });
     } else {
