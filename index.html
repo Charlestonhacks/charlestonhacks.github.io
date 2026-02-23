@@ -269,20 +269,21 @@
 
   <!-- Core modules you already use -->
   <script type="module">
-    import "/assets/js/neuralBackground.js";
-    import { supabase } from "/assets/js/supabaseClient.js";
+  import "/assets/js/animation-lifecycle.js";   // ✅ add this
+  import "/assets/js/neuralBackground.js";
+  import { supabase } from "/assets/js/supabaseClient.js";
 
-    window.__CH_AUTH_READY__ = false;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      localStorage.setItem("ch:lastScreen", "index");
-      window.__CH_SESSION__ = session || null;
-    } catch (e) {
-      console.warn("Auth gate session check failed:", e);
-    } finally {
-      window.__CH_AUTH_READY__ = true;
-    }
-  </script>
+  window.__CH_AUTH_READY__ = false;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    localStorage.setItem("ch:lastScreen", "index");
+    window.__CH_SESSION__ = session || null;
+  } catch (e) {
+    console.warn("Auth gate session check failed:", e);
+  } finally {
+    window.__CH_AUTH_READY__ = true;
+  }
+</script>
 
   <!-- Portal logic (NEW) -->
   <script type="module" src="/assets/js/portal.js"></script>
