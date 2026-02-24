@@ -1,9 +1,10 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v7-single-source-of-truth-20260224
+   Version: portal-css-v8-centered-card-20260224
    Notes:
    - SINGLE source of truth for portal layout (no duplicate rules)
+   - Card is centered in viewport via .main-wrapper + .media-container
    - .card-stage is the positioning container and enables cqw units
    - Portal buttons:
      - positioning uses translate: (not transform)
@@ -39,9 +40,14 @@
 
   --core-glow-strong: rgba(0, 224, 255, 0.45);
   --core-glow-soft: rgba(0, 224, 255, 0.22);
+
+  /* ✅ Space reserved for your fixed top logo (from the HTML) */
+  --top-logo-safe-area: 90px;
 }
 
 * { box-sizing: border-box; }
+
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -235,20 +241,43 @@ body {
 }
 
 /* ============================
-   MAIN CARD / STAGE
+   MAIN CARD / STAGE (✅ CENTERED)
 ============================ */
-.main-wrapper {
+main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2rem;
+}
+
+/*
+  ✅ The card is centered in the viewport.
+  - padding-top reserves space for your fixed logo at the top center
+  - padding-bottom keeps icon bar from crowding on short screens
+*/
+.main-wrapper {
+  flex: 1 1 auto;
+  min-height: 100vh;
+
+  display: grid;
+  place-items: center;
+
+  padding:
+    calc(var(--top-logo-safe-area) + 1.25rem)
+    2rem
+    2.25rem;
+
   position: relative;
 }
 
+/* Centers the stage without relying on inline-block quirks */
 .media-container {
   position: relative;
+  display: grid;
+  place-items: center;
+
+  width: 100%;
+  max-width: 980px;
+
   perspective: 1500px;
   transform-style: preserve-3d;
   animation: cardEntrance 1.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -465,7 +494,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 0.8rem;
-  margin: 2rem auto;
+  margin: 1.4rem auto 2rem;
   padding: 1.2rem 2rem;
   background: rgba(0, 0, 0, 0.5);
   border-radius: 50px;
@@ -589,8 +618,14 @@ body {
    RESPONSIVE
 ============================ */
 @media (max-width: 768px) {
+  :root { --top-logo-safe-area: 76px; }
   #missionImage { width: min(520px, 92vw); }
   .clickable-area.center { width: var(--core-size-mobile); }
+  .main-wrapper { padding: calc(var(--top-logo-safe-area) + 1rem) 1.25rem 2rem; }
+}
+
+@media (max-width: 420px) {
+  :root { --top-logo-safe-area: 68px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
