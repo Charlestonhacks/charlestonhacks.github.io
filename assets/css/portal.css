@@ -293,8 +293,9 @@ body {
 .media-container.idle #missionImage { animation: breathe 6s ease-in-out infinite; }
 
 /* ============================
-   PORTAL BUTTONS (ALL)
+   PORTAL BUTTONS (STABLE FIX)
 ============================ */
+
 .clickable-area {
   position: absolute;
   z-index: 20;
@@ -303,45 +304,59 @@ body {
   background: transparent;
   padding: 0;
 
-  /* key: no transform-based positioning */
+  width: 70px;
+  height: 70px;
+
   border-radius: 50%;
-  aspect-ratio: 1 / 1;
-
-  /* default sizing for corner/side portals */
-  width: clamp(56px, 11.9cqw, 76.5px);
-
-  /* hover uses scale property (won't kill translate) */
-  scale: 1;
-  transition: var(--transition-bounce);
-  filter: brightness(1);
+  transition: 0.3s ease;
 }
 
 .clickable-area > img {
   width: 100%;
   height: 100%;
-  display: block;
-  pointer-events: none;
   object-fit: contain;
+  pointer-events: none;
 }
 
-/* Larger top/bottom center portals (docs / sponsor) */
+/* Larger top/bottom center portals */
 .clickable-area.top-center,
 .clickable-area.bottom-center {
-  width: clamp(72px, 15.3cqw, 110.5px);
+  width: 100px;
+  height: 100px;
 }
 
-/* Position classes (NO transform — uses translate instead) */
+/* Position classes */
 .top-left     { top: 3%;  left: 5%; }
 .top-right    { top: 3%;  right: 5%; }
 .bottom-left  { bottom: 3%; left: 5%; }
 .bottom-right { bottom: 3%; right: 5%; }
 
-.top-center    { top: 2%; left: 50%; translate: -50% 0; }
-.bottom-center { bottom: 2%; left: 50%; translate: -50% 0; }
+.top-center    { top: 2%; left: 50%; transform: translateX(-50%); }
+.bottom-center { bottom: 2%; left: 50%; transform: translateX(-50%); }
 
-.middle-left   { top: 50%; left: 5%; translate: 0 -50%; }
-.middle-right  { top: 50%; right: 5%; translate: 0 -50%; }
+.middle-left   { top: 50%; left: 5%; transform: translateY(-50%); }
+.middle-right  { top: 50%; right: 5%; transform: translateY(-50%); }
 
+/* CENTER PORTAL */
+.clickable-area.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+/* Hover effects */
+.clickable-area:hover {
+  transform: scale(1.1);
+  z-index: 30;
+}
+
+.clickable-area.center:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+}
 /* ============================
    CENTER “CORE” PORTAL
 ============================ */
