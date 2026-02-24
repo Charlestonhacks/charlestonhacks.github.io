@@ -666,6 +666,66 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+/* ==========================================================
+   MATRIX BTC OVERLAY — SCROLLABLE CONTENT PANEL (FIX)
+   ========================================================== */
+
+/* Keep the overlay fixed fullscreen (already true),
+   but prevent body scroll chaining */
+#matrix-btc-overlay.active {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+/* Make the BTC panel scroll instead of the page */
+#matrix-btc-overlay .btc-data-container {
+  /* keep your existing animation behavior */
+  position: relative;
+  z-index: 2;
+  text-align: center;
+
+  /* scroll panel behavior */
+  width: min(900px, 92vw);
+  max-height: min(82vh, 640px);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+
+  /* prevents “rubber-band / scroll chaining” issues */
+  overscroll-behavior: contain;
+
+  /* give content some breathing room */
+  padding: 18px 18px 24px;
+  border-radius: 12px;
+
+  /* OPTIONAL: subtle panel separation so text is readable over matrix */
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* Mobile sizing */
+@media (max-width: 600px) {
+  #matrix-btc-overlay .btc-data-container {
+    width: 94vw;
+    max-height: 86vh;
+    padding: 14px 14px 20px;
+  }
+
+  /* make the big price fit */
+  .btc-main-price {
+    font-size: clamp(2.6rem, 10vw, 4.2rem);
+  }
+}
+
+/* Landscape phones / short screens */
+@media (max-height: 520px) {
+  #matrix-btc-overlay .btc-data-container {
+    max-height: 90vh;
+  }
+}
 
 /* ============================
    EVENTS MODAL
