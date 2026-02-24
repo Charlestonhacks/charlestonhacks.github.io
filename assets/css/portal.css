@@ -1,11 +1,13 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v6-portal-buttons-fixed-20260224
+   Version: portal-css-v7-single-source-of-truth-20260224
    Notes:
-   - Card-stage is the positioning container + enables cqw units
-   - Adds complete portal button sizing + position classes (top-left etc.)
-   - FIX: positioning uses translate:, hover uses scale: (no transform fighting)
+   - SINGLE source of truth for portal layout (no duplicate rules)
+   - .card-stage is the positioning container and enables cqw units
+   - Portal buttons:
+     - positioning uses translate: (not transform)
+     - hover uses scale (not transform)
    - Center portal is a perfect circle “core” with stronger glow
    - Keeps <img> inside buttons click-safe (pointer-events: none)
    - Keeps BTC overlay scroll panel fix
@@ -19,19 +21,22 @@
   --gold-glow: rgba(201, 163, 94, 0.6);
   --cyan: #00e0ff;
   --cyan-glow: rgba(0, 224, 255, 0.4);
+
   --bg-dark: #000;
   --bg-card: #0a0a0a;
+
   --text-primary: #fff;
   --text-secondary: #aaa;
-  --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.3);
+
   --border-radius: 12px;
 
-  --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   /* Center “core” tuning */
-  --core-size: 300px;          /* requested desktop */
-  --core-size-mobile: 220px;   /* requested mobile */
+  --core-size: 300px;          /* desktop */
+  --core-size-mobile: 220px;   /* mobile */
+
   --core-glow-strong: rgba(0, 224, 255, 0.45);
   --core-glow-soft: rgba(0, 224, 255, 0.22);
 }
@@ -101,7 +106,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.5px;
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all var(--transition-smooth);
   font-family: "Orbitron", sans-serif;
   white-space: nowrap;
   border: none;
@@ -149,7 +154,6 @@ body {
   z-index: 1800;
   animation: fadeIn 0.4s ease;
 }
-
 #tutorial-overlay.active { display: flex; }
 
 .tutorial-content {
@@ -188,7 +192,7 @@ body {
   border-radius: var(--border-radius);
   padding: 1.25rem 1.5rem;
   margin: 1rem 0;
-  transition: var(--transition-smooth);
+  transition: all var(--transition-smooth);
   color: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -200,9 +204,6 @@ body {
 .tutorial-step:hover {
   background: rgba(0, 0, 0, 0.82);
   transform: translateX(5px);
-  box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.55),
-    0 0 26px rgba(0, 224, 255, 0.18);
 }
 
 .tutorial-step i {
@@ -221,26 +222,16 @@ body {
   padding: 0.85rem 2rem;
   border-radius: 50px;
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all var(--transition-smooth);
   font-family: "Orbitron", sans-serif;
   margin-top: 1rem;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(0, 224, 255, 0.12);
 }
 #skip-tutorial:hover {
   background: var(--cyan);
   color: #000;
-  box-shadow:
-    0 0 22px rgba(0, 224, 255, 0.35),
-    0 0 38px rgba(0, 224, 255, 0.22);
   transform: translateY(-1px);
-}
-#skip-tutorial:focus-visible {
-  outline: 3px solid rgba(0, 224, 255, 0.5);
-  outline-offset: 3px;
 }
 
 /* ============================
@@ -268,34 +259,26 @@ body {
   100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
 }
 
-/* ✅ IMPORTANT:
-   - container-type enables cqw sizing
-   - line-height:0 prevents inline-image gaps */
+/* Card-stage is the ONLY positioning context for portal buttons */
 .card-stage {
   position: relative;
   display: inline-block;
   line-height: 0;
-  container-type: inline-size;
+  container-type: inline-size; /* enables cqw */
 }
 
-/* Ensure the card image defines the stage size */
+/* The card image defines the stage size */
 #missionImage {
   display: block;
   width: min(560px, 86vw);
   height: auto;
 }
 
-/* Breathing animation for card (optional) */
-@keyframes breathe {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.02); }
-}
-.media-container.idle #missionImage { animation: breathe 6s ease-in-out infinite; }
-
 /* ============================
-   PORTAL BUTTONS (STABLE FIX)
+   PORTAL BUTTONS (CLEAN + STABLE)
+   - Positioning: translate property (NOT transform)
+   - Hover: scale property (NOT transform)
 ============================ */
-
 .clickable-area {
   position: absolute;
   z-index: 20;
@@ -304,16 +287,23 @@ body {
   background: transparent;
   padding: 0;
 
-  width: 70px;
-  height: 70px;
+  /* Default portal size scales with card width */
+  width: clamp(56px, 11.9cqw, 78px);
+  aspect-ratio: 1 / 1;
 
   border-radius: 50%;
-  transition: 0.3s ease;
+  overflow: hidden;
+
+  /* Hover without moving */
+  scale: 1;
+  transition: scale var(--transition-bounce), filter var(--transition-smooth);
+  filter: brightness(1);
 }
 
 .clickable-area > img {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: contain;
   pointer-events: none;
 }
@@ -321,42 +311,28 @@ body {
 /* Larger top/bottom center portals */
 .clickable-area.top-center,
 .clickable-area.bottom-center {
-  width: 100px;
-  height: 100px;
+  width: clamp(72px, 15.3cqw, 112px);
 }
 
-/* Position classes */
+/* ---- Positions (percent of card-stage) ---- */
 .top-left     { top: 3%;  left: 5%; }
 .top-right    { top: 3%;  right: 5%; }
 .bottom-left  { bottom: 3%; left: 5%; }
 .bottom-right { bottom: 3%; right: 5%; }
 
-.top-center    { top: 2%; left: 50%; transform: translateX(-50%); }
-.bottom-center { bottom: 2%; left: 50%; transform: translateX(-50%); }
+.top-center    { top: 2%; left: 50%; translate: -50% 0; }
+.bottom-center { bottom: 2%; left: 50%; translate: -50% 0; }
 
-.middle-left   { top: 50%; left: 5%; transform: translateY(-50%); }
-.middle-right  { top: 50%; right: 5%; transform: translateY(-50%); }
+.middle-left   { top: 50%; left: 5%; translate: 0 -50%; }
+.middle-right  { top: 50%; right: 5%; translate: 0 -50%; }
 
-/* CENTER PORTAL */
-.clickable-area.center {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 240px;
-  height: 240px;
-  border-radius: 50%;
-  overflow: hidden;
+/* Non-center hover */
+.clickable-area:hover:not(.center) {
+  filter: brightness(1.25) drop-shadow(0 0 14px var(--cyan));
+  scale: 1.12;
+  z-index: 40;
 }
 
-/* Hover effects */
-.clickable-area:hover {
-  transform: scale(1.1);
-  z-index: 30;
-}
-
-.clickable-area.center:hover {
-  transform: translate(-50%, -50%) scale(1.05);
-}
 /* ============================
    CENTER “CORE” PORTAL
 ============================ */
@@ -376,6 +352,11 @@ body {
   box-shadow:
     0 0 30px var(--core-glow-soft),
     0 0 70px rgba(0, 224, 255, 0.14);
+
+  transition:
+    scale var(--transition-bounce),
+    box-shadow var(--transition-smooth),
+    filter var(--transition-smooth);
 }
 
 .clickable-area.center > img {
@@ -418,17 +399,8 @@ body {
   50%      { scale: 1.08; opacity: 0.18; }
 }
 
-/* ============================
-   HOVERS (NO POSITION BREAKING)
-============================ */
-.clickable-area:hover:not(.center) {
-  filter: brightness(1.3) drop-shadow(0 0 15px var(--cyan));
-  scale: 1.15;
-  z-index: 40;
-}
-
 .clickable-area.center:hover {
-  scale: 1.08;
+  scale: 1.06;
   box-shadow:
     0 0 38px rgba(0, 224, 255, 0.32),
     0 0 95px rgba(0, 224, 255, 0.18);
@@ -442,18 +414,23 @@ body {
   top: 15%;
   left: 50%;
   translate: -50% 0;
+
   background: rgba(0, 0, 0, 0.95);
   border: 2px solid var(--cyan);
   padding: 1rem 1.8rem;
   border-radius: var(--border-radius);
+
   min-width: 320px;
   max-width: 500px;
   text-align: center;
+
   opacity: 0;
-  transition: var(--transition-smooth);
   pointer-events: none;
+
+  transition: opacity var(--transition-smooth), scale var(--transition-smooth);
   backdrop-filter: blur(15px);
   box-shadow: 0 8px 30px rgba(0, 224, 255, 0.5), 0 0 60px rgba(0, 0, 0, 0.8);
+
   z-index: 100;
 }
 .info-line.visible {
@@ -497,15 +474,16 @@ body {
 }
 
 .icons-container a {
-  position: relative;
   color: #fff;
   font-size: 1.5rem;
   width: 45px;
   height: 45px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: var(--transition-smooth);
+
+  transition: all var(--transition-smooth);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
 }
@@ -531,7 +509,6 @@ body {
   z-index: 2000;
   overflow: hidden;
 }
-
 #matrix-btc-overlay.active {
   display: flex;
   animation: fadeIn 0.3s ease;
@@ -590,7 +567,6 @@ body {
   z-index: 1500;
   pointer-events: none;
 }
-
 #events-overlay.active {
   display: flex;
   pointer-events: auto;
@@ -613,16 +589,8 @@ body {
    RESPONSIVE
 ============================ */
 @media (max-width: 768px) {
-  .clickable-area.center { width: var(--core-size-mobile); }
   #missionImage { width: min(520px, 92vw); }
-}
-
-@media (max-width: 600px) {
-  #matrix-btc-overlay .btc-data-container {
-    width: 94vw;
-    max-height: 86vh;
-    padding: 14px 14px 20px;
-  }
+  .clickable-area.center { width: var(--core-size-mobile); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -633,6 +601,9 @@ body {
   }
 }
 
+/* ============================
+   ACCESSIBILITY
+============================ */
 .clickable-area:focus,
 .icons-container a:focus,
 button:focus {
