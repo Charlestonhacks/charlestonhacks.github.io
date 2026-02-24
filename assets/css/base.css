@@ -2,19 +2,19 @@
    Base Layout
    ========================================================== */
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   background: #000;
   color: #fff;
 
-  /* Keep sideways overflow from causing layout drift,
-     but do NOT block vertical scrolling anywhere */
+  /* Prevent sideways drift; allow vertical scrolling */
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -80,40 +80,9 @@ canvas#neural-bg {
 }
 
 /* ==========================================================
-   BTC Overlay Scroll Fix (works across screen sizes)
-   Notes:
-   - Scroll happens inside the BTC panel, not the full page.
-   - Uses responsive height via vh + a sane cap on desktop.
+   NOTE
+   ==========================================================
+   BTC overlay scrolling is now handled in portal.css under:
+   #matrix-btc-overlay .btc-data-container
+   Keep base.css focused on global layout/structure.
    ========================================================== */
-
-#btc-data-container {
-  width: min(520px, 92vw);
-  max-height: min(85vh, 560px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-
-  /* Helps prevent “scroll chaining” issues on some mobile browsers */
-  overscroll-behavior: contain;
-}
-
-/* If your BTC content wrapper exists, this guarantees inner overflow works even if
-   the container becomes a flex column in other CSS */
-#btc-content {
-  overflow: visible;
-}
-
-/* Mobile tuning */
-@media (max-width: 600px) {
-  #btc-data-container {
-    width: 94vw;
-    max-height: 88vh;
-  }
-}
-
-/* Small-height screens (landscape phones) */
-@media (max-height: 520px) {
-  #btc-data-container {
-    max-height: 90vh;
-  }
-}
