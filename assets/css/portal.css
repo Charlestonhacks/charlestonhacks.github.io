@@ -1,4 +1,13 @@
-  <style>
+/* ==========================================================
+   CharlestonHacks Portal Stylesheet
+   File: /assets/css/portal.css
+   Version: portal-css-v3-no-discovery-progress-20260224
+   Notes:
+   - Discovery tracker styles removed
+   - Splash buttons updated for “Innovation Engine” + “CharlestonHacks”
+   - Tutorial text contrast fixed (legible on animated background)
+   ========================================================== */
+
 /* ============================
    DESIGN SYSTEM & VARIABLES
 ============================ */
@@ -24,7 +33,7 @@ body {
   margin: 0;
   background: var(--bg-dark);
   color: var(--text-primary);
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
@@ -49,7 +58,10 @@ body {
   pointer-events: none;
 }
 
-#splash-content { text-align: center; animation: splashFadeIn 0.8s ease-out; }
+#splash-content {
+  text-align: center;
+  animation: splashFadeIn 0.8s ease-out;
+}
 
 @keyframes splashFadeIn {
   from { opacity: 0; transform: translateY(20px); }
@@ -71,22 +83,56 @@ body {
   50%      { opacity: 0.8; }
 }
 
-.btn {
-  background: linear-gradient(135deg, var(--gold), #d4b684);
-  color: #000;
-  border: none;
-  padding: 0.8rem 2rem;
+/* Buttons: stable width + no wrap (for "Innovation Engine") */
+#splash-content .btn {
+  min-width: 220px;
+  padding: 0.9rem 2.2rem;
   margin: 0.5rem;
   border-radius: 50px;
+  font-size: 1rem;
   font-weight: 600;
+  letter-spacing: 0.5px;
   cursor: pointer;
   transition: var(--transition-smooth);
-  font-family: 'Orbitron', sans-serif;
-  box-shadow: 0 4px 15px var(--gold-glow);
+  font-family: "Orbitron", sans-serif;
+  white-space: nowrap;
+  border: none;
 }
 
-.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px var(--gold-glow); }
-.btn:active { transform: translateY(0); }
+#community-site-btn.btn {
+  background: linear-gradient(135deg, var(--gold), #e5c88a);
+  color: #000;
+  box-shadow: 0 8px 24px rgba(201, 163, 94, 0.35);
+}
+
+#community-site-btn.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(201, 163, 94, 0.5);
+}
+
+#community-site-btn.btn:active { transform: translateY(0); }
+
+#public-site-btn.btn {
+  background: rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--cyan);
+  color: var(--cyan);
+  box-shadow: 0 0 18px rgba(0, 224, 255, 0.12);
+}
+
+#public-site-btn.btn:hover {
+  background: var(--cyan);
+  color: #000;
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
+
+#public-site-btn.btn:active { transform: translateY(0); }
+
+@media (max-width: 480px) {
+  #splash-content .btn {
+    width: 100%;
+    min-width: unset;
+  }
+}
 
 /* ============================
    FIRST VISIT TUTORIAL
@@ -102,6 +148,7 @@ body {
   z-index: 1800;
   animation: fadeIn 0.4s ease;
 }
+
 #tutorial-overlay.active { display: flex; }
 
 .tutorial-content {
@@ -165,9 +212,7 @@ body {
   text-shadow: 0 0 14px rgba(0, 224, 255, 0.35);
 }
 
-.tutorial-step strong {
-  color: var(--cyan);
-}
+.tutorial-step strong { color: var(--cyan); }
 
 #skip-tutorial {
   background: rgba(0, 0, 0, 0.35);
@@ -251,7 +296,7 @@ body {
 }
 
 .clickable-area.center::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
@@ -278,7 +323,7 @@ body {
 }
 
 .clickable-area::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: -10px;
   background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
@@ -302,10 +347,11 @@ body {
   z-index: 10;
 }
 
+/* Removed discovery progress logic; keep discovered styling harmless if any legacy markup remains */
 .clickable-area.discovered { filter: brightness(1.1); }
 
 .clickable-area.discovered::after {
-  content: '✓';
+  content: "✓";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -372,7 +418,11 @@ body {
   50%      { transform: scale(1.3); opacity: 0.7; }
 }
 
-#infoText { font-size: 0.95rem; color: var(--cyan); font-weight: 500; }
+#infoText {
+  font-size: 0.95rem;
+  color: var(--cyan);
+  font-weight: 500;
+}
 
 /* ============================
    ICON BAR
@@ -425,7 +475,7 @@ body {
   pointer-events: none;
   transition: var(--transition-smooth);
   border: 1px solid var(--cyan);
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
 }
 
 .icons-container a:hover {
@@ -455,7 +505,10 @@ body {
   overflow: hidden;
 }
 
-#matrix-btc-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+#matrix-btc-overlay.active {
+  display: flex;
+  animation: fadeIn 0.3s ease;
+}
 
 #matrix-canvas {
   position: absolute;
@@ -474,7 +527,11 @@ body {
   transform: scale(0.8);
   transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
-.btc-data-container.visible { opacity: 1; transform: scale(1); }
+
+.btc-data-container.visible {
+  opacity: 1;
+  transform: scale(1);
+}
 
 .btc-main-price {
   font-size: 5rem;
@@ -482,7 +539,7 @@ body {
   color: #00ff00;
   text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
   margin-bottom: 1rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   letter-spacing: 0.1em;
   animation: glitchPrice 3s infinite;
 }
@@ -497,7 +554,7 @@ body {
   color: #00ff00;
   text-shadow: 0 0 10px #00ff00;
   margin-bottom: 2rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   letter-spacing: 0.2em;
 }
 
@@ -529,18 +586,23 @@ body {
   color: #00ff00;
   opacity: 0.7;
   margin-bottom: 0.5rem;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
+
 .btc-stat-value {
   font-size: 1.5rem;
   color: #00ff00;
   font-weight: bold;
   text-shadow: 0 0 10px #00ff00;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
 }
-.btc-stat-value.negative { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
+
+.btc-stat-value.negative {
+  color: #ff0000;
+  text-shadow: 0 0 10px #ff0000;
+}
 
 .btc-mini-chart {
   background: rgba(0, 255, 0, 0.05);
@@ -559,7 +621,7 @@ body {
   align-items: center;
   justify-content: center;
   color: #00ff00;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-size: 0.9rem;
   opacity: 0.7;
 }
@@ -578,12 +640,13 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 10;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
 }
+
 .btc-close-btn:hover {
   background: #00ff00;
   color: #000;
@@ -594,12 +657,15 @@ body {
 .btc-loading {
   font-size: 2rem;
   color: #00ff00;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-shadow: 0 0 20px #00ff00;
   animation: pulse 1.5s infinite;
 }
 
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
 
 /* ============================
    EVENTS MODAL
@@ -615,7 +681,12 @@ body {
   z-index: 1500;
   pointer-events: none;
 }
-#events-overlay.active { display: flex; pointer-events: auto; animation: fadeIn 0.3s ease; }
+
+#events-overlay.active {
+  display: flex;
+  pointer-events: auto;
+  animation: fadeIn 0.3s ease;
+}
 
 .events-modal {
   background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
@@ -654,22 +725,31 @@ body {
   border-radius: 50px;
   cursor: pointer;
   transition: var(--transition-smooth);
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   font-weight: 600;
 }
-#close-overlay:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px var(--cyan-glow); }
+
+#close-overlay:hover {
+  background: var(--cyan);
+  color: #000;
+  box-shadow: 0 0 20px var(--cyan-glow);
+}
 
 /* ============================
    RESPONSIVE / ACCESSIBILITY
 ============================ */
 @media (max-width: 768px) {
-  #discovery-tracker { top: 10px; left: 10px; padding: 0.8rem 1rem; }
-  .progress-bar { width: 150px; }
   .tutorial-content h2 { font-size: 1.8rem; }
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
   .clickable-area.center { width: 150px !important; height: 150px !important; }
-  .info-line { min-width: 280px; max-width: 85vw; font-size: 0.9rem; padding: 0.8rem 1.2rem; top: 20%; }
+  .info-line {
+    min-width: 280px;
+    max-width: 85vw;
+    font-size: 0.9rem;
+    padding: 0.8rem 1.2rem;
+    top: 20%;
+  }
   .btc-main-price { font-size: 3rem; }
   .btc-stats-grid { grid-template-columns: 1fr; gap: 1rem; }
   .btc-stat-card { padding: 1rem; }
@@ -686,7 +766,10 @@ body {
 
 .clickable-area:focus,
 .icons-container a:focus,
-button:focus { outline: 2px solid var(--cyan); outline-offset: 4px; }
+button:focus {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
 
 .sr-only {
   position: absolute;
@@ -699,4 +782,3 @@ button:focus { outline: 2px solid var(--cyan); outline-offset: 4px; }
   white-space: nowrap;
   border-width: 0;
 }
-  </style>
