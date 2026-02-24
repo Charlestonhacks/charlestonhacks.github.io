@@ -1,11 +1,12 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v4-center-button-image-20260224
+   Version: portal-css-v5-center-core-glow-20260224
    Notes:
-   - Adds proper support for an <img> inside the CENTER clickable area
-   - Keeps existing center pulse/glow behavior
-   - Ensures the image does NOT intercept clicks (pointer-events: none)
+   - Centers the CENTER clickable area on the card (via .card-stage wrapper)
+   - Center portal is round + visibly “core” with stronger glow (without huge size)
+   - Center size set to 300px desktop, 220px mobile
+   - Keeps <img> inside buttons click-safe (pointer-events: none)
    - Keeps BTC overlay scroll panel fix
    ========================================================== */
 
@@ -26,6 +27,13 @@
   --border-radius: 12px;
   --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Center “core” tuning */
+  --core-size: 300px;
+  --core-size-mobile: 220px;
+  --core-ring: rgba(0, 224, 255, 0.18);
+  --core-glow-strong: rgba(0, 224, 255, 0.45);
+  --core-glow-soft: rgba(0, 224, 255, 0.22);
 }
 
 * { box-sizing: border-box; }
@@ -271,6 +279,12 @@ body {
   100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
 }
 
+/* ✅ Card stage: makes portal positioning relative to the card */
+.card-stage {
+  position: relative;
+  display: inline-block;
+}
+
 /* Breathing animation for card */
 @keyframes breathe {
   0%, 100% { transform: scale(1); }
@@ -290,57 +304,92 @@ body {
   padding: 0;
 }
 
-/* ✅ NEW: allow <img> inside buttons without blocking click */
+/* Allow <img> inside buttons without blocking click */
 .clickable-area > img {
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
-  pointer-events: none; /* critical: click goes to button */
+  pointer-events: none;
 }
 
-/* Center portal special styling */
+/* ============================
+   CENTER “CORE” PORTAL (300px)
+============================ */
 .clickable-area.center {
-  /* ✅ NEW: move center sizing/positioning into CSS (supports image cleanly) */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
-  width: 200px;
-  height: 200px;
-  z-index: 5;
+  width: var(--core-size);
+  height: var(--core-size);
 
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 224, 255, 0.03) 0%, transparent 70%);
+  overflow: hidden;
+  z-index: 8;
+
+  /* subtle base aura */
+  background: radial-gradient(circle, rgba(0, 224, 255, 0.06) 0%, transparent 70%);
+
+  /* make it feel like a core without increasing size */
+  box-shadow:
+    0 0 30px var(--core-glow-soft),
+    0 0 70px rgba(0, 224, 255, 0.14);
+}
+
+/* Center image should feel “embedded” */
+.clickable-area.center > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  filter: saturate(1.05) contrast(1.06);
+}
+
+/* Stronger, layered glow rings (visual intensity, not bigger hitbox) */
+.clickable-area.center::before,
+.clickable-area.center::after {
+  content: "";
+  position: absolute;
+  inset: -18px;
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .clickable-area.center::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, var(--cyan-glow) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.6s ease;
-  border-radius: 50%;
-  pointer-events: none;
-  animation: centerPulse 3s ease-in-out infinite;
+  background: radial-gradient(circle, var(--core-glow-strong) 0%, transparent 65%);
+  opacity: 0.22;
+  animation: coreBreath 3.6s ease-in-out infinite;
 }
 
-@keyframes centerPulse {
-  0%, 100% { transform: scale(0.95); opacity: 0.1; }
-  50%      { transform: scale(1.05); opacity: 0.2; }
+.clickable-area.center::after {
+  inset: -40px;
+  background: radial-gradient(circle, rgba(0, 224, 255, 0.24) 0%, transparent 72%);
+  opacity: 0.14;
+  animation: coreBreath2 5.2s ease-in-out infinite;
 }
 
-.clickable-area.center:hover::before {
-  opacity: 0.4;
-  animation: centerPulseFast 1s ease-in-out infinite;
+@keyframes coreBreath {
+  0%, 100% { transform: scale(0.98); opacity: 0.18; }
+  50%      { transform: scale(1.06); opacity: 0.28; }
 }
 
-@keyframes centerPulseFast {
-  0%, 100% { transform: scale(1); opacity: 0.3; }
-  50%      { transform: scale(1.1); opacity: 0.6; }
+@keyframes coreBreath2 {
+  0%, 100% { transform: scale(0.96); opacity: 0.10; }
+  50%      { transform: scale(1.08); opacity: 0.18; }
 }
 
+/* Hover: emphasize core without jumping */
+.clickable-area.center:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+  box-shadow:
+    0 0 38px rgba(0, 224, 255, 0.32),
+    0 0 95px rgba(0, 224, 255, 0.18);
+}
+
+/* ============================
+   OTHER PORTAL HOVER GLOW
+============================ */
 .clickable-area::before {
   content: "";
   position: absolute;
@@ -353,7 +402,10 @@ body {
   z-index: -1;
 }
 
-.clickable-area:hover::before { opacity: 1; animation: pulseGlow 1.5s ease-in-out infinite; }
+.clickable-area:hover::before {
+  opacity: 1;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
 
 @keyframes pulseGlow {
   0%, 100% { transform: scale(1); opacity: 0.6; }
@@ -366,12 +418,7 @@ body {
   z-index: 10;
 }
 
-/* ✅ Preserve center placement while still allowing hover scale */
-.clickable-area.center:hover {
-  transform: translate(-50%, -50%) scale(1.12);
-}
-
-/* Removed discovery progress logic; keep discovered styling harmless if any legacy markup remains */
+/* Keep discovered styling harmless if any legacy markup remains */
 .clickable-area.discovered { filter: brightness(1.1); }
 
 .clickable-area.discovered::after {
@@ -533,8 +580,6 @@ body {
   display: flex;
   animation: fadeIn 0.3s ease;
 
-  /* keep overlay fixed fullscreen,
-     but prevent body scroll chaining */
   overscroll-behavior: none;
   touch-action: none;
 }
@@ -698,38 +743,28 @@ body {
 
 /* ==========================================================
    MATRIX BTC OVERLAY — SCROLLABLE CONTENT PANEL (FIX)
-   ========================================================== */
-
-/* Make the BTC panel scroll instead of the page */
+========================================================== */
 #matrix-btc-overlay .btc-data-container {
-  /* keep your existing animation behavior */
   position: relative;
   z-index: 2;
   text-align: center;
 
-  /* scroll panel behavior */
   width: min(900px, 92vw);
   max-height: min(82vh, 640px);
   overflow-y: auto;
   overflow-x: hidden;
 
-  /* momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
-
-  /* prevents “rubber-band / scroll chaining” issues */
   overscroll-behavior: contain;
 
-  /* give content some breathing room */
   padding: 18px 18px 24px;
   border-radius: 12px;
 
-  /* subtle panel separation so text is readable over matrix */
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* Mobile sizing */
 @media (max-width: 600px) {
   #matrix-btc-overlay .btc-data-container {
     width: 94vw;
@@ -737,13 +772,11 @@ body {
     padding: 14px 14px 20px;
   }
 
-  /* make the big price fit */
   .btc-main-price {
     font-size: clamp(2.6rem, 10vw, 4.2rem);
   }
 }
 
-/* Landscape phones / short screens */
 @media (max-height: 520px) {
   #matrix-btc-overlay .btc-data-container {
     max-height: 90vh;
@@ -826,8 +859,11 @@ body {
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
 
-  /* keep center sizing but responsive */
-  .clickable-area.center { width: 150px; height: 150px; }
+  /* Center core scales down */
+  .clickable-area.center {
+    width: var(--core-size-mobile);
+    height: var(--core-size-mobile);
+  }
 
   .info-line {
     min-width: 280px;
