@@ -1,11 +1,12 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v3-no-discovery-progress-20260224
+   Version: portal-css-v4-center-button-image-20260224
    Notes:
-   - Discovery tracker styles removed
-   - Splash buttons updated for “Innovation Engine” + “CharlestonHacks”
-   - Tutorial text contrast fixed (legible on animated background)
+   - Adds proper support for an <img> inside the CENTER clickable area
+   - Keeps existing center pulse/glow behavior
+   - Ensures the image does NOT intercept clicks (pointer-events: none)
+   - Keeps BTC overlay scroll panel fix
    ========================================================== */
 
 /* ============================
@@ -289,8 +290,26 @@ body {
   padding: 0;
 }
 
+/* ✅ NEW: allow <img> inside buttons without blocking click */
+.clickable-area > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none; /* critical: click goes to button */
+}
+
 /* Center portal special styling */
 .clickable-area.center {
+  /* ✅ NEW: move center sizing/positioning into CSS (supports image cleanly) */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 200px;
+  height: 200px;
+  z-index: 5;
+
   border-radius: 50%;
   background: radial-gradient(circle, rgba(0, 224, 255, 0.03) 0%, transparent 70%);
 }
@@ -345,6 +364,11 @@ body {
   filter: brightness(1.3) drop-shadow(0 0 15px var(--cyan));
   transform: scale(1.15);
   z-index: 10;
+}
+
+/* ✅ Preserve center placement while still allowing hover scale */
+.clickable-area.center:hover {
+  transform: translate(-50%, -50%) scale(1.12);
 }
 
 /* Removed discovery progress logic; keep discovered styling harmless if any legacy markup remains */
@@ -508,6 +532,11 @@ body {
 #matrix-btc-overlay.active {
   display: flex;
   animation: fadeIn 0.3s ease;
+
+  /* keep overlay fixed fullscreen,
+     but prevent body scroll chaining */
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 #matrix-canvas {
@@ -666,16 +695,10 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
+
 /* ==========================================================
    MATRIX BTC OVERLAY — SCROLLABLE CONTENT PANEL (FIX)
    ========================================================== */
-
-/* Keep the overlay fixed fullscreen (already true),
-   but prevent body scroll chaining */
-#matrix-btc-overlay.active {
-  overscroll-behavior: none;
-  touch-action: none;
-}
 
 /* Make the BTC panel scroll instead of the page */
 #matrix-btc-overlay .btc-data-container {
@@ -700,7 +723,7 @@ body {
   padding: 18px 18px 24px;
   border-radius: 12px;
 
-  /* OPTIONAL: subtle panel separation so text is readable over matrix */
+  /* subtle panel separation so text is readable over matrix */
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
@@ -802,7 +825,10 @@ body {
   .tutorial-content h2 { font-size: 1.8rem; }
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
-  .clickable-area.center { width: 150px !important; height: 150px !important; }
+
+  /* keep center sizing but responsive */
+  .clickable-area.center { width: 150px; height: 150px; }
+
   .info-line {
     min-width: 280px;
     max-width: 85vw;
@@ -810,6 +836,7 @@ body {
     padding: 0.8rem 1.2rem;
     top: 20%;
   }
+
   .btc-main-price { font-size: 3rem; }
   .btc-stats-grid { grid-template-columns: 1fr; gap: 1rem; }
   .btc-stat-card { padding: 1rem; }
