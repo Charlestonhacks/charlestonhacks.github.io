@@ -453,12 +453,12 @@
       area.addEventListener("click", (e) => {
         e.preventDefault();
 
-        // center portal opens BTC
-        if (portalId === "center") {
-          openMatrixBTC(area); // pass trigger for focus restore
-          return;
-        }
-
+       // BTC portal opens the BTC overlay (top-right)
+if (portalId === "btc") {
+  openMatrixBTC(area); // pass trigger for focus restore
+  return;
+}
+        
         const soundKey = area.dataset.sound;
         if (soundKey) playSoundById(soundKey + "Sound");
 
