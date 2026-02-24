@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v2-aria-inert-20260223";
+  const VERSION = "portal-js-v2-aria-inert-20260223-no-discovery-progress";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -22,7 +22,6 @@
     // overlays
     splash: $("#splash-overlay"),
     tutorial: $("#tutorial-overlay"),
-    discovery: $("#discovery-tracker"),
 
     // splash buttons
     communityBtn: $("#community-site-btn"),
@@ -69,7 +68,9 @@
 
     // Lazy-load audio only when needed
     if (el.preload === "none" && el.readyState === 0) {
-      try { el.load(); } catch (_) {}
+      try {
+        el.load();
+      } catch (_) {}
     }
 
     try {
@@ -86,9 +87,8 @@
   const SPLASH_KEY = "chs_splash_seen_once";
   const TUTORIAL_KEY = "chs_tutorial_completed";
 
-  function startDiscovery() {
+  function setIdleSoon() {
     setTimeout(() => {
-      DOM.discovery?.classList.add("visible");
       DOM.mediaContainer?.classList.add("idle");
     }, 500);
   }
@@ -99,7 +99,7 @@
     if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
       setTimeout(() => DOM.tutorial.classList.add("active"), 300);
     } else {
-      startDiscovery();
+      setIdleSoon();
     }
   }
 
@@ -126,7 +126,7 @@
     function closeTutorial() {
       DOM.tutorial?.classList.remove("active");
       localStorage.setItem(TUTORIAL_KEY, "true");
-      startDiscovery();
+      setIdleSoon();
     }
 
     DOM.skipTutorial?.addEventListener("click", closeTutorial);
@@ -138,64 +138,23 @@
         DOM.splash.style.display = "flex";
         DOM.body.classList.add("splash-active");
       }
-      DOM.communityBtn && (DOM.communityBtn.onclick = (e) => { e.preventDefault(); dismissSplash(); });
-      DOM.publicBtn && (DOM.publicBtn.onclick = (e) => {
-        e.preventDefault();
-        dismissSplash();
-        window.location.href = "https://charlestonhacks.mailchimpsites.com/";
-      });
+      DOM.communityBtn &&
+        (DOM.communityBtn.onclick = (e) => {
+          e.preventDefault();
+          dismissSplash();
+        });
+      DOM.publicBtn &&
+        (DOM.publicBtn.onclick = (e) => {
+          e.preventDefault();
+          dismissSplash();
+          window.location.href = "https://charlestonhacks.mailchimpsites.com/";
+        });
     }
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && DOM.tutorial?.classList.contains("active")) closeTutorial();
     });
   }
-
-  // ------------------------------------------------
-  // Discovery Progress
-  // ------------------------------------------------
-  const DISCOVERED_KEY = "chs_discovered_portals";
-  const TOTAL_PORTALS = 9;
-
-  const discoveredPortals = new Set(
-    JSON.parse(localStorage.getItem(DISCOVERED_KEY) || "[]")
-  );
-
-  function updateProgressUI() {
-    const count = discoveredPortals.size;
-    const pct = (count / TOTAL_PORTALS) * 100;
-
-    const countEl = $("#portals-count");
-    const fillEl = $("#progress-fill");
-
-    if (countEl) countEl.textContent = String(count);
-    if (fillEl) fillEl.style.width = pct + "%";
-
-    if (count === TOTAL_PORTALS) {
-      const tracker = DOM.discovery;
-      if (!tracker) return;
-      tracker.style.borderColor = "var(--gold)";
-      tracker.style.boxShadow = "0 0 30px var(--gold-glow)";
-      setTimeout(() => { tracker.style.borderColor = ""; tracker.style.boxShadow = ""; }, 2000);
-    }
-  }
-
-  function markDiscovered(portalId) {
-    if (!portalId) return;
-
-    if (!discoveredPortals.has(portalId)) {
-      discoveredPortals.add(portalId);
-      try {
-        localStorage.setItem(DISCOVERED_KEY, JSON.stringify([...discoveredPortals]));
-      } catch (_) {}
-      updateProgressUI();
-      playSoundById("chimeSound");
-    }
-  }
-
-  window.charlestonHacks = window.charlestonHacks || {};
-  window.charlestonHacks.markDiscovered = markDiscovered;
-  window.charlestonHacks.getProgress = () => discoveredPortals.size;
 
   // ------------------------------------------------
   // BTC cache
@@ -234,10 +193,8 @@
 
     const changePercent = btc.usd_24h_change || 0;
     if (DOM.btc24hChange) {
-      DOM.btc24hChange.textContent =
-        (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
-      DOM.btc24hChange.className =
-        "btc-stat-value " + (changePercent >= 0 ? "positive" : "negative");
+      DOM.btc24hChange.textContent = (changePercent >= 0 ? "+" : "") + changePercent.toFixed(2) + "%";
+      DOM.btc24hChange.className = "btc-stat-value " + (changePercent >= 0 ? "positive" : "negative");
     }
 
     const high = details?.high_24h?.usd;
@@ -245,14 +202,14 @@
 
     if (DOM.btc24hHigh) {
       DOM.btc24hHigh.textContent =
-        (typeof high === "number")
+        typeof high === "number"
           ? "$" + high.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           : "--";
     }
 
     if (DOM.btc24hLow) {
       DOM.btc24hLow.textContent =
-        (typeof low === "number")
+        typeof low === "number"
           ? "$" + low.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           : "--";
     }
@@ -265,8 +222,11 @@
 
     const updateTime = new Date((btc.last_updated_at || 0) * 1000);
     if (DOM.btcLastUpdate) {
-      DOM.btcLastUpdate.textContent =
-        updateTime.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      DOM.btcLastUpdate.textContent = updateTime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      });
     }
   }
 
@@ -402,7 +362,9 @@
 
     // Focus close
     requestAnimationFrame(() => {
-      try { DOM.btcCloseBtn?.focus(); } catch (_) {}
+      try {
+        DOM.btcCloseBtn?.focus();
+      } catch (_) {}
     });
 
     playSoundById("cardflipSound");
@@ -433,7 +395,10 @@
       DOM.btcOverlay.hidden = true;
 
       DOM.btcDataContainer?.classList.remove("visible");
-      if (DOM.btcLoading) { DOM.btcLoading.style.display = "block"; DOM.btcLoading.textContent = "LOADING BTC DATA..."; }
+      if (DOM.btcLoading) {
+        DOM.btcLoading.style.display = "block";
+        DOM.btcLoading.textContent = "LOADING BTC DATA...";
+      }
       if (DOM.btcContent) DOM.btcContent.style.display = "none";
 
       if (DOM.matrixCanvas) {
@@ -477,8 +442,6 @@
     areas.forEach((area) => {
       const portalId = area.dataset.portal;
 
-      if (discoveredPortals.has(portalId)) area.classList.add("discovered");
-
       area.addEventListener("mouseenter", () => {
         if (!DOM.infoLine || !DOM.infoText) return;
         DOM.infoText.textContent = area.dataset.info || "";
@@ -489,10 +452,6 @@
 
       area.addEventListener("click", (e) => {
         e.preventDefault();
-
-        // discovery
-        markDiscovered(portalId);
-        area.classList.add("discovered");
 
         // center portal opens BTC
         if (portalId === "center") {
@@ -508,7 +467,10 @@
       });
 
       area.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); area.click(); }
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          area.click();
+        }
       });
     });
   }
@@ -560,10 +522,15 @@
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
     initSplashTutorial();
-    updateProgressUI();
     initPortals();
     initEventsModal();
     initBTCModalControls();
+
+    // Keep previous behavior: idle state once overlays are done
+    // (If splash/tutorial are skipped via localStorage, this ensures UI still settles.)
+    if (localStorage.getItem(SPLASH_KEY) === "true" && localStorage.getItem(TUTORIAL_KEY) === "true") {
+      setIdleSoon();
+    }
 
     // Ensure BTC overlay is safely inert/hidden when not active (in case HTML changed)
     if (DOM.btcOverlay && !DOM.btcOverlay.classList.contains("active")) {
