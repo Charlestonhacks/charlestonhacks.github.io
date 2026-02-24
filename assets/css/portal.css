@@ -8,6 +8,8 @@
    - Center size: 300px desktop, 220px mobile
    - FIX: prevent center distortion by excluding .center from global hover transform
    - FIX: enforce perfect circle using aspect-ratio + overflow hidden
+   - FIX: ensure card-stage sizing is defined ONLY by #missionImage (no baseline gaps)
+   - FIX: prevent #cardFrame / #missionVideo from affecting layout (absolute overlay)
    - Keeps <img> inside buttons click-safe (pointer-events: none)
    - Keeps BTC overlay scroll panel fix
    ========================================================== */
@@ -281,10 +283,28 @@ body {
   100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
 }
 
-/* ✅ Card stage: makes portal positioning relative to the card */
+/* ✅ Card stage: makes portal positioning relative to the card image bounds */
 .card-stage {
   position: relative;
   display: inline-block;
+  line-height: 0; /* ✅ removes baseline gap so stage == image bounds */
+}
+
+/* Ensure the image defines the stage bounds */
+#missionImage {
+  display: block; /* ✅ removes inline baseline spacing */
+  height: auto;
+  max-width: 100%;
+}
+
+/* Layer frame/video without affecting stage layout */
+#cardFrame,
+#missionVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 /* Breathing animation for card */
@@ -325,12 +345,12 @@ body {
   transform: translate(-50%, -50%);
 
   width: var(--core-size);
-  aspect-ratio: 1 / 1;  /* ✅ guarantees square */
+  aspect-ratio: 1 / 1; /* ✅ guarantees square */
   height: auto;
 
   display: block;
   border-radius: 50%;
-  overflow: hidden;
+  overflow: hidden; /* ✅ clip image perfectly */
   z-index: 8;
 
   background: radial-gradient(circle, rgba(0, 224, 255, 0.06) 0%, transparent 70%);
@@ -343,7 +363,7 @@ body {
 .clickable-area.center > img {
   width: 100%;
   height: 100%;
-  object-fit: cover;  /* ✅ fill circle without distortion */
+  object-fit: cover; /* ✅ fill circle without distortion */
   border-radius: 50%;
   filter: saturate(1.05) contrast(1.06);
 }
