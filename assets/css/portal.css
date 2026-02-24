@@ -155,51 +155,6 @@ body {
 #skip-tutorial:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px var(--cyan-glow); }
 
 /* ============================
-   DISCOVERY PROGRESS TRACKER
-============================ */
-#discovery-tracker {
-  position: fixed;
-  top: 20px;
-  left: 20px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 2px solid var(--gold);
-  border-radius: var(--border-radius);
-  padding: 1rem 1.5rem;
-  z-index: 1000;
-  backdrop-filter: blur(10px);
-  opacity: 0;
-  transform: translateX(-20px);
-  transition: var(--transition-smooth);
-}
-#discovery-tracker.visible { opacity: 1; transform: translateX(0); }
-#discovery-tracker h3 {
-  margin: 0 0 0.5rem;
-  font-size: 0.9rem;
-  color: var(--gold);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.progress-bar {
-  width: 200px;
-  height: 8px;
-  background: rgba(201, 163, 94, 0.2);
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--gold), var(--cyan));
-  border-radius: 10px;
-  width: 0%;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 10px var(--gold-glow);
-}
-.portals-found { font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.3rem; }
-
-/* ============================
    MAIN CARD ENHANCEMENTS
 ============================ */
 .main-wrapper {
