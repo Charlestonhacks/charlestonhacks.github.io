@@ -35,7 +35,7 @@
 
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
   <title>CharlestonHacks - Portal to Innovation</title>
-  <meta name="description" content="CharlestonHacks — Making Invisible Networks Visible. Explore 9 interactive portals to innovation, community, and collaboration."/>
+  <meta name="description" content="CharlestonHacks — Making Invisible Networks Visible. Explore interactive portals to innovation, community, and collaboration."/>
   <meta property="og:image" content="images/websitepanel.webp"/>
   <meta property="og:url" content="https://charlestonhacks.com"/>
   <meta name="theme-color" content="#0a0a0a"/>
@@ -63,12 +63,13 @@
         <input type="checkbox" id="dont-show-again"> Don't show this again
       </label>
 
-      <button id="community-site-btn" class="btn">Innovation Engine</button>
-
-<button id="public-site-btn" class="btn"
-  style="background:transparent;border:2px solid var(--cyan);color:var(--cyan);">
-  CharlestonHacks
-</button>
+      <div style="margin-top:1.5rem;">
+        <button id="community-site-btn" class="btn">Innovation Engine</button>
+        <button id="public-site-btn" class="btn"
+          style="background:transparent;border:2px solid var(--cyan);color:var(--cyan);">
+          CharlestonHacks
+        </button>
+      </div>
 
       <p style="font-size:.8rem;opacity:.7;margin-top:2rem;">
         © 2026 CharlestonHacks. All rights reserved.
@@ -77,10 +78,10 @@
   </div>
 
   <!-- First Visit Tutorial -->
-  <div id="tutorial-overlay" role="dialog" aria-modal="true">
+  <div id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
     <div class="tutorial-content">
-      <h2>Discover 9 Portals</h2>
-      <p>Each icon on the card unlocks a different dimension of CharlestonHacks</p>
+      <h2 id="tutorial-title">Discover 9 Portals</h2>
+      <p>Each icon on the card unlocks a different dimension of CharlestonHacks. Hover to preview. Click to enter.</p>
 
       <div class="tutorial-step">
         <i class="fas fa-mouse-pointer"></i>
@@ -93,8 +94,8 @@
       </div>
 
       <div class="tutorial-step">
-        <i class="fas fa-trophy"></i>
-        Join CharlestonHacks <strong>Innovation Engine</strong>
+        <i class="fas fa-brain"></i>
+        Dive into the <strong>Innovation Engine</strong>
       </div>
 
       <button id="skip-tutorial">Start Exploring</button>
@@ -132,10 +133,11 @@
           <img src="images/crestn.svg" alt="">
         </button>
 
+        <!-- Top-right: BTC tracker overlay -->
         <button type="button" class="clickable-area top-right"
-                data-sound="chime" data-url="https://deckerd451.github.io/innovation-engine/"
-                data-info="🚀 Innovation Engine - Connect with the community"
-                data-portal="innovation" aria-label="Innovation Engine Portal">
+                data-sound="cardflip" data-url="#"
+                data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
+                data-portal="btc" aria-label="Bitcoin Tracker Portal">
           <img src="images/innovationenginebutton.webp" alt="">
         </button>
 
@@ -174,17 +176,17 @@
           <img src="images/peoplebutton.webp" alt="">
         </button>
 
-        <!-- Center Portal (Bitcoin Tracker) -->
+        <!-- Center Portal: Innovation Engine -->
         <button type="button"
                 class="clickable-area center"
-                data-sound="cardflip"
-                data-url="#"
-                data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
-                data-portal="center"
-                aria-label="Bitcoin Tracker Portal"
+                data-sound="chime"
+                data-url="https://deckerd451.github.io/innovation-engine/"
+                data-info="🚀 Innovation Engine - Connect with the community"
+                data-portal="innovation"
+                aria-label="Innovation Engine Portal"
                 style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);
                        width:200px; height:200px; z-index:5;">
-          <span class="sr-only">Bitcoin Tracker</span>
+          <span class="sr-only">Innovation Engine</span>
         </button>
 
         <!-- Tooltip -->
@@ -233,7 +235,7 @@
   </div>
 
   <!-- Matrix-Style Bitcoin Tracker -->
- <div id="matrix-btc-overlay" hidden inert aria-hidden="true" role="dialog" aria-modal="true" aria-label="Bitcoin Tracker">
+  <div id="matrix-btc-overlay" hidden inert aria-hidden="true" role="dialog" aria-modal="true" aria-label="Bitcoin Tracker">
     <canvas id="matrix-canvas"></canvas>
     <button class="btc-close-btn" id="close-matrix-btc" aria-label="Close Bitcoin Tracker">×</button>
 
@@ -262,23 +264,23 @@
 
   <!-- Core modules you already use -->
   <script type="module">
-  import "/assets/js/animation-lifecycle.js";   // ✅ add this
-  import "/assets/js/neuralBackground.js";
-  import { supabase } from "/assets/js/supabaseClient.js";
+    import "/assets/js/animation-lifecycle.js";
+    import "/assets/js/neuralBackground.js";
+    import { supabase } from "/assets/js/supabaseClient.js";
 
-  window.__CH_AUTH_READY__ = false;
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    localStorage.setItem("ch:lastScreen", "index");
-    window.__CH_SESSION__ = session || null;
-  } catch (e) {
-    console.warn("Auth gate session check failed:", e);
-  } finally {
-    window.__CH_AUTH_READY__ = true;
-  }
-</script>
+    window.__CH_AUTH_READY__ = false;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      localStorage.setItem("ch:lastScreen", "index");
+      window.__CH_SESSION__ = session || null;
+    } catch (e) {
+      console.warn("Auth gate session check failed:", e);
+    } finally {
+      window.__CH_AUTH_READY__ = true;
+    }
+  </script>
 
-  <!-- Portal logic (NEW) -->
+  <!-- Portal logic -->
   <script type="module" src="/assets/js/portal.js"></script>
 </body>
 </html>
