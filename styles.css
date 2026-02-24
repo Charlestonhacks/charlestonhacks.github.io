@@ -1,31 +1,13 @@
 /* ==========================================================================
-   CHARLESTONHACKS - OPTIMIZED STYLESHEET
-   ==========================================================================
-   
-   TABLE OF CONTENTS:
-   1. CSS Variables & Reset
-   2. Base Layout & Body
-   3. Background & Video
-   4. Animations (Keyframes)
-   5. Media Container & Card System
-   6. Clickable Areas (Portal Buttons)
-   7. Panel Layout
-   8. Buttons & Forms
-   9. Countdown & BTC Price
-   10. Icons & Social Links
-   11. Header & Navigation
-   12. Modals & Overlays
-   13. User Cards & Profiles
-   14. Leaderboard
-   15. Synapse View
-   16. BBS Terminal
-   17. Notifications & Feedback
-   18. Utilities
-   19. Page-Specific Overrides
-   20. Responsive (Mobile)
-   
+   CHARLESTONHACKS - OPTIMIZED STYLESHEET (GLOBAL)
+   File: styles.css
+   Version: styles-css-global-no-portal-interference-20260224
+   Notes:
+   - REMOVED all Portal/Card click-target CSS:
+     .clickable-area, .top-left/.center positioning, @container clickable-area sizing,
+     .media-container card system, #missionImage/#cardFrame/#missionVideo, #splash-overlay
+   - Portal page should use /assets/css/portal.css for ALL portal layout/buttons/splash.
    ========================================================================== */
-
 
 /* ==========================================================================
    1. CSS VARIABLES & RESET
@@ -39,6 +21,8 @@
   --text-color: #fff;
   --text-muted: #aaa;
   --background-color: #000;
+
+  /* Cards */
   --card-bg: #1e1e2f;
   --card-border: rgba(255, 255, 255, 0.12);
 
@@ -69,19 +53,14 @@
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
+
 html,
 body {
-  margin: 0;
-  padding: 0;
   width: 100%;
   height: 100%;
   background: #000;
 }
-
-
 
 /* ==========================================================================
    2. BASE LAYOUT & BODY
@@ -116,15 +95,14 @@ body::before {
   z-index: -1;
   pointer-events: none;
   transition: background 0.5s;
+  opacity: 1;
 }
 
-/* Ensure transparency for containers */
-html,
+/* Make common wrappers transparent by default */
 footer,
 .icons-container {
   background: transparent;
 }
-
 
 /* ==========================================================================
    3. BACKGROUND & VIDEO
@@ -151,52 +129,20 @@ footer,
   opacity: 0.6;
 }
 
-
 /* ==========================================================================
    4. ANIMATIONS (KEYFRAMES)
    ========================================================================== */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fadeInScaleUp {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes flipImageX {
-  0% { opacity: 1; }
-  80% { transform: rotateX(180deg); }
-  100% { transform: rotateX(360deg); opacity: 0; }
-}
-
-@keyframes flipImageY {
-  0% { opacity: 1; }
-  80% { transform: rotateY(180deg); }
-  100% { transform: rotateY(360deg); opacity: 0; }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes glow {
@@ -210,92 +156,43 @@ footer,
   100% { transform: scale(1); }
 }
 
-@keyframes fadeSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Animation helper classes */
-.glow-animate {
-  animation: glow 0.45s ease-in-out;
-  border-radius: 50%;
-}
-
-.flip-image-x {
-  animation: flipImageX 2s forwards;
-}
-
-.flip-image-y {
-  animation: flipImageY 2s forwards;
-}
-
+/* Helper classes */
+.glow-animate { animation: glow 0.45s ease-in-out; border-radius: 50%; }
 
 /* ==========================================================================
-   5. MEDIA CONTAINER & CARD SYSTEM
+   5. LAYOUT HELPERS (NON-PORTAL)
    ========================================================================== */
-.media-container {
-  position: relative;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  perspective: 1000px;
-  transform: translateZ(0);
-  isolation: isolate;
-}
-
-.media-container img,
-.media-container video {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: contain;
-}
-
-.media-container video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
-
-#missionImage {
-  backface-visibility: hidden;
-  will-change: auto;
-  pointer-events: none;
-}
-
-#cardFrame {
-  display: none;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  backface-visibility: hidden;
-  pointer-events: none;
-}
-
-#missionVideo {
-  pointer-events: none;
-}
-
 .main-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+}
+
+/* Generic container used across pages */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panels */
+.panel {
+  position: relative;
+  box-sizing: border-box;
+}
+
+.panels-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 40px;
+  margin: 0;
+  padding: 0;
 }
 
 /* ==========================================================================
@@ -330,7 +227,6 @@ footer,
   max-width: 800px;
 }
 
-/* Form inputs */
 .input-container {
   max-width: 500px;
   margin: 0 auto 20px;
@@ -363,7 +259,6 @@ footer,
   margin-bottom: 20px;
 }
 
-/* Logout button */
 .logout-btn {
   background: #444;
   color: #eee;
@@ -384,9 +279,8 @@ footer,
   box-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
 }
 
-
 /* ==========================================================================
-   9. COUNTDOWN & BTC PRICE
+   9. COUNTDOWN & BTC PRICE (HUD)
    ========================================================================== */
 #countdown,
 #btcPrice {
@@ -401,14 +295,8 @@ footer,
   white-space: nowrap;
 }
 
-#countdown {
-  top: 17%;
-}
-
-#btcPrice {
-  bottom: 17%;
-}
-
+#countdown { top: 17%; }
+#btcPrice { bottom: 17%; }
 
 /* ==========================================================================
    10. ICONS & SOCIAL LINKS
@@ -434,9 +322,7 @@ footer,
   transition: var(--transition);
 }
 
-.icons-container a:hover {
-  transform: translateY(-5px);
-}
+.icons-container a:hover { transform: translateY(-5px); }
 
 .social-container {
   display: flex;
@@ -464,7 +350,6 @@ footer,
   transform: translateY(-5px);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
-
 
 /* ==========================================================================
    11. HEADER & NAVIGATION
@@ -500,7 +385,6 @@ footer,
   color: var(--gold);
 }
 
-/* Auth controls */
 .auth-controls {
   display: flex;
   align-items: center;
@@ -520,7 +404,6 @@ footer,
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Tab navigation */
 .tab-nav {
   display: flex;
   justify-content: center;
@@ -558,15 +441,11 @@ footer,
   padding: 20px 0;
 }
 
-.tab-content-pane.active-tab-pane {
-  display: block;
-}
-
+.tab-content-pane.active-tab-pane { display: block; }
 
 /* ==========================================================================
-   12. MODALS & OVERLAYS
+   12. MODALS & OVERLAYS (GENERIC)
    ========================================================================== */
-/* Events overlay */
 #events-overlay {
   position: fixed;
   inset: 0;
@@ -584,7 +463,6 @@ footer,
   pointer-events: auto;
 }
 
-/* Generic modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -617,11 +495,8 @@ footer,
   cursor: pointer;
 }
 
-.modal .close-button:hover {
-  color: var(--gold);
-}
+.modal .close-button:hover { color: var(--gold); }
 
-/* Docs modal */
 .docs-modal {
   position: fixed;
   inset: 0;
@@ -633,9 +508,7 @@ footer,
   transition: opacity 0.3s ease;
 }
 
-.docs-modal.hidden {
-  display: none;
-}
+.docs-modal.hidden { display: none; }
 
 .docs-modal-content {
   position: relative;
@@ -658,7 +531,6 @@ footer,
   z-index: 10;
 }
 
-/* Profile modal */
 .profile-modal {
   position: fixed;
   inset: 0;
@@ -697,74 +569,6 @@ footer,
   border-radius: 50%;
   margin-bottom: 10px;
 }
-
-/* Splash overlay */
-#splash-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: var(--background-color);
-  color: var(--text-color);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  transition: opacity 0.7s ease;
-}
-
-#splash-overlay.fade-out {
-  opacity: 0;
-  pointer-events: none;
-}
-
-#splash-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--bg-url) no-repeat center center;
-  background-size: cover;
-  height: 100vh;
-  opacity: 0.2;
-  z-index: -1;
-  filter: blur(3px);
-}
-
-#splash-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  max-width: 90%;
-  margin: 0 auto;
-  text-align: center;
-  gap: 1.2rem;
-}
-
-#splash-logo {
-  width: clamp(180px, 30vw, 300px);
-  margin-bottom: 1rem;
-  animation: bounce-in 1s ease;
-}
-
-#splash-title,
-#splash-desc {
-  opacity: 0;
-  animation: fadeInUp 0.9s ease forwards;
-}
-
-#splash-title {
-  font-size: 2rem;
-  animation-delay: 0.3s;
-}
-
-#splash-desc {
-  font-size: 1.1rem;
-  max-width: 600px;
-  line-height: 1.5;
-  animation-delay: 0.6s;
-}
-
 
 /* ==========================================================================
    13. USER CARDS & PROFILES
@@ -849,7 +653,6 @@ footer,
   color: var(--text-muted);
 }
 
-/* Skills */
 .skills-list,
 .card-skills,
 .skills-chips {
@@ -871,7 +674,6 @@ footer,
   text-transform: lowercase;
 }
 
-/* Availability */
 .availability,
 .card-availability,
 .user-status {
@@ -893,7 +695,6 @@ footer,
 .status-Busy { background: #ff8800; }
 .status-NotLooking { background: #888; }
 
-/* Profile bar */
 .profile-bar {
   width: 100%;
   background: #333;
@@ -908,7 +709,6 @@ footer,
   background: var(--gold);
 }
 
-/* Team card */
 .team-card {
   display: flex;
   flex-direction: column;
@@ -925,7 +725,6 @@ footer,
   transform: translateY(-3px);
   box-shadow: 0 0 22px rgba(255, 234, 0, 0.35);
 }
-
 
 /* ==========================================================================
    14. LEADERBOARD
@@ -1009,7 +808,6 @@ footer,
   justify-content: center;
 }
 
-/* Leaderboard tabs */
 .leaderboard-tabs {
   display: flex;
   gap: 10px;
@@ -1027,9 +825,7 @@ footer,
   transition: var(--transition);
 }
 
-.lb-tab:hover {
-  background: #3a3a4a;
-}
+.lb-tab:hover { background: #3a3a4a; }
 
 .lb-tab.active {
   background: var(--primary-color);
@@ -1037,13 +833,10 @@ footer,
   font-weight: bold;
 }
 
-
 /* ==========================================================================
    15. SYNAPSE VIEW
    ========================================================================== */
-#synapse {
-  height: calc(100vh - 100px);
-}
+#synapse { height: calc(100vh - 100px); }
 
 #synapseCanvas {
   flex: 1;
@@ -1106,9 +899,7 @@ footer,
   display: none;
 }
 
-.full-screen-synapse.active-tab-pane {
-  display: block;
-}
+.full-screen-synapse.active-tab-pane { display: block; }
 
 .exit-btn {
   position: absolute;
@@ -1125,11 +916,7 @@ footer,
   transition: background 0.2s ease;
 }
 
-.exit-btn:hover {
-  background: var(--cyan);
-  color: #000;
-}
-
+.exit-btn:hover { background: var(--cyan); color: #000; }
 
 /* ==========================================================================
    16. BBS TERMINAL
@@ -1145,9 +932,7 @@ footer,
   z-index: 1600;
 }
 
-.bbs-overlay.active {
-  display: flex;
-}
+.bbs-overlay.active { display: flex; }
 
 .bbs-window {
   background: #000;
@@ -1209,7 +994,6 @@ footer,
   cursor: pointer;
 }
 
-
 /* ==========================================================================
    17. NOTIFICATIONS & FEEDBACK
    ========================================================================== */
@@ -1238,15 +1022,9 @@ footer,
   color: var(--cyan);
 }
 
-.match-notification {
-  color: gold;
-}
+.match-notification { color: gold; }
+.no-results-notification { color: red; }
 
-.no-results-notification {
-  color: red;
-}
-
-/* Popup notifications */
 .popup-info,
 .popup-success,
 .popup-error,
@@ -1264,7 +1042,6 @@ footer,
   font-family: monospace;
 }
 
-/* Achievement toasts */
 .achievements {
   position: fixed;
   top: 20px;
@@ -1285,17 +1062,12 @@ footer,
   transition: var(--transition);
 }
 
-.achievement.show {
-  transform: translateX(0);
-}
-
+.achievement.show { transform: translateX(0); }
 
 /* ==========================================================================
    18. UTILITIES
    ========================================================================== */
-.hidden {
-  display: none !important;
-}
+.hidden { display: none !important; }
 
 .sr-only {
   position: absolute;
@@ -1316,11 +1088,8 @@ footer,
   text-align: center;
 }
 
-.result-count.hidden {
-  display: none;
-}
+.result-count.hidden { display: none; }
 
-/* Endorsement buttons */
 .endorse-btn {
   background-color: var(--gold);
   color: #222;
@@ -1333,9 +1102,7 @@ footer,
   transition: background-color 0.2s ease;
 }
 
-.endorse-btn:hover {
-  background-color: #e0b800;
-}
+.endorse-btn:hover { background-color: #e0b800; }
 
 .endorse-btn:disabled {
   background: #ccc;
@@ -1350,7 +1117,6 @@ footer,
   margin-left: 7px;
 }
 
-/* Connection buttons */
 .connect-btn,
 .disconnect-btn {
   margin-top: 10px;
@@ -1361,17 +1127,9 @@ footer,
   font-weight: 600;
 }
 
-.connect-btn {
-  background: var(--cyan);
-  color: #000;
-}
+.connect-btn { background: var(--cyan); color: #000; }
+.disconnect-btn { background: #ff6666; color: #fff; }
 
-.disconnect-btn {
-  background: #ff6666;
-  color: #fff;
-}
-
-/* Autocomplete */
 .autocomplete-box {
   position: absolute;
   top: calc(100% + 4px);
@@ -1394,11 +1152,8 @@ footer,
   font-size: 15px;
 }
 
-.autocomplete-box div:hover {
-  background: rgba(255, 215, 0, 0.15);
-}
+.autocomplete-box div:hover { background: rgba(255, 215, 0, 0.15); }
 
-/* Connection status */
 .connection-status {
   background: rgba(255, 215, 0, 0.9);
   color: black;
@@ -1416,7 +1171,6 @@ footer,
   pointer-events: none;
 }
 
-/* Badge */
 .badge {
   background: #333;
   border-left: 4px solid var(--gold);
@@ -1427,7 +1181,6 @@ footer,
   margin: 6px 0;
 }
 
-/* Pending count badge */
 .pending-count-badge {
   background: red;
   color: white;
@@ -1438,7 +1191,6 @@ footer,
   margin-left: 4px;
 }
 
-/* Notifications container */
 .notifications-container {
   position: relative;
   display: inline-block;
@@ -1481,20 +1233,14 @@ footer,
   padding: 10px;
 }
 
-
 /* ==========================================================================
    19. PAGE-SPECIFIC OVERRIDES
    ========================================================================== */
-
-/* Two-card page (Innovation Engine) - TEXT ALIGNMENT ONLY */
 .two-card-page .section-title,
 .two-card-page .header,
 .two-card-page .header p {
   text-align: center;
 }
-
-/* NOTE: Removed global ".two-card-page *" text-align rule to prevent layout conflicts */
-
 
 /* ==========================================================================
    20. RESPONSIVE (MOBILE)
@@ -1532,21 +1278,12 @@ footer,
     color: var(--cyan);
   }
 
-  .icons-container a .fa-heart {
-    color: #FF69B4;
-  }
+  .icons-container a .fa-heart { color: #FF69B4; }
 
-  #countdown {
-    top: 19%;
-  }
+  #countdown { top: 19%; }
+  #btcPrice { bottom: 19%; }
 
-  #btcPrice {
-    bottom: 19%;
-  }
-
-  .card-container {
-    grid-template-columns: 1fr;
-  }
+  .card-container { grid-template-columns: 1fr; }
 
   .card,
   .user-card,
@@ -1599,9 +1336,7 @@ footer,
     gap: 12px;
   }
 
-  .result-name {
-    font-size: 1.1rem;
-  }
+  .result-name { font-size: 1.1rem; }
 }
 
 @media (min-width: 769px) {
@@ -1647,34 +1382,6 @@ footer,
   #countdown,
   #btcPrice {
     font-size: 1.6rem;
-  }
-
-  .clickable-area.top-center,
-  .clickable-area.bottom-center {
-    left: 40.5%;
-    width: 90px;
-    height: 90px;
-    max-width: 100px;
-    max-height: 100px;
-  }
-}
-
-/* Container queries for clickable areas */
-@container (min-width: 600px) {
-  .clickable-area {
-    width: 6.8cqw;
-    max-width: 32.3px;
-  }
-
-  .clickable-area.center {
-    width: 8.5cqw;
-    max-width: 40.8px;
-  }
-
-  .clickable-area.top-center,
-  .clickable-area.bottom-center {
-    width: 15.3cqw;
-    max-width: 110.5px;
   }
 }
 
