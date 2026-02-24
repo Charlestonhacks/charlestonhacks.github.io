@@ -437,7 +437,6 @@
   // ------------------------------------------------
   function initPortals() {
     const areas = $$(".clickable-area");
-    areas.forEach((a) => a.setAttribute("tabindex", "0"));
 
     areas.forEach((area) => {
       const portalId = area.dataset.portal;
