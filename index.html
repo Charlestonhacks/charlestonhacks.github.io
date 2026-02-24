@@ -111,87 +111,93 @@
   <main>
     <div class="main-wrapper">
       <div class="media-container">
-        <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
-        <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
-        <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
-          <source src="" type="video/mp4">
-        </video>
+        <!-- ✅ NEW: Card-stage wrapper ensures buttons center on the card image bounds -->
+        <div class="card-stage">
+          <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
+          <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
-        <!-- Interactive Portal Buttons -->
-        <button type="button" class="clickable-area top-left"
-                data-sound="chime" data-url="Poster.html"
-                data-info="📋 Event Poster - View the official event artwork"
-                data-portal="poster" aria-label="Event Poster Portal">
-          <img src="images/informationbutton.webp" alt="">
-        </button>
+          <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
+            <source src="" type="video/mp4">
+          </video>
 
-        <button type="button" class="clickable-area top-center"
-                data-sound="chime" data-url="docs.html"
-                data-info="📚 Documentation - Explore guides and resources"
-                data-portal="docs" aria-label="Documentation Portal">
-          <img src="images/crestn.svg" alt="">
-        </button>
+          <!-- Interactive Portal Buttons -->
+          <button type="button" class="clickable-area top-left"
+                  data-sound="chime" data-url="Poster.html"
+                  data-info="📋 Event Poster - View the official event artwork"
+                  data-portal="poster" aria-label="Event Poster Portal">
+            <img src="images/informationbutton.webp" alt="">
+          </button>
 
-        <!-- Top-right: BTC tracker overlay -->
-        <button type="button" class="clickable-area top-right"
-                data-sound="cardflip" data-url="#"
-                data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
-                data-portal="btc" aria-label="Bitcoin Tracker Portal">
-          <img src="images/btcbutton.webp" alt="">
-        </button>
+          <button type="button" class="clickable-area top-center"
+                  data-sound="chime" data-url="docs.html"
+                  data-info="📚 Documentation - Explore guides and resources"
+                  data-portal="docs" aria-label="Documentation Portal">
+            <img src="images/crestn.svg" alt="">
+          </button>
 
-        <button type="button" class="clickable-area middle-left"
-                data-sound="chime" data-url="experimental.html"
-                data-info="🧪 Sandbox - Experimental features and tools"
-                data-portal="sandbox" aria-label="Sandbox Portal">
-          <img src="images/experiment.webp" alt="">
-        </button>
+          <!-- Top-right: BTC tracker overlay -->
+          <button type="button" class="clickable-area top-right"
+                  data-sound="cardflip" data-url="#"
+                  data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
+                  data-portal="btc" aria-label="Bitcoin Tracker Portal">
+            <img src="images/btcbutton.webp" alt="">
+          </button>
 
-        <button type="button" class="clickable-area middle-right"
-                data-sound="chime" data-url="swag.html"
-                data-info="🎁 Swag Store - Official CharlestonHacks merchandise"
-                data-portal="swag" aria-label="Swag Store Portal">
-          <img src="images/case.webp" alt="">
-        </button>
+          <button type="button" class="clickable-area middle-left"
+                  data-sound="chime" data-url="experimental.html"
+                  data-info="🧪 Sandbox - Experimental features and tools"
+                  data-portal="sandbox" aria-label="Sandbox Portal">
+            <img src="images/experiment.webp" alt="">
+          </button>
 
-        <button type="button" class="clickable-area bottom-left"
-                data-sound="chime" data-url="news.html"
-                data-info="📰 News Feed - Latest updates and announcements"
-                data-portal="news" aria-label="News Portal">
-          <img src="images/newsbutton.webp" alt="">
-        </button>
+          <button type="button" class="clickable-area middle-right"
+                  data-sound="chime" data-url="swag.html"
+                  data-info="🎁 Swag Store - Official CharlestonHacks merchandise"
+                  data-portal="swag" aria-label="Swag Store Portal">
+            <img src="images/case.webp" alt="">
+          </button>
 
-        <button type="button" class="clickable-area bottom-center"
-                data-sound="keys" data-url="donations.html"
-                data-info="💝 Support Us - Become a sponsor or donate"
-                data-portal="sponsor" aria-label="Sponsorship Portal">
-          <img src="images/keysn.svg" alt="">
-        </button>
+          <button type="button" class="clickable-area bottom-left"
+                  data-sound="chime" data-url="news.html"
+                  data-info="📰 News Feed - Latest updates and announcements"
+                  data-portal="news" aria-label="News Portal">
+            <img src="images/newsbutton.webp" alt="">
+          </button>
 
-        <button type="button" class="clickable-area bottom-right"
-                data-sound="chime" data-url="cardmatchgame.html"
-                data-info="🎮 Card Match Game - Test your memory skills"
-                data-portal="game" aria-label="Game Portal">
-          <img src="images/peoplebutton.webp" alt="">
-        </button>
+          <button type="button" class="clickable-area bottom-center"
+                  data-sound="keys" data-url="donations.html"
+                  data-info="💝 Support Us - Become a sponsor or donate"
+                  data-portal="sponsor" aria-label="Sponsorship Portal">
+            <img src="images/keysn.svg" alt="">
+          </button>
 
-        <!-- Center Portal: Innovation Engine -->
-        <button type="button"
-        class="clickable-area center"
-        data-sound="chime"
-        data-url="https://deckerd451.github.io/innovation-engine/"
-        data-info="🚀 Innovation Engine - Connect with the community"
-        data-portal="innovation"
-        aria-label="Innovation Engine Portal">
-  <img src="images/innovationenginebutton.webp" alt="">
-  <span class="sr-only">Innovation Engine</span>
-</button>
+          <button type="button" class="clickable-area bottom-right"
+                  data-sound="chime" data-url="cardmatchgame.html"
+                  data-info="🎮 Card Match Game - Test your memory skills"
+                  data-portal="game" aria-label="Game Portal">
+            <img src="images/peoplebutton.webp" alt="">
+          </button>
 
-        <!-- Tooltip -->
-        <div id="infoLine" class="info-line" role="tooltip">
-          <span id="infoParticle"></span><span id="infoText"></span>
+          <!-- Center Portal: Innovation Engine -->
+          <button type="button"
+                  class="clickable-area center"
+                  data-sound="chime"
+                  data-url="https://deckerd451.github.io/innovation-engine/"
+                  data-info="🚀 Innovation Engine - Connect with the community"
+                  data-portal="innovation"
+                  aria-label="Innovation Engine Portal">
+            <img src="images/innovationenginebutton.webp" alt="">
+            <span class="sr-only">Innovation Engine</span>
+          </button>
+
+          <!-- Tooltip -->
+          <div id="infoLine" class="info-line" role="tooltip">
+            <span id="infoParticle"></span><span id="infoText"></span>
+          </div>
         </div>
+        <!-- /card-stage -->
+
       </div>
     </div>
 
