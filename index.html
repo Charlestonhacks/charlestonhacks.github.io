@@ -10,7 +10,10 @@
 
   <!-- Preload key visuals -->
   <link rel="preload" as="image" href="icons/card.png">
+  <!-- ✅ Preloaded (but NOT used as the visible header logo) -->
   <link rel="preload" as="image" href="images/charlestonhackslogo.svg">
+  <!-- ✅ Visible header logo asset -->
+  <link rel="preload" as="image" href="images/charlestonhackslog.svg">
 
   <!-- Neuron redirect (keeps querystring, removes source=neuron) -->
   <script>
@@ -47,10 +50,44 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="/assets/css/portal.css"/>
+
+  <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
+  <style>
+    .ch-top-logo {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999; /* above bg canvas + most UI */
+      pointer-events: none; /* prevents blocking clicks on portals */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(92vw, 520px);
+    }
+    .ch-top-logo img {
+      width: min(92vw, 320px);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.55));
+      opacity: 0.98;
+    }
+
+    /* Give the page a little breathing room so the logo never overlaps the card on small screens */
+    @media (max-width: 640px) {
+      .ch-top-logo { top: 10px; }
+      .ch-top-logo img { width: min(92vw, 260px); }
+    }
+  </style>
 </head>
 
 <body>
   <canvas id="neural-bg"></canvas>
+
+  <!-- ✅ NEW: Top-center visible logo -->
+  <div class="ch-top-logo" aria-hidden="true">
+    <img src="images/charlestonhackslog.svg" alt="">
+  </div>
 
   <!-- Enhanced Splash Screen -->
   <div id="splash-overlay" role="dialog" aria-modal="true" aria-labelledby="splash-title">
@@ -112,7 +149,7 @@
     <div class="main-wrapper">
       <div class="media-container">
 
-        <!-- ✅ NEW: Card-stage wrapper ensures buttons center on the card image bounds -->
+        <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
         <div class="card-stage">
           <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
