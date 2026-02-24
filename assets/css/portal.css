@@ -117,42 +117,88 @@ body {
 }
 
 .tutorial-content h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
   margin-bottom: 1rem;
   color: var(--cyan);
-  text-shadow: 0 0 20px var(--cyan-glow);
+  letter-spacing: 0.5px;
+  text-shadow:
+    0 0 10px rgba(0, 224, 255, 0.35),
+    0 0 22px rgba(0, 224, 255, 0.25);
 }
 
 .tutorial-content p {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 1.75rem;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
 }
 
 .tutorial-step {
-  background: rgba(0, 224, 255, 0.05);
-  border: 1px solid var(--cyan);
+  background: rgba(0, 0, 0, 0.68);
+  border: 1px solid rgba(0, 224, 255, 0.75);
   border-radius: var(--border-radius);
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
   margin: 1rem 0;
   transition: var(--transition-smooth);
+  color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(0, 224, 255, 0.12);
 }
-.tutorial-step:hover { background: rgba(0, 224, 255, 0.1); transform: translateX(5px); }
-.tutorial-step i { font-size: 2rem; color: var(--cyan); margin-bottom: 0.5rem; display: block; }
+
+.tutorial-step:hover {
+  background: rgba(0, 0, 0, 0.82);
+  transform: translateX(5px);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.55),
+    0 0 26px rgba(0, 224, 255, 0.18);
+}
+
+.tutorial-step i {
+  font-size: 2rem;
+  color: var(--cyan);
+  margin-bottom: 0.5rem;
+  display: block;
+  text-shadow: 0 0 14px rgba(0, 224, 255, 0.35);
+}
+
+.tutorial-step strong {
+  color: var(--cyan);
+}
 
 #skip-tutorial {
-  background: transparent;
-  border: 2px solid var(--cyan);
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(0, 224, 255, 0.9);
   color: var(--cyan);
-  padding: 0.8rem 2rem;
+  padding: 0.85rem 2rem;
   border-radius: 50px;
   cursor: pointer;
   transition: var(--transition-smooth);
-  font-family: 'Orbitron', sans-serif;
+  font-family: "Orbitron", sans-serif;
   margin-top: 1rem;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(0, 224, 255, 0.12);
 }
-#skip-tutorial:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px var(--cyan-glow); }
+
+#skip-tutorial:hover {
+  background: var(--cyan);
+  color: #000;
+  box-shadow:
+    0 0 22px rgba(0, 224, 255, 0.35),
+    0 0 38px rgba(0, 224, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+#skip-tutorial:focus-visible {
+  outline: 3px solid rgba(0, 224, 255, 0.5);
+  outline-offset: 3px;
+}
 
 /* ============================
    MAIN CARD ENHANCEMENTS
