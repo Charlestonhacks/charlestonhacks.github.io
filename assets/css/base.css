@@ -51,3 +51,13 @@ canvas#neural-bg {
 .action-btn:hover {
   background: #ffd95c;
 }
+/* ==========================
+   BTC Overlay Scroll Fix
+   ========================== */
+
+#btc-data-container {
+  max-height: min(80vh, 560px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
