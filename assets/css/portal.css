@@ -305,6 +305,24 @@ body {
   pointer-events: none; /* critical: click goes to button */
 }
 
+/* ==========================================================
+   PORTAL POSITIONS (single source of truth)
+   ========================================================== */
+
+/* outer 8 portals */
+.clickable-area.top-left     { top: 3%;  left: 5%; }
+.clickable-area.top-right    { top: 3%;  right: 5%; }
+.clickable-area.bottom-left  { bottom: 3%; left: 5%; }
+.clickable-area.bottom-right { bottom: 3%; right: 5%; }
+
+.clickable-area.top-center   { top: 2%;  left: 43%; transform: translateX(-50%); }
+.clickable-area.bottom-center{ bottom: 2%; left: 43%; transform: translateX(-50%); }
+
+.clickable-area.middle-left  { top: 45%; left: 5%; transform: translateY(-50%); }
+.clickable-area.middle-right { top: 45%; right: 5%; transform: translateY(-50%); }
+
+/* center stays handled by your center-specific rules already */
+
 /*
  * Root-cause fix for center button positioning:
  *
