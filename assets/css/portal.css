@@ -249,6 +249,12 @@ body {
 /* ============================
    MAIN CARD ENHANCEMENTS
 ============================ */
+
+/* Ensure card-stage provides the correct positioning context for portal buttons */
+.card-stage {
+  position: relative;
+}
+
 .main-wrapper {
   min-height: 100vh;
   display: flex;
@@ -301,15 +307,18 @@ body {
 
 /* Center portal special styling */
 .clickable-area.center {
-  /* âœ… NEW: move center sizing/positioning into CSS (supports image cleanly) */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 
-  width: 200px;
-  height: 200px;
-  z-index: 5;
+  /* 4× the previously constrained size (~93.5 px → 374 px).
+     Override styles.css max-width so the button actually renders square. */
+  width: 374px;
+  height: 374px;
+  max-width: 374px;
+  max-height: 374px;
 
+  z-index: 5;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(0, 224, 255, 0.03) 0%, transparent 70%);
 }
@@ -827,7 +836,12 @@ body {
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
 
   /* keep center sizing but responsive */
-  .clickable-area.center { width: 150px; height: 150px; }
+  .clickable-area.center {
+    width: 200px;
+    height: 200px;
+    max-width: 200px;
+    max-height: 200px;
+  }
 
   .info-line {
     min-width: 280px;
