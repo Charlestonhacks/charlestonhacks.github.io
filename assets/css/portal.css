@@ -1,12 +1,15 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v4-center-button-image-20260224
+   Version: portal-css-v5-position-tweaks-20260225
    Notes:
    - Adds proper support for an <img> inside the CENTER clickable area
    - Keeps existing center pulse/glow behavior
    - Ensures the image does NOT intercept clicks (pointer-events: none)
    - Keeps BTC overlay scroll panel fix
+   - Position tweaks:
+     • top-left/top-center/top-right moved DOWN slightly
+     • bottom-left/bottom-center/bottom-right moved UP slightly
    ========================================================== */
 
 /* ============================
@@ -296,7 +299,7 @@ body {
   padding: 0;
 }
 
-/* âœ… NEW: allow <img> inside buttons without blocking click */
+/* ✅ allow <img> inside buttons without blocking click */
 .clickable-area > img {
   width: 100%;
   height: 100%;
@@ -307,33 +310,33 @@ body {
 
 /* ==========================================================
    PORTAL POSITIONS (single source of truth)
+   Tweaks applied:
+   - Top row moved DOWN slightly (3% → 4%, 2% → 3%)
+   - Bottom row moved UP slightly (3% → 4%, 2% → 3%)
    ========================================================== */
 
-/* outer 8 portals */
-.clickable-area.top-left     { top: 3%;  left: 5%; }
-.clickable-area.top-right    { top: 3%;  right: 5%; }
-.clickable-area.bottom-left  { bottom: 3%; left: 5%; }
-.clickable-area.bottom-right { bottom: 3%; right: 5%; }
+/* top row (moved DOWN) */
+.clickable-area.top-left      { top: 4%; left: 5%; }
+.clickable-area.top-right     { top: 4%; right: 5%; }
+.clickable-area.top-center    { top: 3%; left: 43%; translate: -50% 0; }
 
-.clickable-area.top-center   { top: 2%;  left: 43%; transform: translateX(-50%); }
-.clickable-area.bottom-center{ bottom: 2%; left: 43%; transform: translateX(-50%); }
+/* bottom row (moved UP) */
+.clickable-area.bottom-left   { bottom: 4%; left: 5%; }
+.clickable-area.bottom-right  { bottom: 4%; right: 5%; }
+.clickable-area.bottom-center { bottom: 3%; left: 43%; translate: -50% 0; }
 
-.clickable-area.middle-left  { top: 45%; left: 5%; transform: translateY(-50%); }
-.clickable-area.middle-right { top: 45%; right: 5%; transform: translateY(-50%); }
+/* middle row (unchanged) */
+.clickable-area.middle-left   { top: 45%; left: 5%; translate: 0 -50%; }
+.clickable-area.middle-right  { top: 45%; right: 5%; translate: 0 -50%; }
 
-/* center stays handled by your center-specific rules already */
+/* center stays handled by center-specific rules below */
 
 /*
  * Root-cause fix for center button positioning:
- *
- * The base .clickable-area rule runs  animation: fadeInScaleUp … forwards
- * whose final keyframe is  transform: scale(1).  CSS animation values
- * override normal style declarations, so that scale(1) permanently
- * replaces translate(-50%,-50%), leaving the button's top-left corner at
- * (50%, 50%) — i.e. bottom-right quadrant of the card.
- *
- * Solution: give the center button its own animation that bakes the
- * translate into every keyframe, so the translate is never discarded.
+ * The base .clickable-area rule runs an animation whose final keyframe is
+ * transform: scale(1). Animation values override normal declarations, which
+ * can discard translate(-50%,-50%). So center gets its own animation that
+ * includes translate in every keyframe.
  */
 @keyframes fadeInScaleUpCenter {
   from {
@@ -350,13 +353,9 @@ body {
 .clickable-area.center {
   top: 50%;
   left: 50%;
-  /* The animation below ends with translate(-50%,-50%) scale(1), which
-     keeps the element perfectly centred even after animation fill kicks in. */
   transform: translate(-50%, -50%);
   animation: fadeInScaleUpCenter 1s ease-out forwards;
 
-  /* 4× the previously constrained size (~93.5 px → 374 px).
-     Override styles.css max-width so the button renders square. */
   width: 374px;
   height: 374px;
   max-width: 374px;
@@ -406,7 +405,10 @@ body {
   z-index: -1;
 }
 
-.clickable-area:hover::before { opacity: 1; animation: pulseGlow 1.5s ease-in-out infinite; }
+.clickable-area:hover::before {
+  opacity: 1;
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
 
 @keyframes pulseGlow {
   0%, 100% { transform: scale(1); opacity: 0.6; }
@@ -419,7 +421,7 @@ body {
   z-index: 10;
 }
 
-/* âœ… Preserve center placement while still allowing hover scale */
+/* ✅ Preserve center placement while still allowing hover scale */
 .clickable-area.center:hover {
   transform: translate(-50%, -50%) scale(1.12);
 }
@@ -428,7 +430,7 @@ body {
 .clickable-area.discovered { filter: brightness(1.1); }
 
 .clickable-area.discovered::after {
-  content: "âœ“";
+  content: "✓";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -586,8 +588,6 @@ body {
   display: flex;
   animation: fadeIn 0.3s ease;
 
-  /* keep overlay fixed fullscreen,
-     but prevent body scroll chaining */
   overscroll-behavior: none;
   touch-action: none;
 }
@@ -750,39 +750,29 @@ body {
 }
 
 /* ==========================================================
-   MATRIX BTC OVERLAY â€” SCROLLABLE CONTENT PANEL (FIX)
+   MATRIX BTC OVERLAY — SCROLLABLE CONTENT PANEL (FIX)
    ========================================================== */
 
-/* Make the BTC panel scroll instead of the page */
 #matrix-btc-overlay .btc-data-container {
-  /* keep your existing animation behavior */
   position: relative;
   z-index: 2;
   text-align: center;
 
-  /* scroll panel behavior */
   width: min(900px, 92vw);
   max-height: min(82vh, 640px);
   overflow-y: auto;
   overflow-x: hidden;
-
-  /* momentum scrolling on iOS */
   -webkit-overflow-scrolling: touch;
-
-  /* prevents â€œrubber-band / scroll chainingâ€ issues */
   overscroll-behavior: contain;
 
-  /* give content some breathing room */
   padding: 18px 18px 24px;
   border-radius: 12px;
 
-  /* subtle panel separation so text is readable over matrix */
   background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }
 
-/* Mobile sizing */
 @media (max-width: 600px) {
   #matrix-btc-overlay .btc-data-container {
     width: 94vw;
@@ -790,13 +780,11 @@ body {
     padding: 14px 14px 20px;
   }
 
-  /* make the big price fit */
   .btc-main-price {
     font-size: clamp(2.6rem, 10vw, 4.2rem);
   }
 }
 
-/* Landscape phones / short screens */
 @media (max-height: 520px) {
   #matrix-btc-overlay .btc-data-container {
     max-height: 90vh;
@@ -879,7 +867,6 @@ body {
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
 
-  /* keep center sizing but responsive */
   .clickable-area.center {
     width: 200px;
     height: 200px;
@@ -921,7 +908,7 @@ button:focus {
   width: 1px;
   height: 1px;
   padding: 0;
-  margin: -1px;
+  margin: 0;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
