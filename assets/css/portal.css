@@ -356,10 +356,10 @@ body {
   transform: translate(-50%, -50%);
   animation: fadeInScaleUpCenter 1s ease-out forwards;
 
-  width: 374px;
-  height: 374px;
-  max-width: 374px;
-  max-height: 374px;
+  width: 470px;
+  height: 470px;
+  max-width: 470px;
+  max-height: 470px;
 
   z-index: 5;
   border-radius: 50%;
@@ -868,10 +868,10 @@ body {
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
 
   .clickable-area.center {
-    width: 200px;
-    height: 200px;
-    max-width: 200px;
-    max-height: 200px;
+    width: 260px;
+    height: 260px;
+    max-width: 260px;
+    max-height: 260px;
   }
 
   .info-line {
