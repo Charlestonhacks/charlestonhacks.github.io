@@ -356,14 +356,17 @@ body {
   transform: translate(-50%, -50%);
   animation: fadeInScaleUpCenter 1s ease-out forwards;
 
-  width: 470px;
-  height: 470px;
-  max-width: 470px;
-  max-height: 470px;
+  /* Responsive dominant sizing */
+  width: clamp(420px, 40vw, 650px);
+  height: clamp(420px, 40vw, 650px);
 
   z-index: 5;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 224, 255, 0.03) 0%, transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 224, 255, 0.03) 0%,
+    transparent 70%
+  );
 }
 
 .clickable-area.center::before {
@@ -866,13 +869,6 @@ body {
   .tutorial-content h2 { font-size: 1.8rem; }
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
-
-  .clickable-area.center {
-    width: 260px;
-    height: 260px;
-    max-width: 260px;
-    max-height: 260px;
-  }
 
   .info-line {
     min-width: 280px;
