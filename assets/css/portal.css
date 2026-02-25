@@ -356,10 +356,10 @@ body {
   transform: translate(-50%, -50%);
   animation: fadeInScaleUpCenter 1s ease-out forwards;
 
-  width: 470px;
-  height: 470px;
-  max-width: 470px;
-  max-height: 470px;
+  width: 400px;
+  height: 400px;
+  max-width: 400px;
+  max-height: 400px;
 
   z-index: 5;
   border-radius: 50%;
