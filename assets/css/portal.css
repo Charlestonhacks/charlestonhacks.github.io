@@ -8,8 +8,8 @@
    - Ensures the image does NOT intercept clicks (pointer-events: none)
    - Keeps BTC overlay scroll panel fix
    - Position tweaks:
-     • top-left/top-center/top-right moved DOWN slightly
-     • bottom-left/bottom-center/bottom-right moved UP slightly
+     â€¢ top-left/top-center/top-right moved DOWN slightly
+     â€¢ bottom-left/bottom-center/bottom-right moved UP slightly
    ========================================================== */
 
 /* ============================
@@ -299,7 +299,7 @@ body {
   padding: 0;
 }
 
-/* ✅ allow <img> inside buttons without blocking click */
+/* âœ… allow <img> inside buttons without blocking click */
 .clickable-area > img {
   width: 100%;
   height: 100%;
@@ -311,8 +311,8 @@ body {
 /* ==========================================================
    PORTAL POSITIONS (single source of truth)
    Tweaks applied:
-   - Top row moved DOWN slightly (3% → 4%, 2% → 3%)
-   - Bottom row moved UP slightly (3% → 4%, 2% → 3%)
+   - Top row moved DOWN slightly (3% â†’ 4%, 2% â†’ 3%)
+   - Bottom row moved UP slightly (3% â†’ 4%, 2% â†’ 3%)
    ========================================================== */
 
 /* top row (moved DOWN) */
@@ -356,17 +356,14 @@ body {
   transform: translate(-50%, -50%);
   animation: fadeInScaleUpCenter 1s ease-out forwards;
 
-  /* Responsive dominant sizing */
-  width: clamp(420px, 40vw, 650px);
-  height: clamp(420px, 40vw, 650px);
+  width: 470px;
+  height: 470px;
+  max-width: 470px;
+  max-height: 470px;
 
   z-index: 5;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 224, 255, 0.03) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle, rgba(0, 224, 255, 0.03) 0%, transparent 70%);
 }
 
 .clickable-area.center::before {
@@ -424,7 +421,7 @@ body {
   z-index: 10;
 }
 
-/* ✅ Preserve center placement while still allowing hover scale */
+/* âœ… Preserve center placement while still allowing hover scale */
 .clickable-area.center:hover {
   transform: translate(-50%, -50%) scale(1.12);
 }
@@ -433,7 +430,7 @@ body {
 .clickable-area.discovered { filter: brightness(1.1); }
 
 .clickable-area.discovered::after {
-  content: "✓";
+  content: "âœ“";
   position: absolute;
   top: -8px;
   right: -8px;
@@ -753,7 +750,7 @@ body {
 }
 
 /* ==========================================================
-   MATRIX BTC OVERLAY — SCROLLABLE CONTENT PANEL (FIX)
+   MATRIX BTC OVERLAY â€” SCROLLABLE CONTENT PANEL (FIX)
    ========================================================== */
 
 #matrix-btc-overlay .btc-data-container {
@@ -869,6 +866,13 @@ body {
   .tutorial-content h2 { font-size: 1.8rem; }
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
+
+  .clickable-area.center {
+    width: 260px;
+    height: 260px;
+    max-width: 260px;
+    max-height: 260px;
+  }
 
   .info-line {
     min-width: 280px;
