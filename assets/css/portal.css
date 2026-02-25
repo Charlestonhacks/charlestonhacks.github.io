@@ -305,14 +305,40 @@ body {
   pointer-events: none; /* critical: click goes to button */
 }
 
+/*
+ * Root-cause fix for center button positioning:
+ *
+ * The base .clickable-area rule runs  animation: fadeInScaleUp … forwards
+ * whose final keyframe is  transform: scale(1).  CSS animation values
+ * override normal style declarations, so that scale(1) permanently
+ * replaces translate(-50%,-50%), leaving the button's top-left corner at
+ * (50%, 50%) — i.e. bottom-right quadrant of the card.
+ *
+ * Solution: give the center button its own animation that bakes the
+ * translate into every keyframe, so the translate is never discarded.
+ */
+@keyframes fadeInScaleUpCenter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
 /* Center portal special styling */
 .clickable-area.center {
   top: 50%;
   left: 50%;
+  /* The animation below ends with translate(-50%,-50%) scale(1), which
+     keeps the element perfectly centred even after animation fill kicks in. */
   transform: translate(-50%, -50%);
+  animation: fadeInScaleUpCenter 1s ease-out forwards;
 
   /* 4× the previously constrained size (~93.5 px → 374 px).
-     Override styles.css max-width so the button actually renders square. */
+     Override styles.css max-width so the button renders square. */
   width: 374px;
   height: 374px;
   max-width: 374px;
