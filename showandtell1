@@ -1,109 +1,525 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeetupMashup2</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MeetupMashup #2 — CharlestonHacks</title>
 
-        .scroll-container {
-            width: 100%;
-            height: 400px; /* Adjust height as needed */
-            overflow-x: scroll;
-            overflow-y: hidden;
-            white-space: nowrap;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6NDKG07DY6');
+  </script>
 
-        .scroll-container a {
-            display: inline-block;
-            height: 100%;
-            margin-right: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+  <!-- Lightbox -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" />
 
-        .scroll-container a:last-child {
-            margin-right: 0;
-        }
+  <style>
+    /* ==========================================================
+       CharlestonHacks-ish micro theme for this standalone page
+       (dark, gold/cyan glow, card panels, soft neon)
+       ========================================================== */
 
-        .scroll-container img {
-            height: 100%;
-            border-radius: 5px;
-        }
+    :root{
+      --bg: #000;
+      --panel: rgba(10,10,10,0.86);
+      --panel-2: rgba(16,16,16,0.78);
 
-        .logo-container {
-            display: flex;
-            justify-content: center; /* Centers the logo */
-            align-items: center;
-            width: 100%; /* Ensures it scales across all screen sizes */
-            margin-top: 20px; /* Adjust spacing as needed */
-        }
+      --text: #fff;
+      --muted: rgba(255,255,255,0.72);
 
-        .responsive-logo {
-            width: 50%; /* Adjusts to 50% of the parent container */
-            max-width: 400px; /* Prevents it from being too large on big screens */
-            height: auto; /* Maintains aspect ratio */
-        }
+      --gold: #c9a35e;
+      --gold-glow: rgba(201, 163, 94, 0.55);
 
-        /* Adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .responsive-logo {
-                width: 80%; /* Takes up more space on smaller screens */
-                max-width: 300px;
-            }
-        }
+      --cyan: #00e0ff;
+      --cyan-glow: rgba(0, 224, 255, 0.35);
 
-        @media (max-width: 480px) {
-            .responsive-logo {
-                width: 90%; /* Almost full width on very small screens */
-                max-width: 250px;
-            }
-        }
-    </style>
+      --border: rgba(255,255,255,0.10);
+      --border-2: rgba(255,255,255,0.14);
+
+      --shadow: 0 12px 40px rgba(0,0,0,0.55);
+      --glow: 0 0 26px var(--cyan-glow);
+
+      --radius: 16px;
+      --radius-sm: 12px;
+
+      --ease: cubic-bezier(.2,.8,.2,1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body{
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 700px at 30% 10%, rgba(0,224,255,0.10), transparent 55%),
+                  radial-gradient(900px 600px at 70% 20%, rgba(201,163,94,0.10), transparent 60%),
+                  linear-gradient(180deg, #000 0%, #050505 60%, #000 100%);
+      color: var(--text);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* Subtle animated “ambient grid” */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 90px 90px;
+      mask-image: radial-gradient(circle at 50% 25%, black 0%, transparent 70%);
+      z-index: -1;
+    }
+
+    .page{
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ==========================================================
+       Header
+       ========================================================== */
+    header{
+      padding: clamp(18px, 3vw, 28px) 16px 10px;
+      display: grid;
+      place-items: center;
+      gap: 10px;
+    }
+
+    .brand-top{
+      width: min(680px, 92vw);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(12,12,12,0.85), rgba(5,5,5,0.70));
+      box-shadow: var(--shadow);
+      padding: clamp(16px, 2.2vw, 22px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-top::before{
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: radial-gradient(600px 200px at 20% 0%, rgba(0,224,255,0.22), transparent 60%),
+                  radial-gradient(500px 220px at 90% 30%, rgba(201,163,94,0.18), transparent 60%);
+      filter: blur(10px);
+      opacity: 0.85;
+      pointer-events: none;
+    }
+
+    .brand-top-inner{
+      position: relative;
+      display: grid;
+      place-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .logo{
+      width: min(420px, 82vw);
+      height: auto;
+      filter: drop-shadow(0 0 18px rgba(0,224,255,0.20));
+      opacity: 0.95;
+    }
+
+    h1{
+      margin: 0;
+      font-size: clamp(22px, 3.2vw, 34px);
+      line-height: 1.1;
+      letter-spacing: 0.2px;
+    }
+
+    .subtitle{
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(13px, 1.6vw, 16px);
+    }
+
+    .badge-row{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    .badge{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      font-size: 12.5px;
+      color: rgba(255,255,255,0.80);
+      transition: transform 250ms var(--ease), border-color 250ms var(--ease);
+      user-select: none;
+    }
+
+    .badge::before{
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px var(--cyan-glow);
+      opacity: 0.9;
+    }
+
+    .badge.gold::before{
+      background: var(--gold);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    /* ==========================================================
+       Main content
+       ========================================================== */
+    main{
+      width: 100%;
+      display: grid;
+      place-items: center;
+      padding: 14px 16px 24px;
+      flex: 1;
+    }
+
+    .panel{
+      width: min(1100px, 94vw);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel), rgba(0,0,0,0.55));
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .panel::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 1px rgba(0,224,255,0.06);
+    }
+
+    .panel-head{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: linear-gradient(180deg, rgba(12,12,12,0.70), rgba(6,6,6,0.50));
+    }
+
+    .panel-title{
+      display: grid;
+      gap: 2px;
+    }
+
+    .panel-title strong{
+      font-size: 14px;
+      letter-spacing: 0.2px;
+    }
+
+    .panel-title span{
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .hint{
+      color: rgba(255,255,255,0.70);
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(10px);
+      white-space: nowrap;
+    }
+
+    /* Filmstrip scroll */
+    .scroll-container{
+      height: clamp(320px, 48vh, 520px);
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: max-content;
+      gap: 14px;
+      padding: 16px;
+      scroll-snap-type: x mandatory;
+      background:
+        radial-gradient(900px 240px at 30% 0%, rgba(0,224,255,0.10), transparent 60%),
+        radial-gradient(800px 260px at 80% 30%, rgba(201,163,94,0.10), transparent 60%),
+        rgba(0,0,0,0.20);
+    }
+
+    /* nicer scrollbar (webkit) */
+    .scroll-container::-webkit-scrollbar{ height: 12px; }
+    .scroll-container::-webkit-scrollbar-track{
+      background: rgba(255,255,255,0.06);
+      border-radius: 999px;
+    }
+    .scroll-container::-webkit-scrollbar-thumb{
+      background: linear-gradient(90deg, rgba(0,224,255,0.35), rgba(201,163,94,0.35));
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.35);
+    }
+
+    .shot{
+      scroll-snap-align: start;
+      display: grid;
+      place-items: center;
+      height: 100%;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-2);
+      background: linear-gradient(180deg, rgba(18,18,18,0.80), rgba(0,0,0,0.55));
+      box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+      position: relative;
+      overflow: hidden;
+      transform: translateZ(0);
+      transition: transform 260ms var(--ease), border-color 260ms var(--ease), box-shadow 260ms var(--ease);
+    }
+
+    .shot:hover{
+      transform: translateY(-3px);
+      border-color: rgba(0,224,255,0.28);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.60), 0 0 22px rgba(0,224,255,0.14);
+    }
+
+    .shot img{
+      height: 100%;
+      width: auto;
+      display: block;
+      border-radius: var(--radius-sm);
+      object-fit: contain;
+      max-width: min(80vw, 720px);
+      user-select: none;
+    }
+
+    .shot::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 65%, rgba(0,0,0,0.35));
+      opacity: 0.65;
+    }
+
+    /* small caption pill (uses Lightbox data-title as the actual title) */
+    .shot .pill{
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      z-index: 2;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(10px);
+      max-width: calc(100% - 20px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================
+       Footer
+       ========================================================== */
+    footer{
+      padding: 18px 16px 26px;
+      display: grid;
+      place-items: center;
+      gap: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.45));
+    }
+
+    .footer-card{
+      width: min(680px, 92vw);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(0,0,0,0.35);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.55);
+      padding: 14px 16px;
+      display: grid;
+      place-items: center;
+      gap: 10px;
+    }
+
+    .footer-logo{
+      width: min(420px, 86vw);
+      max-width: 420px;
+      height: auto;
+      opacity: 0.9;
+      filter: drop-shadow(0 0 16px rgba(201,163,94,0.16));
+    }
+
+    .copyright{
+      margin: 0;
+      color: rgba(255,255,255,0.70);
+      font-size: 13px;
+    }
+
+    /* ==========================================================
+       Lightbox “skin” tweaks so it matches dark UI
+       (keeps it subtle; Lightbox2 is opinionated)
+       ========================================================== */
+    .lb-outerContainer,
+    .lb-dataContainer{
+      background: rgba(8,8,8,0.92) !important;
+      border: 1px solid rgba(255,255,255,0.10) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.70) !important;
+    }
+    .lb-image{
+      border-radius: 10px !important;
+    }
+    .lb-data .lb-caption{
+      color: rgba(255,255,255,0.86) !important;
+    }
+    .lb-data .lb-number{
+      color: rgba(255,255,255,0.55) !important;
+    }
+    .lb-nav a.lb-prev,
+    .lb-nav a.lb-next{
+      opacity: 0.95 !important;
+      filter: drop-shadow(0 0 12px rgba(0,224,255,0.18));
+    }
+
+    /* Mobile comfort */
+    @media (max-width: 640px){
+      .panel-head{
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .hint{ white-space: normal; }
+      .scroll-container{
+        padding: 14px;
+        gap: 12px;
+      }
+      .shot img{
+        max-width: 86vw;
+      }
+    }
+  </style>
 </head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-6NDKG07DY6');
-</script>
 <body>
+  <div class="ambient" aria-hidden="true"></div>
 
-    <h1 style="text-align: center; margin-top: 20px;">Welcome to MeetupMashup #2</h1>
-    <p style="text-align: center;">Explore our highlights below:</p>
+  <div class="page">
+    <header>
+      <div class="brand-top">
+        <div class="brand-top-inner">
+          <!-- Swap this to your preferred header logo if you want -->
+          <a href="index.html" aria-label="Back to CharlestonHacks home">
+            <img
+              class="logo"
+              src="images/CHARLESTONHACKS Grey off center-01-01.png"
+              alt="CharlestonHacks Logo"
+            />
+          </a>
 
-    <div class="scroll-container">
-        <a href="images/mm25.jpg" data-lightbox="mashup" data-title="Meetup Mashup 2 Poster"><img src="images/mm25.jpg" alt="Meetup Mashup 2 Poster"></a>
-        <a href="images/mmc1.jpg" data-lightbox="mashup" data-title="Doug and Dave"><img src="images/mmc1.jpg" alt="comic pg 1"></a>
-        <a href="images/mmc2.jpg" data-lightbox="mashup" data-title="Comic 1"><img src="images/mmc2.jpg" alt="Comic pg 2"></a>
-        <a href="images/mmc3.jpg" data-lightbox="mashup" data-title="Comic 2"><img src="images/mmc3.jpg" alt="Comic pg 3"></a>
-        <a href="images/mmc4.jpg" data-lightbox="mashup" data-title="Comic 3"><img src="images/mmc4.jpg" alt="Comic pg 4"></a>
-        <a href="images/mmc5.jpg" data-lightbox="mashup" data-title="Letter"><img src="images/mmc5.jpg" alt="Comic pg 5"></a>
-    </div>
+          <h1>MeetupMashup #2</h1>
+          <p class="subtitle">Swipe the filmstrip • click any frame to expand</p>
 
-    <!-- Footer -->
-    <footer id="footer" style="text-align: center; padding: 20px; background-color: #f4f4f9; margin-top: 20px; border-top: 2px solid #ddd;">
-        <a class="logo-container" href="index.html">
-            <img src="images/CHARLESTONHACKS Grey off center-01-01.png" alt="Charleston Hacks Logo" class="responsive-logo">
+          <div class="badge-row" aria-hidden="true">
+            <span class="badge">Highlights</span>
+            <span class="badge gold">Poster</span>
+            <span class="badge">Comic</span>
+            <span class="badge gold">Letter</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel" aria-label="MeetupMashup #2 gallery">
+        <div class="panel-head">
+          <div class="panel-title">
+            <strong>Gallery Strip</strong>
+            <span>Horizontal scroll with snap • Lightbox for full view</span>
+          </div>
+          <div class="hint">Tip: trackpad swipe → • shift + mousewheel →</div>
+        </div>
+
+        <div class="scroll-container" role="list">
+          <a class="shot" role="listitem" href="images/mm25.jpg" data-lightbox="mashup" data-title="Meetup Mashup 2 Poster">
+            <img src="images/mm25.jpg" alt="Meetup Mashup 2 Poster" />
+            <span class="pill">Meetup Mashup 2 Poster</span>
+          </a>
+
+          <a class="shot" role="listitem" href="images/mmc1.jpg" data-lightbox="mashup" data-title="Doug and Dave">
+            <img src="images/mmc1.jpg" alt="Comic page 1" />
+            <span class="pill">Doug and Dave</span>
+          </a>
+
+          <a class="shot" role="listitem" href="images/mmc2.jpg" data-lightbox="mashup" data-title="Comic 1">
+            <img src="images/mmc2.jpg" alt="Comic page 2" />
+            <span class="pill">Comic 1</span>
+          </a>
+
+          <a class="shot" role="listitem" href="images/mmc3.jpg" data-lightbox="mashup" data-title="Comic 2">
+            <img src="images/mmc3.jpg" alt="Comic page 3" />
+            <span class="pill">Comic 2</span>
+          </a>
+
+          <a class="shot" role="listitem" href="images/mmc4.jpg" data-lightbox="mashup" data-title="Comic 3">
+            <img src="images/mmc4.jpg" alt="Comic page 4" />
+            <span class="pill">Comic 3</span>
+          </a>
+
+          <a class="shot" role="listitem" href="images/mmc5.jpg" data-lightbox="mashup" data-title="Letter">
+            <img src="images/mmc5.jpg" alt="Letter page" />
+            <span class="pill">Letter</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-card">
+        <a href="index.html" aria-label="Back to CharlestonHacks home">
+          <img
+            class="footer-logo"
+            src="images/CHARLESTONHACKS Grey off center-01-01.png"
+            alt="CharlestonHacks Logo"
+          />
         </a>
-        <p style="margin-top: 10px; font-size: 16px; color: #333;">© 2025 MeetupMashup. All rights reserved.</p>
+        <p class="copyright">© 2025 MeetupMashup. All rights reserved.</p>
+      </div>
     </footer>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+  <script>
+    // Lightbox behavior tuned to feel more “app-like”
+    if (window.lightbox) {
+      lightbox.option({
+        resizeDuration: 180,
+        fadeDuration: 180,
+        imageFadeDuration: 180,
+        wrapAround: true,
+        disableScrolling: true,
+        alwaysShowNavOnTouchDevices: true
+      });
+    }
+  </script>
 </body>
 </html>
