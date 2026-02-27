@@ -14,18 +14,21 @@
     gtag('config', 'G-6NDKG07DY6');
   </script>
 
-  <!-- Lightbox -->
+  <!-- Lightbox2 -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" />
 
   <style>
     /* ==========================================================
-       CharlestonHacks-ish micro theme for this standalone page
-       (dark, gold/cyan glow, card panels, soft neon)
+       MeetupMashup #2 — CharlestonHacks branded single page
+       - Dark portal look (gold/cyan glow)
+       - Tight hero panel
+       - True filmstrip gallery (multiple frames visible)
+       - Lightbox styled to match dark UI
        ========================================================== */
 
     :root{
       --bg: #000;
-      --panel: rgba(10,10,10,0.86);
+      --panel: rgba(10,10,10,0.90);
       --panel-2: rgba(16,16,16,0.78);
 
       --text: #fff;
@@ -41,8 +44,6 @@
       --border-2: rgba(255,255,255,0.14);
 
       --shadow: 0 12px 40px rgba(0,0,0,0.55);
-      --glow: 0 0 26px var(--cyan-glow);
-
       --radius: 16px;
       --radius-sm: 12px;
 
@@ -55,9 +56,10 @@
     body{
       margin: 0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 700px at 30% 10%, rgba(0,224,255,0.10), transparent 55%),
-                  radial-gradient(900px 600px at 70% 20%, rgba(201,163,94,0.10), transparent 60%),
-                  linear-gradient(180deg, #000 0%, #050505 60%, #000 100%);
+      background:
+        radial-gradient(1200px 700px at 30% 10%, rgba(0,224,255,0.10), transparent 55%),
+        radial-gradient(900px 600px at 70% 20%, rgba(201,163,94,0.10), transparent 60%),
+        linear-gradient(180deg, #000 0%, #050505 60%, #000 100%);
       color: var(--text);
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
@@ -66,7 +68,7 @@
 
     a { color: inherit; text-decoration: none; }
 
-    /* Subtle animated “ambient grid” */
+    /* Subtle ambient grid */
     .ambient {
       position: fixed;
       inset: 0;
@@ -87,22 +89,22 @@
     }
 
     /* ==========================================================
-       Header
+       Header (tight + portal-card feel)
        ========================================================== */
     header{
-      padding: clamp(18px, 3vw, 28px) 16px 10px;
+      padding: clamp(10px, 1.6vw, 16px) 16px 8px;
       display: grid;
       place-items: center;
       gap: 10px;
     }
 
     .brand-top{
-      width: min(680px, 92vw);
+      width: min(760px, 94vw);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(12,12,12,0.85), rgba(5,5,5,0.70));
-      box-shadow: var(--shadow);
-      padding: clamp(16px, 2.2vw, 22px);
+      background: linear-gradient(180deg, rgba(10,10,10,0.92), rgba(0,0,0,0.62));
+      box-shadow: var(--shadow), 0 0 0 1px rgba(0,224,255,0.06);
+      padding: clamp(14px, 1.8vw, 18px);
       position: relative;
       overflow: hidden;
     }
@@ -111,10 +113,11 @@
       content: "";
       position: absolute;
       inset: -2px;
-      background: radial-gradient(600px 200px at 20% 0%, rgba(0,224,255,0.22), transparent 60%),
-                  radial-gradient(500px 220px at 90% 30%, rgba(201,163,94,0.18), transparent 60%);
-      filter: blur(10px);
-      opacity: 0.85;
+      background:
+        radial-gradient(700px 220px at 18% 10%, rgba(0,224,255,0.20), transparent 60%),
+        radial-gradient(520px 240px at 92% 40%, rgba(201,163,94,0.16), transparent 62%);
+      filter: blur(12px);
+      opacity: 0.9;
       pointer-events: none;
     }
 
@@ -122,15 +125,18 @@
       position: relative;
       display: grid;
       place-items: center;
-      gap: 10px;
+      gap: 8px;
       text-align: center;
     }
 
+    /* Use your existing asset (same as your original file) */
     .logo{
-      width: min(420px, 82vw);
+      width: min(520px, 84vw);
       height: auto;
-      filter: drop-shadow(0 0 18px rgba(0,224,255,0.20));
-      opacity: 0.95;
+      opacity: 0.92;
+      filter:
+        drop-shadow(0 0 18px rgba(0,224,255,0.18))
+        drop-shadow(0 0 14px rgba(201,163,94,0.10));
     }
 
     h1{
@@ -151,7 +157,7 @@
       flex-wrap: wrap;
       gap: 10px;
       justify-content: center;
-      margin-top: 6px;
+      margin-top: 4px;
     }
 
     .badge{
@@ -165,7 +171,6 @@
       backdrop-filter: blur(10px);
       font-size: 12.5px;
       color: rgba(255,255,255,0.80);
-      transition: transform 250ms var(--ease), border-color 250ms var(--ease);
       user-select: none;
     }
 
@@ -191,12 +196,12 @@
       width: 100%;
       display: grid;
       place-items: center;
-      padding: 14px 16px 24px;
+      padding: 10px 16px 22px;
       flex: 1;
     }
 
     .panel{
-      width: min(1100px, 94vw);
+      width: min(1180px, 94vw);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: linear-gradient(180deg, var(--panel), rgba(0,0,0,0.55));
@@ -211,11 +216,13 @@
       inset: 0;
       pointer-events: none;
       border-radius: var(--radius);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04), 0 0 0 1px rgba(0,224,255,0.06);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.04),
+        0 0 0 1px rgba(0,224,255,0.05);
     }
 
     .panel-head{
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
@@ -250,43 +257,39 @@
       white-space: nowrap;
     }
 
-    /* Filmstrip scroll */
+    /* ==========================================================
+       Filmstrip gallery (multiple frames visible)
+       ========================================================== */
     .scroll-container{
-      height: clamp(320px, 48vh, 520px);
+      height: clamp(260px, 34vh, 360px);
       overflow-x: auto;
       overflow-y: hidden;
-      display: grid;
-      grid-auto-flow: column;
-      grid-auto-columns: max-content;
+      display: flex;
       gap: 14px;
-      padding: 16px;
+      padding: 14px 14px 16px;
       scroll-snap-type: x mandatory;
       background:
-        radial-gradient(900px 240px at 30% 0%, rgba(0,224,255,0.10), transparent 60%),
-        radial-gradient(800px 260px at 80% 30%, rgba(201,163,94,0.10), transparent 60%),
-        rgba(0,0,0,0.20);
-    }
+        radial-gradient(900px 220px at 30% 0%, rgba(0,224,255,0.08), transparent 60%),
+        radial-gradient(800px 240px at 80% 30%, rgba(201,163,94,0.08), transparent 60%),
+        rgba(0,0,0,0.16);
+      -webkit-overflow-scrolling: touch;
 
-    /* nicer scrollbar (webkit) */
-    .scroll-container::-webkit-scrollbar{ height: 12px; }
-    .scroll-container::-webkit-scrollbar-track{
-      background: rgba(255,255,255,0.06);
-      border-radius: 999px;
+      /* hide scrollbar but keep scrolling */
+      scrollbar-width: none;          /* Firefox */
     }
-    .scroll-container::-webkit-scrollbar-thumb{
-      background: linear-gradient(90deg, rgba(0,224,255,0.35), rgba(201,163,94,0.35));
-      border-radius: 999px;
-      border: 2px solid rgba(0,0,0,0.35);
+    .scroll-container::-webkit-scrollbar{
+      display: none;                  /* Chrome/Safari */
     }
 
     .shot{
+      flex: 0 0 clamp(420px, 42vw, 560px);
+      height: 100%;
       scroll-snap-align: start;
       display: grid;
       place-items: center;
-      height: 100%;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border-2);
-      background: linear-gradient(180deg, rgba(18,18,18,0.80), rgba(0,0,0,0.55));
+      background: linear-gradient(180deg, rgba(18,18,18,0.85), rgba(0,0,0,0.55));
       box-shadow: 0 10px 28px rgba(0,0,0,0.55);
       position: relative;
       overflow: hidden;
@@ -295,18 +298,17 @@
     }
 
     .shot:hover{
-      transform: translateY(-3px);
+      transform: translateY(-3px) scale(1.01);
       border-color: rgba(0,224,255,0.28);
-      box-shadow: 0 14px 34px rgba(0,0,0,0.60), 0 0 22px rgba(0,224,255,0.14);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.60), 0 0 22px rgba(0,224,255,0.12);
     }
 
     .shot img{
+      width: 100%;
       height: 100%;
-      width: auto;
+      object-fit: cover; /* uniform strip; use contain if you want no crop */
       display: block;
       border-radius: var(--radius-sm);
-      object-fit: contain;
-      max-width: min(80vw, 720px);
       user-select: none;
     }
 
@@ -315,24 +317,24 @@
       position: absolute;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, transparent 65%, rgba(0,0,0,0.35));
-      opacity: 0.65;
+      background: linear-gradient(180deg, transparent 62%, rgba(0,0,0,0.45));
+      opacity: 0.75;
     }
 
-    /* small caption pill (uses Lightbox data-title as the actual title) */
     .shot .pill{
       position: absolute;
-      left: 10px;
-      bottom: 10px;
+      left: 12px;
+      bottom: 12px;
       z-index: 2;
-      padding: 8px 10px;
+      padding: 8px 12px;
       border-radius: 999px;
       font-size: 12px;
-      color: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.45);
-      backdrop-filter: blur(10px);
-      max-width: calc(100% - 20px);
+      color: rgba(255,255,255,0.86);
+      border: 1px solid rgba(0,224,255,0.18);
+      background: rgba(0,0,0,0.46);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 0 18px rgba(0,224,255,0.08);
+      max-width: calc(100% - 24px);
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -342,7 +344,7 @@
        Footer
        ========================================================== */
     footer{
-      padding: 18px 16px 26px;
+      padding: 16px 16px 22px;
       display: grid;
       place-items: center;
       gap: 10px;
@@ -351,7 +353,7 @@
     }
 
     .footer-card{
-      width: min(680px, 92vw);
+      width: min(760px, 94vw);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       background: rgba(0,0,0,0.35);
@@ -363,11 +365,10 @@
     }
 
     .footer-logo{
-      width: min(420px, 86vw);
-      max-width: 420px;
+      width: min(520px, 86vw);
       height: auto;
       opacity: 0.9;
-      filter: drop-shadow(0 0 16px rgba(201,163,94,0.16));
+      filter: drop-shadow(0 0 16px rgba(201,163,94,0.14));
     }
 
     .copyright{
@@ -377,8 +378,7 @@
     }
 
     /* ==========================================================
-       Lightbox “skin” tweaks so it matches dark UI
-       (keeps it subtle; Lightbox2 is opinionated)
+       Lightbox skin (match dark UI)
        ========================================================== */
     .lb-outerContainer,
     .lb-dataContainer{
@@ -399,23 +399,17 @@
     .lb-nav a.lb-prev,
     .lb-nav a.lb-next{
       opacity: 0.95 !important;
-      filter: drop-shadow(0 0 12px rgba(0,224,255,0.18));
+      filter: drop-shadow(0 0 12px rgba(0,224,255,0.16));
     }
 
-    /* Mobile comfort */
+    /* Mobile */
     @media (max-width: 640px){
       .panel-head{
         flex-direction: column;
         align-items: flex-start;
       }
       .hint{ white-space: normal; }
-      .scroll-container{
-        padding: 14px;
-        gap: 12px;
-      }
-      .shot img{
-        max-width: 86vw;
-      }
+      .shot{ flex-basis: 86vw; }
     }
   </style>
 </head>
@@ -427,7 +421,6 @@
     <header>
       <div class="brand-top">
         <div class="brand-top-inner">
-          <!-- Swap this to your preferred header logo if you want -->
           <a href="index.html" aria-label="Back to CharlestonHacks home">
             <img
               class="logo"
