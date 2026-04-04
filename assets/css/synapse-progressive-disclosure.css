@@ -24,11 +24,11 @@
   transition: all 0.3s ease;
 }
 
-/* Mobile: Bottom navigation */
+/* Mobile: Bottom navigation — sits above the search bar (~130px) */
 @media (max-width: 767px) {
   .synapse-mode-switcher {
     top: auto;
-    bottom: 20px;
+    bottom: 132px; /* above search container (~114px) + 16px gap */
     right: 50%;
     transform: translateX(50%);
     flex-direction: row;

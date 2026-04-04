@@ -1683,6 +1683,23 @@ async function buildGraph() {
       }
     }
 
+    // Mobile boundary clamping: keep nodes inside visible viewport
+    // Accounts for top UI chrome (~70px) and bottom search bar (~130px on mobile)
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const topPad = 70;    // below top nav/header
+      const botPad = 140;   // above bottom search bar + mode switcher
+      const sidePad = 40;   // left/right edge buffer
+      visibleNodes.forEach((d) => {
+        if (d.type === "theme") return; // themes are pinned separately
+        const r = d.isCurrentUser ? 55 : (d.shouldShowImage ? 30 : 24);
+        if (d.x != null) d.x = Math.max(sidePad + r, Math.min(w - sidePad - r, d.x));
+        if (d.y != null) d.y = Math.max(topPad + r, Math.min(h - botPad - r, d.y));
+      });
+    }
+
     // Update link positions - simplified for single line elements
     linkEls
       .attr("x1", (d) => d.source.x)
