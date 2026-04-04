@@ -173,11 +173,11 @@
       #btn-refresh-network {
         position: fixed !important;
         top: auto !important;
-        bottom: 80px !important; /* Above search bar */
+        bottom: 260px !important; /* above FAB (196px) + 64px clearance */
         right: 20px !important;
         z-index: 1000 !important;
-        width: 56px !important;
-        height: 56px !important;
+        width: 48px !important;
+        height: 48px !important;
         box-shadow: 0 4px 12px rgba(0,224,255,0.3) !important;
       }
 
@@ -485,9 +485,9 @@
         display: none !important;
       }
 
-      /* Search container - move down significantly */
+      /* Search container - anchored at bottom with safe area inset */
       #centered-search-container {
-        bottom: 20px !important; /* Move to bottom with more space */
+        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
         width: calc(100vw - 20px) !important;
         max-width: calc(100vw - 20px) !important;
         left: 10px !important;
