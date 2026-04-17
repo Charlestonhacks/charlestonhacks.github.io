@@ -81,6 +81,29 @@
 
   window.__CH_PLAY_SOUND_ID__ = playSoundById;
 
+  // Synthesized ascending arpeggio (C5-E5-G5-C6) for the center portal
+  function playPortalActivationSound() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const t = ctx.currentTime + i * 0.09;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.15, t + 0.025);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+        osc.start(t);
+        osc.stop(t + 0.55);
+      });
+      setTimeout(() => ctx.close(), 1600);
+    } catch (_) {}
+  }
+
   // ------------------------------------------------
   // Splash + Tutorial
   // ------------------------------------------------
@@ -458,8 +481,12 @@ if (portalId === "btc") {
   return;
 }
         
-        const soundKey = area.dataset.sound;
-        if (soundKey) playSoundById(soundKey + "Sound");
+        if (portalId === "innovation") {
+          playPortalActivationSound();
+        } else {
+          const soundKey = area.dataset.sound;
+          if (soundKey) playSoundById(soundKey + "Sound");
+        }
 
         const url = area.dataset.url;
         if (url && url !== "#") setTimeout(() => { window.location.href = url; }, 200);
