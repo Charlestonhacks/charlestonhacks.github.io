@@ -294,8 +294,8 @@
       { name: "Hat1", img: "icons/hat1.webp" },
       { name: "Hat2", img: "icons/hat2.webp" },
       { name: "Hoodie", img: "icons/hoodie.webp" },
-      { name: "Mug", img: "icons/mug1.webp" },
-      { name: "Mug", img: "icons/mug2.webp" },
+      { name: "Mug 1", img: "icons/mug1.webp" },
+      { name: "Mug 2", img: "icons/mug2.webp" },
       { name: "Gauntlet", img: "icons/gauntlet.webp" }
     ];
 
@@ -362,38 +362,42 @@
 
     async function voteForSwag(swagName) {
       try {
-        const { data, error } = await supabase.from('swag_votes').select('*').eq('swag', swagName).single();
-        if (error && error.code !== "PGRST116") {
-          // PGRST116 = No rows found (depends on PostgREST version); treat other errors as real
-          console.warn("Select error:", error);
-        }
+        const { data, error: selErr } = await supabase
+          .from('swag_votes')
+          .select('votes')
+          .eq('swag', swagName)
+          .maybeSingle();
 
-        let currentVotes = data?.votes || 0;
+        if (selErr) throw selErr;
 
-        if (data) {
-          const { error: upErr } = await supabase
-            .from('swag_votes')
-            .update({ votes: currentVotes + 1 })
-            .eq('swag', swagName);
-          if (upErr) throw upErr;
-        } else {
-          const { error: insErr } = await supabase
-            .from('swag_votes')
-            .insert([{ swag: swagName, votes: 1 }]);
-          if (insErr) throw insErr;
-        }
+        const newVotes = (data?.votes ?? 0) + 1;
+
+        const { error: upsErr } = await supabase
+          .from('swag_votes')
+          .upsert({ swag: swagName, votes: newVotes }, { onConflict: 'swag' });
+
+        if (upsErr) throw upsErr;
 
         showVoteOverlay(swagName);
         loadLeaderboard();
       } catch (err) {
         console.error("Voting error:", err);
+        showVoteOverlay(null, err.message || "Vote failed — please try again.");
       }
     }
 
-    function showVoteOverlay(swagName) {
-      voteOverlay.textContent = `Vote Registered for ${swagName}!`;
+    function showVoteOverlay(swagName, errMsg) {
+      if (errMsg) {
+        voteOverlay.textContent = errMsg;
+        voteOverlay.style.background = "rgba(220,50,50,0.95)";
+        voteOverlay.style.color = "#fff";
+      } else {
+        voteOverlay.textContent = `Vote Registered for ${swagName}!`;
+        voteOverlay.style.background = "";
+        voteOverlay.style.color = "";
+      }
       voteOverlay.classList.add('active');
-      setTimeout(() => voteOverlay.classList.remove('active'), 1500);
+      setTimeout(() => voteOverlay.classList.remove('active'), 2000);
     }
 
     lightboxVote.onclick = () => voteForSwag(swagItems[currentIndex].name);
