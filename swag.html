@@ -294,8 +294,8 @@
       { name: "Hat1", img: "icons/hat1.webp" },
       { name: "Hat2", img: "icons/hat2.webp" },
       { name: "Hoodie", img: "icons/hoodie.webp" },
-      { name: "Mug 1", img: "icons/mug1.webp" },
-      { name: "Mug 2", img: "icons/mug2.webp" },
+      { name: "Mug", img: "icons/mug1.webp" },
+      { name: "Mug", img: "icons/mug2.webp" },
       { name: "Gauntlet", img: "icons/gauntlet.webp" }
     ];
 
@@ -364,19 +364,24 @@
       try {
         const { data, error: selErr } = await supabase
           .from('swag_votes')
-          .select('votes')
+          .select('id, votes')
           .eq('swag', swagName)
           .maybeSingle();
 
         if (selErr) throw selErr;
 
-        const newVotes = (data?.votes ?? 0) + 1;
-
-        const { error: upsErr } = await supabase
-          .from('swag_votes')
-          .upsert({ swag: swagName, votes: newVotes }, { onConflict: 'swag' });
-
-        if (upsErr) throw upsErr;
+        if (data) {
+          const { error: upErr } = await supabase
+            .from('swag_votes')
+            .update({ votes: data.votes + 1 })
+            .eq('id', data.id);
+          if (upErr) throw upErr;
+        } else {
+          const { error: insErr } = await supabase
+            .from('swag_votes')
+            .insert([{ swag: swagName, votes: 1 }]);
+          if (insErr) throw insErr;
+        }
 
         showVoteOverlay(swagName);
         loadLeaderboard();
