@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Support Charleston Hacks - Donate or become a sponsor to help us build the tech community.">
     <title>Support Charleston Hacks</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6NDKG07DY6');
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -169,19 +176,19 @@
         </div>
 
         <div class="donation-options">
-            <div class="donation-card" onclick="window.open('https://github.com/sponsors/deckerd451', '_blank')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'github_sponsor'})} window.open('https://github.com/sponsors/deckerd451', '_blank')">
                 <i class="fab fa-github"></i>
                 <h3>GitHub Sponsors</h3>
                 <p>Support us through GitHub's sponsorship program</p>
             </div>
 
-            <div class="donation-card" onclick="alert('Contact us at hello@charlestonhacks.com for sponsorship opportunities')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'corporate_sponsor'})} alert('Contact us at hello@charlestonhacks.com for sponsorship opportunities')">
                 <i class="fas fa-handshake"></i>
                 <h3>Corporate Sponsor</h3>
                 <p>Partner with us to support the next generation of developers</p>
             </div>
 
-            <div class="donation-card" onclick="alert('Contact us at hello@charlestonhacks.com for custom donation options')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'custom_donation'})} alert('Contact us at hello@charlestonhacks.com for custom donation options')">
                 <i class="fas fa-heart"></i>
                 <h3>Custom Donation</h3>
                 <p>Get in touch for other ways to contribute</p>
