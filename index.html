@@ -78,12 +78,12 @@
 
     .ch-tagline {
       position: fixed;
-      top: 72px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 9998;
       margin: 0;
-      color: rgba(255, 255, 255, 0.55);
+      color: rgba(255, 255, 255, 0.45);
       font-size: clamp(0.65rem, 1.8vw, 0.8rem);
       letter-spacing: 0.1em;
       text-align: center;
@@ -93,8 +93,9 @@
       font-family: 'Orbitron', sans-serif;
       text-transform: uppercase;
     }
-    @media (max-width: 640px) {
-      .ch-tagline { top: 62px; font-size: 0.6rem; }
+    /* On mobile the icon bar is fixed at the bottom — keep tagline above it */
+    @media (max-width: 768px) {
+      .ch-tagline { bottom: 68px; font-size: 0.6rem; }
     }
   </style>
 </head>
