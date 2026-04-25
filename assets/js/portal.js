@@ -475,6 +475,10 @@
       area.addEventListener("click", (e) => {
         e.preventDefault();
 
+        if (typeof gtag === "function") {
+          gtag("event", "portal_click", { portal_id: portalId });
+        }
+
        // BTC portal opens the BTC overlay (top-right)
 if (portalId === "btc") {
   openMatrixBTC(area); // pass trigger for focus restore

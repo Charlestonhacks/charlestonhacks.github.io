@@ -2,8 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>CharlestonHacks Swag Voting</title>
+  <title>CharlestonHacks Swag — Vote for Your Favorite Merch</title>
+  <meta name="description" content="Vote for your favorite CharlestonHacks merchandise. See what's trending and help decide the next batch of official swag.">
+  <meta property="og:title" content="CharlestonHacks Swag — Vote for Your Favorite Merch">
+  <meta property="og:description" content="Vote for your favorite CharlestonHacks merchandise. See what's trending.">
+  <meta property="og:image" content="https://charlestonhacks.com/images/websitepanel.webp">
+  <meta property="og:url" content="https://charlestonhacks.com/swag.html">
+  <meta property="og:type" content="website">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6NDKG07DY6');
+  </script>
 
   <!-- ✅ FIX: "Britannic Bold" is not a Google Font, so that URL returns HTML and triggers CORB.
        Use a real Google Font instead (Montserrat), and keep Britannic Bold as a fallback if it exists locally. -->
@@ -384,6 +397,9 @@
         }
 
         showVoteOverlay(swagName);
+        if (typeof gtag === "function") {
+          gtag("event", "swag_vote", { swag_item: swagName });
+        }
         loadLeaderboard();
       } catch (err) {
         console.error("Voting error:", err);
