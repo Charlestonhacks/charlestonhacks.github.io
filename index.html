@@ -71,16 +71,17 @@
       opacity: 0.98;
     }
 
-    /* Give the page a little breathing room so the logo never overlaps the card on small screens */
-    @media (max-width: 640px) {
+    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 96px mobile) */
+    .main-wrapper { padding-top: 130px; }
+
+    @media (max-width: 768px) {
       .ch-top-logo { top: 10px; }
       .ch-top-logo img { width: min(92vw, 260px); }
-    }
-
-    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 95px mobile) */
-    .main-wrapper { padding-top: 130px; }
-    @media (max-width: 640px) {
-      .main-wrapper { padding-top: 100px; }
+      /* flex-start prevents the centering algorithm from adding a second gap
+         equal to padding-top below the logo */
+      .main-wrapper { padding-top: 108px; justify-content: flex-start; }
+      /* 55px icon bar + ~34px iPhone home-indicator safe area + 16px buffer */
+      .ch-tagline { bottom: 105px; font-size: 0.6rem; }
     }
 
     .ch-tagline {
@@ -99,10 +100,6 @@
       text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
       font-family: 'Orbitron', sans-serif;
       text-transform: uppercase;
-    }
-    /* On mobile the icon bar is fixed at the bottom — keep tagline above it */
-    @media (max-width: 768px) {
-      .ch-tagline { bottom: 68px; font-size: 0.6rem; }
     }
   </style>
   <script type="application/ld+json">
