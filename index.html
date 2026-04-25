@@ -10,9 +10,6 @@
 
   <!-- Preload key visuals -->
   <link rel="preload" as="image" href="icons/card.png">
-  <!-- ✅ Preloaded (but NOT used as the visible header logo) -->
-  <link rel="preload" as="image" href="images/charlestonhackslogo.svg">
-  <!-- ✅ Visible header logo asset -->
   <link rel="preload" as="image" href="images/charlestonhackslogo.svg">
 
   <!-- Neuron redirect (keeps querystring, removes source=neuron) -->
@@ -36,7 +33,7 @@
     gtag("config", "G-6NDKG07DY6");
   </script>
 
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>CharlestonHacks - Portal to Innovation</title>
   <meta name="description" content="CharlestonHacks — Making Invisible Networks Visible. Explore interactive portals to innovation, community, and collaboration."/>
   <meta property="og:image" content="images/websitepanel.webp"/>
@@ -78,31 +75,61 @@
       .ch-top-logo { top: 10px; }
       .ch-top-logo img { width: min(92vw, 260px); }
     }
+
+    .ch-tagline {
+      position: fixed;
+      top: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9998;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+      letter-spacing: 0.1em;
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+    }
+    @media (max-width: 640px) {
+      .ch-tagline { top: 62px; font-size: 0.6rem; }
+    }
   </style>
 </head>
 
 <body>
   <canvas id="neural-bg"></canvas>
 
-  <!-- ✅ NEW: Top-center visible logo -->
+  <!-- Top-center visible logo -->
   <div class="ch-top-logo" aria-hidden="true">
     <img src="images/charlestonhackslogo.svg" alt="">
   </div>
+  <p class="ch-tagline">Charleston's community for builders, hackers &amp; makers</p>
 
-  <!-- Enhanced Splash Screen -->
+  <!-- Splash Screen -->
   <div id="splash-overlay" role="dialog" aria-modal="true" aria-labelledby="splash-title">
     <div id="splash-content">
       <h1 id="splash-title">Welcome to CharlestonHacks</h1>
+      <p style="font-size:.9rem;opacity:.8;margin:.5rem 0 1.5rem;line-height:1.6;">
+        Charleston's community for builders, hackers &amp; makers.<br>
+        Where would you like to go?
+      </p>
 
-      <label style="margin-top:1.5em;font-size:.9rem;display:block;">
+      <label style="font-size:.85rem;display:block;margin-bottom:1.5rem;">
         <input type="checkbox" id="dont-show-again"> Don't show this again
       </label>
 
-      <div style="margin-top:1.5rem;">
-        <button id="community-site-btn" class="btn">Innovation Engine</button>
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <button id="community-site-btn" class="btn">
+          Community Dashboard
+          <span style="display:block;font-size:.75rem;opacity:.7;font-weight:normal;margin-top:.2rem;">Connect with members · Innovation Engine</span>
+        </button>
         <button id="public-site-btn" class="btn"
           style="background:transparent;border:2px solid var(--cyan);color:var(--cyan);">
-          CharlestonHacks
+          Public Website
+          <span style="display:block;font-size:.75rem;opacity:.7;font-weight:normal;margin-top:.2rem;">News, newsletter &amp; announcements</span>
         </button>
       </div>
 
@@ -188,8 +215,8 @@
 
           <button type="button" class="clickable-area middle-right"
                   data-sound="chime" data-url="swag.html"
-                  data-info="🎁 Swag Store - Official CharlestonHacks merchandise"
-                  data-portal="swag" aria-label="Swag Store Portal">
+                  data-info="🗳️ Swag Vote - Vote on official CharlestonHacks merchandise"
+                  data-portal="swag" aria-label="Swag Vote Portal">
             <img src="images/case.webp" alt="">
           </button>
 
@@ -256,10 +283,10 @@
       <a href="mailto:hello@charlestonhacks.com" title="Email Us" aria-label="Email">
         <i class="fas fa-envelope"></i>
       </a>
-      <a href="https://www.facebook.com/deckerdb26354" target="_blank" title="Facebook" aria-label="Facebook">
+      <a href="https://www.facebook.com/charlestonhacks" target="_blank" title="Facebook" aria-label="Facebook">
         <i class="fab fa-facebook"></i>
       </a>
-      <a id="open-calendar" title="Charleston Events Calendar (coming soon)" aria-label="Events Calendar" style="cursor:pointer;">
+      <a id="open-calendar" title="Charleston Events Calendar" aria-label="Events Calendar" style="cursor:pointer;">
         <i class="fas fa-calendar-alt"></i>
       </a>
     </section>
@@ -268,7 +295,7 @@
   <!-- Events Modal -->
   <div id="events-overlay" role="dialog" aria-modal="true" aria-labelledby="events-title">
     <div class="events-modal">
-      <h2 id="events-title">Upcoming Charleston Events (feature in development)</h2>
+      <h2 id="events-title">Upcoming Charleston Events</h2>
       <div id="events-list" role="list"></div>
       <button id="close-overlay">Close</button>
     </div>
