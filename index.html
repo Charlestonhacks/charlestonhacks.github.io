@@ -39,6 +39,7 @@
   <meta property="og:image" content="images/websitepanel.webp"/>
   <meta property="og:url" content="https://charlestonhacks.com"/>
   <meta name="theme-color" content="#0a0a0a"/>
+  <link rel="canonical" href="https://charlestonhacks.com/"/>
 
   <link rel="icon" href="favicon.ico" type="image/x-icon"/>
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
@@ -70,16 +71,17 @@
       opacity: 0.98;
     }
 
-    /* Give the page a little breathing room so the logo never overlaps the card on small screens */
-    @media (max-width: 640px) {
+    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 96px mobile) */
+    .main-wrapper { padding-top: 130px; }
+
+    @media (max-width: 768px) {
       .ch-top-logo { top: 10px; }
       .ch-top-logo img { width: min(92vw, 260px); }
-    }
-
-    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 95px mobile) */
-    .main-wrapper { padding-top: 130px; }
-    @media (max-width: 640px) {
-      .main-wrapper { padding-top: 100px; }
+      /* flex-start prevents the centering algorithm from adding a second gap
+         equal to padding-top below the logo */
+      .main-wrapper { padding-top: 108px; justify-content: flex-start; }
+      /* 55px icon bar + ~34px iPhone home-indicator safe area + 16px buffer */
+      .ch-tagline { bottom: 105px; font-size: 0.6rem; }
     }
 
     .ch-tagline {
@@ -99,11 +101,34 @@
       font-family: 'Orbitron', sans-serif;
       text-transform: uppercase;
     }
-    /* On mobile the icon bar is fixed at the bottom — keep tagline above it */
-    @media (max-width: 768px) {
-      .ch-tagline { bottom: 68px; font-size: 0.6rem; }
-    }
   </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "CharlestonHacks",
+    "url": "https://charlestonhacks.com",
+    "logo": "https://charlestonhacks.com/images/charlestonhackslogo.svg",
+    "description": "Charleston's community for builders, hackers, and makers. Hosting hackathons, meetups, and innovation events in Charleston, SC.",
+    "email": "hello@charlestonhacks.com",
+    "location": {
+      "@type": "Place",
+      "name": "Charleston, South Carolina",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Charleston",
+        "addressRegion": "SC",
+        "addressCountry": "US"
+      }
+    },
+    "sameAs": [
+      "https://www.linkedin.com/company/charlestonhacks",
+      "https://www.instagram.com/charlestonhacks/",
+      "https://www.facebook.com/charlestonhacks",
+      "https://www.meetup.com/charlestonhacks/"
+    ]
+  }
+  </script>
 </head>
 
 <body>
