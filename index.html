@@ -76,6 +76,12 @@
       .ch-top-logo img { width: min(92vw, 260px); }
     }
 
+    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 95px mobile) */
+    .main-wrapper { padding-top: 130px; }
+    @media (max-width: 640px) {
+      .main-wrapper { padding-top: 100px; }
+    }
+
     .ch-tagline {
       position: fixed;
       bottom: 20px;
