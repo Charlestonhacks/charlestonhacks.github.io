@@ -173,6 +173,38 @@
                 padding: 1.25rem;
             }
         }
+
+        #subscribe-success {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        #subscribe-success .success-icon {
+            font-size: 3rem;
+            color: #00e0ff;
+        }
+        #subscribe-success h3 {
+            color: #c9a35e;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+        #subscribe-success p {
+            color: #aaa;
+            font-size: .9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        #subscribe-success a {
+            display: inline-block;
+            margin-top: 8px;
+            color: #00e0ff;
+            font-size: .85rem;
+            text-decoration: none;
+        }
+        #subscribe-success a:hover { text-decoration: underline; }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -200,6 +232,11 @@
                     return;
                 }
                 captchaError.style.display = 'none';
+                // Show success panel immediately — Mailchimp confirmation opens in new tab
+                setTimeout(function() {
+                    document.getElementById('mc_embed_signup_scroll').style.display = 'none';
+                    document.getElementById('subscribe-success').style.display = 'flex';
+                }, 100);
             });
 
             captchaInput.addEventListener('input', function() {
@@ -280,6 +317,12 @@
                     </div>
                 </div>
             </form>
+        <div id="subscribe-success">
+            <i class="fas fa-check-circle success-icon"></i>
+            <h3>You're in!</h3>
+            <p>Thanks for subscribing. Check your inbox for a confirmation email — then you're all set for event updates and community news.</p>
+            <a href="community.html"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Back to Community</a>
+        </div>
         </div>
     </div>
 </body>
