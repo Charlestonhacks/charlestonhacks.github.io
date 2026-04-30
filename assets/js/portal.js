@@ -171,7 +171,7 @@
         (DOM.publicBtn.onclick = (e) => {
           e.preventDefault();
           dismissSplash();
-          window.location.href = "https://charlestonhacks.mailchimpsites.com/";
+          window.location.href = "news.html";
         });
     }
 
