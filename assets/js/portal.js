@@ -165,6 +165,7 @@
         (DOM.communityBtn.onclick = (e) => {
           e.preventDefault();
           dismissSplash();
+          window.location.href = "community.html";
         });
       DOM.publicBtn &&
         (DOM.publicBtn.onclick = (e) => {
