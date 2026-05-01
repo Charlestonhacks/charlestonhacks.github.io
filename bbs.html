@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BBS — CharlestonHacks</title>
+  <meta name="description" content="CharlestonHacks Community BBS — real-time chat and Zork for Charleston's builders, hackers, and makers.">
+  <link rel="canonical" href="https://charlestonhacks.com/bbs.html">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-6NDKG07DY6");
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+    }
+
+    /* Nav */
+    .bbs-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid #0f03;
+      background: #000;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .bbs-nav a {
+      color: #0f0;
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .bbs-nav a:hover { opacity: 1; }
+    .bbs-nav .brand {
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    /* BBS fill container */
+    #bbs-modal {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px 40px;
+      min-height: calc(100vh - 45px);
+    }
+
+    /* Override modal sizing so it fills the page nicely */
+    #bbs-modal #bbs-wrapper {
+      width: min(100%, 760px) !important;
+      max-height: none !important;
+    }
+
+    #bbs-modal #bbs-screen {
+      height: min(480px, 55vh) !important;
+    }
+
+    /* Hide the close button — navigation is via the top nav */
+    #bbs-modal #bbs-close {
+      display: none !important;
+    }
+
+    /* Hint line */
+    .bbs-hint {
+      text-align: center;
+      color: #0f06;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      padding: 6px 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="bbs-nav">
+    <a href="community.html"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Community</a>
+    <span class="brand">⬛ CharlestonHacks BBS</span>
+    <a href="index.html"><i class="fas fa-home" style="margin-right:6px;"></i>Home</a>
+  </nav>
+
+  <p class="bbs-hint">Type a message and press Send &nbsp;·&nbsp; Type <strong>zork</strong> to play Zork &nbsp;·&nbsp; Username stored locally</p>
+
+  <!-- BBS mounts here -->
+  <div id="bbs-modal"></div>
+
+  <script type="module">
+    import { initBBS } from "/assets/js/bbs.js";
+    document.addEventListener("DOMContentLoaded", initBBS);
+  </script>
+
+</body>
+</html>
