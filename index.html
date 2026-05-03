@@ -414,6 +414,233 @@
       border-top: 1px solid rgba(255,255,255,0.07);
     }
 
+    /* ── Photo gallery filmstrip ── */
+    .gallery-strip {
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      gap: 14px;
+      padding: 12px 20px 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0,224,255,0.3) transparent;
+    }
+    .gallery-strip::-webkit-scrollbar { height: 6px; }
+    .gallery-strip::-webkit-scrollbar-track { background: transparent; }
+    .gallery-strip::-webkit-scrollbar-thumb { background: rgba(0,224,255,0.25); border-radius: 99px; }
+    .gallery-item {
+      flex: 0 0 clamp(220px, 30vw, 320px);
+      height: clamp(160px, 22vw, 220px);
+      border-radius: 12px;
+      overflow: hidden;
+      scroll-snap-align: start;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    }
+    .gallery-item:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 8px 32px rgba(0,224,255,0.15);
+      border-color: rgba(0,224,255,0.3);
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s;
+    }
+    .gallery-item:hover img { transform: scale(1.06); }
+    .gallery-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 8px 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.04em;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .gallery-header .section-title { margin-bottom: 0; }
+    .gallery-hint {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Event recap card ── */
+    .recap-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: #0d0d0d;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .recap-card:hover {
+      border-color: rgba(0,224,255,0.3);
+      box-shadow: 0 8px 32px rgba(0,224,255,0.08);
+    }
+    .recap-image {
+      width: 100%;
+      height: 100%;
+      min-height: 260px;
+      object-fit: cover;
+      display: block;
+    }
+    .recap-body {
+      padding: 32px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 12px;
+    }
+    .recap-eyebrow {
+      font-size: 0.7rem;
+      color: #00e0ff;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .recap-body h3 {
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      line-height: 1.25;
+    }
+    .recap-body p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      line-height: 1.65;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+    .recap-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: #00e0ff;
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      transition: gap 0.2s;
+      margin-top: 4px;
+    }
+    .recap-link:hover { gap: 10px; }
+
+    @media (max-width: 700px) {
+      .recap-card { grid-template-columns: 1fr; }
+      .recap-image { min-height: 200px; max-height: 240px; }
+      .recap-body { padding: 24px 20px; }
+    }
+
+    /* ── Values grid ── */
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .value-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 24px 20px;
+      transition: background 0.2s, border-color 0.2s, transform 0.2s;
+    }
+    .value-card:hover {
+      background: rgba(0,224,255,0.04);
+      border-color: rgba(0,224,255,0.25);
+      transform: translateY(-2px);
+    }
+    .value-card i {
+      font-size: 1.3rem;
+      color: #00e0ff;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .value-card h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .value-card p {
+      color: rgba(255,255,255,0.45);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+
+    /* ── FAQ accordion ── */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .faq-item {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .faq-item:hover,
+    .faq-item.open {
+      border-color: rgba(0,224,255,0.25);
+    }
+    .faq-question {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: none;
+      color: #fff;
+      font-family: 'Orbitron', Arial, sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 16px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(0,224,255,0.04); }
+    .faq-question .faq-icon {
+      font-size: 0.75rem;
+      color: #00e0ff;
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s;
+      padding: 0 20px;
+    }
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+      padding: 0 20px 18px;
+    }
+    .faq-answer p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.84rem;
+      line-height: 1.7;
+      font-family: 'Inter', Arial, sans-serif;
+    }
+
     /* ── Events grid ── */
     .events-grid {
       display: grid;
@@ -558,6 +785,13 @@
       .newsletter-box { padding: 24px 16px; }
       .newsletter-box p { font-size: 0.9rem; }
 
+      /* Gallery */
+      .gallery-item { flex: 0 0 75vw; height: 180px; }
+      .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+
+      /* Values */
+      .values-grid { grid-template-columns: 1fr; }
+
       /* Footer */
       footer { font-size: 0.7rem; padding: 24px 16px 40px; }
     }
@@ -615,6 +849,58 @@
     </div>
   </div>
 
+  <!-- Community Gallery -->
+  <div class="section" style="padding-bottom:0;">
+    <div class="gallery-header">
+      <p class="section-title" data-aos="fade-up">Community in Action</p>
+      <span class="gallery-hint" data-aos="fade-up" data-aos-delay="60">← scroll →</span>
+    </div>
+  </div>
+  <div class="gallery-strip" data-aos="fade-up" data-aos-delay="120" role="list" aria-label="Community photo gallery">
+    <div class="gallery-item" role="listitem">
+      <img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy">
+      <span class="gallery-caption">Hack Nights '24 — Winners</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy">
+      <span class="gallery-caption">Summer Hack — Teams Building</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy">
+      <span class="gallery-caption">Show &amp; Tell #2</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy">
+      <span class="gallery-caption">Summer Hack — Awards</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy">
+      <span class="gallery-caption">Hack Nights '24 — Building</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy">
+      <span class="gallery-caption">Summer Hack — Presentations</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy">
+      <span class="gallery-caption">Show &amp; Tell — Demo</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy">
+      <span class="gallery-caption">Summer Hack — Celebration</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy">
+      <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
+    </div>
+    <div class="gallery-item" role="listitem">
+      <img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy">
+      <span class="gallery-caption">Summer Hack — Teamwork</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
   <!-- Primary Actions -->
   <div class="section">
     <p class="section-title" data-aos="fade-up">Get Involved</p>
@@ -668,24 +954,60 @@
 
   <hr class="divider">
 
-  <!-- Who We Are -->
+  <!-- Latest Event Recap -->
   <div class="section">
-    <p class="section-title" data-aos="fade-up">Who We Are</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">We make the invisible networks of Charleston's tech scene visible.</p>
+    <p class="section-title" data-aos="fade-up">Latest Event</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Here's what went down at our most recent gathering.</p>
 
-    <div class="pillars-grid">
-      <a class="pillar" href="https://charlestonhacks.mailchimpsites.com/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="120">
+    <div class="recap-card" data-aos="fade-up" data-aos-delay="120">
+      <img class="recap-image" src="images/hnwinners.jpg" alt="Hack Nights 2024 — AI for Humanity winners" loading="lazy">
+      <div class="recap-body">
+        <span class="recap-eyebrow">Hack Nights 2024</span>
+        <h3>AI for Humanity</h3>
+        <p>Teams tackled real-world challenges using generative AI across healthcare, education, and civic tech. Over 14 participants built working prototypes in a single evening, with judges awarding prizes for creativity, impact, and technical execution.</p>
+        <a href="hacknights24.html" class="recap-link">See the full recap <i class="fas fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- What We Believe -->
+  <div class="section">
+    <p class="section-title" data-aos="fade-up">What We Believe</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">These principles guide how we build community and support each other.</p>
+
+    <div class="values-grid">
+      <div class="value-card" data-aos="fade-up" data-aos-delay="0">
         <i class="fas fa-users"></i>
-        <h4>Meet the Community</h4>
-        <p>Meet founders, engineers, designers, and makers living and working in Charleston.</p>
-        <span class="pillar-cta">Join the Community →</span>
-      </a>
-      <a class="pillar" href="https://charlestonhacks.com/cardmatchgame.html" data-aos="fade-up" data-aos-delay="180">
-        <i class="fas fa-address-card"></i>
-        <h4>About Us</h4>
-        <p>Learn who we are through an interactive experience — meet the faces behind CharlestonHacks.</p>
-        <span class="pillar-cta">Meet the Team →</span>
-      </a>
+        <h4>People Matter Most</h4>
+        <p>We prioritize trust, inclusion, and human relationships over hype, metrics, or ego.</p>
+      </div>
+      <div class="value-card" data-aos="fade-up" data-aos-delay="60">
+        <i class="fas fa-link"></i>
+        <h4>We Are Connectors</h4>
+        <p>We bring builders together across disciplines to spark collaborations that wouldn't happen alone.</p>
+      </div>
+      <div class="value-card" data-aos="fade-up" data-aos-delay="120">
+        <i class="fas fa-flask"></i>
+        <h4>We Are Experimental</h4>
+        <p>We test ideas in public, learn quickly, and treat iteration as a core part of progress.</p>
+      </div>
+      <div class="value-card" data-aos="fade-up" data-aos-delay="180">
+        <i class="fas fa-hands-helping"></i>
+        <h4>We Help Others</h4>
+        <p>We share knowledge, mentorship, and resources so more people can build with confidence.</p>
+      </div>
+      <div class="value-card" data-aos="fade-up" data-aos-delay="240">
+        <i class="fas fa-compass"></i>
+        <h4>We Are Independent</h4>
+        <p>We stay community-led so decisions serve members first and keep our mission clear.</p>
+      </div>
+      <div class="value-card" data-aos="fade-up" data-aos-delay="300">
+        <i class="fas fa-globe"></i>
+        <h4>We Think Big Picture</h4>
+        <p>We focus on long-term impact for Charleston's tech ecosystem, not just short-term wins.</p>
+      </div>
     </div>
   </div>
 
@@ -701,6 +1023,62 @@
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- FAQ -->
+  <div class="section">
+    <p class="section-title" data-aos="fade-up">Common Questions</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Everything you need to know before showing up.</p>
+
+    <div class="faq-list" data-aos="fade-up" data-aos-delay="120">
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Who can join CharlestonHacks?
+          <i class="fas fa-plus faq-icon"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p>Everyone. Students, career-changers, senior engineers, designers, founders, and the simply curious. We're not a gatekept club — if you're interested in building things, you belong here.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Do I need to know how to code?
+          <i class="fas fa-plus faq-icon"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p>Not at all. Many of our members are designers, project managers, writers, or people exploring tech for the first time. Hack nights and Show &amp; Tell sessions welcome all skill levels.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          What happens at a typical event?
+          <i class="fas fa-plus faq-icon"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p>It depends on the format. Hack nights are focused build sessions around a theme. Show &amp; Tell is casual — people demo what they've been working on. Happy hours are just good conversation. All events are free.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          Is there a cost to participate?
+          <i class="fas fa-plus faq-icon"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p>No. All CharlestonHacks events are free. We're supported by sponsors and community donations to keep it that way.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-question" aria-expanded="false">
+          How do I stay updated on events?
+          <i class="fas fa-plus faq-icon"></i>
+        </button>
+        <div class="faq-answer" role="region">
+          <p>Subscribe to our newsletter for weekly updates, or follow us on <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" style="color:#00e0ff;">Meetup</a> and <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" style="color:#00e0ff;">LinkedIn</a> for event announcements.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -906,6 +1284,25 @@
 
   <!-- Live Events Feed -->
   <script>
+    // ── FAQ accordion ──
+    document.querySelectorAll('.faq-question').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.parentElement;
+        const isOpen = item.classList.contains('open');
+        // Close all
+        document.querySelectorAll('.faq-item.open').forEach(el => {
+          el.classList.remove('open');
+          el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+        });
+        // Toggle clicked
+        if (!isOpen) {
+          item.classList.add('open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+
+    // ── Load live events ──
     (function () {
       const FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
 
