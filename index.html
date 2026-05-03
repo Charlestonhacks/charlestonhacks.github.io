@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CharlestonHacks — Community for Builders & Makers</title>
+  <title>CharlestonHacks — Community for Builders &amp; Makers</title>
   <meta name="description" content="Join CharlestonHacks — Charleston's community for builders, hackers, and makers. Subscribe to our newsletter, find upcoming events, and connect with local innovators.">
   <meta property="og:title" content="Join the CharlestonHacks Community">
   <meta property="og:description" content="Charleston's hub for builders, hackers, and makers. Events, newsletter, and connection.">
@@ -20,40 +20,6 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
-  <link rel="stylesheet" href="styles.css">
-
-  <style>
-    /* Neural canvas background */
-    #hero-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      opacity: 0.4;
-    }
-
-    /* Event countdown banner */
-    #event-countdown-banner {
-      display: none;
-      background: linear-gradient(90deg, rgba(0,30,40,0.97) 0%, rgba(0,12,20,0.99) 100%);
-      border-bottom: 1px solid rgba(0,224,255,0.25);
-      backdrop-filter: blur(6px);
-      padding: 7px 16px;
-      text-align: center;
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(0.62rem, 2vw, 0.75rem);
-      letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.85);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    #event-countdown-banner a { color: #00e0ff; text-decoration: none; }
-    #event-countdown-banner a:hover { text-decoration: underline; }
-    #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
-    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
-  </style>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
@@ -65,106 +31,237 @@
   </script>
 
   <style>
+    /* ══════════════════════════════════════════════════════════
+       DESIGN SYSTEM
+       ══════════════════════════════════════════════════════════ */
+    :root {
+      --cyan: #00e0ff;
+      --cyan-glow: rgba(0, 224, 255, 0.15);
+      --gold: #c9a35e;
+      --bg: #000;
+      --bg-card: #0d0d0d;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(0, 224, 255, 0.35);
+      --text: #fff;
+      --text-muted: rgba(255, 255, 255, 0.5);
+      --text-dim: rgba(255, 255, 255, 0.35);
+      --font-display: 'Orbitron', Arial, sans-serif;
+      --font-body: 'Inter', Arial, sans-serif;
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
 
     html, body {
       min-height: 100vh;
-      background: #000;
-      color: #fff;
-      font-family: 'Orbitron', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
     }
 
-    /* Dim the background image from styles.css instead of hiding it */
+    /* Background image — dimmed */
     body::before {
-      opacity: 0.12;
-      filter: brightness(0.6) saturate(0.5);
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: url('images/background.jpg') no-repeat center center;
+      background-size: cover;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.1;
+      filter: brightness(0.5) saturate(0.4);
     }
 
-    /* Override styles.css .section-title leak */
-    .section-title {
-      text-align: left;
-      color: #fff;
-      margin-bottom: 8px;
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: -3;
+      pointer-events: none;
     }
 
-    /* ── Nav ── */
+    /* ══════════════════════════════════════════════════════════
+       NEURAL CANVAS
+       ══════════════════════════════════════════════════════════ */
+    #hero-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       EVENT COUNTDOWN BANNER
+       ══════════════════════════════════════════════════════════ */
+    #event-countdown-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(0,30,40,0.97) 0%, rgba(0,12,20,0.99) 100%);
+      border-bottom: 1px solid rgba(0,224,255,0.25);
+      backdrop-filter: blur(6px);
+      padding: 7px 16px;
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: clamp(0.62rem, 2vw, 0.75rem);
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #event-countdown-banner a { color: var(--cyan); text-decoration: none; }
+    #event-countdown-banner a:hover { text-decoration: underline; }
+    #event-countdown-banner .cd-time { color: var(--cyan); font-weight: bold; }
+    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
+
+    /* ══════════════════════════════════════════════════════════
+       NAVIGATION
+       ══════════════════════════════════════════════════════════ */
     .top-nav {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 1px solid rgba(0,224,255,0.12);
+      padding: 0 24px;
+      height: 56px;
+      border-bottom: 1px solid rgba(0,224,255,0.1);
       position: sticky;
       top: 0;
       background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       z-index: 100;
+      gap: 8px;
     }
-    .top-nav a {
-      color: rgba(255,255,255,0.7);
+    .nav-logo img { height: 28px; width: auto; display: block; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .nav-links a {
+      color: rgba(255,255,255,0.6);
       text-decoration: none;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 0.08em;
-      transition: color 0.2s;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: color var(--transition), background var(--transition);
     }
-    .top-nav a:hover { color: #00e0ff; }
-    .top-nav .logo-link img { width: 140px; height: auto; display: block; }
+    .nav-links a:hover {
+      color: var(--cyan);
+      background: rgba(0,224,255,0.06);
+    }
+    .nav-join {
+      background: linear-gradient(135deg, var(--cyan), #0099cc) !important;
+      color: #000 !important;
+      font-weight: 700;
+      padding: 7px 16px !important;
+      border-radius: 6px;
+    }
+    .nav-join:hover {
+      background: linear-gradient(135deg, #33e8ff, #00b3e6) !important;
+      color: #000 !important;
+    }
 
-    /* ── Hero ── */
+    /* Mobile nav toggle */
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.7);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 6px;
+      margin-left: auto;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       HERO — 100vh
+       ══════════════════════════════════════════════════════════ */
     .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       text-align: center;
-      padding: 72px 20px 48px;
-      background: radial-gradient(ellipse at 50% 0%, rgba(0,224,255,0.08) 0%, transparent 65%);
+      padding: 80px 20px 60px;
       position: relative;
       z-index: 1;
     }
     .hero-eyebrow {
       display: inline-block;
-      background: rgba(0,224,255,0.1);
-      border: 1px solid rgba(0,224,255,0.3);
-      color: #00e0ff;
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
-      padding: 5px 14px;
+      background: rgba(0,224,255,0.08);
+      border: 1px solid rgba(0,224,255,0.25);
+      color: var(--cyan);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      padding: 6px 16px;
       border-radius: 999px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       text-transform: uppercase;
     }
     .hero h1 {
-      font-size: clamp(2rem, 6vw, 3.6rem);
+      font-size: clamp(2.2rem, 7vw, 4rem);
       font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.01em;
-      background: linear-gradient(135deg, #fff 30%, #00e0ff 100%);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 20px;
-      text-shadow: none;
-      filter: drop-shadow(0 2px 12px rgba(0,0,0,0.5));
+      max-width: 700px;
     }
-    .hero p {
-      max-width: 560px;
-      margin: 0 auto 40px;
-      color: rgba(255,255,255,0.6);
-      font-size: clamp(0.85rem, 2.2vw, 1rem);
+    .hero-sub {
+      max-width: 540px;
+      color: var(--text-muted);
+      font-size: clamp(0.9rem, 2.2vw, 1.05rem);
       line-height: 1.7;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: var(--font-body);
+      margin-bottom: 36px;
     }
     .hero-cta {
       display: flex;
       gap: 14px;
-      justify-content: center;
       flex-wrap: wrap;
+      justify-content: center;
     }
+    .hero-scroll {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: var(--text-dim);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      animation: gentleBounce 2.5s ease-in-out infinite;
+    }
+    @keyframes gentleBounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(6px); }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       BUTTONS
+       ══════════════════════════════════════════════════════════ */
     .btn-primary {
-      background: linear-gradient(135deg, #00e0ff, #0099cc);
+      background: linear-gradient(135deg, var(--cyan), #0099cc);
       color: #000;
-      font-family: inherit;
+      font-family: var(--font-display);
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.08em;
-      padding: 13px 28px;
+      padding: 14px 28px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -172,49 +269,50 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform var(--transition), box-shadow var(--transition);
     }
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(0,224,255,0.35);
+      box-shadow: 0 6px 28px rgba(0,224,255,0.35);
     }
     .btn-outline {
       background: transparent;
       color: #fff;
-      font-family: inherit;
+      font-family: var(--font-display);
       font-size: 0.8rem;
       font-weight: 600;
       letter-spacing: 0.08em;
-      padding: 12px 24px;
-      border: 1px solid rgba(255,255,255,0.25);
+      padding: 13px 24px;
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: border-color 0.2s, color 0.2s, transform 0.2s;
+      transition: border-color var(--transition), color var(--transition), transform var(--transition);
     }
     .btn-outline:hover {
-      border-color: #00e0ff;
-      color: #00e0ff;
+      border-color: var(--cyan);
+      color: var(--cyan);
       transform: translateY(-2px);
     }
 
-    /* ── Stats ── */
+    /* ══════════════════════════════════════════════════════════
+       STATS BAR
+       ══════════════════════════════════════════════════════════ */
     .stats-bar {
       display: flex;
       justify-content: center;
-      gap: 0;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.02);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.015);
       flex-wrap: wrap;
     }
     .stat-item {
       padding: 24px 40px;
       text-align: center;
-      border-right: 1px solid rgba(255,255,255,0.07);
+      border-right: 1px solid var(--border);
       flex: 1;
       min-width: 140px;
     }
@@ -222,515 +320,121 @@
     .stat-num {
       font-size: clamp(1.6rem, 4vw, 2.4rem);
       font-weight: 900;
-      color: #00e0ff;
+      color: var(--cyan);
       display: block;
     }
     .stat-label {
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.45);
+      font-size: 0.7rem;
+      color: var(--text-dim);
       letter-spacing: 0.12em;
       text-transform: uppercase;
       margin-top: 4px;
     }
 
-    /* ── Section wrapper ── */
+    /* ══════════════════════════════════════════════════════════
+       SECTION WRAPPER
+       ══════════════════════════════════════════════════════════ */
     .section {
       max-width: 1000px;
       margin: 0 auto;
-      padding: 64px 20px;
+      padding: 72px 20px;
     }
-    .section-title {
-      font-size: clamp(1.2rem, 3vw, 1.7rem);
-      font-weight: 800;
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-    .section-sub {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.9rem;
-      font-family: 'Inter', Arial, sans-serif;
-      margin-bottom: 36px;
-      line-height: 1.6;
-    }
-
-    /* ── Action cards ── */
-    .action-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 20px;
-    }
-    .action-card {
-      background: #0d0d0d;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
-      text-decoration: none;
-      color: inherit;
-    }
-    .action-card:hover {
-      border-color: rgba(0,224,255,0.4);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
-    }
-    .action-card.gold:hover {
-      border-color: rgba(201,163,94,0.5);
-      box-shadow: 0 8px 32px rgba(201,163,94,0.12);
-    }
-    .action-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      background: rgba(0,224,255,0.1);
-      color: #00e0ff;
-    }
-    .action-icon.gold {
-      background: rgba(201,163,94,0.12);
-      color: #c9a35e;
-    }
-    .action-icon.green {
-      background: rgba(0,255,136,0.1);
-      color: #00ff88;
-    }
-    .action-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-    .action-card p {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.82rem;
-      line-height: 1.6;
-      font-family: 'Inter', Arial, sans-serif;
-      flex: 1;
-    }
-    .action-card .card-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: #00e0ff;
-      letter-spacing: 0.06em;
-      margin-top: 4px;
-    }
-    .action-card.gold .card-link { color: #c9a35e; }
-    .action-card.green .card-link { color: #00ff88; }
-
-    /* ── Pillars ── */
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-    }
-    .pillar {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 22px 18px;
-      text-align: center;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: background 0.2s, border-color 0.2s, transform 0.2s;
-      cursor: pointer;
-    }
-    .pillar:hover {
-      background: rgba(0,224,255,0.06);
-      border-color: rgba(0,224,255,0.35);
-      transform: translateY(-2px);
-    }
-    .pillar i {
-      font-size: 1.5rem;
-      color: #00e0ff;
-      margin-bottom: 12px;
-      display: block;
-    }
-    .pillar h4 {
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      margin-bottom: 8px;
-    }
-    .pillar p {
-      color: rgba(255,255,255,0.45);
-      font-size: 0.85rem;
-      font-family: 'Inter', Arial, sans-serif;
-      line-height: 1.6;
-      flex: 1;
-    }
-    .pillar .pillar-cta {
-      margin-top: 12px;
-      font-size: 0.78rem;
-      color: #00e0ff;
-      letter-spacing: 0.06em;
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .pillar:hover .pillar-cta {
-      opacity: 1;
-    }
-
-    /* ── Channels ── */
-    .channels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
-    }
-    .channel-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-    }
-    .channel-btn:hover {
-      background: rgba(0,224,255,0.06);
-      border-color: rgba(0,224,255,0.3);
-      color: #00e0ff;
-    }
-    .channel-btn i { font-size: 1.1rem; width: 20px; text-align: center; }
-
-    /* ── Newsletter inline ── */
-    .newsletter-box {
-      background: linear-gradient(135deg, rgba(0,224,255,0.06) 0%, rgba(0,0,0,0) 100%);
-      border: 1px solid rgba(0,224,255,0.2);
-      border-radius: 16px;
-      padding: 40px 32px;
-      text-align: center;
-    }
-    .newsletter-box h2 {
-      font-size: clamp(1.1rem, 3vw, 1.5rem);
+    .section-label {
+      font-size: 0.68rem;
+      color: var(--cyan);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
       margin-bottom: 10px;
     }
-    .newsletter-box p {
-      color: rgba(255,255,255,0.55);
-      font-family: 'Inter', Arial, sans-serif;
-      font-size: 0.88rem;
-      margin-bottom: 24px;
-      line-height: 1.6;
+    .section-title {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+      color: #fff;
+      text-align: left;
     }
-
-    /* ── Divider ── */
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-family: var(--font-body);
+      margin-bottom: 40px;
+      line-height: 1.65;
+      max-width: 600px;
+    }
     .divider {
       border: none;
-      border-top: 1px solid rgba(255,255,255,0.07);
+      border-top: 1px solid var(--border);
       margin: 0;
     }
 
-    /* ── Photo gallery filmstrip ── */
-    .gallery-outer {
-      overflow: hidden;
-      position: relative;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
-      mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
-    }
-
-    .gallery-strip {
-      display: flex;
-      gap: 14px;
-      padding: 12px 0 20px;
-      will-change: transform;
-      animation: galleryScroll 50s linear infinite;
-    }
-
-    @keyframes galleryScroll {
-      from { transform: translate3d(0, 0, 0); }
-      to   { transform: translate3d(-50%, 0, 0); }
-    }
-
-    /* Pause on hover (desktop) */
-    .gallery-outer:hover .gallery-strip {
-      animation-play-state: paused;
-    }
-
-    /* Pause on touch (set by JS) */
-    .gallery-strip.paused {
-      animation-play-state: paused;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .gallery-strip {
-        animation: none;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-      }
-      .gallery-outer {
-        -webkit-mask-image: none;
-        mask-image: none;
-      }
-    }
-
-    @media (max-width: 600px) {
-      .gallery-strip {
-        animation-duration: 30s;
-      }
-    }
-    .gallery-item {
-      flex: 0 0 340px;
-      height: 230px;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid rgba(255,255,255,0.08);
-      transition: border-color 0.3s;
-    }
-    .gallery-item:hover {
-      border-color: rgba(0,224,255,0.3);
-    }
-    .gallery-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .gallery-item picture {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    .recap-card picture {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-    .gallery-caption {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 8px 12px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.85));
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.85);
-      letter-spacing: 0.04em;
-      font-family: 'Inter', Arial, sans-serif;
-    }
-    .gallery-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    .gallery-header .section-title { margin-bottom: 0; }
-    .gallery-hint {
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.35);
-      letter-spacing: 0.06em;
-    }
-
-    /* ── Event recap card ── */
-    .recap-card {
+    /* ══════════════════════════════════════════════════════════
+       WHAT IS CHARLESTONHACKS
+       ══════════════════════════════════════════════════════════ */
+    .about-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 0;
-      background: #0d0d0d;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
+      gap: 32px;
+      align-items: center;
+    }
+    .about-text h2 {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 800;
+      margin-bottom: 16px;
+      letter-spacing: 0.03em;
+    }
+    .about-text p {
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+    .about-image {
+      border-radius: var(--radius);
       overflow: hidden;
-      transition: border-color 0.25s, box-shadow 0.25s;
+      border: 1px solid var(--border);
     }
-    .recap-card:hover {
-      border-color: rgba(0,224,255,0.3);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.08);
-    }
-    .recap-image {
+    .about-image img {
       width: 100%;
       height: 100%;
-      min-height: 260px;
       object-fit: cover;
       display: block;
     }
-    .recap-body {
-      padding: 32px 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      gap: 12px;
-    }
-    .recap-eyebrow {
-      font-size: 0.7rem;
-      color: #00e0ff;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    .recap-body h3 {
-      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      line-height: 1.25;
-    }
-    .recap-body p {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.85rem;
-      line-height: 1.65;
-      font-family: 'Inter', Arial, sans-serif;
-    }
-    .recap-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      color: #00e0ff;
-      text-decoration: none;
-      letter-spacing: 0.06em;
-      transition: gap 0.2s;
-      margin-top: 4px;
-    }
-    .recap-link:hover { gap: 10px; }
 
-    @media (max-width: 700px) {
-      .recap-card { grid-template-columns: 1fr; }
-      .recap-image { min-height: 200px; max-height: 240px; }
-      .recap-body { padding: 24px 20px; }
-    }
-
-    /* ── Values grid ── */
-    .values-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-    .value-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 24px 20px;
-      transition: background 0.2s, border-color 0.2s, transform 0.2s;
-    }
-    .value-card:hover {
-      background: rgba(0,224,255,0.04);
-      border-color: rgba(0,224,255,0.25);
-      transform: translateY(-2px);
-    }
-    .value-card i {
-      font-size: 1.3rem;
-      color: #00e0ff;
-      margin-bottom: 10px;
-      display: block;
-    }
-    .value-card h4 {
-      font-size: 0.92rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 8px;
-    }
-    .value-card p {
-      color: rgba(255,255,255,0.45);
-      font-size: 0.82rem;
-      line-height: 1.6;
-      font-family: 'Inter', Arial, sans-serif;
-    }
-
-    /* ── FAQ accordion ── */
-    .faq-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .faq-item {
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 10px;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .faq-item:hover,
-    .faq-item.open {
-      border-color: rgba(0,224,255,0.25);
-    }
-    .faq-question {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: none;
-      color: #fff;
-      font-family: 'Orbitron', Arial, sans-serif;
-      font-size: 0.88rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      padding: 16px 20px;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: background 0.2s;
-    }
-    .faq-question:hover { background: rgba(0,224,255,0.04); }
-    .faq-question .faq-icon {
-      font-size: 0.75rem;
-      color: #00e0ff;
-      transition: transform 0.3s;
-      flex-shrink: 0;
-    }
-    .faq-item.open .faq-icon { transform: rotate(45deg); }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s;
-      padding: 0 20px;
-    }
-    .faq-item.open .faq-answer {
-      max-height: 300px;
-      padding: 0 20px 18px;
-    }
-    .faq-answer p {
-      color: rgba(255,255,255,0.5);
-      font-size: 0.84rem;
-      line-height: 1.7;
-      font-family: 'Inter', Arial, sans-serif;
-    }
-
-    /* ── Events grid ── */
+    /* ══════════════════════════════════════════════════════════
+       EVENTS
+       ══════════════════════════════════════════════════════════ */
     .events-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
     }
     .event-card {
-      background: #0d0d0d;
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 24px 22px;
       position: relative;
       overflow: hidden;
-      transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
     }
     .event-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 100%;
-      background: linear-gradient(180deg, #00e0ff, #c9a35e);
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      background: linear-gradient(180deg, var(--cyan), var(--gold));
       border-radius: 2px 0 0 2px;
     }
     .event-card:hover {
-      border-color: rgba(0,224,255,0.4);
+      border-color: var(--border-hover);
       transform: translateY(-3px);
       box-shadow: 0 8px 32px rgba(0,224,255,0.1);
     }
     .event-date {
       font-size: 0.72rem;
-      color: #00e0ff;
+      color: var(--cyan);
       text-transform: uppercase;
       letter-spacing: 0.1em;
       margin-bottom: 6px;
@@ -744,28 +448,32 @@
     .event-card h3 a {
       color: #fff;
       text-decoration: none;
-      transition: color 0.2s;
+      transition: color var(--transition);
     }
-    .event-card h3 a:hover { color: #00e0ff; }
+    .event-card h3 a:hover { color: var(--cyan); }
     .event-location {
       font-size: 0.78rem;
-      color: rgba(255,255,255,0.45);
+      color: var(--text-dim);
       margin-bottom: 8px;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: var(--font-body);
     }
     .event-desc {
       font-size: 0.82rem;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-dim);
       line-height: 1.6;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: var(--font-body);
     }
     .events-empty {
       grid-column: 1 / -1;
       text-align: center;
-      color: rgba(255,255,255,0.4);
+      color: var(--text-dim);
       padding: 32px 16px;
       font-size: 0.88rem;
-      font-family: 'Inter', Arial, sans-serif;
+      font-family: var(--font-body);
+    }
+    .events-cta {
+      text-align: center;
+      margin-top: 28px;
     }
 
     /* Skeleton loading */
@@ -783,74 +491,367 @@
       100% { background-position: -200% 0; }
     }
 
-    @media (max-width: 600px) {
-      .events-grid { grid-template-columns: 1fr; }
+    /* ══════════════════════════════════════════════════════════
+       GET INVOLVED — 4 ACTION CARDS
+       ══════════════════════════════════════════════════════════ */
+    .involve-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .involve-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .involve-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
+    }
+    .involve-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: var(--cyan-glow);
+      color: var(--cyan);
+    }
+    .involve-icon.gold {
+      background: rgba(201,163,94,0.12);
+      color: var(--gold);
+    }
+    .involve-icon.green {
+      background: rgba(0,255,136,0.1);
+      color: #00ff88;
+    }
+    .involve-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .involve-card p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-family: var(--font-body);
+      flex: 1;
+    }
+    .involve-card .card-arrow {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      letter-spacing: 0.06em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: gap var(--transition);
+    }
+    .involve-card:hover .card-arrow { gap: 10px; }
+    .involve-card.gold .card-arrow { color: var(--gold); }
+    .involve-card.green .card-arrow { color: #00ff88; }
+
+    /* ══════════════════════════════════════════════════════════
+       NEWSLETTER CTA
+       ══════════════════════════════════════════════════════════ */
+    .newsletter-box {
+      background: linear-gradient(135deg, rgba(0,224,255,0.06) 0%, rgba(0,0,0,0) 100%);
+      border: 1px solid rgba(0,224,255,0.2);
+      border-radius: 16px;
+      padding: 44px 32px;
+      text-align: center;
+    }
+    .newsletter-box h2 {
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      margin-bottom: 10px;
+    }
+    .newsletter-box p {
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      margin-bottom: 24px;
+      line-height: 1.6;
     }
 
-    /* ── Footer ── */
+    /* ══════════════════════════════════════════════════════════
+       GALLERY FILMSTRIP
+       ══════════════════════════════════════════════════════════ */
+    .gallery-outer {
+      overflow: hidden;
+      position: relative;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+    }
+    .gallery-strip {
+      display: flex;
+      gap: 14px;
+      padding: 12px 0 20px;
+      will-change: transform;
+      animation: galleryScroll 50s linear infinite;
+    }
+    @keyframes galleryScroll {
+      from { transform: translate3d(0, 0, 0); }
+      to   { transform: translate3d(-50%, 0, 0); }
+    }
+    .gallery-outer:hover .gallery-strip { animation-play-state: paused; }
+    .gallery-strip.paused { animation-play-state: paused; }
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-strip { animation: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .gallery-outer { -webkit-mask-image: none; mask-image: none; }
+    }
+    .gallery-item {
+      flex: 0 0 340px;
+      height: 230px;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border);
+      transition: border-color 0.3s;
+    }
+    .gallery-item:hover { border-color: var(--border-hover); }
+    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-item picture { display: block; width: 100%; height: 100%; }
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 8px 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.04em;
+      font-family: var(--font-body);
+    }
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    .gallery-header .section-title { margin-bottom: 0; }
+
+    /* ══════════════════════════════════════════════════════════
+       EXPLORE THE HUB
+       ══════════════════════════════════════════════════════════ */
+    .hub-preview {
+      text-align: center;
+    }
+    .hub-card-wrapper {
+      max-width: 420px;
+      margin: 0 auto 28px;
+      position: relative;
+    }
+    .hub-card-wrapper img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .hub-card-wrapper:hover img {
+      border-color: var(--border-hover);
+      box-shadow: 0 8px 40px rgba(0,224,255,0.12);
+    }
+    .hub-features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .hub-feature {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hub-feature i { color: var(--cyan); font-size: 0.8rem; }
+
+    /* ══════════════════════════════════════════════════════════
+       CONNECT CHANNELS
+       ══════════════════════════════════════════════════════════ */
+    .channels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 14px;
+    }
+    .channel-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      transition: background var(--transition), border-color var(--transition), color var(--transition);
+    }
+    .channel-btn:hover {
+      background: rgba(0,224,255,0.06);
+      border-color: var(--border-hover);
+      color: var(--cyan);
+    }
+    .channel-btn i { font-size: 1.1rem; width: 20px; text-align: center; }
+
+    /* ══════════════════════════════════════════════════════════
+       FAQ ACCORDION
+       ══════════════════════════════════════════════════════════ */
+    .faq-list { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .faq-item:hover, .faq-item.open { border-color: var(--border-hover); }
+    .faq-question {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: none;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      padding: 16px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .faq-question:hover { background: rgba(0,224,255,0.04); }
+    .faq-question .faq-icon {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      transition: transform 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s;
+      padding: 0 20px;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; padding: 0 20px 18px; }
+    .faq-answer p {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      line-height: 1.7;
+      font-family: var(--font-body);
+    }
+    .faq-answer a { color: var(--cyan); text-decoration: none; }
+    .faq-answer a:hover { text-decoration: underline; }
+
+    /* ══════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════ */
     footer {
       text-align: center;
       padding: 32px 20px 48px;
-      color: rgba(255,255,255,0.25);
+      color: var(--text-dim);
       font-size: 0.7rem;
       letter-spacing: 0.08em;
-      border-top: 1px solid rgba(255,255,255,0.07);
+      border-top: 1px solid var(--border);
     }
-    footer a { color: rgba(255,255,255,0.35); text-decoration: none; }
-    footer a:hover { color: #00e0ff; }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: var(--cyan); }
 
-    @media (max-width: 600px) {
+    /* ══════════════════════════════════════════════════════════
+       RESPONSIVE
+       ══════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
       /* Nav */
-      .top-nav { padding: 12px 16px; }
-      .top-nav a:not(.logo-link) { font-size: 0.78rem; }
-      .top-nav .logo-link img { width: 120px; }
-
-      /* Countdown */
-      #event-countdown-banner { white-space: normal; font-size: 0.65rem; padding: 6px 12px; }
+      .top-nav { padding: 0 16px; height: 52px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 52px;
+        left: 0; right: 0;
+        background: rgba(0,0,0,0.97);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        gap: 4px;
+        backdrop-filter: blur(12px);
+      }
+      .nav-links.open a {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+      }
+      .nav-toggle { display: block; }
 
       /* Hero */
-      .hero { padding: 44px 16px 32px; }
-      .hero-eyebrow { font-size: 0.7rem; letter-spacing: 0.12em; }
-      .hero p { font-size: 0.95rem; }
+      .hero { min-height: calc(100vh - 52px); padding: 48px 16px 40px; }
+      .hero-eyebrow { font-size: 0.65rem; }
       .hero-cta { flex-direction: column; align-items: stretch; }
-      .btn-primary, .btn-outline { justify-content: center; font-size: 0.85rem; padding: 14px 20px; }
+      .btn-primary, .btn-outline { justify-content: center; font-size: 0.82rem; padding: 14px 20px; }
+      .hero-scroll { display: none; }
 
-      /* Stats — fix 2×2 grid border bleed + label wrapping */
+      /* Stats */
       .stat-item { padding: 16px 12px; min-width: 0; flex-basis: 50%; }
       .stat-item:nth-child(2n) { border-right: none; }
-      .stat-item:nth-child(1),
-      .stat-item:nth-child(2) { border-bottom: 1px solid rgba(255,255,255,0.07); }
-      .stat-label { font-size: 0.68rem; letter-spacing: 0.04em; }
+      .stat-item:nth-child(1), .stat-item:nth-child(2) { border-bottom: 1px solid var(--border); }
+      .stat-label { font-size: 0.66rem; letter-spacing: 0.04em; }
 
       /* Sections */
-      .section { padding: 36px 16px; }
-      .section-title { font-size: clamp(1.3rem, 5vw, 1.7rem); }
-      .section-sub { font-size: 0.9rem; }
+      .section { padding: 48px 16px; }
 
-      /* Pillars */
-      .pillars-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-      .pillar { padding: 16px 12px; }
-      .pillar h4 { font-size: 0.86rem; }
-      .pillar p { font-size: 0.8rem; }
-      .pillar .pillar-cta { opacity: 1; font-size: 0.74rem; }
+      /* About */
+      .about-grid { grid-template-columns: 1fr; gap: 24px; }
+      .about-image { max-height: 240px; }
 
-      /* Channels */
-      .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-      .channel-btn { font-size: 0.82rem; padding: 12px 14px; }
+      /* Events */
+      .events-grid { grid-template-columns: 1fr; }
 
-      /* Newsletter */
-      .newsletter-box { padding: 24px 16px; }
-      .newsletter-box p { font-size: 0.9rem; }
+      /* Involve */
+      .involve-grid { grid-template-columns: 1fr; }
 
       /* Gallery */
       .gallery-item { flex: 0 0 260px; height: 180px; }
+      .gallery-strip { animation-duration: 30s; }
       .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
 
-      /* Values */
-      .values-grid { grid-template-columns: 1fr; }
+      /* Hub */
+      .hub-card-wrapper { max-width: 300px; }
+
+      /* Channels */
+      .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+      /* Newsletter */
+      .newsletter-box { padding: 28px 16px; }
 
       /* Footer */
-      footer { font-size: 0.7rem; padding: 24px 16px 40px; }
+      footer { padding: 24px 16px 40px; }
+    }
+
+    @media (max-width: 480px) {
+      .involve-grid { grid-template-columns: 1fr; }
+      .hub-features { gap: 8px; }
+      .hub-feature { font-size: 0.68rem; padding: 6px 12px; }
     }
   </style>
 </head>
@@ -861,40 +862,57 @@
   <!-- Event countdown banner -->
   <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- Nav -->
-  <nav class="top-nav">
-    <a href="/" class="logo-link" aria-label="CharlestonHacks home">
+  <!-- ════════════════════════════════════════════════════════
+       1. NAVIGATION
+       ════════════════════════════════════════════════════════ -->
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
-    <a href="/"><i class="fas fa-home" style="margin-right:6px;"></i>Home</a>
-    <a href="/about.html"><i class="fas fa-info-circle" style="margin-right:6px;"></i>About</a>
-    <a href="/hub.html"><i class="fas fa-th-large" style="margin-right:6px;"></i>Member Hub</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links">
+      <a href="#events-section">Events</a>
+      <a href="#about-section">Community</a>
+      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">Innovation Engine</a>
+      <a href="/about.html">About</a>
+      <a href="subscribe.html" class="nav-join">Join</a>
+    </div>
   </nav>
 
-  <!-- Hero -->
-  <section class="hero">
+  <!-- ════════════════════════════════════════════════════════
+       2. HERO — 100vh
+       ════════════════════════════════════════════════════════ -->
+  <section class="hero" id="hero">
     <span class="hero-eyebrow">Charleston, SC</span>
-    <h1>Build. Connect.<br>Hack.</h1>
-    <p>CharlestonHacks is the local hub for builders, tinkerers, and innovators. Whether you're shipping your first project or your fiftieth, there's a seat for you here.</p>
+    <h1>Charleston's Community for Builders, Hackers &amp; Makers</h1>
+    <p class="hero-sub">We host events, connect people, and build things together. Whether you're shipping your first project or your fiftieth, there's a seat for you here.</p>
     <div class="hero-cta">
       <a href="subscribe.html" class="btn-primary">
-        <i class="fas fa-envelope-open-text"></i> Join the Mailing List
+        <i class="fas fa-users"></i> Join the Community
       </a>
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-outline">
-        <i class="fas fa-calendar-alt"></i> Find Events
+      <a href="#events-section" class="btn-outline">
+        <i class="fas fa-calendar-alt"></i> Explore Events
       </a>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span>SCROLL</span>
+      <i class="fas fa-chevron-down"></i>
     </div>
   </section>
 
-  <!-- Stats -->
+  <!-- ════════════════════════════════════════════════════════
+       3. SOCIAL PROOF — STATS BAR
+       ════════════════════════════════════════════════════════ -->
   <div class="stats-bar" role="list">
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="0">
-      <span class="stat-num" data-count="10" data-suffix="+">10+</span>
-      <span class="stat-label">Events Hosted</span>
-    </div>
-    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="80">
       <span class="stat-num" data-count="500" data-suffix="+">500+</span>
       <span class="stat-label">Community Members</span>
+    </div>
+    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="80">
+      <span class="stat-num" data-count="10" data-suffix="+">10+</span>
+      <span class="stat-label">Events Hosted</span>
     </div>
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="160">
       <span class="stat-num" data-count="5" data-suffix="+">5+</span>
@@ -906,7 +924,112 @@
     </div>
   </div>
 
-  <!-- Community Gallery -->
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       4. WHAT IS CHARLESTONHACKS
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="about-section">
+    <div class="about-grid" data-aos="fade-up">
+      <div class="about-text">
+        <p class="section-label">What is CharlestonHacks</p>
+        <h2>A home base for Charleston's tech community</h2>
+        <p>CharlestonHacks is an independent, community-led group that brings together coders, designers, entrepreneurs, and the simply curious. We run hack nights, show-and-tell demos, happy hours, and experimental builds — all free, all open to everyone.</p>
+        <p>We believe the best things get built when people connect across disciplines. No gatekeeping, no dues, no prerequisites. Just show up and make something.</p>
+      </div>
+      <div class="about-image">
+        <picture>
+          <source srcset="images/gallery/goodpartyshot.webp" type="image/webp">
+          <img src="images/goodpartyshot.jpg" alt="CharlestonHacks community gathering at a local event" loading="lazy">
+        </picture>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       5. UPCOMING EVENTS (PRIMARY CONVERSION)
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="events-section">
+    <p class="section-label" data-aos="fade-up">What's Next</p>
+    <p class="section-title" data-aos="fade-up">Upcoming Events</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Free events for builders at every level. RSVP on Meetup and show up.</p>
+
+    <div class="events-grid" id="homepage-events" data-aos="fade-up" data-aos-delay="120">
+      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
+      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
+      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
+    </div>
+
+    <div class="events-cta" data-aos="fade-up" data-aos-delay="180">
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-outline" style="margin-top:8px;">
+        <i class="fab fa-meetup"></i> View All on Meetup
+      </a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       6. NEWSLETTER CTA (LOW-FRICTION CONVERSION)
+       ════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="newsletter-box" data-aos="fade-up">
+      <h2>Stay in the Loop</h2>
+      <p>Get updates on events, projects, and opportunities from Charleston's tech community. No spam, just signal.</p>
+      <a href="subscribe.html" class="btn-primary">
+        <i class="fas fa-envelope-open-text"></i> Subscribe to the Newsletter
+      </a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       7. GET INVOLVED — 4 ACTION CARDS
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="involve-section">
+    <p class="section-label" data-aos="fade-up">Take Action</p>
+    <p class="section-title" data-aos="fade-up">Get Involved</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Four ways to plug in, depending on where you are.</p>
+
+    <div class="involve-grid">
+      <a class="involve-card" href="subscribe.html" data-aos="fade-up" data-aos-delay="0">
+        <div class="involve-icon"><i class="fas fa-users"></i></div>
+        <h3>Join the Community</h3>
+        <p>Subscribe to the newsletter and get connected with 500+ builders, designers, and makers in Charleston.</p>
+        <span class="card-arrow">Get started <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <a class="involve-card" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="60">
+        <div class="involve-icon" style="background:rgba(201,163,94,0.12);color:#c9a35e;"><i class="fas fa-calendar-check"></i></div>
+        <h3>Attend Events</h3>
+        <p>Hack nights, show-and-tell demos, happy hours, and experimental builds. All free, all open.</p>
+        <span class="card-arrow" style="color:#c9a35e;">Find events <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <a class="involve-card" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="120">
+        <div class="involve-icon" style="background:rgba(0,255,136,0.1);color:#00ff88;"><i class="fas fa-rocket"></i></div>
+        <h3>Innovation Engine</h3>
+        <p>Explore the community network, discover projects, and connect directly with other members.</p>
+        <span class="card-arrow" style="color:#00ff88;">Launch dashboard <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <a class="involve-card" href="bbs.html" data-aos="fade-up" data-aos-delay="180">
+        <div class="involve-icon"><i class="fas fa-terminal"></i></div>
+        <h3>Community BBS</h3>
+        <p>Real-time community chat with a retro terminal vibe. Drop in, say hello, or play Zork.</p>
+        <span class="card-arrow">Open terminal <i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       8. COMMUNITY GALLERY
+       ════════════════════════════════════════════════════════ -->
   <div class="section" style="padding-bottom:12px;">
     <div class="gallery-header">
       <p class="section-title" data-aos="fade-up">Community in Action</p>
@@ -1000,152 +1123,44 @@
 
   <hr class="divider">
 
-  <!-- 4. Upcoming Events -->
-  <div class="section" id="events-section">
-    <p class="section-title" data-aos="fade-up">Upcoming Events</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">What's happening in Charleston's tech scene.</p>
-
-    <div class="events-grid" id="homepage-events" data-aos="fade-up" data-aos-delay="120">
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- 5. Latest Event Recap -->
-  <div class="section" id="latest-event-section">
-    <p class="section-title" data-aos="fade-up">Latest Event</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Here's what went down at our most recent gathering.</p>
-
-    <div id="latest-event-card" data-aos="fade-up" data-aos-delay="120">
-      <div class="recap-card">
-        <picture>
-          <source srcset="images/gallery/goodpartyshot-recap.webp" type="image/webp">
-          <img class="recap-image" src="images/goodpartyshot.jpg" alt="CharlestonHacks Happy Hour at Revelry Brewery" loading="lazy">
-        </picture>
-        <div class="recap-body">
-          <span class="recap-eyebrow">April 21, 2026</span>
-          <h3>CharlestonHacks Happy Hour</h3>
-          <p>The community gathered at Revelry Brewery for an after-work social designed to connect Charleston's tech scene. Coders, designers, entrepreneurs, and the simply curious came out to unwind, network, and build lasting connections.</p>
-          <a href="https://www.meetup.com/charlestonhacks/events/314200042/" target="_blank" rel="noopener noreferrer" class="recap-link">View on Meetup <i class="fas fa-arrow-right"></i></a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- 6. What We Believe -->
+  <!-- ════════════════════════════════════════════════════════
+       9. EXPLORE THE HUB
+       ════════════════════════════════════════════════════════ -->
   <div class="section">
-    <p class="section-title" data-aos="fade-up">What We Believe</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">These principles guide how we build community and support each other.</p>
+    <div class="hub-preview" data-aos="fade-up">
+      <p class="section-label">Go Deeper</p>
+      <p class="section-title" style="text-align:center;">Explore the Hub</p>
+      <p class="section-sub" style="text-align:center;max-width:520px;margin:0 auto 32px;">The interactive member portal with 9 portals to events, experiments, the Innovation Engine, community tools, and more.</p>
 
-    <div class="values-grid">
-      <div class="value-card" data-aos="fade-up" data-aos-delay="0">
-        <i class="fas fa-users"></i>
-        <h4>People Matter Most</h4>
-        <p>We prioritize trust, inclusion, and human relationships over hype, metrics, or ego.</p>
-      </div>
-      <div class="value-card" data-aos="fade-up" data-aos-delay="60">
-        <i class="fas fa-link"></i>
-        <h4>We Are Connectors</h4>
-        <p>We bring builders together across disciplines to spark collaborations that wouldn't happen alone.</p>
-      </div>
-      <div class="value-card" data-aos="fade-up" data-aos-delay="120">
-        <i class="fas fa-flask"></i>
-        <h4>We Are Experimental</h4>
-        <p>We test ideas in public, learn quickly, and treat iteration as a core part of progress.</p>
-      </div>
-      <div class="value-card" data-aos="fade-up" data-aos-delay="180">
-        <i class="fas fa-hands-helping"></i>
-        <h4>We Help Others</h4>
-        <p>We share knowledge, mentorship, and resources so more people can build with confidence.</p>
-      </div>
-      <div class="value-card" data-aos="fade-up" data-aos-delay="240">
-        <i class="fas fa-compass"></i>
-        <h4>We Are Independent</h4>
-        <p>We stay community-led so decisions serve members first and keep our mission clear.</p>
-      </div>
-      <div class="value-card" data-aos="fade-up" data-aos-delay="300">
-        <i class="fas fa-globe"></i>
-        <h4>We Think Big Picture</h4>
-        <p>We focus on long-term impact for Charleston's tech ecosystem, not just short-term wins.</p>
-      </div>
-    </div>
-  </div>
+      <a href="/hub.html" class="hub-card-wrapper" aria-label="Open the CharlestonHacks Member Hub">
+        <img src="icons/card.png" alt="CharlestonHacks interactive portal card with 9 clickable areas" loading="lazy">
+      </a>
 
-  <hr class="divider">
+      <div class="hub-features">
+        <span class="hub-feature"><i class="fas fa-code"></i> Hack Nights</span>
+        <span class="hub-feature"><i class="fas fa-lightbulb"></i> Show &amp; Tell</span>
+        <span class="hub-feature"><i class="fas fa-rocket"></i> Innovation Engine</span>
+        <span class="hub-feature"><i class="fas fa-flask"></i> Experiments</span>
+        <span class="hub-feature"><i class="fas fa-terminal"></i> BBS Chat</span>
+        <span class="hub-feature"><i class="fas fa-newspaper"></i> News Feed</span>
+        <span class="hub-feature"><i class="fas fa-heart"></i> Donations</span>
+        <span class="hub-feature"><i class="fas fa-gamepad"></i> Card Game</span>
+        <span class="hub-feature"><i class="fab fa-bitcoin"></i> BTC Tracker</span>
+      </div>
 
-  <!-- 7. Newsletter CTA -->
-  <div class="section">
-    <div class="newsletter-box" data-aos="fade-up">
-      <h2>Stay in the Loop</h2>
-      <p>Get weekly updates on events, projects, and opportunities from Charleston's tech community.</p>
-      <a href="subscribe.html" class="btn-primary">
-        <i class="fas fa-envelope-open-text"></i> Subscribe to the Newsletter
+      <a href="/hub.html" class="btn-primary">
+        <i class="fas fa-th-large"></i> Enter the Hub
       </a>
     </div>
   </div>
 
   <hr class="divider">
 
-  <!-- 8. Get Involved -->
-  <div class="section">
-    <p class="section-title" data-aos="fade-up">Get Involved</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Pick whichever fits you right now.</p>
-
-    <div class="pillars-grid">
-      <a class="pillar" href="https://charlestonhacks.com/Poster.html" data-aos="fade-up" data-aos-delay="0">
-        <i class="fas fa-code"></i>
-        <h4>Previous Events</h4>
-        <p>48-hour sprints where ideas become real products — all skill levels welcome.</p>
-        <span class="pillar-cta">View Previous Events →</span>
-      </a>
-      <a class="pillar" href="showandtell2.html" data-aos="fade-up" data-aos-delay="60">
-        <i class="fas fa-lightbulb"></i>
-        <h4>Show &amp; Tell</h4>
-        <p>Present what you've been building to an engaged, supportive crowd.</p>
-        <span class="pillar-cta">See Highlights →</span>
-      </a>
-      <a class="pillar" href="experimental.html" data-aos="fade-up" data-aos-delay="120">
-        <i class="fas fa-flask"></i>
-        <h4>Experiments</h4>
-        <p>Open sandbox sessions for new tech, demos, and building weird things together.</p>
-        <span class="pillar-cta">Explore Sandbox →</span>
-      </a>
-      <a class="pillar" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="180">
-        <i class="fas fa-people-arrows"></i>
-        <h4>Networking</h4>
-        <p>Connect directly with members, discover projects, and explore the community network.</p>
-        <span class="pillar-cta">Open Dashboard →</span>
-      </a>
-      <a class="pillar" href="/hub.html" data-aos="fade-up" data-aos-delay="300">
-        <i class="fas fa-th-large"></i>
-        <h4>Member Hub</h4>
-        <p>Returning member? Jump straight into the interactive portal for tools, channels, and experiments.</p>
-        <span class="pillar-cta">Explore the Hub →</span>
-      </a>
-      <a class="pillar" href="donations.html" data-aos="fade-up" data-aos-delay="360">
-        <i class="fas fa-heart"></i>
-        <h4>Support the Community</h4>
-        <p>Help us keep events free and accessible. Donate, sponsor, or become a GitHub supporter.</p>
-        <span class="pillar-cta">Support Us →</span>
-      </a>
-      <a class="pillar" href="bbs.html" data-aos="fade-up" data-aos-delay="420">
-        <i class="fas fa-terminal"></i>
-        <h4>Community BBS</h4>
-        <p>Real-time community chat with a retro terminal vibe. Members only area.</p>
-        <span class="pillar-cta">Open Terminal →</span>
-      </a>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- 9. FAQ -->
-  <div class="section">
+  <!-- ════════════════════════════════════════════════════════
+       10. FAQ
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="faq-section">
+    <p class="section-label" data-aos="fade-up">Questions</p>
     <p class="section-title" data-aos="fade-up">Common Questions</p>
     <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Everything you need to know before showing up.</p>
 
@@ -1192,7 +1207,7 @@
           <i class="fas fa-plus faq-icon"></i>
         </button>
         <div class="faq-answer" role="region">
-          <p>Subscribe to our newsletter for weekly updates, or follow us on <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" style="color:#00e0ff;">Meetup</a> and <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" style="color:#00e0ff;">LinkedIn</a> for event announcements.</p>
+          <p>Subscribe to our <a href="subscribe.html">newsletter</a> for updates, or follow us on <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Meetup</a> and <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer">LinkedIn</a> for event announcements.</p>
         </div>
       </div>
     </div>
@@ -1200,8 +1215,11 @@
 
   <hr class="divider">
 
-  <!-- 10. Connect -->
+  <!-- ════════════════════════════════════════════════════════
+       11. CONNECT CHANNELS
+       ════════════════════════════════════════════════════════ -->
   <div class="section">
+    <p class="section-label" data-aos="fade-up">Find Us</p>
     <p class="section-title" data-aos="fade-up">Connect With Us</p>
     <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Find us wherever you hang out online.</p>
 
@@ -1227,6 +1245,9 @@
     </div>
   </div>
 
+  <!-- ════════════════════════════════════════════════════════
+       12. FOOTER
+       ════════════════════════════════════════════════════════ -->
   <footer>
     <p>© 2026 CharlestonHacks · Charleston, SC ·
       <a href="/">Home</a> ·
@@ -1240,14 +1261,37 @@
     </p>
   </footer>
 
+  <!-- ════════════════════════════════════════════════════════
+       SCRIPTS
+       ════════════════════════════════════════════════════════ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script>
     AOS.init({ duration: 500, easing: 'ease-out', once: true, offset: 60 });
+
+    // ── Mobile nav toggle ──
+    (function () {
+      const toggle = document.querySelector('.nav-toggle');
+      const links = document.querySelector('.nav-links');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function () {
+        const open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.querySelector('i').className = open ? 'fas fa-times' : 'fas fa-bars';
+      });
+      // Close on link click
+      links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.querySelector('i').className = 'fas fa-bars';
+        });
+      });
+    })();
 
     // ── Neural canvas background ──
     (function () {
       const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
       const ctx = canvas.getContext('2d');
       let W, H, nodes = [];
 
@@ -1265,21 +1309,21 @@
         if (this.y < 0 || this.y > H) this.vy *= -1;
       };
 
-      for (let i = 0; i < 55; i++) nodes.push(new Node());
+      for (var i = 0; i < 55; i++) nodes.push(new Node());
 
       function draw() {
         ctx.clearRect(0, 0, W, H);
-        for (let i = 0; i < nodes.length; i++) {
+        for (var i = 0; i < nodes.length; i++) {
           nodes[i].update();
           ctx.beginPath();
           ctx.arc(nodes[i].x, nodes[i].y, 1.8, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(0,224,255,0.55)';
           ctx.fill();
-          for (let j = i + 1; j < nodes.length; j++) {
-            const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-            const d = Math.sqrt(dx * dx + dy * dy);
+          for (var j = i + 1; j < nodes.length; j++) {
+            var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+            var d = Math.sqrt(dx * dx + dy * dy);
             if (d < 130) {
-              ctx.strokeStyle = `rgba(0,224,255,${(1 - d / 130) * 0.18})`;
+              ctx.strokeStyle = 'rgba(0,224,255,' + ((1 - d / 130) * 0.18) + ')';
               ctx.lineWidth = 0.5;
               ctx.beginPath();
               ctx.moveTo(nodes[i].x, nodes[i].y);
@@ -1295,27 +1339,27 @@
 
     // ── Counting stats ──
     (function () {
-      const els = document.querySelectorAll('.stat-num[data-count]');
-      const observed = new Set();
+      var els = document.querySelectorAll('.stat-num[data-count]');
+      var observed = new Set();
 
       function animateCount(el) {
-        const target = el.dataset.count;
-        const suffix = el.dataset.suffix || '';
+        var target = el.dataset.count;
+        var suffix = el.dataset.suffix || '';
         if (target === 'inf') return;
-        const n = parseInt(target, 10);
-        const duration = 1400;
-        const start = performance.now();
-        const tick = (now) => {
-          const t = Math.min((now - start) / duration, 1);
-          const ease = 1 - Math.pow(1 - t, 3);
+        var n = parseInt(target, 10);
+        var duration = 1400;
+        var start = performance.now();
+        var tick = function (now) {
+          var t = Math.min((now - start) / duration, 1);
+          var ease = 1 - Math.pow(1 - t, 3);
           el.textContent = Math.round(ease * n) + suffix;
           if (t < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
       }
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
           if (e.isIntersecting && !observed.has(e.target)) {
             observed.add(e.target);
             animateCount(e.target);
@@ -1323,83 +1367,18 @@
         });
       }, { threshold: 0.5 });
 
-      els.forEach(el => observer.observe(el));
+      els.forEach(function (el) { observer.observe(el); });
     })();
 
-    // ── VanillaTilt on pillar cards (desktop/mouse only) ──
-    if (window.matchMedia('(hover: hover)').matches) {
-      VanillaTilt.init(document.querySelectorAll('.pillar'), {
-        max: 8, speed: 400, glare: true, 'max-glare': 0.08, scale: 1.02
-      });
-    }
-
-    // ── Live event countdown ──
-    (function () {
-      const FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
-      const banner = document.getElementById('event-countdown-banner');
-
-      function pad(n) { return String(n).padStart(2, '0'); }
-
-      function renderCountdown(title, link, target) {
-        const tick = () => {
-          const diff = target - Date.now();
-          if (diff <= 0) { banner.style.display = 'none'; return; }
-          const days = Math.floor(diff / 86400000);
-          const hrs  = Math.floor((diff % 86400000) / 3600000);
-          const mins = Math.floor((diff % 3600000) / 60000);
-          const secs = Math.floor((diff % 60000) / 1000);
-          const timeStr = days > 0
-            ? `${days}d ${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`
-            : `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
-          const titleHtml = link
-            ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a>`
-            : title;
-          banner.innerHTML = `<span class="cd-label">NEXT EVENT</span>${titleHtml}&ensp;<span class="cd-time">${timeStr}</span>`;
-        };
-        banner.style.display = 'block';
-        tick();
-        setInterval(tick, 1000);
-      }
-
-      async function initCountdown() {
-        try {
-          const res = await fetch(FEED_URL);
-          if (!res.ok) return;
-          const data = await res.json();
-          const events = Array.isArray(data) ? data : (data?.events ?? []);
-          const now = Date.now();
-          const upcoming = events
-            .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
-            .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-          if (!upcoming.length) return;
-          const next = upcoming[0];
-          const title = String(next.title ?? 'Upcoming Event')
-            .replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
-          renderCountdown(title, next.link ?? null, new Date(next.startDate).getTime());
-        } catch { /* silently skip */ }
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCountdown);
-      } else {
-        initCountdown();
-      }
-    })();
-  </script>
-
-  <!-- Live Events Feed -->
-  <script>
     // ── FAQ accordion ──
-    document.querySelectorAll('.faq-question').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = btn.parentElement;
-        const isOpen = item.classList.contains('open');
-        // Close all
-        document.querySelectorAll('.faq-item.open').forEach(el => {
+    document.querySelectorAll('.faq-question').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var item = btn.parentElement;
+        var isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(function (el) {
           el.classList.remove('open');
           el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
         });
-        // Toggle clicked
         if (!isOpen) {
           item.classList.add('open');
           btn.setAttribute('aria-expanded', 'true');
@@ -1409,9 +1388,9 @@
 
     // ── Gallery: pause on touch for mobile ──
     (function () {
-      const strip = document.querySelector('.gallery-strip');
+      var strip = document.querySelector('.gallery-strip');
       if (!strip) return;
-      let touchTimer;
+      var touchTimer;
       strip.addEventListener('touchstart', function () {
         strip.classList.add('paused');
         clearTimeout(touchTimer);
@@ -1423,104 +1402,115 @@
       }, { passive: true });
     })();
 
+    // ── Live event countdown banner ──
+    (function () {
+      var FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
+      var banner = document.getElementById('event-countdown-banner');
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function renderCountdown(title, link, target) {
+        var tick = function () {
+          var diff = target - Date.now();
+          if (diff <= 0) { banner.style.display = 'none'; return; }
+          var days = Math.floor(diff / 86400000);
+          var hrs  = Math.floor((diff % 86400000) / 3600000);
+          var mins = Math.floor((diff % 3600000) / 60000);
+          var secs = Math.floor((diff % 60000) / 1000);
+          var timeStr = days > 0
+            ? days + 'd ' + pad(hrs) + 'h ' + pad(mins) + 'm ' + pad(secs) + 's'
+            : pad(hrs) + 'h ' + pad(mins) + 'm ' + pad(secs) + 's';
+          var titleHtml = link
+            ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer">' + title + '</a>'
+            : title;
+          banner.innerHTML = '<span class="cd-label">NEXT EVENT</span>' + titleHtml + '&ensp;<span class="cd-time">' + timeStr + '</span>';
+        };
+        banner.style.display = 'block';
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      async function initCountdown() {
+        try {
+          var res = await fetch(FEED_URL);
+          if (!res.ok) return;
+          var data = await res.json();
+          var events = Array.isArray(data) ? data : (data?.events ?? []);
+          var now = Date.now();
+          var upcoming = events
+            .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
+            .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
+          if (!upcoming.length) return;
+          var next = upcoming[0];
+          var title = String(next.title ?? 'Upcoming Event')
+            .replace(/[<>&"]/g, function (c) { return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c]; });
+          renderCountdown(title, next.link ?? null, new Date(next.startDate).getTime());
+        } catch (e) { /* silently skip */ }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCountdown);
+      } else {
+        initCountdown();
+      }
+    })();
+
     // ── Load live events ──
     (function () {
-      const FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
+      var FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
 
       function safeText(s) {
-        return String(s ?? '').replace(/[<>&"]/g, c =>
-          ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+        return String(s ?? '').replace(/[<>&"]/g, function (c) {
+          return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c];
+        });
       }
 
       function formatDate(dateStr) {
         if (!dateStr) return 'Upcoming';
         try {
-          const d = new Date(dateStr);
+          var d = new Date(dateStr);
           if (isNaN(d.getTime())) return 'Upcoming';
-          return d.toLocaleDateString(undefined, {
-            weekday: 'short', month: 'short', day: 'numeric'
-          });
-        } catch { return 'Upcoming'; }
-      }
-
-      function formatDateLong(dateStr) {
-        if (!dateStr) return '';
-        try {
-          const d = new Date(dateStr);
-          if (isNaN(d.getTime())) return '';
-          return d.toLocaleDateString(undefined, {
-            month: 'long', day: 'numeric', year: 'numeric'
-          });
-        } catch { return ''; }
+          return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+        } catch (e) { return 'Upcoming'; }
       }
 
       async function loadHomepageEvents() {
-        const container = document.getElementById('homepage-events');
-        const latestCard = document.getElementById('latest-event-card');
-        let events = [];
+        var container = document.getElementById('homepage-events');
+        var events = [];
 
         try {
-          const res = await fetch(FEED_URL);
+          var res = await fetch(FEED_URL);
           if (!res.ok) throw new Error(res.status);
-          const data = await res.json();
+          var data = await res.json();
           events = Array.isArray(data) ? data : (data?.events ?? []);
-        } catch {
+        } catch (e) {
           events = [];
         }
 
-        const now = Date.now();
+        var now = Date.now();
 
-        // ── Upcoming events grid ──
         if (container) {
-          const upcoming = events
-            .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
-            .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+          var upcoming = events
+            .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
+            .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
 
           if (upcoming.length === 0) {
-            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — check back soon!</p>';
+            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — check back soon or follow us on Meetup!</p>';
           } else {
-            container.innerHTML = upcoming.slice(0, 3).map(ev => {
-              const title = safeText(ev.title || 'Event');
-              const link = safeText(ev.link || '#');
-              const location = safeText(ev.location || '');
-              const desc = safeText((ev.description || '').substring(0, 140));
-              const date = safeText(formatDate(ev.startDate));
-              return `
-                <div class="event-card">
-                  <div class="event-date">${date}</div>
-                  <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
-                  ${location ? '<p class="event-location">📍 ' + location + '</p>' : ''}
-                  ${desc ? '<p class="event-desc">' + desc + (ev.description && ev.description.length > 140 ? '…' : '') + '</p>' : ''}
-                </div>`;
+            container.innerHTML = upcoming.slice(0, 3).map(function (ev) {
+              var title = safeText(ev.title || 'Event');
+              var link = safeText(ev.link || '#');
+              var location = safeText(ev.location || '');
+              var desc = safeText((ev.description || '').substring(0, 140));
+              var date = safeText(formatDate(ev.startDate));
+              return '<div class="event-card">' +
+                '<div class="event-date">' + date + '</div>' +
+                '<h3><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + title + '</a></h3>' +
+                (location ? '<p class="event-location">\uD83D\uDCCD ' + location + '</p>' : '') +
+                (desc ? '<p class="event-desc">' + desc + (ev.description && ev.description.length > 140 ? '…' : '') + '</p>' : '') +
+                '</div>';
             }).join('');
           }
-        }
-
-        // ── Latest (most recent past) event recap ──
-        if (latestCard && events.length > 0) {
-          const past = events
-            .filter(e => e?.startDate && new Date(e.startDate).getTime() <= now)
-            .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
-
-          if (past.length > 0) {
-            const ev = past[0];
-            const title = safeText(ev.title || 'Recent Event');
-            const link = safeText(ev.link || '#');
-            const desc = safeText((ev.description || '').substring(0, 220));
-            const dateLong = safeText(formatDateLong(ev.startDate));
-
-            latestCard.innerHTML = `
-              <div class="recap-card">
-                <img class="recap-image" src="images/hnwinners.jpg" alt="${title}" loading="lazy">
-                <div class="recap-body">
-                  <span class="recap-eyebrow">${dateLong}</span>
-                  <h3>${title}</h3>
-                  <p>${desc}${ev.description && ev.description.length > 220 ? '…' : ''}</p>
-                  <a href="${link}" target="_blank" rel="noopener noreferrer" class="recap-link">View on Meetup <i class="fas fa-arrow-right"></i></a>
-                </div>
-              </div>`;
-          }
-          // If no past events, the hardcoded fallback stays
         }
       }
 
