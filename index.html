@@ -1656,9 +1656,13 @@
       async function loadHomepageEvents() {
         var container = document.getElementById('homepage-events');
         var events = [];
+        var TIMEOUT_MS = 6000;
 
         try {
-          var res = await fetch(FEED_URL);
+          var controller = new AbortController();
+          var timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
+          var res = await fetch(FEED_URL, { signal: controller.signal });
+          clearTimeout(timer);
           if (!res.ok) throw new Error(res.status);
           var data = await res.json();
           events = Array.isArray(data) ? data : (data?.events ?? []);
@@ -1674,7 +1678,7 @@
             .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
 
           if (upcoming.length === 0) {
-            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — check back soon or follow us on Meetup!</p>';
+            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);text-decoration:none;">check Meetup</a> or join the newsletter.</p>';
           } else {
             container.innerHTML = upcoming.slice(0, 3).map(function (ev) {
               var title = safeText(ev.title || 'Event');
