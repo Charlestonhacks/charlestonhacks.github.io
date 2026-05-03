@@ -415,26 +415,47 @@
     }
 
     /* ── Photo gallery filmstrip ── */
+    .gallery-outer {
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-outer::before,
+    .gallery-outer::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .gallery-outer::before { left: 0; background: linear-gradient(to right, #000, transparent); }
+    .gallery-outer::after  { right: 0; background: linear-gradient(to left, #000, transparent); }
+
     .gallery-strip {
-      overflow-x: auto;
-      overflow-y: hidden;
       display: flex;
       gap: 14px;
-      padding: 12px 20px 20px;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(0,224,255,0.3) transparent;
+      padding: 12px 0 20px;
+      width: max-content;
+      animation: galleryScroll 60s linear infinite;
     }
-    .gallery-strip::-webkit-scrollbar { height: 6px; }
-    .gallery-strip::-webkit-scrollbar-track { background: transparent; }
-    .gallery-strip::-webkit-scrollbar-thumb { background: rgba(0,224,255,0.25); border-radius: 99px; }
+    .gallery-outer:hover .gallery-strip {
+      animation-play-state: paused;
+    }
+
+    @keyframes galleryScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-strip { animation: none; overflow-x: auto; }
+    }
     .gallery-item {
       flex: 0 0 clamp(220px, 30vw, 320px);
       height: clamp(160px, 22vw, 220px);
       border-radius: 12px;
       overflow: hidden;
-      scroll-snap-align: start;
       position: relative;
       border: 1px solid rgba(255,255,255,0.08);
       transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
@@ -786,7 +807,7 @@
       .newsletter-box p { font-size: 0.9rem; }
 
       /* Gallery */
-      .gallery-item { flex: 0 0 75vw; height: 180px; }
+      .gallery-item { flex: 0 0 260px; height: 180px; }
       .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
 
       /* Values */
@@ -853,49 +874,91 @@
   <div class="section" style="padding-bottom:0;">
     <div class="gallery-header">
       <p class="section-title" data-aos="fade-up">Community in Action</p>
-      <span class="gallery-hint" data-aos="fade-up" data-aos-delay="60">← scroll →</span>
     </div>
   </div>
-  <div class="gallery-strip" data-aos="fade-up" data-aos-delay="120" role="list" aria-label="Community photo gallery">
-    <div class="gallery-item" role="listitem">
-      <img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy">
-      <span class="gallery-caption">Hack Nights '24 — Winners</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy">
-      <span class="gallery-caption">Summer Hack — Teams Building</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy">
-      <span class="gallery-caption">Show &amp; Tell #2</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy">
-      <span class="gallery-caption">Summer Hack — Awards</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy">
-      <span class="gallery-caption">Hack Nights '24 — Building</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy">
-      <span class="gallery-caption">Summer Hack — Presentations</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy">
-      <span class="gallery-caption">Show &amp; Tell — Demo</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy">
-      <span class="gallery-caption">Summer Hack — Celebration</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy">
-      <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
-    </div>
-    <div class="gallery-item" role="listitem">
-      <img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy">
-      <span class="gallery-caption">Summer Hack — Teamwork</span>
+  <div class="gallery-outer" data-aos="fade-up" data-aos-delay="120">
+    <div class="gallery-strip" role="list" aria-label="Community photo gallery">
+      <div class="gallery-item" role="listitem">
+        <img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Winners</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Teams Building</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy">
+        <span class="gallery-caption">Show &amp; Tell #2</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Awards</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Building</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Presentations</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy">
+        <span class="gallery-caption">Show &amp; Tell — Demo</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Celebration</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Teamwork</span>
+      </div>
+      <!-- Duplicate set for seamless loop -->
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/hnwinners.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Winners</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/goodworking.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Teams Building</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/st2group1.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Show &amp; Tell #2</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/goodaward.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Awards</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/hnphotos-03.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Building</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/dougexplaining.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Presentations</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/st2mike.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Show &amp; Tell — Demo</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/goodpartyshot.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Celebration</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/hnphotos-07.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <img src="images/venkatandteam.jpg" alt="" loading="lazy">
+        <span class="gallery-caption">Summer Hack — Teamwork</span>
+      </div>
     </div>
   </div>
 
@@ -955,17 +1018,20 @@
   <hr class="divider">
 
   <!-- Latest Event Recap -->
-  <div class="section">
+  <div class="section" id="latest-event-section">
     <p class="section-title" data-aos="fade-up">Latest Event</p>
     <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Here's what went down at our most recent gathering.</p>
 
-    <div class="recap-card" data-aos="fade-up" data-aos-delay="120">
-      <img class="recap-image" src="images/hnwinners.jpg" alt="Hack Nights 2024 — AI for Humanity winners" loading="lazy">
-      <div class="recap-body">
-        <span class="recap-eyebrow">Hack Nights 2024</span>
-        <h3>AI for Humanity</h3>
-        <p>Teams tackled real-world challenges using generative AI across healthcare, education, and civic tech. Over 14 participants built working prototypes in a single evening, with judges awarding prizes for creativity, impact, and technical execution.</p>
-        <a href="hacknights24.html" class="recap-link">See the full recap <i class="fas fa-arrow-right"></i></a>
+    <div id="latest-event-card" data-aos="fade-up" data-aos-delay="120">
+      <!-- Populated by JS; fallback below if fetch fails -->
+      <div class="recap-card">
+        <img class="recap-image" src="images/hnwinners.jpg" alt="Hack Nights 2024 — AI for Humanity winners" loading="lazy">
+        <div class="recap-body">
+          <span class="recap-eyebrow">Hack Nights 2024</span>
+          <h3>AI for Humanity</h3>
+          <p>Teams tackled real-world challenges using generative AI across healthcare, education, and civic tech. Over 14 participants built working prototypes in a single evening, with judges awarding prizes for creativity, impact, and technical execution.</p>
+          <a href="hacknights24.html" class="recap-link">See the full recap <i class="fas fa-arrow-right"></i></a>
+        </div>
       </div>
     </div>
   </div>
@@ -1322,11 +1388,22 @@
         } catch { return 'Upcoming'; }
       }
 
+      function formatDateLong(dateStr) {
+        if (!dateStr) return '';
+        try {
+          const d = new Date(dateStr);
+          if (isNaN(d.getTime())) return '';
+          return d.toLocaleDateString(undefined, {
+            month: 'long', day: 'numeric', year: 'numeric'
+          });
+        } catch { return ''; }
+      }
+
       async function loadHomepageEvents() {
         const container = document.getElementById('homepage-events');
-        if (!container) return;
-
+        const latestCard = document.getElementById('latest-event-card');
         let events = [];
+
         try {
           const res = await fetch(FEED_URL);
           if (!res.ok) throw new Error(res.status);
@@ -1336,31 +1413,60 @@
           events = [];
         }
 
-        // Filter to future events only
         const now = Date.now();
-        const upcoming = events
-          .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
-          .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
 
-        if (upcoming.length === 0) {
-          container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — check back soon!</p>';
-          return;
+        // ── Upcoming events grid ──
+        if (container) {
+          const upcoming = events
+            .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
+            .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+          if (upcoming.length === 0) {
+            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — check back soon!</p>';
+          } else {
+            container.innerHTML = upcoming.slice(0, 3).map(ev => {
+              const title = safeText(ev.title || 'Event');
+              const link = safeText(ev.link || '#');
+              const location = safeText(ev.location || '');
+              const desc = safeText((ev.description || '').substring(0, 140));
+              const date = safeText(formatDate(ev.startDate));
+              return `
+                <div class="event-card">
+                  <div class="event-date">${date}</div>
+                  <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
+                  ${location ? '<p class="event-location">📍 ' + location + '</p>' : ''}
+                  ${desc ? '<p class="event-desc">' + desc + (ev.description && ev.description.length > 140 ? '…' : '') + '</p>' : ''}
+                </div>`;
+            }).join('');
+          }
         }
 
-        container.innerHTML = upcoming.slice(0, 3).map(ev => {
-          const title = safeText(ev.title || 'Event');
-          const link = safeText(ev.link || '#');
-          const location = safeText(ev.location || '');
-          const desc = safeText((ev.description || '').substring(0, 140));
-          const date = safeText(formatDate(ev.startDate));
-          return `
-            <div class="event-card">
-              <div class="event-date">${date}</div>
-              <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
-              ${location ? '<p class="event-location">📍 ' + location + '</p>' : ''}
-              ${desc ? '<p class="event-desc">' + desc + (ev.description && ev.description.length > 140 ? '…' : '') + '</p>' : ''}
-            </div>`;
-        }).join('');
+        // ── Latest (most recent past) event recap ──
+        if (latestCard && events.length > 0) {
+          const past = events
+            .filter(e => e?.startDate && new Date(e.startDate).getTime() <= now)
+            .sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+          if (past.length > 0) {
+            const ev = past[0];
+            const title = safeText(ev.title || 'Recent Event');
+            const link = safeText(ev.link || '#');
+            const desc = safeText((ev.description || '').substring(0, 220));
+            const dateLong = safeText(formatDateLong(ev.startDate));
+
+            latestCard.innerHTML = `
+              <div class="recap-card">
+                <img class="recap-image" src="images/hnwinners.jpg" alt="${title}" loading="lazy">
+                <div class="recap-body">
+                  <span class="recap-eyebrow">${dateLong}</span>
+                  <h3>${title}</h3>
+                  <p>${desc}${ev.description && ev.description.length > 220 ? '…' : ''}</p>
+                  <a href="${link}" target="_blank" rel="noopener noreferrer" class="recap-link">View on Meetup <i class="fas fa-arrow-right"></i></a>
+                </div>
+              </div>`;
+          }
+          // If no past events, the hardcoded fallback stays
+        }
       }
 
       if (document.readyState === 'loading') {
