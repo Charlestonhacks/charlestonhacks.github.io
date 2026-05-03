@@ -22,6 +22,38 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
   <link rel="stylesheet" href="styles.css">
 
+  <style>
+    /* Neural canvas background */
+    #hero-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Event countdown banner */
+    #event-countdown-banner {
+      display: none;
+      background: linear-gradient(90deg, rgba(0,30,40,0.97) 0%, rgba(0,12,20,0.99) 100%);
+      border-bottom: 1px solid rgba(0,224,255,0.25);
+      backdrop-filter: blur(6px);
+      padding: 7px 16px;
+      text-align: center;
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.62rem, 2vw, 0.75rem);
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #event-countdown-banner a { color: #00e0ff; text-decoration: none; }
+    #event-countdown-banner a:hover { text-decoration: underline; }
+    #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
+    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
+  </style>
+
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
   <script>
@@ -418,6 +450,11 @@
 </head>
 <body>
 
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+
+  <!-- Event countdown banner -->
+  <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
+
   <!-- Nav -->
   <nav class="top-nav">
     <a href="/" class="logo-link" aria-label="CharlestonHacks home">
@@ -446,19 +483,19 @@
   <!-- Stats -->
   <div class="stats-bar" role="list">
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="0">
-      <span class="stat-num">10+</span>
+      <span class="stat-num" data-count="10" data-suffix="+">10+</span>
       <span class="stat-label">Events Hosted</span>
     </div>
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="80">
-      <span class="stat-num">500+</span>
+      <span class="stat-num" data-count="500" data-suffix="+">500+</span>
       <span class="stat-label">Community Members</span>
     </div>
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="160">
-      <span class="stat-num">5+</span>
+      <span class="stat-num" data-count="5" data-suffix="+">5+</span>
       <span class="stat-label">Years Active</span>
     </div>
     <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="240">
-      <span class="stat-num">∞</span>
+      <span class="stat-num" data-count="inf" data-suffix="">∞</span>
       <span class="stat-label">Ideas Built</span>
     </div>
   </div>
@@ -595,8 +632,148 @@
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script>
     AOS.init({ duration: 500, easing: 'ease-out', once: true, offset: 60 });
+
+    // ── Neural canvas background ──
+    (function () {
+      const canvas = document.getElementById('hero-canvas');
+      const ctx = canvas.getContext('2d');
+      let W, H, nodes = [];
+
+      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function Node() {
+        this.x = Math.random() * W; this.y = Math.random() * H;
+        this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4;
+      }
+      Node.prototype.update = function () {
+        this.x += this.vx; this.y += this.vy;
+        if (this.x < 0 || this.x > W) this.vx *= -1;
+        if (this.y < 0 || this.y > H) this.vy *= -1;
+      };
+
+      for (let i = 0; i < 55; i++) nodes.push(new Node());
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (let i = 0; i < nodes.length; i++) {
+          nodes[i].update();
+          ctx.beginPath();
+          ctx.arc(nodes[i].x, nodes[i].y, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0,224,255,0.55)';
+          ctx.fill();
+          for (let j = i + 1; j < nodes.length; j++) {
+            const dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
+            const d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 130) {
+              ctx.strokeStyle = `rgba(0,224,255,${(1 - d / 130) * 0.18})`;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(nodes[i].x, nodes[i].y);
+              ctx.lineTo(nodes[j].x, nodes[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    // ── Counting stats ──
+    (function () {
+      const els = document.querySelectorAll('.stat-num[data-count]');
+      const observed = new Set();
+
+      function animateCount(el) {
+        const target = el.dataset.count;
+        const suffix = el.dataset.suffix || '';
+        if (target === 'inf') return;
+        const n = parseInt(target, 10);
+        const duration = 1400;
+        const start = performance.now();
+        const tick = (now) => {
+          const t = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - t, 3);
+          el.textContent = Math.round(ease * n) + suffix;
+          if (t < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting && !observed.has(e.target)) {
+            observed.add(e.target);
+            animateCount(e.target);
+          }
+        });
+      }, { threshold: 0.5 });
+
+      els.forEach(el => observer.observe(el));
+    })();
+
+    // ── VanillaTilt on pillar cards ──
+    VanillaTilt.init(document.querySelectorAll('.pillar'), {
+      max: 8, speed: 400, glare: true, 'max-glare': 0.08, scale: 1.02
+    });
+
+    // ── Live event countdown ──
+    (function () {
+      const FEED_URL = 'https://charlestonhacks-events-worker.deckerdb26354.workers.dev';
+      const banner = document.getElementById('event-countdown-banner');
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function renderCountdown(title, link, target) {
+        const tick = () => {
+          const diff = target - Date.now();
+          if (diff <= 0) { banner.style.display = 'none'; return; }
+          const days = Math.floor(diff / 86400000);
+          const hrs  = Math.floor((diff % 86400000) / 3600000);
+          const mins = Math.floor((diff % 3600000) / 60000);
+          const secs = Math.floor((diff % 60000) / 1000);
+          const timeStr = days > 0
+            ? `${days}d ${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`
+            : `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
+          const titleHtml = link
+            ? `<a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a>`
+            : title;
+          banner.innerHTML = `<span class="cd-label">NEXT EVENT</span>${titleHtml}&ensp;<span class="cd-time">${timeStr}</span>`;
+        };
+        banner.style.display = 'block';
+        tick();
+        setInterval(tick, 1000);
+      }
+
+      async function initCountdown() {
+        try {
+          const res = await fetch(FEED_URL);
+          if (!res.ok) return;
+          const data = await res.json();
+          const events = Array.isArray(data) ? data : (data?.events ?? []);
+          const now = Date.now();
+          const upcoming = events
+            .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
+            .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+          if (!upcoming.length) return;
+          const next = upcoming[0];
+          const title = String(next.title ?? 'Upcoming Event')
+            .replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+          renderCountdown(title, next.link ?? null, new Date(next.startDate).getTime());
+        } catch { /* silently skip */ }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCountdown);
+      } else {
+        initCountdown();
+      }
+    })();
   </script>
 </body>
 </html>
