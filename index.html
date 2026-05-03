@@ -338,6 +338,7 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 72px 20px;
+      scroll-margin-top: 64px;
     }
     .section-label {
       font-size: 0.68rem;
@@ -588,6 +589,9 @@
     .gallery-outer {
       overflow: hidden;
       position: relative;
+      z-index: 1;
+      isolation: isolate;
+      contain: paint;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
       mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
     }
@@ -645,22 +649,6 @@
        ══════════════════════════════════════════════════════════ */
     .hub-preview {
       text-align: center;
-    }
-    .hub-card-wrapper {
-      max-width: 420px;
-      margin: 0 auto 28px;
-      position: relative;
-    }
-    .hub-card-wrapper img {
-      width: 100%;
-      height: auto;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      transition: border-color var(--transition), box-shadow var(--transition);
-    }
-    .hub-card-wrapper:hover img {
-      border-color: var(--border-hover);
-      box-shadow: 0 8px 40px rgba(0,224,255,0.12);
     }
     .hub-features {
       display: flex;
@@ -834,9 +822,6 @@
       .gallery-item { flex: 0 0 260px; height: 180px; }
       .gallery-strip { animation-duration: 30s; }
       .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
-
-      /* Hub */
-      .hub-card-wrapper { max-width: 300px; }
 
       /* Channels */
       .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
@@ -1030,12 +1015,13 @@
   <!-- ════════════════════════════════════════════════════════
        8. COMMUNITY GALLERY
        ════════════════════════════════════════════════════════ -->
-  <div class="section" style="padding-bottom:12px;">
+  <div class="section" style="padding-bottom:0;">
     <div class="gallery-header">
+      <p class="section-label" data-aos="fade-up">Photos</p>
       <p class="section-title" data-aos="fade-up">Community in Action</p>
     </div>
   </div>
-  <div class="gallery-outer" data-aos="fade-up" data-aos-delay="120">
+  <div class="gallery-outer" style="padding-bottom:20px;" data-aos="fade-up" data-aos-delay="120">
     <div class="gallery-strip" role="list" aria-label="Community photo gallery">
       <div class="gallery-item" role="listitem">
         <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy"></picture>
@@ -1131,10 +1117,6 @@
       <p class="section-label">Go Deeper</p>
       <p class="section-title" style="text-align:center;">Explore the Hub</p>
       <p class="section-sub" style="text-align:center;max-width:520px;margin:0 auto 32px;">The interactive member portal with 9 portals to events, experiments, the Innovation Engine, community tools, and more.</p>
-
-      <a href="/hub.html" class="hub-card-wrapper" aria-label="Open the CharlestonHacks Member Hub">
-        <img src="icons/card.png" alt="CharlestonHacks interactive portal card with 9 clickable areas" loading="lazy">
-      </a>
 
       <div class="hub-features">
         <span class="hub-feature"><i class="fas fa-code"></i> Hack Nights</span>
