@@ -998,26 +998,18 @@
   <section class="hero" id="hero">
     <span class="hero-eyebrow">Charleston, SC</span>
     <h1>Charleston's Community for Builders, Hackers &amp; Makers</h1>
-    <p class="hero-sub">We host events, connect people, and build things together. Whether you're shipping your first project or your fiftieth, there's a seat for you here.</p>
+    <p class="hero-sub">Charleston has the talent. It needs more coordinated interaction. We connect the right people at the right time through events, tools, and repeated collisions.</p>
     <div class="hero-cta">
       <a href="#events-section" class="btn-primary">
         <i class="fas fa-calendar-alt"></i> Join the Next Event
       </a>
       <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="btn-outline">
-        <i class="fas fa-project-diagram"></i> See Who's Here
+        <i class="fas fa-project-diagram"></i> See Who's Building
       </a>
     </div>
     <div class="hero-scroll" aria-hidden="true">
       <span>SCROLL</span>
       <i class="fas fa-chevron-down"></i>
-    </div>
-
-    <!-- Phase 2: Intent selector -->
-    <div class="intent-bar" id="intent-bar">
-      <span class="intent-label">What are you here to do?</span>
-      <button class="intent-btn" data-intent="build"><i class="fas fa-hammer" style="margin-right:5px;"></i>Build something</button>
-      <button class="intent-btn" data-intent="meet"><i class="fas fa-handshake" style="margin-right:5px;"></i>Meet people</button>
-      <button class="intent-btn" data-intent="explore"><i class="fas fa-compass" style="margin-right:5px;"></i>Explore ideas</button>
     </div>
   </section>
 
@@ -1072,34 +1064,41 @@
        5. FIND YOUR NEXT CONNECTION (Bridge)
        ════════════════════════════════════════════════════════ -->
   <div class="section" id="bridge-section">
-    <p class="section-label" data-aos="fade-up">The Coordination Layer</p>
+    <p class="section-label" data-aos="fade-up">Start Here</p>
     <p class="section-title" data-aos="fade-up">Find Your Next Connection</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Three tools, one loop: discover who's here, find the right people, and show up where it matters.</p>
 
     <div class="bridge-grid" id="bridge-grid">
       <a class="bridge-card" id="bridge-network" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="0">
         <div class="bridge-icon cyan"><i class="fas fa-project-diagram"></i></div>
-        <h3>See the Network</h3>
-        <p id="bridge-network-copy">See who's building, what clusters are forming, and where overlap exists across Charleston.</p>
-        <span class="bridge-cta">View Live Network <i class="fas fa-arrow-right"></i></span>
+        <h3>See Who's Building</h3>
+        <p id="bridge-network-copy">See who's active, what projects are forming, and where skills overlap across Charleston.</p>
+        <span class="bridge-cta">See the network <i class="fas fa-arrow-right"></i></span>
       </a>
 
       <a class="bridge-card emphasized" id="bridge-match" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="80">
         <div class="bridge-icon gold"><i class="fas fa-bullseye"></i></div>
-        <h3>Find People You Should Meet</h3>
-        <p id="bridge-match-copy">Targeted collisions work better than random networking. Find people with aligned interests, complementary skills, or shared event intent.</p>
-        <span class="bridge-cta" style="color:var(--gold);">Find Matches <i class="fas fa-arrow-right"></i></span>
+        <h3>Find People to Meet</h3>
+        <p id="bridge-match-copy">Targeted collisions work better than random networking. Find people with aligned interests or complementary skills.</p>
+        <span class="bridge-cta" style="color:var(--gold);">Find people <i class="fas fa-arrow-right"></i></span>
       </a>
 
       <a class="bridge-card" id="bridge-event" href="https://nearify.org/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="160">
         <div class="bridge-icon green"><i class="fas fa-map-marker-alt"></i></div>
-        <h3>Show Up Where It Matters</h3>
+        <h3>Show Up Where They'll Be</h3>
         <p id="bridge-event-copy">Connections compound when they repeat. Join the next event where the right people are likely to be.</p>
-        <span class="bridge-cta" style="color:#00ff88;">Join an Event <i class="fas fa-arrow-right"></i></span>
+        <span class="bridge-cta" style="color:#00ff88;">Join an event <i class="fas fa-arrow-right"></i></span>
       </a>
     </div>
 
     <p class="bridge-thesis" data-aos="fade-up" data-aos-delay="200">Charleston doesn't need more random networking. It needs more precise, repeated, intentional connections.</p>
+
+    <!-- Intent selector (secondary, contextual) -->
+    <div class="intent-bar" id="intent-bar" data-aos="fade-up" data-aos-delay="240">
+      <span class="intent-label">I'm here to:</span>
+      <button class="intent-btn" data-intent="build"><i class="fas fa-hammer" style="margin-right:5px;"></i>Build</button>
+      <button class="intent-btn" data-intent="meet"><i class="fas fa-handshake" style="margin-right:5px;"></i>Meet people</button>
+      <button class="intent-btn" data-intent="explore"><i class="fas fa-compass" style="margin-right:5px;"></i>Browse</button>
+    </div>
   </div>
 
   <hr class="divider">
@@ -1472,7 +1471,7 @@
       // Intent-specific copy variants
       var copyVariants = {
         build: {
-          network: 'Explore active projects, find collaborators, and see what builders are shipping across Charleston.',
+          network: 'See what builders are shipping — active projects, collaborators, and hack night teams across Charleston.',
           match: 'Find people with complementary skills who are ready to build. Hack nights and projects need your kind of weird.',
           event: 'The best collaborations start in person. Show up at the next hack night or build session.'
         },
@@ -1483,8 +1482,8 @@
         },
         explore: {
           network: 'Browse experiments, demos, and ideas from across Charleston\'s builder community.',
-          match: 'Discover people working on things that interest you — from AI experiments to hardware hacks to open-source tools.',
-          event: 'Show & Tell nights and experimental sessions are the best way to see what\'s possible.'
+          match: 'Find people working on things that interest you — from AI experiments to hardware hacks to open-source tools.',
+          event: 'Show & Tell nights and experimental sessions are where you see what\'s possible.'
         }
       };
 
@@ -1554,14 +1553,6 @@
           var intent = btn.dataset.intent;
           var isActive = btn.classList.contains('active');
           applyIntent(isActive ? null : intent);
-
-          // Optionally scroll to bridge section
-          if (!isActive) {
-            var bridge = document.getElementById('bridge-section');
-            if (bridge) {
-              bridge.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }
         });
       });
 
