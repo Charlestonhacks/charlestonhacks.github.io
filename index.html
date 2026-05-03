@@ -338,6 +338,7 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 72px 20px;
+      scroll-margin-top: 64px;
     }
     .section-label {
       font-size: 0.68rem;
@@ -589,6 +590,8 @@
       overflow: hidden;
       position: relative;
       z-index: 1;
+      isolation: isolate;
+      contain: paint;
       -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
       mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
     }
@@ -1031,12 +1034,13 @@
   <!-- ════════════════════════════════════════════════════════
        8. COMMUNITY GALLERY
        ════════════════════════════════════════════════════════ -->
-  <div class="section" style="padding-bottom:12px;">
+  <div class="section" style="padding-bottom:0;">
     <div class="gallery-header">
+      <p class="section-label" data-aos="fade-up">Photos</p>
       <p class="section-title" data-aos="fade-up">Community in Action</p>
     </div>
   </div>
-  <div class="gallery-outer" data-aos="fade-up" data-aos-delay="120">
+  <div class="gallery-outer" style="padding-bottom:20px;" data-aos="fade-up" data-aos-delay="120">
     <div class="gallery-strip" role="list" aria-label="Community photo gallery">
       <div class="gallery-item" role="listitem">
         <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy"></picture>
