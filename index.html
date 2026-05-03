@@ -418,51 +418,54 @@
     .gallery-outer {
       overflow: hidden;
       position: relative;
+      -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+      mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
     }
-    .gallery-outer::before,
-    .gallery-outer::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 60px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    .gallery-outer::before { left: 0; background: linear-gradient(to right, #000, transparent); }
-    .gallery-outer::after  { right: 0; background: linear-gradient(to left, #000, transparent); }
 
     .gallery-strip {
       display: flex;
       gap: 14px;
       padding: 12px 0 20px;
-      width: max-content;
-      animation: galleryScroll 60s linear infinite;
+      will-change: transform;
+      animation: galleryScroll 50s linear infinite;
     }
+
+    @keyframes galleryScroll {
+      from { transform: translate3d(0, 0, 0); }
+      to   { transform: translate3d(-50%, 0, 0); }
+    }
+
+    /* Pause on hover (desktop) */
     .gallery-outer:hover .gallery-strip {
       animation-play-state: paused;
     }
 
-    @keyframes galleryScroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+    /* Pause on touch (set by JS) */
+    .gallery-strip.paused {
+      animation-play-state: paused;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .gallery-strip { animation: none; overflow-x: auto; }
+      .gallery-strip {
+        animation: none;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .gallery-outer {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
     }
     .gallery-item {
-      flex: 0 0 clamp(220px, 30vw, 320px);
-      height: clamp(160px, 22vw, 220px);
+      flex: 0 0 280px;
+      height: 200px;
       border-radius: 12px;
       overflow: hidden;
       position: relative;
       border: 1px solid rgba(255,255,255,0.08);
-      transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+      transition: border-color 0.3s;
     }
     .gallery-item:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.15);
       border-color: rgba(0,224,255,0.3);
     }
     .gallery-item img {
@@ -470,9 +473,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      transition: transform 0.4s;
     }
-    .gallery-item:hover img { transform: scale(1.06); }
     .gallery-caption {
       position: absolute;
       bottom: 0;
@@ -807,7 +808,7 @@
       .newsletter-box p { font-size: 0.9rem; }
 
       /* Gallery */
-      .gallery-item { flex: 0 0 260px; height: 180px; }
+      .gallery-item { flex: 0 0 240px; height: 170px; }
       .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
 
       /* Values */
@@ -1367,6 +1368,22 @@
         }
       });
     });
+
+    // ── Gallery: pause on touch for mobile ──
+    (function () {
+      const strip = document.querySelector('.gallery-strip');
+      if (!strip) return;
+      let touchTimer;
+      strip.addEventListener('touchstart', function () {
+        strip.classList.add('paused');
+        clearTimeout(touchTimer);
+      }, { passive: true });
+      strip.addEventListener('touchend', function () {
+        touchTimer = setTimeout(function () {
+          strip.classList.remove('paused');
+        }, 3000);
+      }, { passive: true });
+    })();
 
     // ── Load live events ──
     (function () {
