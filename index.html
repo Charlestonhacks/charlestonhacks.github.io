@@ -456,6 +456,12 @@
         mask-image: none;
       }
     }
+
+    @media (max-width: 600px) {
+      .gallery-strip {
+        animation-duration: 30s;
+      }
+    }
     .gallery-item {
       flex: 0 0 280px;
       height: 200px;
@@ -473,6 +479,16 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+    .gallery-item picture {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    .recap-card picture {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
     .gallery-caption {
       position: absolute;
@@ -880,84 +896,84 @@
   <div class="gallery-outer" data-aos="fade-up" data-aos-delay="120">
     <div class="gallery-strip" role="list" aria-label="Community photo gallery">
       <div class="gallery-item" role="listitem">
-        <img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy">
+        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Winners</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy">
+        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Teams Building</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy">
+        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy"></picture>
         <span class="gallery-caption">Show &amp; Tell #2</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy">
+        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Awards</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy">
+        <picture><source srcset="images/gallery/hnphotos-03.webp" type="image/webp"><img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Building</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy">
+        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Presentations</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy">
+        <picture><source srcset="images/gallery/st2mike.webp" type="image/webp"><img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy"></picture>
         <span class="gallery-caption">Show &amp; Tell — Demo</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy">
+        <picture><source srcset="images/gallery/goodpartyshot.webp" type="image/webp"><img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Celebration</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy">
+        <picture><source srcset="images/gallery/hnphotos-07.webp" type="image/webp"><img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
       </div>
       <div class="gallery-item" role="listitem">
-        <img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy">
+        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Teamwork</span>
       </div>
       <!-- Duplicate set for seamless loop -->
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/hnwinners.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Winners</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/goodworking.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Teams Building</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/st2group1.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Show &amp; Tell #2</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/goodaward.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Awards</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/hnphotos-03.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/hnphotos-03.webp" type="image/webp"><img src="images/hnphotos-03.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Building</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/dougexplaining.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Presentations</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/st2mike.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/st2mike.webp" type="image/webp"><img src="images/st2mike.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Show &amp; Tell — Demo</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/goodpartyshot.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/goodpartyshot.webp" type="image/webp"><img src="images/goodpartyshot.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Celebration</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/hnphotos-07.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/hnphotos-07.webp" type="image/webp"><img src="images/hnphotos-07.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
       </div>
       <div class="gallery-item" role="listitem" aria-hidden="true">
-        <img src="images/venkatandteam.jpg" alt="" loading="lazy">
+        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="" loading="lazy"></picture>
         <span class="gallery-caption">Summer Hack — Teamwork</span>
       </div>
     </div>
@@ -1026,7 +1042,10 @@
     <div id="latest-event-card" data-aos="fade-up" data-aos-delay="120">
       <!-- JS will overwrite if worker returns past events; otherwise this fallback shows -->
       <div class="recap-card">
-        <img class="recap-image" src="images/goodpartyshot.jpg" alt="CharlestonHacks Happy Hour at Revelry Brewery" loading="lazy">
+        <picture>
+          <source srcset="images/gallery/goodpartyshot-recap.webp" type="image/webp">
+          <img class="recap-image" src="images/goodpartyshot.jpg" alt="CharlestonHacks Happy Hour at Revelry Brewery" loading="lazy">
+        </picture>
         <div class="recap-body">
           <span class="recap-eyebrow">April 21, 2026</span>
           <h3>CharlestonHacks Happy Hour</h3>
