@@ -672,35 +672,6 @@
     .hub-feature i { color: var(--cyan); font-size: 0.8rem; }
 
     /* ══════════════════════════════════════════════════════════
-       CONNECT CHANNELS
-       ══════════════════════════════════════════════════════════ */
-    .channels-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 14px;
-    }
-    .channel-btn {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: #fff;
-      text-decoration: none;
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      transition: background var(--transition), border-color var(--transition), color var(--transition);
-    }
-    .channel-btn:hover {
-      background: rgba(0,224,255,0.06);
-      border-color: var(--border-hover);
-      color: var(--cyan);
-    }
-    .channel-btn i { font-size: 1.1rem; width: 20px; text-align: center; }
-
-    /* ══════════════════════════════════════════════════════════
        FAQ ACCORDION
        ══════════════════════════════════════════════════════════ */
     .faq-list { display: flex; flex-direction: column; gap: 10px; }
@@ -885,8 +856,9 @@
       letter-spacing: 0.08em;
       border-top: 1px solid var(--border);
     }
-    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a { color: var(--text-dim); text-decoration: none; transition: color var(--transition); }
     footer a:hover { color: var(--cyan); }
+    footer a i { font-size: 1.1rem; }
 
     /* ══════════════════════════════════════════════════════════
        RESPONSIVE
@@ -943,9 +915,6 @@
       .gallery-item { flex: 0 0 260px; height: 180px; }
       .gallery-strip { animation-duration: 30s; }
       .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
-
-      /* Channels */
-      .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 
       /* Bridge */
       .bridge-grid { grid-template-columns: 1fr; }
@@ -1104,136 +1073,7 @@
   <hr class="divider">
 
   <!-- ════════════════════════════════════════════════════════
-       6. WHAT IS CHARLESTONHACKS (moved down, after action)
-       ════════════════════════════════════════════════════════ -->
-  <div class="section" id="about-section">
-    <div class="about-grid" data-aos="fade-up">
-      <div class="about-text">
-        <p class="section-label">What is CharlestonHacks</p>
-        <h2>A home base for Charleston's tech community</h2>
-        <p>CharlestonHacks is an independent, community-led group that brings together coders, designers, entrepreneurs, and the simply curious. We run hack nights, show-and-tell demos, happy hours, and experimental builds — all free, all open to everyone.</p>
-        <p>No gatekeeping, no dues, no prerequisites. Just show up and make something.</p>
-      </div>
-      <div class="about-image">
-        <picture>
-          <source srcset="images/gallery/goodpartyshot.webp" type="image/webp">
-          <img src="images/goodpartyshot.jpg" alt="CharlestonHacks community gathering at a local event" loading="lazy">
-        </picture>
-      </div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- ════════════════════════════════════════════════════════
-       7. COMMUNITY GALLERY (compact)
-       ════════════════════════════════════════════════════════ -->
-  <div class="gallery-outer" style="padding:20px 0;" data-aos="fade-up">
-    <div class="gallery-strip" role="list" aria-label="Community photo gallery">
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Winners</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Teams Building</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy"></picture>
-        <span class="gallery-caption">Show &amp; Tell #2</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Awards</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/hnphotos-03.webp" type="image/webp"><img src="images/hnphotos-03.jpg" alt="Hack Nights participants working" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Building</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Presentations</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/st2mike.webp" type="image/webp"><img src="images/st2mike.jpg" alt="Mike presenting at Show and Tell" loading="lazy"></picture>
-        <span class="gallery-caption">Show &amp; Tell — Demo</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/goodpartyshot.webp" type="image/webp"><img src="images/goodpartyshot.jpg" alt="Community celebration" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Celebration</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/hnphotos-07.webp" type="image/webp"><img src="images/hnphotos-07.jpg" alt="Hack Nights collaboration" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
-      </div>
-      <div class="gallery-item" role="listitem">
-        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Teamwork</span>
-      </div>
-      <!-- Duplicate set for seamless loop -->
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Winners</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Teams Building</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Show &amp; Tell #2</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Awards</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/hnphotos-03.webp" type="image/webp"><img src="images/hnphotos-03.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Building</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Presentations</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/st2mike.webp" type="image/webp"><img src="images/st2mike.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Show &amp; Tell — Demo</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/goodpartyshot.webp" type="image/webp"><img src="images/goodpartyshot.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Celebration</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/hnphotos-07.webp" type="image/webp"><img src="images/hnphotos-07.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Hack Nights '24 — Collaboration</span>
-      </div>
-      <div class="gallery-item" role="listitem" aria-hidden="true">
-        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="" loading="lazy"></picture>
-        <span class="gallery-caption">Summer Hack — Teamwork</span>
-      </div>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- ════════════════════════════════════════════════════════
-       8. MEMBER HUB (simplified)
-       ════════════════════════════════════════════════════════ -->
-  <div class="section">
-    <div class="hub-preview" data-aos="fade-up">
-      <p class="section-label">Go Deeper</p>
-      <p class="section-title" style="text-align:center;">Member Hub</p>
-      <p class="section-sub" style="text-align:center;max-width:480px;margin:0 auto 28px;">Interactive portal with experiments, community tools, the Innovation Engine, and more. For members who want to go beyond events.</p>
-      <a href="/hub.html" class="btn-outline">
-        <i class="fas fa-th-large"></i> Enter the Hub
-      </a>
-    </div>
-  </div>
-
-  <hr class="divider">
-
-  <!-- ════════════════════════════════════════════════════════
-       9. FAQ (essential only)
+       6. FAQ (essential only)
        ════════════════════════════════════════════════════════ -->
   <div class="section" id="faq-section">
     <p class="section-title" data-aos="fade-up">Common Questions</p>
@@ -1272,7 +1112,104 @@
   <hr class="divider">
 
   <!-- ════════════════════════════════════════════════════════
-       10. NEWSLETTER (demoted, low-friction catch)
+       7. WHAT IS CHARLESTONHACKS
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="about-section">
+    <div class="about-grid" data-aos="fade-up">
+      <div class="about-text">
+        <p class="section-label">What is CharlestonHacks</p>
+        <h2>A home base for Charleston's tech community</h2>
+        <p>CharlestonHacks is an independent, community-led group that brings together coders, designers, entrepreneurs, and the simply curious. We run hack nights, show-and-tell demos, happy hours, and experimental builds — all free, all open to everyone.</p>
+        <p>No gatekeeping, no dues, no prerequisites. Just show up and make something.</p>
+      </div>
+      <div class="about-image">
+        <picture>
+          <source srcset="images/gallery/goodpartyshot.webp" type="image/webp">
+          <img src="images/goodpartyshot.jpg" alt="CharlestonHacks community gathering at a local event" loading="lazy">
+        </picture>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       8. COMMUNITY GALLERY (trimmed to 6)
+       ════════════════════════════════════════════════════════ -->
+  <div class="gallery-outer" style="padding:20px 0;" data-aos="fade-up">
+    <div class="gallery-strip" role="list" aria-label="Community photo gallery">
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="Hack Nights 2024 winners on stage" loading="lazy"></picture>
+        <span class="gallery-caption">Hack Nights '24 — Winners</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="Teams collaborating at Summer Hack" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Teams Building</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="Show and Tell community gathering" loading="lazy"></picture>
+        <span class="gallery-caption">Show &amp; Tell #2</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="Award ceremony at CharlestonHacks" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Awards</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="Doug presenting to the group" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Presentations</span>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="Venkat and team at Summer Hack" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Teamwork</span>
+      </div>
+      <!-- Duplicate set for seamless loop -->
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/hnwinners.webp" type="image/webp"><img src="images/hnwinners.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Hack Nights '24 — Winners</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/goodworking.webp" type="image/webp"><img src="images/goodworking.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Teams Building</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/st2group1.webp" type="image/webp"><img src="images/st2group1.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Show &amp; Tell #2</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/goodaward.webp" type="image/webp"><img src="images/goodaward.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Awards</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/dougexplaining.webp" type="image/webp"><img src="images/dougexplaining.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Presentations</span>
+      </div>
+      <div class="gallery-item" role="listitem" aria-hidden="true">
+        <picture><source srcset="images/gallery/venkatandteam.webp" type="image/webp"><img src="images/venkatandteam.jpg" alt="" loading="lazy"></picture>
+        <span class="gallery-caption">Summer Hack — Teamwork</span>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       9. MEMBER HUB
+       ════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="hub-preview" data-aos="fade-up">
+      <p class="section-label">Go Deeper</p>
+      <p class="section-title" style="text-align:center;">Member Hub</p>
+      <p class="section-sub" style="text-align:center;max-width:480px;margin:0 auto 28px;">Interactive portal with experiments, community tools, the Innovation Engine, and more. For members who want to go beyond events.</p>
+      <a href="/hub.html" class="btn-outline">
+        <i class="fas fa-th-large"></i> Enter the Hub
+      </a>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       10. NEWSLETTER (low-friction catch)
        ════════════════════════════════════════════════════════ -->
   <div class="section">
     <div class="newsletter-box" data-aos="fade-up">
@@ -1284,51 +1221,22 @@
     </div>
   </div>
 
-  <hr class="divider">
-
   <!-- ════════════════════════════════════════════════════════
-       11. CONNECT CHANNELS
-       ════════════════════════════════════════════════════════ -->
-  <div class="section">
-    <p class="section-label" data-aos="fade-up">Find Us</p>
-    <p class="section-title" data-aos="fade-up">Connect With Us</p>
-    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Find us wherever you hang out online.</p>
-
-    <div class="channels-grid" data-aos="fade-up" data-aos-delay="120">
-      <a class="channel-btn" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-meetup"></i> Meetup
-      </a>
-      <a class="channel-btn" href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-linkedin"></i> LinkedIn
-      </a>
-      <a class="channel-btn" href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-instagram"></i> Instagram
-      </a>
-      <a class="channel-btn" href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer">
-        <i class="fab fa-github"></i> GitHub
-      </a>
-      <a class="channel-btn" href="mailto:hello@charlestonhacks.com">
-        <i class="fas fa-envelope"></i> Email
-      </a>
-      <a class="channel-btn" href="https://github.com/sponsors/deckerd451" target="_blank" rel="noopener noreferrer">
-        <i class="fas fa-heart" style="color:#db61a2;"></i> Sponsor
-      </a>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════════════════════
-       12. FOOTER
+       11. FOOTER
        ════════════════════════════════════════════════════════ -->
   <footer>
+    <div style="display:flex;justify-content:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" aria-label="Meetup"><i class="fab fa-meetup"></i></a>
+      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      <a href="mailto:hello@charlestonhacks.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+      <a href="https://github.com/sponsors/deckerd451" target="_blank" rel="noopener noreferrer" aria-label="Sponsor"><i class="fas fa-heart" style="color:#db61a2;"></i></a>
+    </div>
     <p>© 2026 CharlestonHacks · Charleston, SC ·
       <a href="/">Home</a> ·
       <a href="/about.html">About</a> ·
-      <a href="/hub.html">Member Hub</a> ·
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Meetup</a> ·
-      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Instagram</a> ·
-      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer">LinkedIn</a> ·
-      <a href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer">GitHub</a> ·
-      <a href="mailto:hello@charlestonhacks.com">hello@charlestonhacks.com</a>
+      <a href="/hub.html">Member Hub</a>
     </p>
   </footer>
 
