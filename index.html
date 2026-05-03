@@ -71,7 +71,7 @@
       background: rgba(0,224,255,0.1);
       border: 1px solid rgba(0,224,255,0.3);
       color: #00e0ff;
-      font-size: 0.65rem;
+      font-size: 0.75rem;
       letter-spacing: 0.18em;
       padding: 5px 14px;
       border-radius: 999px;
@@ -172,7 +172,7 @@
       display: block;
     }
     .stat-label {
-      font-size: 0.65rem;
+      font-size: 0.72rem;
       color: rgba(255,255,255,0.45);
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -193,7 +193,7 @@
     }
     .section-sub {
       color: rgba(255,255,255,0.5);
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-family: Arial, sans-serif;
       margin-bottom: 36px;
       line-height: 1.6;
@@ -301,21 +301,21 @@
       display: block;
     }
     .pillar h4 {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       margin-bottom: 8px;
     }
     .pillar p {
       color: rgba(255,255,255,0.45);
-      font-size: 0.75rem;
+      font-size: 0.85rem;
       font-family: Arial, sans-serif;
-      line-height: 1.5;
+      line-height: 1.6;
       flex: 1;
     }
     .pillar .pillar-cta {
       margin-top: 12px;
-      font-size: 0.7rem;
+      font-size: 0.78rem;
       color: #00e0ff;
       letter-spacing: 0.06em;
       opacity: 0;
@@ -391,9 +391,24 @@
     footer a:hover { color: #00e0ff; }
 
     @media (max-width: 600px) {
+      .top-nav a:not(.logo-link) { font-size: 0.8rem; }
+      .hero { padding: 48px 16px 36px; }
+      .hero-eyebrow { font-size: 0.72rem; }
       .stat-item { padding: 18px 20px; }
-      .section { padding: 48px 16px; }
+      .stat-label { font-size: 0.7rem; }
+      .section { padding: 40px 16px; }
+      .section-title { font-size: clamp(1.3rem, 5vw, 1.7rem); }
+      .section-sub { font-size: 0.92rem; }
+      .pillars-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+      .pillar { padding: 18px 14px; }
+      .pillar h4 { font-size: 0.88rem; }
+      .pillar p { font-size: 0.82rem; }
+      .pillar .pillar-cta { opacity: 1; font-size: 0.76rem; }
+      .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+      .channel-btn { font-size: 0.82rem; }
       .newsletter-box { padding: 28px 18px; }
+      .newsletter-box p { font-size: 0.9rem; }
+      footer { font-size: 0.72rem; }
     }
   </style>
 </head>
@@ -467,12 +482,6 @@
         <h4>Experiments</h4>
         <p>Open sandbox sessions for new tech, demos, and building weird things together.</p>
         <span class="pillar-cta">Explore Sandbox →</span>
-      </a>
-      <a class="pillar" href="subscribe.html">
-        <i class="fas fa-paper-plane"></i>
-        <h4>Join the Mailing List</h4>
-        <p>Stay in the loop on upcoming hackathons, workshops, and community news. Low-volume, high-signal.</p>
-        <span class="pillar-cta">Subscribe →</span>
       </a>
       <a class="pillar" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">
         <i class="fas fa-calendar-check"></i>
