@@ -754,6 +754,127 @@
     .faq-answer a:hover { text-decoration: underline; }
 
     /* ══════════════════════════════════════════════════════════
+       INTENT SELECTOR (Phase 2)
+       ══════════════════════════════════════════════════════════ */
+    .intent-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .intent-label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .intent-btn {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.7);
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .intent-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(0,224,255,0.06);
+    }
+    .intent-btn.active {
+      border-color: var(--cyan);
+      color: #000;
+      background: var(--cyan);
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       BRIDGE SECTION — Find Your Next Connection (Phase 1)
+       ══════════════════════════════════════════════════════════ */
+    .bridge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .bridge-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    }
+    .bridge-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
+    }
+    .bridge-card.emphasized {
+      border-color: rgba(0,224,255,0.25);
+      background: linear-gradient(180deg, rgba(0,224,255,0.04) 0%, var(--bg-card) 100%);
+    }
+    .bridge-card.emphasized:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 8px 40px rgba(0,224,255,0.15);
+    }
+    .bridge-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .bridge-icon.cyan { background: var(--cyan-glow); color: var(--cyan); }
+    .bridge-icon.gold { background: rgba(201,163,94,0.12); color: var(--gold); }
+    .bridge-icon.green { background: rgba(0,255,136,0.1); color: #00ff88; }
+    .bridge-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .bridge-card p {
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      font-family: var(--font-body);
+      flex: 1;
+    }
+    .bridge-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      transition: gap var(--transition);
+    }
+    .bridge-card:hover .bridge-cta { gap: 10px; }
+    .bridge-thesis {
+      text-align: center;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.84rem;
+      font-style: italic;
+      line-height: 1.65;
+      margin-top: 32px;
+      max-width: 640px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ══════════════════════════════════════════════════════════
        FOOTER
        ══════════════════════════════════════════════════════════ */
     footer {
@@ -826,6 +947,11 @@
       /* Channels */
       .channels-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
 
+      /* Bridge */
+      .bridge-grid { grid-template-columns: 1fr; }
+      .intent-bar { gap: 8px; }
+      .intent-btn { font-size: 0.7rem; padding: 7px 14px; }
+
       /* Newsletter */
       .newsletter-box { padding: 28px 16px; }
 
@@ -884,6 +1010,14 @@
     <div class="hero-scroll" aria-hidden="true">
       <span>SCROLL</span>
       <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <!-- Phase 2: Intent selector -->
+    <div class="intent-bar" id="intent-bar">
+      <span class="intent-label">What are you here to do?</span>
+      <button class="intent-btn" data-intent="build"><i class="fas fa-hammer" style="margin-right:5px;"></i>Build something</button>
+      <button class="intent-btn" data-intent="meet"><i class="fas fa-handshake" style="margin-right:5px;"></i>Meet people</button>
+      <button class="intent-btn" data-intent="explore"><i class="fas fa-compass" style="margin-right:5px;"></i>Explore ideas</button>
     </div>
   </section>
 
@@ -952,6 +1086,42 @@
         <i class="fab fa-meetup"></i> View All on Meetup
       </a>
     </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ════════════════════════════════════════════════════════
+       5b. FIND YOUR NEXT CONNECTION (Bridge — Phase 1)
+       ════════════════════════════════════════════════════════ -->
+  <div class="section" id="bridge-section">
+    <p class="section-label" data-aos="fade-up">The Coordination Layer</p>
+    <p class="section-title" data-aos="fade-up">Find Your Next Connection</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Three tools, one loop: discover who's here, find the right people, and show up where it matters.</p>
+
+    <div class="bridge-grid" id="bridge-grid">
+      <a class="bridge-card" id="bridge-network" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="0">
+        <div class="bridge-icon cyan"><i class="fas fa-project-diagram"></i></div>
+        <h3>See the Network</h3>
+        <p id="bridge-network-copy">See who's building, what clusters are forming, and where overlap exists across Charleston.</p>
+        <span class="bridge-cta">View Live Network <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <a class="bridge-card emphasized" id="bridge-match" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="80">
+        <div class="bridge-icon gold"><i class="fas fa-bullseye"></i></div>
+        <h3>Find People You Should Meet</h3>
+        <p id="bridge-match-copy">Targeted collisions work better than random networking. Find people with aligned interests, complementary skills, or shared event intent.</p>
+        <span class="bridge-cta" style="color:var(--gold);">Find Matches <i class="fas fa-arrow-right"></i></span>
+      </a>
+
+      <a class="bridge-card" id="bridge-event" href="https://nearify.org/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="160">
+        <div class="bridge-icon green"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Show Up Where It Matters</h3>
+        <p id="bridge-event-copy">Connections compound when they repeat. Join the next event where the right people are likely to be.</p>
+        <span class="bridge-cta" style="color:#00ff88;">Join an Event <i class="fas fa-arrow-right"></i></span>
+      </a>
+    </div>
+
+    <p class="bridge-thesis" data-aos="fade-up" data-aos-delay="200">Charleston doesn't need more random networking. It needs more precise, repeated, intentional connections.</p>
   </div>
 
   <hr class="divider">
@@ -1367,6 +1537,122 @@
         }
       });
     });
+
+    // ── Phase 2 & 3: Intent selection + context-aware handoff ──
+    (function () {
+      var STORAGE_KEY = 'charlestonhacks_intent';
+      var buttons = document.querySelectorAll('.intent-btn');
+      var bridgeNetwork = document.getElementById('bridge-network');
+      var bridgeMatch = document.getElementById('bridge-match');
+      var bridgeEvent = document.getElementById('bridge-event');
+      var bridgeNetworkCopy = document.getElementById('bridge-network-copy');
+      var bridgeMatchCopy = document.getElementById('bridge-match-copy');
+      var bridgeEventCopy = document.getElementById('bridge-event-copy');
+
+      // Intent-specific copy variants
+      var copyVariants = {
+        build: {
+          network: 'Explore active projects, find collaborators, and see what builders are shipping across Charleston.',
+          match: 'Find people with complementary skills who are ready to build. Hack nights and projects need your kind of weird.',
+          event: 'The best collaborations start in person. Show up at the next hack night or build session.'
+        },
+        meet: {
+          network: 'See who\'s active in the community — their interests, skills, and what events they attend.',
+          match: 'Targeted collisions work better than random networking. Find people with aligned interests and shared event intent.',
+          event: 'Connections compound when they repeat. Join the next event where the right people are likely to be.'
+        },
+        explore: {
+          network: 'Browse experiments, demos, and ideas from across Charleston\'s builder community.',
+          match: 'Discover people working on things that interest you — from AI experiments to hardware hacks to open-source tools.',
+          event: 'Show & Tell nights and experimental sessions are the best way to see what\'s possible.'
+        }
+      };
+
+      // Emphasis mapping: which bridge card gets visually emphasized per intent
+      var emphasisMap = {
+        build: 'bridge-network',
+        meet: 'bridge-match',
+        explore: 'bridge-network'
+      };
+
+      function getIntentParam() {
+        return function (baseUrl, intent) {
+          if (!intent) return baseUrl;
+          var sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
+          return baseUrl + sep + 'intent=' + encodeURIComponent(intent);
+        };
+      }
+      var appendIntent = getIntentParam();
+
+      function applyIntent(intent) {
+        // Update button states
+        buttons.forEach(function (btn) {
+          btn.classList.toggle('active', btn.dataset.intent === intent);
+        });
+
+        // Update bridge card copy
+        if (intent && copyVariants[intent]) {
+          var v = copyVariants[intent];
+          if (bridgeNetworkCopy) bridgeNetworkCopy.textContent = v.network;
+          if (bridgeMatchCopy) bridgeMatchCopy.textContent = v.match;
+          if (bridgeEventCopy) bridgeEventCopy.textContent = v.event;
+        }
+
+        // Update emphasis
+        var cards = document.querySelectorAll('.bridge-card');
+        cards.forEach(function (card) { card.classList.remove('emphasized'); });
+        if (intent && emphasisMap[intent]) {
+          var target = document.getElementById(emphasisMap[intent]);
+          if (target) target.classList.add('emphasized');
+        } else if (bridgeMatch) {
+          bridgeMatch.classList.add('emphasized'); // default
+        }
+
+        // Phase 3: Update handoff links with intent parameter
+        var ieBase = 'https://deckerd451.github.io/innovation-engine/';
+        var nearifyBase = 'https://nearify.org/';
+
+        if (bridgeNetwork) bridgeNetwork.href = appendIntent(ieBase, intent);
+        if (bridgeMatch) bridgeMatch.href = appendIntent(ieBase, intent);
+        if (bridgeEvent) bridgeEvent.href = appendIntent(nearifyBase, intent);
+
+        // Also update nav and involve-section links
+        document.querySelectorAll('a[href*="innovation-engine"]').forEach(function (a) {
+          if (!a.closest('#bridge-grid')) return; // only bridge links
+          a.href = appendIntent(ieBase, intent);
+        });
+
+        // Store intent
+        if (intent) {
+          try { localStorage.setItem(STORAGE_KEY, intent); } catch (e) {}
+        }
+      }
+
+      // Button click handlers
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var intent = btn.dataset.intent;
+          var isActive = btn.classList.contains('active');
+          applyIntent(isActive ? null : intent);
+
+          // Optionally scroll to bridge section
+          if (!isActive) {
+            var bridge = document.getElementById('bridge-section');
+            if (bridge) {
+              bridge.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }
+        });
+      });
+
+      // Restore saved intent on load
+      try {
+        var saved = localStorage.getItem(STORAGE_KEY);
+        if (saved && copyVariants[saved]) {
+          applyIntent(saved);
+        }
+      } catch (e) {}
+    })();
 
     // ── Gallery: pause on touch for mobile ──
     (function () {
