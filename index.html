@@ -14,8 +14,12 @@
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
   <link rel="stylesheet" href="styles.css">
 
   <!-- Google Analytics -->
@@ -34,7 +38,7 @@
       min-height: 100vh;
       background: #000;
       color: #fff;
-      font-family: 'Orbitron', 'Britannic Bold', Arial, sans-serif;
+      font-family: 'Orbitron', Arial, sans-serif;
     }
 
     /* ── Nav ── */
@@ -95,7 +99,7 @@
       color: rgba(255,255,255,0.6);
       font-size: clamp(0.85rem, 2.2vw, 1rem);
       line-height: 1.7;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
     }
     .hero-cta {
       display: flex;
@@ -194,7 +198,7 @@
     .section-sub {
       color: rgba(255,255,255,0.5);
       font-size: 0.9rem;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       margin-bottom: 36px;
       line-height: 1.6;
     }
@@ -254,7 +258,7 @@
       color: rgba(255,255,255,0.5);
       font-size: 0.82rem;
       line-height: 1.6;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       flex: 1;
     }
     .action-card .card-link {
@@ -309,7 +313,7 @@
     .pillar p {
       color: rgba(255,255,255,0.45);
       font-size: 0.85rem;
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       line-height: 1.6;
       flex: 1;
     }
@@ -366,7 +370,7 @@
     }
     .newsletter-box p {
       color: rgba(255,255,255,0.55);
-      font-family: Arial, sans-serif;
+      font-family: 'Inter', Arial, sans-serif;
       font-size: 0.88rem;
       margin-bottom: 24px;
       line-height: 1.6;
@@ -441,19 +445,19 @@
 
   <!-- Stats -->
   <div class="stats-bar" role="list">
-    <div class="stat-item" role="listitem">
+    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="0">
       <span class="stat-num">10+</span>
       <span class="stat-label">Events Hosted</span>
     </div>
-    <div class="stat-item" role="listitem">
+    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="80">
       <span class="stat-num">500+</span>
       <span class="stat-label">Community Members</span>
     </div>
-    <div class="stat-item" role="listitem">
+    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="160">
       <span class="stat-num">5+</span>
       <span class="stat-label">Years Active</span>
     </div>
-    <div class="stat-item" role="listitem">
+    <div class="stat-item" role="listitem" data-aos="fade-up" data-aos-delay="240">
       <span class="stat-num">∞</span>
       <span class="stat-label">Ideas Built</span>
     </div>
@@ -461,53 +465,53 @@
 
   <!-- Primary Actions -->
   <div class="section">
-    <p class="section-title">Get Involved</p>
-    <p class="section-sub">Pick whichever fits you right now.</p>
+    <p class="section-title" data-aos="fade-up">Get Involved</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Pick whichever fits you right now.</p>
 
     <div class="pillars-grid">
-      <a class="pillar" href="https://charlestonhacks.com/Poster.html">
+      <a class="pillar" href="https://charlestonhacks.com/Poster.html" data-aos="fade-up" data-aos-delay="0">
         <i class="fas fa-code"></i>
         <h4>Previous Events</h4>
         <p>48-hour sprints where ideas become real products — all skill levels welcome.</p>
         <span class="pillar-cta">View Previous Events →</span>
       </a>
-      <a class="pillar" href="showandtell2.html">
+      <a class="pillar" href="showandtell2.html" data-aos="fade-up" data-aos-delay="60">
         <i class="fas fa-lightbulb"></i>
         <h4>Show &amp; Tell</h4>
         <p>Present what you've been building to an engaged, supportive crowd.</p>
         <span class="pillar-cta">See Highlights →</span>
       </a>
-      <a class="pillar" href="experimental.html">
+      <a class="pillar" href="experimental.html" data-aos="fade-up" data-aos-delay="120">
         <i class="fas fa-flask"></i>
         <h4>Experiments</h4>
         <p>Open sandbox sessions for new tech, demos, and building weird things together.</p>
         <span class="pillar-cta">Explore Sandbox →</span>
       </a>
-      <a class="pillar" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">
+      <a class="pillar" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="180">
         <i class="fas fa-calendar-check"></i>
         <h4>Find Upcoming Events</h4>
         <p>Hackathons, show &amp; tells, lightning talks, and more. See what's happening on Meetup.com.</p>
         <span class="pillar-cta">View Events →</span>
       </a>
-      <a class="pillar" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">
+      <a class="pillar" href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="240">
         <i class="fas fa-people-arrows"></i>
         <h4>Networking</h4>
         <p>Connect directly with members, discover projects, and explore the community network.</p>
         <span class="pillar-cta">Open Dashboard →</span>
       </a>
-      <a class="pillar" href="/hub.html">
+      <a class="pillar" href="/hub.html" data-aos="fade-up" data-aos-delay="300">
         <i class="fas fa-th-large"></i>
         <h4>Member Hub</h4>
         <p>Returning member? Jump straight into the interactive portal for tools, channels, and experiments.</p>
         <span class="pillar-cta">Explore the Hub →</span>
       </a>
-      <a class="pillar" href="donations.html">
+      <a class="pillar" href="donations.html" data-aos="fade-up" data-aos-delay="360">
         <i class="fas fa-heart"></i>
         <h4>Support the Community</h4>
         <p>Help us keep events free and accessible. Donate, sponsor, or become a GitHub supporter.</p>
         <span class="pillar-cta">Support Us →</span>
       </a>
-      <a class="pillar" href="bbs.html">
+      <a class="pillar" href="bbs.html" data-aos="fade-up" data-aos-delay="420">
         <i class="fas fa-terminal"></i>
         <h4>Community BBS</h4>
         <p>Real-time community chat with a retro terminal vibe. Members only area.</p>
@@ -520,17 +524,17 @@
 
   <!-- Who We Are -->
   <div class="section">
-    <p class="section-title">Who We Are</p>
-    <p class="section-sub">We make the invisible networks of Charleston's tech scene visible.</p>
+    <p class="section-title" data-aos="fade-up">Who We Are</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">We make the invisible networks of Charleston's tech scene visible.</p>
 
     <div class="pillars-grid">
-      <a class="pillar" href="https://charlestonhacks.mailchimpsites.com/" target="_blank" rel="noopener noreferrer">
+      <a class="pillar" href="https://charlestonhacks.mailchimpsites.com/" target="_blank" rel="noopener noreferrer" data-aos="fade-up" data-aos-delay="120">
         <i class="fas fa-users"></i>
         <h4>Meet the Community</h4>
         <p>Meet founders, engineers, designers, and makers living and working in Charleston.</p>
         <span class="pillar-cta">Join the Community →</span>
       </a>
-      <a class="pillar" href="https://charlestonhacks.com/cardmatchgame.html">
+      <a class="pillar" href="https://charlestonhacks.com/cardmatchgame.html" data-aos="fade-up" data-aos-delay="180">
         <i class="fas fa-address-card"></i>
         <h4>About Us</h4>
         <p>Learn who we are through an interactive experience — meet the faces behind CharlestonHacks.</p>
@@ -543,26 +547,26 @@
 
   <!-- Connect channels -->
   <div class="section">
-    <p class="section-title">Connect With Us</p>
-    <p class="section-sub">Find the channel that works for you.</p>
+    <p class="section-title" data-aos="fade-up">Connect With Us</p>
+    <p class="section-sub" data-aos="fade-up" data-aos-delay="60">Find the channel that works for you.</p>
 
     <div class="channels-grid">
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="channel-btn">
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="channel-btn" data-aos="fade-up" data-aos-delay="0">
         <i class="fas fa-users" style="color:#f65858;"></i> Meetup
       </a>
-      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="channel-btn">
+      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="channel-btn" data-aos="fade-up" data-aos-delay="60">
         <i class="fab fa-instagram" style="color:#e1306c;"></i> Instagram
       </a>
-      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn">
+      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn" data-aos="fade-up" data-aos-delay="120">
         <i class="fab fa-linkedin" style="color:#0a66c2;"></i> LinkedIn
       </a>
-      <a href="https://www.facebook.com/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn">
+      <a href="https://www.facebook.com/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn" data-aos="fade-up" data-aos-delay="180">
         <i class="fab fa-facebook" style="color:#1877f2;"></i> Facebook
       </a>
-      <a href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn">
+      <a href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer" class="channel-btn" data-aos="fade-up" data-aos-delay="240">
         <i class="fab fa-github" style="color:#ccc;"></i> GitHub
       </a>
-      <a href="mailto:hello@charlestonhacks.com" class="channel-btn">
+      <a href="mailto:hello@charlestonhacks.com" class="channel-btn" data-aos="fade-up" data-aos-delay="300">
         <i class="fas fa-envelope" style="color:#c9a35e;"></i> Email Us
       </a>
     </div>
@@ -572,7 +576,7 @@
 
   <!-- Newsletter CTA -->
   <div class="section" style="padding-top:48px;padding-bottom:72px;">
-    <div class="newsletter-box">
+    <div class="newsletter-box" data-aos="fade-up">
       <h2>Stay in the Loop</h2>
       <p>Get notified about hackathons, show &amp; tells, and local tech events.<br>No spam — just the good stuff.</p>
       <a href="subscribe.html" class="btn-primary">
@@ -590,5 +594,9 @@
     </p>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script>
+    AOS.init({ duration: 500, easing: 'ease-out', once: true, offset: 60 });
+  </script>
 </body>
 </html>
