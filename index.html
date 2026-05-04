@@ -190,60 +190,49 @@
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 80px 20px 60px;
+      padding: 100px 20px 80px;
       position: relative;
       z-index: 1;
     }
     .hero-eyebrow {
       display: inline-block;
-      background: rgba(0,224,255,0.08);
-      border: 1px solid rgba(0,224,255,0.25);
-      color: var(--cyan);
-      font-size: 0.7rem;
-      letter-spacing: 0.2em;
-      padding: 6px 16px;
-      border-radius: 999px;
-      margin-bottom: 24px;
+      color: var(--text-dim);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      margin-bottom: 32px;
       text-transform: uppercase;
     }
     .hero h1 {
-      font-size: clamp(2.2rem, 7vw, 4rem);
+      font-size: clamp(2.4rem, 7vw, 4.2rem);
       font-weight: 900;
-      line-height: 1.08;
+      line-height: 1.1;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #fff 30%, var(--cyan) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 20px;
-      max-width: 700px;
+      color: #fff;
+      margin-bottom: 24px;
+      max-width: 680px;
     }
     .hero-sub {
-      max-width: 540px;
+      max-width: 440px;
       color: var(--text-muted);
-      font-size: clamp(0.9rem, 2.2vw, 1.05rem);
-      line-height: 1.7;
+      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      line-height: 1.6;
       font-family: var(--font-body);
-      margin-bottom: 36px;
+      margin-bottom: 44px;
     }
     .hero-cta {
       display: flex;
-      gap: 14px;
+      gap: 16px;
       flex-wrap: wrap;
       justify-content: center;
     }
     .hero-scroll {
       position: absolute;
-      bottom: 28px;
+      bottom: 32px;
       left: 50%;
       transform: translateX(-50%);
       color: var(--text-dim);
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
+      font-size: 0.9rem;
+      opacity: 0.4;
       animation: gentleBounce 2.5s ease-in-out infinite;
     }
     @keyframes gentleBounce {
@@ -299,39 +288,6 @@
     }
 
     /* ══════════════════════════════════════════════════════════
-       STATS BAR
-       ══════════════════════════════════════════════════════════ */
-    .stats-bar {
-      display: flex;
-      justify-content: center;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: rgba(255,255,255,0.015);
-      flex-wrap: wrap;
-    }
-    .stat-item {
-      padding: 24px 40px;
-      text-align: center;
-      border-right: 1px solid var(--border);
-      flex: 1;
-      min-width: 140px;
-    }
-    .stat-item:last-child { border-right: none; }
-    .stat-num {
-      font-size: clamp(1.6rem, 4vw, 2.4rem);
-      font-weight: 900;
-      color: var(--cyan);
-      display: block;
-    }
-    .stat-label {
-      font-size: 0.7rem;
-      color: var(--text-dim);
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-top: 4px;
-    }
-
-    /* ══════════════════════════════════════════════════════════
        SECTION WRAPPER
        ══════════════════════════════════════════════════════════ */
     .section {
@@ -370,40 +326,6 @@
     }
 
     /* ══════════════════════════════════════════════════════════
-       WHAT IS CHARLESTONHACKS
-       ══════════════════════════════════════════════════════════ */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      align-items: center;
-    }
-    .about-text h2 {
-      font-size: clamp(1.3rem, 3vw, 1.8rem);
-      font-weight: 800;
-      margin-bottom: 16px;
-      letter-spacing: 0.03em;
-    }
-    .about-text p {
-      color: var(--text-muted);
-      font-family: var(--font-body);
-      font-size: 0.92rem;
-      line-height: 1.7;
-      margin-bottom: 12px;
-    }
-    .about-image {
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .about-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    /* ══════════════════════════════════════════════════════════
        EVENTS
        ══════════════════════════════════════════════════════════ */
     .events-grid {
@@ -424,14 +346,15 @@
       content: '';
       position: absolute;
       top: 0; left: 0;
-      width: 4px; height: 100%;
-      background: linear-gradient(180deg, var(--cyan), var(--gold));
+      width: 3px; height: 100%;
+      background: var(--cyan);
       border-radius: 2px 0 0 2px;
+      opacity: 0.5;
     }
     .event-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
+      border-color: rgba(0,224,255,0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,224,255,0.06);
     }
     .event-date {
       font-size: 0.72rem;
@@ -458,12 +381,6 @@
       margin-bottom: 8px;
       font-family: var(--font-body);
     }
-    .event-desc {
-      font-size: 0.82rem;
-      color: var(--text-dim);
-      line-height: 1.6;
-      font-family: var(--font-body);
-    }
     .events-empty {
       grid-column: 1 / -1;
       text-align: center;
@@ -471,10 +388,6 @@
       padding: 32px 16px;
       font-size: 0.88rem;
       font-family: var(--font-body);
-    }
-    .events-cta {
-      text-align: center;
-      margin-top: 28px;
     }
 
     /* Skeleton loading */
@@ -491,257 +404,6 @@
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-
-    /* ══════════════════════════════════════════════════════════
-       GET INVOLVED — 4 ACTION CARDS
-       ══════════════════════════════════════════════════════════ */
-    .involve-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-    }
-    .involve-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      text-decoration: none;
-      color: inherit;
-      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
-    }
-    .involve-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
-    }
-    .involve-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      background: var(--cyan-glow);
-      color: var(--cyan);
-    }
-    .involve-icon.gold {
-      background: rgba(201,163,94,0.12);
-      color: var(--gold);
-    }
-    .involve-icon.green {
-      background: rgba(0,255,136,0.1);
-      color: #00ff88;
-    }
-    .involve-card h3 {
-      font-size: 1rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-    .involve-card p {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      line-height: 1.6;
-      font-family: var(--font-body);
-      flex: 1;
-    }
-    .involve-card .card-arrow {
-      font-size: 0.75rem;
-      color: var(--cyan);
-      letter-spacing: 0.06em;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: gap var(--transition);
-    }
-    .involve-card:hover .card-arrow { gap: 10px; }
-    .involve-card.gold .card-arrow { color: var(--gold); }
-    .involve-card.green .card-arrow { color: #00ff88; }
-
-    /* ══════════════════════════════════════════════════════════
-       NEWSLETTER CTA
-       ══════════════════════════════════════════════════════════ */
-    .newsletter-box {
-      background: linear-gradient(135deg, rgba(0,224,255,0.06) 0%, rgba(0,0,0,0) 100%);
-      border: 1px solid rgba(0,224,255,0.2);
-      border-radius: 16px;
-      padding: 44px 32px;
-      text-align: center;
-    }
-    .newsletter-box h2 {
-      font-size: clamp(1.1rem, 3vw, 1.5rem);
-      margin-bottom: 10px;
-    }
-    .newsletter-box p {
-      color: var(--text-muted);
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-
-    /* ══════════════════════════════════════════════════════════
-       GALLERY FILMSTRIP
-       ══════════════════════════════════════════════════════════ */
-    .gallery-outer {
-      overflow: hidden;
-      position: relative;
-      z-index: 1;
-      isolation: isolate;
-      contain: paint;
-      -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
-      mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
-    }
-    .gallery-strip {
-      display: flex;
-      gap: 14px;
-      padding: 12px 0 20px;
-      will-change: transform;
-      animation: galleryScroll 50s linear infinite;
-    }
-    @keyframes galleryScroll {
-      from { transform: translate3d(0, 0, 0); }
-      to   { transform: translate3d(-50%, 0, 0); }
-    }
-    .gallery-outer:hover .gallery-strip { animation-play-state: paused; }
-    .gallery-strip.paused { animation-play-state: paused; }
-    @media (prefers-reduced-motion: reduce) {
-      .gallery-strip { animation: none; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .gallery-outer { -webkit-mask-image: none; mask-image: none; }
-    }
-    .gallery-item {
-      flex: 0 0 340px;
-      height: 230px;
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-      border: 1px solid var(--border);
-      transition: border-color 0.3s;
-    }
-    .gallery-item:hover { border-color: var(--border-hover); }
-    .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .gallery-item picture { display: block; width: 100%; height: 100%; }
-    .gallery-caption {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 8px 12px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.85));
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.85);
-      letter-spacing: 0.04em;
-      font-family: var(--font-body);
-    }
-    .gallery-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    .gallery-header .section-title { margin-bottom: 0; }
-
-    /* ══════════════════════════════════════════════════════════
-       EXPLORE THE HUB
-       ══════════════════════════════════════════════════════════ */
-    .hub-preview {
-      text-align: center;
-    }
-    .hub-features {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      margin-bottom: 28px;
-    }
-    .hub-feature {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      letter-spacing: 0.06em;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .hub-feature i { color: var(--cyan); font-size: 0.8rem; }
-
-    /* ══════════════════════════════════════════════════════════
-       FAQ ACCORDION
-       ══════════════════════════════════════════════════════════ */
-    .faq-list { display: flex; flex-direction: column; gap: 10px; }
-    .faq-item {
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .faq-item:hover, .faq-item.open { border-color: var(--border-hover); }
-    .faq-question {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: none;
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 0.88rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      padding: 16px 20px;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      transition: background 0.2s;
-    }
-    .faq-question:hover { background: rgba(0,224,255,0.04); }
-    .faq-question .faq-icon {
-      font-size: 0.75rem;
-      color: var(--cyan);
-      transition: transform 0.3s;
-      flex-shrink: 0;
-    }
-    .faq-item.open .faq-icon { transform: rotate(45deg); }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s;
-      padding: 0 20px;
-    }
-    .faq-item.open .faq-answer { max-height: 300px; padding: 0 20px 18px; }
-    .faq-answer p {
-      color: var(--text-muted);
-      font-size: 0.84rem;
-      line-height: 1.7;
-      font-family: var(--font-body);
-    }
-    .faq-answer a { color: var(--cyan); text-decoration: none; }
-    .faq-answer a:hover { text-decoration: underline; }
-
-    /* ══════════════════════════════════════════════════════════
-       INTENT SELECTOR (Phase 2)
-       ══════════════════════════════════════════════════════════ */
-    .intent-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 32px;
-    }
-    .intent-label {
-      font-size: 0.72rem;
-      color: var(--text-dim);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-    .intent-btn {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.12);
       color: rgba(255,255,255,0.7);
@@ -754,96 +416,69 @@
       cursor: pointer;
       transition: all var(--transition);
     }
-    .intent-btn:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      background: rgba(0,224,255,0.06);
-    }
-    .intent-btn.active {
-      border-color: var(--cyan);
-      color: #000;
-      background: var(--cyan);
+    /* ══════════════════════════════════════════════════════════
+       SOCIAL PROOF LINE
+       ══════════════════════════════════════════════════════════ */
+    .section-proof {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      font-style: italic;
     }
 
     /* ══════════════════════════════════════════════════════════
-       BRIDGE SECTION — Find Your Next Connection (Phase 1)
+       FLOW STEPS
        ══════════════════════════════════════════════════════════ */
-    .bridge-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-    .bridge-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px 24px;
+    .flow-steps {
+      max-width: 520px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 20px;
+    }
+    .flow-step {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
       text-decoration: none;
       color: inherit;
-      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+      padding: 8px 0;
+      transition: opacity var(--transition);
     }
-    .bridge-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0,224,255,0.1);
-    }
-    .bridge-card.emphasized {
-      border-color: rgba(0,224,255,0.25);
-      background: linear-gradient(180deg, rgba(0,224,255,0.04) 0%, var(--bg-card) 100%);
-    }
-    .bridge-card.emphasized:hover {
-      border-color: var(--cyan);
-      box-shadow: 0 8px 40px rgba(0,224,255,0.15);
-    }
-    .bridge-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-    .bridge-icon.cyan { background: var(--cyan-glow); color: var(--cyan); }
-    .bridge-icon.gold { background: rgba(201,163,94,0.12); color: var(--gold); }
-    .bridge-icon.green { background: rgba(0,255,136,0.1); color: #00ff88; }
-    .bridge-card h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-    .bridge-card p {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      line-height: 1.65;
-      font-family: var(--font-body);
-      flex: 1;
-    }
-    .bridge-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      letter-spacing: 0.06em;
-      color: var(--cyan);
-      transition: gap var(--transition);
-    }
-    .bridge-card:hover .bridge-cta { gap: 10px; }
-    .bridge-thesis {
+    .flow-step:hover { opacity: 0.75; }
+    .flow-num {
+      font-size: 1.3rem;
+      font-weight: 800;
+      width: 28px;
       text-align: center;
-      color: var(--text-muted);
-      font-family: var(--font-body);
-      font-size: 0.84rem;
-      font-style: italic;
-      line-height: 1.65;
-      margin-top: 32px;
-      max-width: 640px;
-      margin-left: auto;
-      margin-right: auto;
+      flex-shrink: 0;
     }
+    .flow-text {
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .flow-text strong { color: #fff; }
+
+    /* ══════════════════════════════════════════════════════════
+       DEPTH LINKS
+       ══════════════════════════════════════════════════════════ */
+    .depth-links {
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .depth-link {
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .depth-link:hover { color: var(--cyan); }
 
     /* ══════════════════════════════════════════════════════════
        FOOTER
@@ -892,46 +527,18 @@
       .btn-primary, .btn-outline { justify-content: center; font-size: 0.82rem; padding: 14px 20px; }
       .hero-scroll { display: none; }
 
-      /* Stats */
-      .stat-item { padding: 16px 12px; min-width: 0; flex-basis: 50%; }
-      .stat-item:nth-child(2n) { border-right: none; }
-      .stat-item:nth-child(1), .stat-item:nth-child(2) { border-bottom: 1px solid var(--border); }
-      .stat-label { font-size: 0.66rem; letter-spacing: 0.04em; }
-
       /* Sections */
       .section { padding: 48px 16px; }
-
-      /* About */
-      .about-grid { grid-template-columns: 1fr; gap: 24px; }
-      .about-image { max-height: 240px; }
 
       /* Events */
       .events-grid { grid-template-columns: 1fr; }
 
-      /* Involve */
-      .involve-grid { grid-template-columns: 1fr; }
-
-      /* Gallery */
-      .gallery-item { flex: 0 0 260px; height: 180px; }
-      .gallery-strip { animation-duration: 30s; }
-      .gallery-header { flex-direction: column; align-items: flex-start; gap: 4px; }
-
-      /* Bridge */
-      .bridge-grid { grid-template-columns: 1fr; }
-      .intent-bar { gap: 8px; }
-      .intent-btn { font-size: 0.7rem; padding: 7px 14px; }
-
-      /* Newsletter */
-      .newsletter-box { padding: 28px 16px; }
+      /* Flow */
+      .flow-steps { gap: 16px; }
+      .depth-links { gap: 16px; }
 
       /* Footer */
       footer { padding: 24px 16px 40px; }
-    }
-
-    @media (max-width: 480px) {
-      .involve-grid { grid-template-columns: 1fr; }
-      .hub-features { gap: 8px; }
-      .hub-feature { font-size: 0.68rem; padding: 6px 12px; }
     }
   </style>
 </head>
@@ -965,18 +572,17 @@
        ════════════════════════════════════════════════════════ -->
   <section class="hero" id="hero">
     <span class="hero-eyebrow">Charleston, SC · 500+ members · All events free</span>
-    <h1>Meet the people building in Charleston.</h1>
-    <p class="hero-sub">Not online. Not someday. This week.</p>
+    <h1>Meet the people building<br>in Charleston.</h1>
+    <p class="hero-sub">Show up to the next event. That's where it happens.</p>
     <div class="hero-cta">
       <a href="#events-section" class="btn-primary">
         <i class="fas fa-calendar-alt"></i> Join the Next Event
       </a>
-      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="btn-outline">
-        <i class="fas fa-project-diagram"></i> See Who's Building
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-outline">
+        <i class="fab fa-meetup"></i> View All Events
       </a>
     </div>
     <div class="hero-scroll" aria-hidden="true">
-      <span>SCROLL</span>
       <i class="fas fa-chevron-down"></i>
     </div>
   </section>
@@ -986,17 +592,12 @@
        ════════════════════════════════════════════════════════ -->
   <div class="section" id="events-section">
     <p class="section-title" data-aos="fade-up">Upcoming Events</p>
+    <p class="section-proof" data-aos="fade-up" data-aos-delay="40">Last event had 40+ builders show up.</p>
 
     <div class="events-grid" id="homepage-events" data-aos="fade-up" data-aos-delay="80">
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
       <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-    </div>
-
-    <div class="events-cta" data-aos="fade-up" data-aos-delay="140">
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-outline" style="margin-top:8px;">
-        <i class="fab fa-meetup"></i> View All on Meetup
-      </a>
     </div>
   </div>
 
@@ -1006,16 +607,16 @@
        4. HOW THIS WORKS
        ════════════════════════════════════════════════════════ -->
   <div class="section" id="bridge-section" style="padding-top:56px;padding-bottom:48px;">
-    <p class="section-title" data-aos="fade-up" style="text-align:center;margin-bottom:32px;">How this works:</p>
+    <p class="section-title" data-aos="fade-up" style="text-align:center;margin-bottom:36px;">How this works:</p>
 
-    <div data-aos="fade-up" data-aos-delay="60" style="max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
-      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" id="bridge-network" style="display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;">
-        <span style="font-size:1.4rem;color:var(--cyan);width:32px;text-align:center;">1</span>
-        <span style="font-family:var(--font-body);font-size:0.95rem;color:var(--text-muted);"><strong style="color:#fff;">See who's building and find people to meet</strong> — projects, people, skills, and where overlap exists. <span style="color:var(--cyan);font-size:0.8rem;">→</span></span>
+    <div class="flow-steps" data-aos="fade-up" data-aos-delay="60">
+      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="flow-step">
+        <span class="flow-num" style="color:var(--cyan);">1</span>
+        <span class="flow-text"><strong>See who's building and find people to meet</strong> — projects, people, skills, and where overlap exists.</span>
       </a>
-      <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" id="bridge-event" style="display:flex;align-items:center;gap:16px;text-decoration:none;color:inherit;">
-        <span style="font-size:1.4rem;color:#00ff88;width:32px;text-align:center;">2</span>
-        <span style="font-family:var(--font-body);font-size:0.95rem;color:var(--text-muted);"><strong style="color:#fff;">Show up where they'll be</strong> — connections compound when they repeat. <span style="color:#00ff88;font-size:0.8rem;">→</span></span>
+      <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" class="flow-step">
+        <span class="flow-num" style="color:#00ff88;">2</span>
+        <span class="flow-text"><strong>Show up where they'll be</strong> — connections compound when they repeat.</span>
       </a>
     </div>
   </div>
@@ -1026,10 +627,10 @@
        5. GO DEEPER (minimal)
        ════════════════════════════════════════════════════════ -->
   <div class="section" style="padding-top:40px;padding-bottom:40px;">
-    <div data-aos="fade-up" style="display:flex;justify-content:center;gap:24px;flex-wrap:wrap;font-size:0.78rem;letter-spacing:0.06em;">
-      <a href="subscribe.html" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;">Join the community →</a>
-      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;">See active projects →</a>
-      <a href="bbs.html" style="color:var(--text-muted);text-decoration:none;transition:color 0.2s;">Open chat →</a>
+    <div class="depth-links" data-aos="fade-up">
+      <a href="subscribe.html" class="depth-link">Join the community →</a>
+      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="depth-link">See active projects →</a>
+      <a href="bbs.html" class="depth-link">Open chat →</a>
     </div>
   </div>
 
@@ -1126,179 +727,6 @@
         requestAnimationFrame(draw);
       }
       draw();
-    })();
-
-    // ── Counting stats ──
-    (function () {
-      var els = document.querySelectorAll('.stat-num[data-count]');
-      var observed = new Set();
-
-      function animateCount(el) {
-        var target = el.dataset.count;
-        var suffix = el.dataset.suffix || '';
-        if (target === 'inf') return;
-        var n = parseInt(target, 10);
-        var duration = 1400;
-        var start = performance.now();
-        var tick = function (now) {
-          var t = Math.min((now - start) / duration, 1);
-          var ease = 1 - Math.pow(1 - t, 3);
-          el.textContent = Math.round(ease * n) + suffix;
-          if (t < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
-
-      var observer = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting && !observed.has(e.target)) {
-            observed.add(e.target);
-            animateCount(e.target);
-          }
-        });
-      }, { threshold: 0.5 });
-
-      els.forEach(function (el) { observer.observe(el); });
-    })();
-
-    // ── FAQ accordion ──
-    document.querySelectorAll('.faq-question').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var item = btn.parentElement;
-        var isOpen = item.classList.contains('open');
-        document.querySelectorAll('.faq-item.open').forEach(function (el) {
-          el.classList.remove('open');
-          el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-        });
-        if (!isOpen) {
-          item.classList.add('open');
-          btn.setAttribute('aria-expanded', 'true');
-        }
-      });
-    });
-
-    // ── Phase 2 & 3: Intent selection + context-aware handoff ──
-    (function () {
-      var STORAGE_KEY = 'charlestonhacks_intent';
-      var buttons = document.querySelectorAll('.intent-btn');
-      var bridgeNetwork = document.getElementById('bridge-network');
-      var bridgeMatch = document.getElementById('bridge-match');
-      var bridgeEvent = document.getElementById('bridge-event');
-      var bridgeNetworkCopy = document.getElementById('bridge-network-copy');
-      var bridgeMatchCopy = document.getElementById('bridge-match-copy');
-      var bridgeEventCopy = document.getElementById('bridge-event-copy');
-
-      // Intent-specific copy variants
-      var copyVariants = {
-        build: {
-          network: 'See what builders are shipping — active projects, collaborators, and hack night teams across Charleston.',
-          match: 'Find people with complementary skills who are ready to build. Hack nights and projects need your kind of weird.',
-          event: 'The best collaborations start in person. Show up at the next hack night or build session.'
-        },
-        meet: {
-          network: 'See who\'s active in the community — their interests, skills, and what events they attend.',
-          match: 'Targeted collisions work better than random networking. Find people with aligned interests and shared event intent.',
-          event: 'Connections compound when they repeat. Join the next event where the right people are likely to be.'
-        },
-        explore: {
-          network: 'Browse experiments, demos, and ideas from across Charleston\'s builder community.',
-          match: 'Find people working on things that interest you — from AI experiments to hardware hacks to open-source tools.',
-          event: 'Show & Tell nights and experimental sessions are where you see what\'s possible.'
-        }
-      };
-
-      // Emphasis mapping: which bridge card gets visually emphasized per intent
-      var emphasisMap = {
-        build: 'bridge-network',
-        meet: 'bridge-match',
-        explore: 'bridge-network'
-      };
-
-      function getIntentParam() {
-        return function (baseUrl, intent) {
-          if (!intent) return baseUrl;
-          var sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
-          return baseUrl + sep + 'intent=' + encodeURIComponent(intent);
-        };
-      }
-      var appendIntent = getIntentParam();
-
-      function applyIntent(intent) {
-        // Update button states
-        buttons.forEach(function (btn) {
-          btn.classList.toggle('active', btn.dataset.intent === intent);
-        });
-
-        // Update bridge card copy
-        if (intent && copyVariants[intent]) {
-          var v = copyVariants[intent];
-          if (bridgeNetworkCopy) bridgeNetworkCopy.textContent = v.network;
-          if (bridgeMatchCopy) bridgeMatchCopy.textContent = v.match;
-          if (bridgeEventCopy) bridgeEventCopy.textContent = v.event;
-        }
-
-        // Update emphasis
-        var cards = document.querySelectorAll('.bridge-card');
-        cards.forEach(function (card) { card.classList.remove('emphasized'); });
-        if (intent && emphasisMap[intent]) {
-          var target = document.getElementById(emphasisMap[intent]);
-          if (target) target.classList.add('emphasized');
-        } else if (bridgeMatch) {
-          bridgeMatch.classList.add('emphasized'); // default
-        }
-
-        // Phase 3: Update handoff links with intent parameter
-        var ieBase = 'https://deckerd451.github.io/innovation-engine/';
-        var nearifyBase = 'https://nearify.org/';
-
-        if (bridgeNetwork) bridgeNetwork.href = appendIntent(ieBase, intent);
-        if (bridgeMatch) bridgeMatch.href = appendIntent(ieBase, intent);
-        if (bridgeEvent) bridgeEvent.href = appendIntent(nearifyBase, intent);
-
-        // Also update nav and involve-section links
-        document.querySelectorAll('a[href*="innovation-engine"]').forEach(function (a) {
-          if (!a.closest('#bridge-grid')) return; // only bridge links
-          a.href = appendIntent(ieBase, intent);
-        });
-
-        // Store intent
-        if (intent) {
-          try { localStorage.setItem(STORAGE_KEY, intent); } catch (e) {}
-        }
-      }
-
-      // Button click handlers
-      buttons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var intent = btn.dataset.intent;
-          var isActive = btn.classList.contains('active');
-          applyIntent(isActive ? null : intent);
-        });
-      });
-
-      // Restore saved intent on load
-      try {
-        var saved = localStorage.getItem(STORAGE_KEY);
-        if (saved && copyVariants[saved]) {
-          applyIntent(saved);
-        }
-      } catch (e) {}
-    })();
-
-    // ── Gallery: pause on touch for mobile ──
-    (function () {
-      var strip = document.querySelector('.gallery-strip');
-      if (!strip) return;
-      var touchTimer;
-      strip.addEventListener('touchstart', function () {
-        strip.classList.add('paused');
-        clearTimeout(touchTimer);
-      }, { passive: true });
-      strip.addEventListener('touchend', function () {
-        touchTimer = setTimeout(function () {
-          strip.classList.remove('paused');
-        }, 3000);
-      }, { passive: true });
     })();
 
     // ── Live event countdown banner ──
