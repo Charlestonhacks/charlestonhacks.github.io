@@ -874,12 +874,21 @@
         const start = getStart(ev);
         const date = safeText(formatDate(start));
         const msAway = new Date(start).getTime() - Date.now();
-        const daysAway = Math.ceil(msAway / 86400000);
+        const totalMinutesAway = Math.max(0, Math.floor(msAway / 60000));
+        const daysAway = Math.floor(totalMinutesAway / 1440);
+        const hoursAway = Math.floor((totalMinutesAway % 1440) / 60);
+        const minutesAway = totalMinutesAway % 60;
+
         let proximity = date;
-        if (daysAway <= 0) proximity = 'Today';
-        else if (daysAway === 1) proximity = 'Tomorrow';
-        else if (daysAway <= 7) proximity = 'In ' + daysAway + ' days';
-        else if (daysAway <= 14) proximity = date + ' · ' + daysAway + ' days away';
+        if (msAway <= 0) {
+          proximity = 'Starting now';
+        } else if (daysAway >= 14) {
+          proximity = date + ' · in ' + daysAway + 'd ' + hoursAway + 'h';
+        } else if (daysAway > 0) {
+          proximity = 'In ' + daysAway + 'd ' + hoursAway + 'h ' + minutesAway + 'm';
+        } else {
+          proximity = 'In ' + hoursAway + 'h ' + minutesAway + 'm';
+        }
 
         const rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || ev.attendee_count || 0;
         const signal = rsvpCount >= 5 ? rsvpCount + ' people going' : 'Builders, designers, and founders already going';
