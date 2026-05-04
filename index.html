@@ -188,32 +188,54 @@
       text-align: center;
       position: relative;
       z-index: 1;
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .hero-inner {
-      max-width: 680px;
+      max-width: 640px;
       margin: 0 auto;
     }
+    .hero-eyebrow {
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+    }
     .hero-title {
-      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       line-height: 1.15;
       color: #fff;
     }
     .hero-sub {
-      margin-top: 18px;
-      font-size: 1.05rem;
-      color: rgba(255,255,255,0.65);
+      margin-top: 16px;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
       line-height: 1.6;
       font-family: var(--font-body);
     }
     .hero-cta {
-      margin-top: 36px;
+      margin-top: 32px;
       display: flex;
       justify-content: center;
       gap: 14px;
       flex-wrap: wrap;
     }
+    .hero-secondary {
+      margin-top: 24px;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+    }
+    .hero-secondary a {
+      color: var(--text-dim);
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .hero-secondary a:hover { color: var(--cyan); }
 
     /* ══════════════════════════════════════════════════════════
        BUTTONS
@@ -299,41 +321,19 @@
     /* ══════════════════════════════════════════════════════════
        EVENTS
        ══════════════════════════════════════════════════════════ */
-    .events {
-      padding: 100px 20px;
-      text-align: center;
-      scroll-margin-top: 64px;
-    }
-    .events-header {
-      max-width: 560px;
-      margin: 0 auto;
-    }
     .events-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      opacity: 0.6;
-    }
-    .events-title {
-      margin-top: 10px;
-      font-size: 2rem;
-      font-weight: 600;
-    }
-    .events-sub {
-      margin-top: 12px;
-      color: rgba(255,255,255,0.7);
-      font-family: var(--font-body);
-      font-size: 0.92rem;
-      line-height: 1.6;
+      color: var(--cyan);
+      margin-bottom: 8px;
     }
     .events-signal {
-      margin-top: 14px;
-      font-size: 0.9rem;
+      font-size: 0.82rem;
       color: var(--cyan);
       font-family: var(--font-body);
     }
     .events-list {
-      margin-top: 50px;
       display: grid;
       gap: 16px;
       max-width: 520px;
@@ -357,12 +357,6 @@
       letter-spacing: 0.03em;
       margin-bottom: 4px;
     }
-    .event-card p {
-      color: rgba(255,255,255,0.5);
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      line-height: 1.5;
-    }
     .event-link {
       display: inline-block;
       margin-top: 8px;
@@ -373,13 +367,6 @@
       transition: opacity var(--transition);
     }
     .event-link:hover { opacity: 0.7; }
-    .events-empty {
-      text-align: center;
-      color: var(--text-dim);
-      padding: 32px 16px;
-      font-size: 0.88rem;
-      font-family: var(--font-body);
-    }
 
     /* Skeleton loading */
     .skeleton {
@@ -487,8 +474,8 @@
       }
       .nav-toggle { display: block; }
 
-      .hero { padding: 80px 16px 60px; }
-      .hero-title { font-size: clamp(2rem, 6vw, 3.2rem); }
+      .hero { padding: 80px 16px 60px; min-height: 70vh; }
+      .hero-title { font-size: clamp(1.8rem, 6vw, 2.8rem); }
       .hero-cta { flex-direction: column; align-items: center; }
       .btn-primary, .btn-secondary { width: 100%; max-width: 280px; text-align: center; padding: 14px 20px; }
 
@@ -496,8 +483,7 @@
       .section { padding: 48px 16px; }
 
       /* Events */
-      .events { padding: 60px 16px; }
-      .events-title { font-size: 1.6rem; }
+      .events-list { padding: 0 16px 40px !important; }
 
       /* Flow */
       .flow-steps { gap: 16px; }
@@ -534,35 +520,29 @@
   </nav>
 
   <!-- ════════════════════════════════════════════════════════
-       2. HERO
+       2. HERO (next event IS the hero)
        ════════════════════════════════════════════════════════ -->
-  <section class="hero">
+  <section class="hero" id="events">
     <div class="hero-inner">
-      <h1 class="hero-title">
-        Meet the people building in Charleston.
-      </h1>
-      <p class="hero-sub">
-        Not online. Not someday.<br>
-        This week.
-      </p>
-      <div class="hero-cta">
-        <a href="#events" class="btn-primary">Join the Next Event</a>
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="btn-secondary">See Who's Building</a>
+      <p class="hero-eyebrow">CharlestonHacks · Meet people building in Charleston</p>
+      <div id="hero-event">
+        <p class="events-label">Next Event</p>
+        <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
+        <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
       </div>
+      <div id="hero-cta" class="hero-cta" style="display:none;">
+        <a id="hero-rsvp" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary">RSVP Now</a>
+      </div>
+      <p class="hero-secondary">
+        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">See who's building →</a>
+      </p>
     </div>
   </section>
 
   <!-- ════════════════════════════════════════════════════════
-       3. EVENTS
+       3. MORE EVENTS
        ════════════════════════════════════════════════════════ -->
-  <section id="events" class="events">
-    <div id="events-featured" class="events-header">
-      <p class="events-label">Next Event</p>
-      <h2 class="events-title skeleton" style="height:2rem;width:80%;margin:10px auto 0;border-radius:6px;">&nbsp;</h2>
-      <p class="events-sub skeleton" style="height:1rem;width:60%;margin:12px auto 0;border-radius:4px;">&nbsp;</p>
-    </div>
-    <div id="events-secondary" class="events-list"></div>
-  </section>
+  <div id="events-more" class="events-list" style="padding:0 20px 60px;"></div>
 
   <hr class="divider">
 
@@ -765,8 +745,10 @@
       }
 
       async function loadHomepageEvents() {
-        var featured = document.getElementById('events-featured');
-        var secondary = document.getElementById('events-secondary');
+        var heroEvent = document.getElementById('hero-event');
+        var heroCta = document.getElementById('hero-cta');
+        var heroRsvp = document.getElementById('hero-rsvp');
+        var moreList = document.getElementById('events-more');
         var events = [];
         var TIMEOUT_MS = 6000;
 
@@ -787,30 +769,32 @@
           .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
           .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
 
-        if (featured) {
+        if (heroEvent) {
           if (upcoming.length === 0) {
-            featured.innerHTML =
+            heroEvent.innerHTML =
               '<p class="events-label">Next Event</p>' +
-              '<h2 class="events-title">Coming Soon</h2>' +
-              '<p class="events-sub">No upcoming events right now.</p>' +
-              '<a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:24px;">Check Meetup</a>';
+              '<h1 class="hero-title">Coming Soon</h1>' +
+              '<p class="hero-sub">No upcoming events right now — check back soon.</p>';
+            if (heroCta) { heroCta.style.display = 'flex'; }
+            if (heroRsvp) { heroRsvp.textContent = 'Check Meetup'; }
           } else {
             var ev = upcoming[0];
             var title = safeText(ev.title || 'Event');
             var link = safeText(ev.link || '#');
             var desc = safeText((ev.description || '').substring(0, 120));
             var date = safeText(formatDate(ev.startDate));
-            featured.innerHTML =
+            heroEvent.innerHTML =
               '<p class="events-label">Next Event</p>' +
-              '<h2 class="events-title">' + title + ' — ' + date + '</h2>' +
-              (desc ? '<p class="events-sub">' + desc + (ev.description && ev.description.length > 120 ? '…' : '') + '</p>' : '') +
-              '<p class="events-signal">Last event had 40+ builders</p>' +
-              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:24px;">RSVP Now</a>';
+              '<h1 class="hero-title">' + title + '</h1>' +
+              '<p class="hero-sub">' + date + (desc ? ' · ' + desc + (ev.description && ev.description.length > 120 ? '…' : '') : '') + '</p>' +
+              '<p class="events-signal" style="margin-top:14px;">Last event had 40+ builders</p>';
+            if (heroCta) { heroCta.style.display = 'flex'; }
+            if (heroRsvp) { heroRsvp.href = link; heroRsvp.textContent = 'RSVP Now'; }
           }
         }
 
-        if (secondary && upcoming.length > 1) {
-          secondary.innerHTML = upcoming.slice(1, 3).map(function (ev) {
+        if (moreList && upcoming.length > 1) {
+          moreList.innerHTML = upcoming.slice(1, 3).map(function (ev) {
             var title = safeText(ev.title || 'Event');
             var link = safeText(ev.link || '#');
             var date = safeText(formatDate(ev.startDate));
