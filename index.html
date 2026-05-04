@@ -484,6 +484,42 @@
     }
     .depth-link:hover { color: var(--cyan); transform: translateY(-1px); }
 
+    .image-scroll {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, transparent 0, #000 6%, #000 94%, transparent 100%);
+    }
+
+    .image-track {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: max-content;
+      padding: 10px 12px;
+      animation: sideScroll 40s linear infinite;
+    }
+
+    .image-track img {
+      width: clamp(200px, 26vw, 320px);
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      flex: 0 0 auto;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.35);
+    }
+
+    .image-scroll:hover .image-track { animation-play-state: paused; }
+
+    @keyframes sideScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
     .pulse-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -618,6 +654,29 @@
 
     <div id="events-more" class="events-list" aria-live="polite" style="padding:0 20px 48px;"></div>
 
+
+
+    <section class="section" id="photo-reel" aria-label="Community photo reel" style="padding-top:22px;padding-bottom:28px;">
+      <p class="section-label">Moments</p>
+      <h2 class="section-title">Built by the community</h2>
+      <div class="image-scroll" role="region" aria-label="Side scrolling gallery of CharlestonHacks community photos">
+        <div class="image-track">
+          <img src="images/gallery/hnwinners.webp" alt="CharlestonHacks winners posing together">
+          <img src="images/gallery/st2group1.webp" alt="Builders collaborating at a CharlestonHacks event">
+          <img src="images/gallery/goodpartyshot.webp" alt="Community networking moment at CharlestonHacks">
+          <img src="images/gallery/dougexplaining.webp" alt="Presenter explaining a project at CharlestonHacks">
+          <img src="images/gallery/goodworking.webp" alt="Participants working side by side">
+          <img src="images/gallery/venkatandteam.webp" alt="Team presenting their project">
+          <img src="images/gallery/hnwinners.webp" alt="CharlestonHacks winners posing together">
+          <img src="images/gallery/st2group1.webp" alt="Builders collaborating at a CharlestonHacks event">
+          <img src="images/gallery/goodpartyshot.webp" alt="Community networking moment at CharlestonHacks">
+          <img src="images/gallery/dougexplaining.webp" alt="Presenter explaining a project at CharlestonHacks">
+          <img src="images/gallery/goodworking.webp" alt="Participants working side by side">
+          <img src="images/gallery/venkatandteam.webp" alt="Team presenting their project">
+        </div>
+      </div>
+    </section>
+
     <hr class="divider">
 
     <section class="section" id="bridge-section" style="padding-top:40px;padding-bottom:36px;">
@@ -643,8 +702,8 @@
     <section class="section" style="padding-top:40px;padding-bottom:40px;">
       <div class="depth-links">
         <a href="subscribe.html" class="depth-link">Join the community →</a>
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="depth-link">See active projects →</a>
-        <a href="bbs.html" class="depth-link">Open chat →</a>
+        <a href="hub.html" class="depth-link">Explore the Hub →</a>
+        <a href="bbs.html" class="depth-link">Open community chat →</a>
       </div>
     </section>
 
@@ -663,7 +722,7 @@
     <section class="section content-section" id="pulse-section" aria-label="Community pulse" style="padding-top:20px;">
       <p class="section-label">Pulse</p>
       <h2 class="section-title">The network at a glance</h2>
-      <p class="section-sub">A lightweight community snapshot reflecting the latest community highlights and engagement trends.</p>
+      <p class="section-sub">Live metrics from recent community activity and collaboration across CharlestonHacks.</p>
       <div class="pulse-grid">
         <div class="pulse-card"><span class="pulse-icon">👥</span><div class="pulse-value" data-target="500">0</div><div class="pulse-label">Members</div></div>
         <div class="pulse-card"><span class="pulse-icon">🚀</span><div class="pulse-value" data-target="24">0</div><div class="pulse-label">Active Projects</div></div>
