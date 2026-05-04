@@ -113,7 +113,7 @@
       z-index: 100;
       gap: 8px;
     }
-    .nav-logo img { height: 28px; width: auto; display: block; }
+    .nav-logo img { height: 34px; width: auto; display: block; filter: brightness(1.1); }
     .nav-links {
       display: flex;
       align-items: center;
@@ -161,7 +161,7 @@
        HERO — 100vh
        ══════════════════════════════════════════════════════════ */
     .hero {
-      padding: 140px 20px 80px;
+      padding: 140px 20px 60px;
       text-align: center;
       position: relative;
       z-index: 1;
@@ -226,17 +226,18 @@
       font-size: 0.82rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      padding: 12px 22px;
+      padding: 14px 26px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
+      box-shadow: 0 0 12px rgba(0,224,255,0.15);
       transition: transform var(--transition), box-shadow var(--transition);
     }
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 20px rgba(0,224,255,0.3);
+      box-shadow: 0 4px 24px rgba(0,224,255,0.4);
     }
     .btn-secondary {
       border: 1px solid rgba(255,255,255,0.25);
@@ -519,7 +520,7 @@
   <!-- ════════════════════════════════════════════════════════
        3. MORE EVENTS
        ════════════════════════════════════════════════════════ -->
-  <div id="events-more" class="events-list" style="padding:0 20px 60px;"></div>
+  <div id="events-more" class="events-list" style="padding:0 20px 48px;"></div>
 
   <hr class="divider">
 
