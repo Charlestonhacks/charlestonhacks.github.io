@@ -98,29 +98,6 @@
     }
 
     /* ══════════════════════════════════════════════════════════
-       EVENT COUNTDOWN BANNER
-       ══════════════════════════════════════════════════════════ */
-    #event-countdown-banner {
-      display: none;
-      background: linear-gradient(90deg, rgba(0,30,40,0.97) 0%, rgba(0,12,20,0.99) 100%);
-      border-bottom: 1px solid rgba(0,224,255,0.25);
-      backdrop-filter: blur(6px);
-      padding: 7px 16px;
-      text-align: center;
-      font-family: var(--font-display);
-      font-size: clamp(0.62rem, 2vw, 0.75rem);
-      letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.85);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    #event-countdown-banner a { color: var(--cyan); text-decoration: none; }
-    #event-countdown-banner a:hover { text-decoration: underline; }
-    #event-countdown-banner .cd-time { color: var(--cyan); font-weight: bold; }
-    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
-
-    /* ══════════════════════════════════════════════════════════
        NAVIGATION
        ══════════════════════════════════════════════════════════ */
     .top-nav {
@@ -231,11 +208,13 @@
       letter-spacing: 0.06em;
     }
     .hero-secondary a {
-      color: var(--text-dim);
+      color: rgba(255,255,255,0.5);
       text-decoration: none;
       transition: color var(--transition);
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      padding-bottom: 2px;
     }
-    .hero-secondary a:hover { color: var(--cyan); }
+    .hero-secondary a:hover { color: var(--cyan); border-color: var(--cyan); }
 
     /* ══════════════════════════════════════════════════════════
        BUTTONS
@@ -499,9 +478,6 @@
 
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
 
-  <!-- Event countdown banner -->
-  <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
-
   <!-- ════════════════════════════════════════════════════════
        1. NAVIGATION
        ════════════════════════════════════════════════════════ -->
@@ -550,8 +526,8 @@
   <!-- ════════════════════════════════════════════════════════
        4. HOW THIS WORKS
        ════════════════════════════════════════════════════════ -->
-  <div class="section" id="bridge-section" style="padding-top:56px;padding-bottom:48px;">
-    <p class="section-title" data-aos="fade-up" style="text-align:center;margin-bottom:36px;">How this works:</p>
+  <div class="section" id="bridge-section" style="padding-top:40px;padding-bottom:36px;">
+    <p class="section-title" data-aos="fade-up" style="text-align:center;margin-bottom:24px;font-size:1rem;font-weight:600;color:var(--text-dim);">How this works:</p>
 
     <div class="flow-steps" data-aos="fade-up" data-aos-delay="60">
       <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="flow-step">
@@ -673,59 +649,6 @@
       draw();
     })();
 
-    // ── Live event countdown banner ──
-    (function () {
-      var FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
-      var banner = document.getElementById('event-countdown-banner');
-
-      function pad(n) { return String(n).padStart(2, '0'); }
-
-      function renderCountdown(title, link, target) {
-        var tick = function () {
-          var diff = target - Date.now();
-          if (diff <= 0) { banner.style.display = 'none'; return; }
-          var days = Math.floor(diff / 86400000);
-          var hrs  = Math.floor((diff % 86400000) / 3600000);
-          var mins = Math.floor((diff % 3600000) / 60000);
-          var secs = Math.floor((diff % 60000) / 1000);
-          var timeStr = days > 0
-            ? days + 'd ' + pad(hrs) + 'h ' + pad(mins) + 'm ' + pad(secs) + 's'
-            : pad(hrs) + 'h ' + pad(mins) + 'm ' + pad(secs) + 's';
-          var titleHtml = link
-            ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer">' + title + '</a>'
-            : title;
-          banner.innerHTML = '<span class="cd-label">NEXT EVENT</span>' + titleHtml + '&ensp;<span class="cd-time">' + timeStr + '</span>';
-        };
-        banner.style.display = 'block';
-        tick();
-        setInterval(tick, 1000);
-      }
-
-      async function initCountdown() {
-        try {
-          var res = await fetch(FEED_URL);
-          if (!res.ok) return;
-          var data = await res.json();
-          var events = Array.isArray(data) ? data : (data?.events ?? []);
-          var now = Date.now();
-          var upcoming = events
-            .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
-            .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
-          if (!upcoming.length) return;
-          var next = upcoming[0];
-          var title = String(next.title ?? 'Upcoming Event')
-            .replace(/[<>&"]/g, function (c) { return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c]; });
-          renderCountdown(title, next.link ?? null, new Date(next.startDate).getTime());
-        } catch (e) { /* silently skip */ }
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initCountdown);
-      } else {
-        initCountdown();
-      }
-    })();
-
     // ── Load live events ──
     (function () {
       var FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
@@ -781,7 +704,8 @@
             if (heroRsvp) { heroRsvp.textContent = 'Follow on Meetup'; }
           } else {
             var ev = upcoming[0];
-            var title = safeText(ev.title || 'Event');
+            var title = safeText(ev.title || 'Event')
+              .replace(/^CharlestonHacks\s*[-–—:]\s*/i, '');
             var link = safeText(ev.link || '#');
             var desc = safeText((ev.description || '').substring(0, 120));
             var date = safeText(formatDate(ev.startDate));
@@ -819,7 +743,8 @@
 
         if (moreList && upcoming.length > 1) {
           moreList.innerHTML = upcoming.slice(1, 3).map(function (ev) {
-            var title = safeText(ev.title || 'Event');
+            var title = safeText(ev.title || 'Event')
+              .replace(/^CharlestonHacks\s*[-–—:]\s*/i, '');
             var link = safeText(ev.link || '#');
             var date = safeText(formatDate(ev.startDate));
             return '<div class="event-card">' +
