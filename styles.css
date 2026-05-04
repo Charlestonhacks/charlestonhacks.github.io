@@ -57,6 +57,7 @@
   /* Effects */
   --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 15px rgba(0, 224, 255, 0.3);
+  --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.45);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --border-radius: 12px;
 }
@@ -91,9 +92,13 @@ body {
   overflow-x: hidden;
   color: var(--text-color);
   font-family: var(--font-primary);
-  background: #000;
+  background:
+    radial-gradient(1200px circle at 10% 10%, rgba(135, 158, 242, 0.14), transparent 55%),
+    radial-gradient(900px circle at 90% 10%, rgba(0, 224, 255, 0.08), transparent 45%),
+    #000;
   position: relative;
   z-index: 1;
+  line-height: 1.5;
 }
 
 /* Solid black base layer */
@@ -116,6 +121,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
   transition: background 0.5s;
+  filter: saturate(1.1) contrast(1.05);
 }
 
 /* Ensure transparency for containers */
@@ -123,6 +129,51 @@ html,
 footer,
 .icons-container {
   background: transparent;
+}
+
+/* Readability polish for content-heavy pages */
+main,
+section,
+.panel,
+.content-card,
+.card {
+  backdrop-filter: blur(3px);
+}
+
+a {
+  color: var(--secondary-color);
+  text-underline-offset: 0.18em;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--cyan);
+  text-shadow: 0 0 12px rgba(0, 224, 255, 0.45);
+}
+
+button,
+.button,
+input[type="submit"] {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+button:hover,
+.button:hover,
+input[type="submit"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 15px 26px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 224, 255, 0.22);
+  filter: brightness(1.05);
+}
+
+button:focus-visible,
+.button:focus-visible,
+input[type="submit"]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
 }
 
 
