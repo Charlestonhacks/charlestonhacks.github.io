@@ -918,6 +918,12 @@
         '/assets/data/events.json'
       ];
 
+      const NEARIFY_EVENT_ID = "2c7cf86a-e329-4065-baa7-ff5c32b45343";
+
+      function buildNearifyLink(eventName) {
+        return `https://nearify.org/join/?event=${NEARIFY_EVENT_ID}&name=${encodeURIComponent(eventName || "Event")}`;
+      }
+
       function safeText(s) {
         return String(s ?? '').replace(/[<>&"]/g, function (c) {
           return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c];
@@ -976,8 +982,18 @@
             '<p class="events-signal" style="margin-top:16px;">500+ members · builders, hackers, and makers in Charleston</p>';
           if (heroCta) heroCta.style.display = 'flex';
           if (heroRsvp) {
-            heroRsvp.href = 'https://www.meetup.com/charlestonhacks/';
-            heroRsvp.textContent = 'Follow on Meetup';
+            heroRsvp.href = buildNearifyLink('Event');
+            heroRsvp.textContent = 'Join on Nearify';
+            console.log('[CTA Override] Using Nearify link for event:', NEARIFY_EVENT_ID);
+
+            let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
+            if (!fallback) {
+              fallback = document.createElement('p');
+              fallback.className = 'cta-secondary';
+              heroRsvp.parentNode.appendChild(fallback);
+            }
+
+            fallback.innerHTML = `Prefer Meetup? <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener">RSVP here</a>`;
           }
           return;
         }
@@ -1004,7 +1020,9 @@
 
         const rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || ev.attendee_count || 0;
         const signal = rsvpCount >= 5 ? rsvpCount + ' people going' : 'Builders, designers, and founders already going';
-        const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
+        const event = ev;
+        const meetupUrl = event.link;
+        const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
 
         heroEvent.innerHTML =
           '<p class="events-label">Next event — ' + proximity.toLowerCase() + '</p>' +
@@ -1013,8 +1031,18 @@
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
         if (heroCta) heroCta.style.display = 'flex';
         if (heroRsvp) {
-          heroRsvp.href = link;
-          heroRsvp.textContent = 'Attend Event';
+          heroRsvp.href = buildNearifyLink(event.name || event.title);
+          heroRsvp.textContent = 'Join on Nearify';
+          console.log('[CTA Override] Using Nearify link for event:', NEARIFY_EVENT_ID);
+
+          let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
+          if (!fallback) {
+            fallback = document.createElement('p');
+            fallback.className = 'cta-secondary';
+            heroRsvp.parentNode.appendChild(fallback);
+          }
+
+          fallback.innerHTML = `Prefer Meetup? <a href="${link}" target="_blank" rel="noopener">RSVP here</a>`;
         }
       }
 
@@ -1029,7 +1057,9 @@
         }
 
         homepageEvents.innerHTML = eventsToShow.map(function (ev) {
-          const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
+          const event = ev;
+        const meetupUrl = event.link;
+        const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
           const location = safeText(ev.location || ev.venue || '');
           const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
           const date = safeText(formatDate(getStart(ev)));
