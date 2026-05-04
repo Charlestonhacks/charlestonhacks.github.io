@@ -1,829 +1,163 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CharlestonHacks — Community for Builders &amp; Makers</title>
-  <meta name="description" content="Join CharlestonHacks — Charleston's community for builders, hackers, and makers. Subscribe to our newsletter, find upcoming events, and connect with local innovators.">
-  <meta property="og:title" content="Join the CharlestonHacks Community">
-  <meta property="og:description" content="Charleston's hub for builders, hackers, and makers. Events, newsletter, and connection.">
-  <meta property="og:image" content="https://charlestonhacks.com/images/websitepanel.webp">
-  <meta property="og:url" content="https://charlestonhacks.com/">
-  <link rel="canonical" href="https://charlestonhacks.com/">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+<title>CharlestonHacks — Community for Builders</title>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag("js", new Date());
-    gtag("config", "G-6NDKG07DY6");
-  </script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <style>
-    /* ══════════════════════════════════════════════════════════
-       DESIGN SYSTEM
-       ══════════════════════════════════════════════════════════ */
-    :root {
-      --cyan: #00e0ff;
-      --violet: #7b5cff;
-      --rose: #ff4edb;
-      --cyan-glow: rgba(0, 224, 255, 0.15);
-      --magenta-glow: rgba(170, 76, 255, 0.12);
-      --gold: #c9a35e;
-      --bg: #000;
-      --bg-card: #0d0d0d;
-      --border: rgba(255, 255, 255, 0.08);
-      --border-hover: rgba(0, 224, 255, 0.35);
-      --text: #fff;
-      --text-muted: rgba(255, 255, 255, 0.5);
-      --text-dim: rgba(255, 255, 255, 0.35);
-      --font-display: 'Orbitron', Arial, sans-serif;
-      --font-body: 'Inter', Arial, sans-serif;
-      --radius: 14px;
-      --radius-sm: 10px;
-      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
+<style>
+:root {
+  --cyan:#00e0ff;
+  --bg:#000;
+  --text:#fff;
+  --muted:rgba(255,255,255,0.5);
+}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:'Orbitron',sans-serif;
+}
 
-    html { scroll-behavior: smooth; }
+/* NAV */
+.top-nav {
+  display:flex;
+  justify-content:space-between;
+  padding:16px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
 
-    html, body {
-      min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-display);
-    }
+.nav-links a {
+  margin-left:16px;
+  color:var(--muted);
+  text-decoration:none;
+}
 
-    /* Background image — dimmed */
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: url('images/background.jpg') no-repeat center center;
-      background-size: cover;
-      z-index: -2;
-      pointer-events: none;
-      opacity: 0.1;
-      filter: brightness(0.5) saturate(0.4);
-    }
+.nav-links a:hover { color:var(--cyan); }
 
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 85% 10%, rgba(0, 224, 255, 0.12), transparent 42%),
-        radial-gradient(circle at 20% 80%, rgba(175, 76, 255, 0.08), transparent 45%),
-        #000;
-      z-index: -3;
-      pointer-events: none;
-    }
-    body {
-      background-image:
-        linear-gradient(120deg, rgba(0, 224, 255, 0.03), transparent 40%),
-        linear-gradient(300deg, rgba(123, 92, 255, 0.05), transparent 42%);
-    }
+/* HERO */
+.hero {
+  min-height:70vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:40px 20px;
+}
 
-    /* ══════════════════════════════════════════════════════════
-       NEURAL CANVAS
-       ══════════════════════════════════════════════════════════ */
-    #hero-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: -1;
-      pointer-events: none;
-      opacity: 0.35;
-    }
+.hero-inner {
+  max-width:600px;
+}
 
-    /* ══════════════════════════════════════════════════════════
-       NAVIGATION
-       ══════════════════════════════════════════════════════════ */
-    .top-nav {
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      height: 56px;
-      border-bottom: 1px solid rgba(0,224,255,0.1);
-      position: sticky;
-      top: 0;
-      background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(10px);
-      z-index: 100;
-      gap: 8px;
-    }
-    .nav-logo img { height: 34px; width: auto; display: block; filter: brightness(1.1); }
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
-    }
-    .nav-links a {
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      padding: 6px 10px;
-      border-radius: 6px;
-      transition: color var(--transition), background var(--transition);
-    }
-    .nav-links a:hover {
-      color: var(--cyan);
-      background: rgba(0,224,255,0.06);
-    }
-    .nav-join {
-      background: linear-gradient(135deg, var(--cyan), #0099cc) !important;
-      color: #000 !important;
-      font-weight: 700;
-      padding: 7px 16px !important;
-      border-radius: 6px;
-    }
-    .nav-join:hover {
-      background: linear-gradient(135deg, #33e8ff, #00b3e6) !important;
-      color: #000 !important;
-    }
+.hero-title {
+  font-size:2.5rem;
+  margin-top:10px;
+}
 
-    /* Mobile nav toggle */
-    .nav-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.7);
-      font-size: 1.3rem;
-      cursor: pointer;
-      padding: 6px;
-      margin-left: auto;
-    }
+.hero-sub {
+  margin-top:10px;
+  color:var(--muted);
+}
 
-    /* ══════════════════════════════════════════════════════════
-       HERO — 100vh
-       ══════════════════════════════════════════════════════════ */
-    .hero {
-      padding: 140px 20px 60px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      min-height: 80vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hero-inner {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 30px 24px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      background: linear-gradient(145deg, rgba(10, 15, 20, 0.74), rgba(0, 0, 0, 0.52));
-      backdrop-filter: blur(8px);
-      box-shadow:
-        0 16px 44px rgba(0, 0, 0, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.07);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-inner::before {
-      content: "";
-      position: absolute;
-      top: -60%;
-      right: -28%;
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 78, 219, 0.16) 0%, rgba(0, 224, 255, 0.04) 45%, transparent 70%);
-      pointer-events: none;
-    }
-    .hero-eyebrow {
-      font-size: 0.68rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 40px;
-    }
-    .hero-title {
-      font-size: clamp(2.2rem, 5vw, 3.4rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      color: #fff;
-      text-shadow: 0 0 22px rgba(0, 224, 255, 0.15);
-      background: linear-gradient(95deg, #ffffff 24%, #9ceeff 60%, #e1d5ff 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero-sub {
-      margin-top: 16px;
-      font-size: 1rem;
-      color: rgba(255,255,255,0.6);
-      line-height: 1.6;
-      font-family: var(--font-body);
-    }
-    .hero-cta {
-      margin-top: 32px;
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    .hero-secondary {
-      margin-top: 24px;
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-    }
-    .hero-secondary a {
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      transition: color var(--transition);
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      padding-bottom: 2px;
-    }
-    .hero-secondary a:hover { color: var(--cyan); border-color: var(--cyan); }
+.btn {
+  margin-top:20px;
+  display:inline-block;
+  padding:12px 24px;
+  background:var(--cyan);
+  color:#000;
+  text-decoration:none;
+  font-weight:bold;
+}
 
-    /* ══════════════════════════════════════════════════════════
-       BUTTONS
-       ══════════════════════════════════════════════════════════ */
-    .btn-primary {
-      background: linear-gradient(135deg, #64f2ff, #4fa3ff 55%, #7b5cff 100%);
-      color: #000;
-      font-family: var(--font-display);
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      padding: 14px 26px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      box-shadow: 0 10px 30px rgba(79, 163, 255, 0.34);
-      transition: transform var(--transition), box-shadow var(--transition);
-    }
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 36px rgba(79, 163, 255, 0.46);
-    }
-    .btn-secondary {
-      border: 1px solid rgba(255,255,255,0.25);
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      padding: 12px 22px;
-      border-radius: 8px;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-block;
-      background: transparent;
-      transition: border-color var(--transition), color var(--transition), transform var(--transition);
-    }
-    .btn-secondary:hover {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      transform: translateY(-1px);
-    }
+/* EVENTS */
+.events-list {
+  max-width:600px;
+  margin:40px auto;
+}
 
-    /* ══════════════════════════════════════════════════════════
-       SECTION WRAPPER
-       ══════════════════════════════════════════════════════════ */
-    .section {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 72px 20px;
-      scroll-margin-top: 64px;
-    }
-    .section-label {
-      font-size: 0.68rem;
-      color: var(--cyan);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-    .section-title {
-      font-size: clamp(1.3rem, 3vw, 1.8rem);
-      font-weight: 800;
-      letter-spacing: 0.03em;
-      margin-bottom: 8px;
-      color: #fff;
-      text-align: left;
-    }
-    .section-sub {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-family: var(--font-body);
-      margin-bottom: 40px;
-      line-height: 1.65;
-      max-width: 600px;
-    }
-    .divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0;
-    }
+.event-card {
+  padding:16px;
+  border:1px solid rgba(255,255,255,0.1);
+  margin-bottom:12px;
+}
 
-    /* ══════════════════════════════════════════════════════════
-       EVENTS
-       ══════════════════════════════════════════════════════════ */
-    .events-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--cyan);
-      margin-bottom: 8px;
-    }
-    .events-signal {
-      font-size: 0.82rem;
-      color: var(--cyan);
-      font-family: var(--font-body);
-      opacity: 0.85;
-    }
-    .events-list {
-      display: grid;
-      gap: 16px;
-      max-width: 520px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .event-card {
-      border: 1px solid rgba(255,255,255,0.12);
-      padding: 18px;
-      border-radius: 10px;
-      text-align: left;
-      background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      box-shadow: 0 10px 28px rgba(0,0,0,0.3);
-      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .event-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.1) 48%, transparent 65%);
-      transform: translateX(-120%);
-      transition: transform 0.75s ease;
-      pointer-events: none;
-    }
-    .event-card:hover {
-      border-color: rgba(0,224,255,0.5);
-      transform: translateY(-2px);
-      box-shadow:
-        0 12px 30px rgba(0, 0, 0, 0.34),
-        0 0 0 1px var(--cyan-glow),
-        0 0 22px var(--magenta-glow);
-    }
-    .event-card:hover::after { transform: translateX(120%); }
-    .event-card h3 {
-      font-size: 0.92rem;
-      font-weight: 700;
-      letter-spacing: 0.03em;
-      margin-bottom: 4px;
-    }
-    .event-link {
-      display: inline-block;
-      margin-top: 8px;
-      color: var(--cyan);
-      font-size: 0.78rem;
-      letter-spacing: 0.04em;
-      text-decoration: none;
-      transition: opacity var(--transition);
-    }
-    .event-link:hover { opacity: 0.7; }
-
-    /* Skeleton loading */
-    .skeleton {
-      background: linear-gradient(90deg,
-        rgba(255,255,255,0.03) 25%,
-        rgba(255,255,255,0.06) 50%,
-        rgba(255,255,255,0.03) 75%);
-      background-size: 200% 100%;
-      animation: skeletonShimmer 1.5s ease-in-out infinite;
-    }
-    @keyframes skeletonShimmer {
-      0%   { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    /* ══════════════════════════════════════════════════════════
-       FLOW STEPS
-       ══════════════════════════════════════════════════════════ */
-    .flow-steps {
-      max-width: 520px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .flow-step {
-      display: flex;
-      align-items: baseline;
-      gap: 16px;
-      text-decoration: none;
-      color: inherit;
-      padding: 10px 12px;
-      transition: opacity var(--transition), background var(--transition);
-      border-radius: 10px;
-      border: 1px solid transparent;
-    }
-    .flow-step:hover {
-      opacity: 0.92;
-      background: rgba(123, 92, 255, 0.08);
-      border-color: rgba(123, 92, 255, 0.24);
-    }
-    .flow-num {
-      font-size: 1.3rem;
-      font-weight: 800;
-      width: 28px;
-      text-align: center;
-      flex-shrink: 0;
-    }
-    .flow-text {
-      font-family: var(--font-body);
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-    .flow-text strong { color: #fff; }
-
-    /* ══════════════════════════════════════════════════════════
-       DEPTH LINKS
-       ══════════════════════════════════════════════════════════ */
-    .depth-links {
-      display: flex;
-      justify-content: center;
-      gap: 28px;
-      flex-wrap: wrap;
-    }
-    .depth-link {
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      color: var(--text-dim);
-      text-decoration: none;
-      transition: color var(--transition), transform var(--transition);
-    }
-    .depth-link:hover { color: var(--cyan); transform: translateY(-1px); }
-
-    /* ══════════════════════════════════════════════════════════
-       FOOTER
-       ══════════════════════════════════════════════════════════ */
-    footer {
-      text-align: center;
-      padding: 32px 20px 48px;
-      color: var(--text-dim);
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      border-top: 1px solid var(--border);
-    }
-    footer a { color: var(--text-dim); text-decoration: none; transition: color var(--transition); }
-    footer a:hover { color: var(--cyan); }
-    footer a i { font-size: 1.1rem; }
-
-    /* ══════════════════════════════════════════════════════════
-       RESPONSIVE
-       ══════════════════════════════════════════════════════════ */
-    @media (max-width: 768px) {
-      /* Nav */
-      .top-nav { padding: 0 16px; height: 52px; }
-      .nav-links { display: none; }
-      .nav-links.open {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 52px;
-        left: 0; right: 0;
-        background: rgba(0,0,0,0.97);
-        border-bottom: 1px solid var(--border);
-        padding: 12px 16px;
-        gap: 4px;
-        backdrop-filter: blur(12px);
-      }
-      .nav-links.open a {
-        padding: 10px 12px;
-        font-size: 0.82rem;
-      }
-      .nav-toggle { display: block; }
-
-      .hero { padding: 80px 16px 60px; min-height: 70vh; }
-      .hero-title { font-size: clamp(1.8rem, 6vw, 2.8rem); }
-      .hero-cta { flex-direction: column; align-items: center; }
-      .btn-primary, .btn-secondary { width: 100%; max-width: 280px; text-align: center; padding: 14px 20px; }
-
-      /* Sections */
-      .section { padding: 48px 16px; }
-
-      /* Events */
-      .events-list { padding: 0 16px 40px !important; }
-
-      /* Flow */
-      .flow-steps { gap: 16px; }
-      .depth-links { gap: 16px; }
-
-      /* Footer */
-      footer { padding: 24px 16px 40px; }
-    }
-  </style>
+</style>
 </head>
+
 <body>
 
-  <canvas id="hero-canvas" aria-hidden="true"></canvas>
-
-  <!-- ════════════════════════════════════════════════════════
-       1. NAVIGATION
-       ════════════════════════════════════════════════════════ -->
-  <nav class="top-nav" role="navigation" aria-label="Main navigation">
-    <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
-      <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
-    </a>
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
-      <i class="fas fa-bars"></i>
-    </button>
-    <div class="nav-links">
-      <a href="#events">Events</a>
-      <a href="/hub.html">Hub</a>
-      <a href="/about.html">About</a>
-      <a href="subscribe.html" class="nav-join">Join</a>
-    </div>
-  </nav>
-
-  <!-- ════════════════════════════════════════════════════════
-       2. HERO (next event IS the hero)
-       ════════════════════════════════════════════════════════ -->
-  <section class="hero" id="events">
-    <div class="hero-inner">
-      <p class="hero-eyebrow">CharlestonHacks</p>
-      <div id="hero-event">
-        <p class="events-label">Next Event</p>
-        <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
-        <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
-      </div>
-      <div id="hero-cta" class="hero-cta" style="display:none;">
-        <a id="hero-rsvp" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary">RSVP Now</a>
-      </div>
-      <p class="hero-secondary">
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">See who's building →</a>
-      </p>
-    </div>
-  </section>
-
-  <!-- ════════════════════════════════════════════════════════
-       3. MORE EVENTS
-       ════════════════════════════════════════════════════════ -->
-  <div id="events-more" class="events-list" style="padding:0 20px 48px;"></div>
-
-  <hr class="divider">
-
-  <!-- ════════════════════════════════════════════════════════
-       4. HOW THIS WORKS
-       ════════════════════════════════════════════════════════ -->
-  <div class="section" id="bridge-section" style="padding-top:40px;padding-bottom:36px;">
-    <p class="section-title" data-aos="fade-up" style="text-align:center;margin-bottom:24px;font-size:1rem;font-weight:600;color:var(--text-dim);">How this works:</p>
-
-    <div class="flow-steps" data-aos="fade-up" data-aos-delay="60">
-      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="flow-step">
-        <span class="flow-num" style="color:var(--cyan);">1</span>
-        <span class="flow-text"><strong>See who's building and find people to meet</strong> — projects, people, skills, and where overlap exists.</span>
-      </a>
-      <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" class="flow-step">
-        <span class="flow-num" style="color:#00ff88;">2</span>
-        <span class="flow-text"><strong>Show up where they'll be</strong> — connections compound when they repeat.</span>
-      </a>
-    </div>
+<nav class="top-nav">
+  <div>CharlestonHacks</div>
+  <div class="nav-links">
+    <a href="#events">Events</a>
+    <a href="subscribe.html">Join</a>
   </div>
+</nav>
 
-  <hr class="divider">
+<section class="hero" id="events">
+  <div class="hero-inner">
+    <p>Next Event</p>
 
-  <!-- ════════════════════════════════════════════════════════
-       5. GO DEEPER (minimal)
-       ════════════════════════════════════════════════════════ -->
-  <div class="section" style="padding-top:40px;padding-bottom:40px;">
-    <div class="depth-links" data-aos="fade-up">
-      <a href="subscribe.html" class="depth-link">Join the community →</a>
-      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="depth-link">See active projects →</a>
-      <a href="bbs.html" class="depth-link">Open chat →</a>
-    </div>
+    <h1 id="event-title" class="hero-title">Loading…</h1>
+    <p id="event-date" class="hero-sub"></p>
+
+    <a id="event-link" class="btn" href="#" target="_blank">RSVP</a>
   </div>
+</section>
 
-  <!-- ════════════════════════════════════════════════════════
-       6. FOOTER
-       ════════════════════════════════════════════════════════ -->
-  <footer>
-    <div style="display:flex;justify-content:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;">
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" aria-label="Meetup"><i class="fab fa-meetup"></i></a>
-      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-      <a href="https://github.com/charlestonhacks" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
-      <a href="mailto:hello@charlestonhacks.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-    </div>
-    <p>© 2026 CharlestonHacks · Charleston, SC ·
-      <a href="/">Home</a> ·
-      <a href="/about.html">About</a> ·
-      <a href="/hub.html">Hub</a> ·
-      <a href="subscribe.html">Newsletter</a>
-    </p>
-  </footer>
+<div id="events-more" class="events-list"></div>
 
-  <!-- ════════════════════════════════════════════════════════
-       SCRIPTS
-       ════════════════════════════════════════════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script>
-    AOS.init({ duration: 500, easing: 'ease-out', once: true, offset: 60 });
+<script>
+const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
 
-    // ── Mobile nav toggle ──
-    (function () {
-      const toggle = document.querySelector('.nav-toggle');
-      const links = document.querySelector('.nav-links');
-      if (!toggle || !links) return;
-      toggle.addEventListener('click', function () {
-        const open = links.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', String(open));
-        toggle.querySelector('i').className = open ? 'fas fa-times' : 'fas fa-bars';
-      });
-      // Close on link click
-      links.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () {
-          links.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-          toggle.querySelector('i').className = 'fas fa-bars';
-        });
-      });
-    })();
+async function loadEvents() {
+  try {
+    const res = await fetch(FEED_URL);
+    const data = await res.json();
 
-    // ── Neural canvas background ──
-    (function () {
-      const canvas = document.getElementById('hero-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      let W, H, nodes = [];
+    const now = Date.now();
 
-      function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-      window.addEventListener('resize', resize);
-      resize();
+    const upcoming = data
+      .filter(e => new Date(e.startDate).getTime() > now)
+      .sort((a,b)=>new Date(a.startDate)-new Date(b.startDate));
 
-      function Node() {
-        this.x = Math.random() * W; this.y = Math.random() * H;
-        this.vx = (Math.random() - 0.5) * 0.4; this.vy = (Math.random() - 0.5) * 0.4;
-      }
-      Node.prototype.update = function () {
-        this.x += this.vx; this.y += this.vy;
-        if (this.x < 0 || this.x > W) this.vx *= -1;
-        if (this.y < 0 || this.y > H) this.vy *= -1;
-      };
+    if (!upcoming.length) {
+      document.getElementById("event-title").innerText = "New event dropping soon";
+      return;
+    }
 
-      for (var i = 0; i < 55; i++) nodes.push(new Node());
+    const next = upcoming[0];
 
-      function draw() {
-        ctx.clearRect(0, 0, W, H);
-        for (var i = 0; i < nodes.length; i++) {
-          nodes[i].update();
-          ctx.beginPath();
-          ctx.arc(nodes[i].x, nodes[i].y, 1.8, 0, Math.PI * 2);
-          ctx.fillStyle = 'rgba(0,224,255,0.55)';
-          ctx.fill();
-          for (var j = i + 1; j < nodes.length; j++) {
-            var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y;
-            var d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 130) {
-              ctx.strokeStyle = 'rgba(0,224,255,' + ((1 - d / 130) * 0.18) + ')';
-              ctx.lineWidth = 0.5;
-              ctx.beginPath();
-              ctx.moveTo(nodes[i].x, nodes[i].y);
-              ctx.lineTo(nodes[j].x, nodes[j].y);
-              ctx.stroke();
-            }
-          }
-        }
-        requestAnimationFrame(draw);
-      }
-      draw();
-    })();
+    document.getElementById("event-title").innerText = next.title;
+    document.getElementById("event-date").innerText =
+      new Date(next.startDate).toLocaleDateString();
 
-    // ── Load live events ──
-    (function () {
-      var FEED_URL = 'https://charlestonhacks-events.dmhamilton1.workers.dev';
+    document.getElementById("event-link").href = next.link;
 
-      function safeText(s) {
-        return String(s ?? '').replace(/[<>&"]/g, function (c) {
-          return ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' })[c];
-        });
-      }
+    // more events
+    const more = upcoming.slice(1,3);
 
-      function formatDate(dateStr) {
-        if (!dateStr) return 'Upcoming';
-        try {
-          var d = new Date(dateStr);
-          if (isNaN(d.getTime())) return 'Upcoming';
-          return d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-        } catch (e) { return 'Upcoming'; }
-      }
+    document.getElementById("events-more").innerHTML =
+      more.map(e => `
+        <div class="event-card">
+          <strong>${e.title}</strong><br>
+          ${new Date(e.startDate).toLocaleDateString()}<br>
+          <a href="${e.link}" target="_blank">View →</a>
+        </div>
+      `).join("");
 
-      async function loadHomepageEvents() {
-        var heroEvent = document.getElementById('hero-event');
-        var heroCta = document.getElementById('hero-cta');
-        var heroRsvp = document.getElementById('hero-rsvp');
-        var moreList = document.getElementById('events-more');
-        var events = [];
-        var TIMEOUT_MS = 6000;
+  } catch(e) {
+    document.getElementById("event-title").innerText = "Unable to load events";
+  }
+}
 
-        try {
-          var controller = new AbortController();
-          var timer = setTimeout(function () { controller.abort(); }, TIMEOUT_MS);
-          var res = await fetch(FEED_URL, { signal: controller.signal });
-          clearTimeout(timer);
-          if (!res.ok) throw new Error(res.status);
-          var data = await res.json();
-          events = Array.isArray(data) ? data : (data?.events ?? []);
-        } catch (e) {
-          events = [];
-        }
+loadEvents();
+</script>
 
-        var now = Date.now();
-        var upcoming = events
-          .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
-          .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
-
-        if (heroEvent) {
-          if (upcoming.length === 0) {
-            heroEvent.innerHTML =
-              '<p class="events-label">Next Event</p>' +
-              '<h1 class="hero-title">New event dropping soon</h1>' +
-              '<p class="hero-sub">Follow us on Meetup to get notified the moment it\'s live.</p>' +
-              '<p class="events-signal" style="margin-top:16px;">500+ members · 40+ at the last event</p>';
-            if (heroCta) { heroCta.style.display = 'flex'; }
-            if (heroRsvp) { heroRsvp.textContent = 'Follow on Meetup'; }
-          } else {
-            var ev = upcoming[0];
-            var title = safeText(ev.title || 'Event')
-              .replace(/CharlestonHacks\s*(Presents\s*:?\s*)?[-–—:]?\s*/gi, '')
-              .replace(/\*\*/g, '')
-              .trim();
-            var link = safeText(ev.link || '#');
-            var date = safeText(formatDate(ev.startDate));
-
-            // Time proximity
-            var msAway = new Date(ev.startDate).getTime() - Date.now();
-            var daysAway = Math.ceil(msAway / 86400000);
-            var proximity = '';
-            if (daysAway <= 0) proximity = 'Today';
-            else if (daysAway === 1) proximity = 'Tomorrow';
-            else if (daysAway <= 7) proximity = 'In ' + daysAway + ' days';
-            else if (daysAway <= 14) proximity = date + ' · ' + daysAway + ' days away';
-            else proximity = date;
-
-            // Social signal — specific if available, confident if not
-            var rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || 0;
-            var signal = '';
-            if (rsvpCount >= 5) {
-              signal = rsvpCount + ' people going';
-            } else {
-              signal = 'Builders, designers, and founders already going';
-            }
-
-            heroEvent.innerHTML =
-              '<p class="events-label">Next Event — ' + proximity + '</p>' +
-              '<h1 class="hero-title">' + title + '</h1>' +
-              '<p class="hero-sub">Bring what you\'re building. Or just show up.</p>' +
-              '<p class="events-signal" style="margin-top:16px;">' + signal + '</p>';
-            if (heroCta) { heroCta.style.display = 'flex'; }
-            if (heroRsvp) { heroRsvp.href = link; heroRsvp.textContent = 'RSVP Now'; }
-          }
-        }
-
-        if (moreList && upcoming.length > 1) {
-          moreList.innerHTML = upcoming.slice(1, 3).map(function (ev) {
-            var title = safeText(ev.title || 'Event')
-              .replace(/CharlestonHacks\s*(Presents\s*:?\s*)?[-–—:]?\s*/gi, '')
-              .replace(/\*\*/g, '')
-              .trim();
-            var link = safeText(ev.link || '#');
-            var date = safeText(formatDate(ev.startDate));
-            return '<div class="event-card">' +
-              '<h3>' + title + ' — ' + date + '</h3>' +
-              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="event-link">View Event →</a>' +
-              '</div>';
-          }).join('');
-        }
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadHomepageEvents);
-      } else {
-        loadHomepageEvents();
-      }
-    })();
-  </script>
 </body>
 </html>
