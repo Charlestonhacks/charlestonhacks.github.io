@@ -9,6 +9,12 @@
   <meta property="og:description" content="Charleston's hub for builders, hackers, and makers. Events, newsletter, and connection.">
   <meta property="og:image" content="https://charlestonhacks.com/images/websitepanel.webp">
   <meta property="og:url" content="https://charlestonhacks.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="CharlestonHacks">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Join the CharlestonHacks Community">
+  <meta name="twitter:description" content="Charleston's hub for builders, hackers, and makers. Events, newsletter, and connection.">
+  <meta name="twitter:image" content="https://charlestonhacks.com/images/websitepanel.webp">
   <link rel="canonical" href="https://charlestonhacks.com/">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -92,6 +98,25 @@
     }
 
     a { color: inherit; }
+
+
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--cyan);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      #hero-canvas { display: none; }
+      .content-section { opacity: 1; transform: none; }
+    }
 
     #hero-canvas {
       position: fixed;
@@ -561,10 +586,10 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
       <i class="fas fa-bars"></i>
     </button>
-    <div class="nav-links">
+    <div class="nav-links" id="primary-nav">
       <a href="#events">Events</a>
       <a href="/hub.html">Hub</a>
       <a href="/about.html">About</a>
@@ -591,7 +616,7 @@
       </div>
     </section>
 
-    <div id="events-more" class="events-list" style="padding:0 20px 48px;"></div>
+    <div id="events-more" class="events-list" aria-live="polite" style="padding:0 20px 48px;"></div>
 
     <hr class="divider">
 
@@ -629,7 +654,7 @@
       <p class="section-label">Upcoming</p>
       <h2 class="section-title">More ways to show up</h2>
       <p class="section-sub">The next event stays first. Additional events appear here so the page still has depth without competing with the hero.</p>
-      <div class="events-list" id="homepage-events">
+      <div class="events-list" id="homepage-events" aria-live="polite">
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
       </div>
@@ -686,7 +711,7 @@
     </p>
   </footer>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script>
     if (window.AOS) AOS.init({ duration: 500, easing: 'ease-out', once: true, offset: 60 });
 
@@ -715,6 +740,8 @@
     (function () {
       const canvas = document.getElementById('hero-canvas');
       if (!canvas) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) return;
       const ctx = canvas.getContext('2d');
       let W = 0;
       let H = 0;
@@ -744,6 +771,7 @@
       for (let i = 0; i < 55; i++) nodes.push(new Node());
 
       function draw() {
+        if (document.hidden) { requestAnimationFrame(draw); return; }
         ctx.clearRect(0, 0, W, H);
         for (let i = 0; i < nodes.length; i++) {
           nodes[i].update();
