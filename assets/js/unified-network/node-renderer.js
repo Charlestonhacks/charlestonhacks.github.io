@@ -211,9 +211,20 @@ export class NodeRenderer {
     nodeMerge.each((d, i, nodes) => {
       const element = nodes[i];
       const visualState = this.getVisualState(d, state);
-      
+
+      // Mobile boundary clamping: keep nodes inside visible viewport
+      // Accounts for top UI chrome (~70px) and bottom search/mode-switcher (~200px)
+      let x = d.x ?? 0;
+      let y = d.y ?? 0;
+      if (window.innerWidth < 768) {
+        const r = (visualState.radius || 24) + 4;
+        const sidePad = 40;
+        x = Math.max(sidePad + r, Math.min(window.innerWidth - sidePad - r, x));
+        y = Math.max(70 + r, Math.min(window.innerHeight - 200 - r, y));
+      }
+
       // Use CSS transform for GPU acceleration
-      element.style.transform = `translate(${d.x}px, ${d.y}px) scale(${visualState.scale})`;
+      element.style.transform = `translate(${x}px, ${y}px) scale(${visualState.scale})`;
       element.style.opacity = visualState.opacity;
     });
 

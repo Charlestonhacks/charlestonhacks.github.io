@@ -11,17 +11,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <title>CharlestonHacks Innovation Engine</title>
-  <link rel="icon" href="favicon.ico"/>
 
   <!-- Core CSS -->
   <link rel="stylesheet" href="assets/css/base.css" />
   <link rel="stylesheet" href="assets/css/engine.css" />
   <link rel="stylesheet" href="assets/css/overlays.css" />
-  <link rel="stylesheet" href="assets/css/connections.css" />
+  <link rel="stylesheet" href="assets/css/connections.css?v=mobile-fix-20260405" />
   <link rel="stylesheet" href="assets/css/cynq.css" />
   <link rel="stylesheet" href="assets/css/messaging.css" />
-  <link rel="stylesheet" href="dashboard.css" />
-  <link rel="stylesheet" href="assets/css/synapse-progressive-disclosure.css" />
+  <link rel="stylesheet" href="dashboard.css?v=mobile-fix-20260405" />
+  <link rel="stylesheet" href="assets/css/synapse-progressive-disclosure.css?v=mobile-fix-20260405" />
   <link rel="stylesheet" href="assets/css/quiet-mode.css" />
 
   <!-- Icons -->
@@ -173,11 +172,11 @@
       #btn-refresh-network {
         position: fixed !important;
         top: auto !important;
-        bottom: 80px !important; /* Above search bar */
+        bottom: 260px !important; /* above FAB (196px) + 64px clearance */
         right: 20px !important;
         z-index: 1000 !important;
-        width: 56px !important;
-        height: 56px !important;
+        width: 48px !important;
+        height: 48px !important;
         box-shadow: 0 4px 12px rgba(0,224,255,0.3) !important;
       }
 
@@ -485,9 +484,9 @@
         display: none !important;
       }
 
-      /* Search container - move down significantly */
+      /* Search container - anchored at bottom with safe area inset */
       #centered-search-container {
-        bottom: 20px !important; /* Move to bottom with more space */
+        bottom: max(16px, env(safe-area-inset-bottom, 16px)) !important;
         width: calc(100vw - 20px) !important;
         max-width: calc(100vw - 20px) !important;
         left: 10px !important;
@@ -577,6 +576,17 @@
     }
 
   </style>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6NDKG07DY6');
+  </script>
+  <link rel="canonical" href="https://charlestonhacks.com/dashboard.html"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+  <link rel="manifest" href="/manifest.json"/>
 </head>
 
 <body>
@@ -696,6 +706,16 @@
         display:flex; align-items:center; justify-content:center; position:relative;"
         title="Refresh network view">
         <i class="fas fa-sync-alt" id="refresh-icon-header" style="color:#00e0ff; font-size:1.2rem;"></i>
+      </div>
+
+      <!-- BBS Button -->
+      <div id="btn-bbs" style="cursor:pointer; padding:0.75rem; background:rgba(200,100,255,0.1);
+        border:1px solid rgba(200,100,255,0.3); border-radius:50%; width:48px; height:48px;
+        display:flex; align-items:center; justify-content:center; transition:all 0.2s;"
+        onmouseenter="this.style.background='rgba(200,100,255,0.2)'; this.style.borderColor='rgba(200,100,255,0.6)'"
+        onmouseleave="this.style.background='rgba(200,100,255,0.1)'; this.style.borderColor='rgba(200,100,255,0.3)'"
+        title="Community BBS">
+        <i class="fas fa-terminal" style="color:#c864ff; font-size:1.2rem;"></i>
       </div>
 
       <!-- Logout Button -->
@@ -1452,7 +1472,7 @@
   <script type="module" src="assets/js/synapse.js?v=fc09b39b-1770146154f916933b2da"></script>
 
   <!-- Unified Network Discovery Integration (Feature Flag Controlled) -->
-  <script type="module" src="assets/js/unified-network-integration.js?v=fc09b39b-17701461547"></script>
+  <script type="module" src="assets/js/unified-network-integration.js?v=mobile-fix-20260405"></script>
   
   <!-- Presence Session Manager (Creates and maintains presence sessions) -->
   <script src="assets/js/presence-session-manager.js?v=20260208-1"></script>
@@ -1997,6 +2017,12 @@
 
 <!-- Unified Notification System (Replaces START button with enhanced notifications) -->
 <script src="assets/js/unified-notification-system.js?v=1"></script>
+
+<!-- BBS: import and expose initBBS globally for dashboard-actions.js -->
+<script type="module">
+  import { initBBS } from './assets/js/bbs.js';
+  window.initBBS = initBBS;
+</script>
 
 <!-- Daily Suggestions Engine -->
 <script type="module" src="assets/js/suggestions/index-v2.js"></script>

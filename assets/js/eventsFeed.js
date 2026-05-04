@@ -7,7 +7,7 @@
 
 console.log("📜 eventsFeed.js loaded");
 
-const FEED_URL = "https://charlestonhacks-events-worker.deckerdb26354.workers.dev";
+const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
 
 // Render helpers
 function safeText(s) {

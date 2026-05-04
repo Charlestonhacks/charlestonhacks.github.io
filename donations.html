@@ -5,167 +5,194 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Support Charleston Hacks - Donate or become a sponsor to help us build the tech community.">
     <title>Support Charleston Hacks</title>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-6NDKG07DY6');
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: 'Arial', sans-serif;
+        html, body {
+            background: #000;
+            color: #fff;
+            font-family: 'Orbitron', 'Britannic Bold', Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             min-height: 100vh;
         }
 
-        .container {
-            background: #fff;
-            width: 90%;
-            max-width: 800px;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            margin: 20px auto;
+        .page-wrapper {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
         }
 
-        .back-button {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-            margin-bottom: 20px;
-            display: inline-block;
-        }
-
-        .back-button:hover {
-            background: #764ba2;
-        }
-
-        h1 {
-            color: #333;
+        .page-header {
             text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
+            margin-bottom: 40px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+        .page-header h1 {
+            font-size: 2.4em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #c9a35e, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: #aaa;
+            font-size: 1em;
+            margin: 0;
         }
 
         .donation-options {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
-            margin: 30px 0;
+            margin: 0 0 32px;
         }
 
         .donation-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 10px;
+            background: #1e1e2f;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 32px 24px;
             text-align: center;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         }
 
         .donation-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 22px rgba(201, 163, 94, 0.35);
+            border-color: #c9a35e;
         }
 
         .donation-card i {
-            font-size: 3em;
-            margin-bottom: 15px;
+            font-size: 2.8em;
+            margin-bottom: 16px;
+            color: #c9a35e;
+            display: block;
         }
 
         .donation-card h3 {
-            margin: 10px 0;
-            font-size: 1.5em;
+            margin: 0 0 10px;
+            font-size: 1.2em;
+            color: #c9a35e;
         }
 
         .donation-card p {
-            font-size: 0.95em;
-            opacity: 0.9;
+            font-size: 0.88em;
+            color: #aaa;
+            margin: 0;
+            line-height: 1.5;
         }
 
         .info-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
+            background: #1e1e2f;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 20px;
         }
 
         .info-section h3 {
-            color: #667eea;
-            margin-top: 0;
+            color: #00e0ff;
+            margin: 0 0 16px;
+            font-size: 1.05em;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         .info-section ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
 
         .info-section li {
             padding: 8px 0;
-            color: #555;
+            color: #ccc;
+            font-size: 0.9em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .info-section li:before {
-            content: "✓ ";
-            color: #667eea;
+        .info-section li:last-child {
+            border-bottom: none;
+        }
+
+        .info-section li::before {
+            content: "▸ ";
+            color: #c9a35e;
             font-weight: bold;
-            margin-right: 8px;
+            margin-right: 6px;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
+        .footer-back-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+        }
+
+        .footer-back-button img {
+            max-width: 220px;
+            width: 55vw;
+            height: auto;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .footer-back-button img:hover {
+            transform: scale(1.05);
+            opacity: 0.85;
+        }
+
+        @media (max-width: 600px) {
+            .page-header h1 {
+                font-size: 1.8em;
             }
 
-            .container {
-                padding: 20px;
-                margin: 10px auto;
+            .page-wrapper {
+                padding: 24px 16px 48px;
             }
 
-            h1 {
-                font-size: 2em;
-            }
-
-            .back-button {
-                width: 100%;
+            .donation-options {
+                grid-template-columns: 1fr;
             }
         }
     </style>
+  <link rel="canonical" href="https://charlestonhacks.com/donations.html"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+  <link rel="manifest" href="/manifest.json"/>
 </head>
 <body>
-    <div class="container">
-        <button class="back-button" onclick="window.location.href='index.html'">
-            <i class="fas fa-arrow-left"></i> Back to Home
-        </button>
-
-        <h1>💝 Support Charleston Hacks</h1>
-        <p class="subtitle">Help us build and grow the tech community in Charleston</p>
+    <div class="page-wrapper">
+        <div class="page-header">
+            <h1>Support Charleston Hacks</h1>
+            <p>Help us build and grow the tech community in Charleston</p>
+        </div>
 
         <div class="donation-options">
-            <div class="donation-card" onclick="window.open('https://github.com/sponsors/deckerd451', '_blank')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'github_sponsor'})} window.open('https://github.com/sponsors/deckerd451', '_blank')">
                 <i class="fab fa-github"></i>
                 <h3>GitHub Sponsors</h3>
                 <p>Support us through GitHub's sponsorship program</p>
             </div>
 
-            <div class="donation-card" onclick="alert('Contact us at hello@charlestonhacks.com for sponsorship opportunities')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'corporate_sponsor'})} alert('Contact us at hello@charlestonhacks.com for sponsorship opportunities')">
                 <i class="fas fa-handshake"></i>
                 <h3>Corporate Sponsor</h3>
                 <p>Partner with us to support the next generation of developers</p>
             </div>
 
-            <div class="donation-card" onclick="alert('Contact us at hello@charlestonhacks.com for custom donation options')">
+            <div class="donation-card" onclick="if(typeof gtag==='function'){gtag('event','donation_click',{donation_type:'custom_donation'})} alert('Contact us at hello@charlestonhacks.com for custom donation options')">
                 <i class="fas fa-heart"></i>
                 <h3>Custom Donation</h3>
                 <p>Get in touch for other ways to contribute</p>
@@ -192,6 +219,12 @@
                 <li>Community goodwill and recognition</li>
                 <li>Tax-deductible contributions (where applicable)</li>
             </ul>
+        </div>
+
+        <div class="footer-back-button">
+            <a href="index.html">
+                <img src="assets/chbackbuttonred.png" alt="Back to Home">
+            </a>
         </div>
     </div>
 </body>
