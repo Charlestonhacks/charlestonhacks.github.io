@@ -1,0 +1,49 @@
+Website Beauty Audit (Practical Checklist)
+
+Scope: index.html (homepage) and inlined CSS/JS currently shipping on CharlestonHacks.
+
+1) Strong visual hierarchy — PASS (minor refinement opportunities)
+- Above the fold has a clear flow: eyebrow -> event label -> large headline (h1) -> supporting subhead -> primary CTA (RSVP Now) + secondary CTA (Join the List).
+- Visual weight is concentrated in the hero card and button treatment, making first action obvious.
+- Suggestion: Keep one clearly dominant CTA style; slightly reduce secondary CTA contrast.
+
+2) Readable contrast first — MOSTLY PASS
+- Background image is intentionally subdued (opacity: 0.10 + darkening filter), preserving legibility.
+- Text sits on dark translucent panel with blur and border for readability.
+- Risk: muted text using low-alpha white can dip in contrast on small/mobile displays.
+- Suggestion: raise muted text opacity for critical copy and run an automated contrast audit.
+
+3) Intentional whitespace — PASS
+- Sections use generous vertical spacing (desktop and mobile).
+- Cards and dividers create clear separation between content groups.
+- Suggestion: preserve this spacing discipline as new sections are added.
+
+4) Consistent design language — PASS
+- Font system is controlled (Orbitron + Inter).
+- Stable color tokens and repeated card/button patterns.
+- Hover, radius, and border language are coherent.
+- Suggestion: move inline style attributes into reusable classes for maintainability.
+
+5) Motion with restraint — MIXED
+- Good: prefers-reduced-motion support is implemented.
+- Risk: multiple simultaneous motion systems can compete for attention (hero canvas + auto-scrolling image reel + shimmer placeholders).
+- Suggestion: reduce motion density (slower reel, lower canvas intensity, or interaction-triggered movement).
+
+6) Fast loading — NEEDS IMPROVEMENT
+- Good: webp usage, deferred AOS, and resilient events fetch fallback.
+- Gaps: non-critical gallery images are not lazy-loaded; large inline CSS/JS blocks increase HTML payload and parse work.
+- Suggestion: add loading="lazy" + decoding="async" to gallery/non-critical images and externalize large inline assets.
+
+7) Mobile-first polish — GOOD
+- Mobile nav, stacked CTA layout, and responsive grids are in place.
+- Risks: hero can become tall with dynamic event text; persistent motion can be distracting on lower-powered devices.
+- Suggestion: trim hero density for smallest devices and test scroll smoothness on mid-tier phones.
+
+Overall score: 7.8 / 10
+
+Highest-ROI action list:
+1) Add lazy loading/async decode to gallery and non-critical images.
+2) Reduce simultaneous motion intensity.
+3) Increase muted text contrast slightly.
+4) Externalize large inline CSS/JS for caching/perf.
+5) Add lighthouse and contrast quality gates.
