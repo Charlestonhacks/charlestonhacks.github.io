@@ -184,107 +184,78 @@
        HERO — 100vh
        ══════════════════════════════════════════════════════════ */
     .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      padding: 140px 20px 80px;
       text-align: center;
-      padding: 100px 20px 80px;
       position: relative;
       z-index: 1;
     }
-    .hero-eyebrow {
-      display: inline-block;
-      color: var(--text-dim);
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      margin-bottom: 32px;
-      text-transform: uppercase;
-    }
-    .hero h1 {
-      font-size: clamp(2.4rem, 7vw, 4.2rem);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      color: #fff;
-      margin-bottom: 24px;
+    .hero-inner {
       max-width: 680px;
+      margin: 0 auto;
+    }
+    .hero-title {
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: #fff;
     }
     .hero-sub {
-      max-width: 440px;
-      color: var(--text-muted);
-      font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+      margin-top: 18px;
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.65);
       line-height: 1.6;
       font-family: var(--font-body);
-      margin-bottom: 44px;
     }
     .hero-cta {
+      margin-top: 36px;
       display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
       justify-content: center;
-    }
-    .hero-scroll {
-      position: absolute;
-      bottom: 32px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: var(--text-dim);
-      font-size: 0.9rem;
-      opacity: 0.4;
-      animation: gentleBounce 2.5s ease-in-out infinite;
-    }
-    @keyframes gentleBounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(6px); }
+      gap: 14px;
+      flex-wrap: wrap;
     }
 
     /* ══════════════════════════════════════════════════════════
        BUTTONS
        ══════════════════════════════════════════════════════════ */
     .btn-primary {
-      background: linear-gradient(135deg, var(--cyan), #0099cc);
+      background: var(--cyan);
       color: #000;
       font-family: var(--font-display);
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 14px 28px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 12px 22px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      display: inline-block;
       transition: transform var(--transition), box-shadow var(--transition);
     }
     .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(0,224,255,0.35);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(0,224,255,0.3);
     }
-    .btn-outline {
-      background: transparent;
+    .btn-secondary {
+      border: 1px solid rgba(255,255,255,0.25);
       color: #fff;
       font-family: var(--font-display);
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      padding: 13px 24px;
-      border: 1px solid rgba(255,255,255,0.2);
+      letter-spacing: 0.04em;
+      padding: 12px 22px;
       border-radius: 8px;
       cursor: pointer;
       text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
+      display: inline-block;
+      background: transparent;
       transition: border-color var(--transition), color var(--transition), transform var(--transition);
     }
-    .btn-outline:hover {
+    .btn-secondary:hover {
       border-color: var(--cyan);
       color: var(--cyan);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -328,61 +299,81 @@
     /* ══════════════════════════════════════════════════════════
        EVENTS
        ══════════════════════════════════════════════════════════ */
-    .events-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
+    .events {
+      padding: 100px 20px;
+      text-align: center;
+      scroll-margin-top: 64px;
     }
-    .event-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px 22px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
+    .events-header {
+      max-width: 560px;
+      margin: 0 auto;
     }
-    .event-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: 3px; height: 100%;
-      background: var(--cyan);
-      border-radius: 2px 0 0 2px;
-      opacity: 0.5;
-    }
-    .event-card:hover {
-      border-color: rgba(0,224,255,0.2);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 20px rgba(0,224,255,0.06);
-    }
-    .event-date {
-      font-size: 0.72rem;
-      color: var(--cyan);
+    .events-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 6px;
+      opacity: 0.6;
     }
-    .event-card h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
+    .events-title {
+      margin-top: 10px;
+      font-size: 2rem;
+      font-weight: 600;
     }
-    .event-card h3 a {
-      color: #fff;
-      text-decoration: none;
-      transition: color var(--transition);
+    .events-sub {
+      margin-top: 12px;
+      color: rgba(255,255,255,0.7);
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      line-height: 1.6;
     }
-    .event-card h3 a:hover { color: var(--cyan); }
-    .event-location {
-      font-size: 0.78rem;
-      color: var(--text-dim);
-      margin-bottom: 8px;
+    .events-signal {
+      margin-top: 14px;
+      font-size: 0.9rem;
+      color: var(--cyan);
       font-family: var(--font-body);
     }
+    .events-list {
+      margin-top: 50px;
+      display: grid;
+      gap: 16px;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .event-card {
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 18px;
+      border-radius: 10px;
+      text-align: left;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+    .event-card:hover {
+      border-color: rgba(0,224,255,0.5);
+      transform: translateY(-2px);
+    }
+    .event-card h3 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      margin-bottom: 4px;
+    }
+    .event-card p {
+      color: rgba(255,255,255,0.5);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+    .event-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: var(--cyan);
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      transition: opacity var(--transition);
+    }
+    .event-link:hover { opacity: 0.7; }
     .events-empty {
-      grid-column: 1 / -1;
       text-align: center;
       color: var(--text-dim);
       padding: 32px 16px;
@@ -399,34 +390,10 @@
       background-size: 200% 100%;
       animation: skeletonShimmer 1.5s ease-in-out infinite;
     }
-    .skeleton::before { display: none; }
     @keyframes skeletonShimmer {
       0%   { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.7);
-      font-family: var(--font-display);
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      padding: 8px 18px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all var(--transition);
-    }
-    /* ══════════════════════════════════════════════════════════
-       SOCIAL PROOF LINE
-       ══════════════════════════════════════════════════════════ */
-    .section-proof {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      margin-bottom: 32px;
-      font-style: italic;
-    }
-
     /* ══════════════════════════════════════════════════════════
        FLOW STEPS
        ══════════════════════════════════════════════════════════ */
@@ -520,18 +487,17 @@
       }
       .nav-toggle { display: block; }
 
-      /* Hero */
-      .hero { min-height: calc(100vh - 52px); padding: 48px 16px 40px; }
-      .hero-eyebrow { font-size: 0.65rem; }
-      .hero-cta { flex-direction: column; align-items: stretch; }
-      .btn-primary, .btn-outline { justify-content: center; font-size: 0.82rem; padding: 14px 20px; }
-      .hero-scroll { display: none; }
+      .hero { padding: 80px 16px 60px; }
+      .hero-title { font-size: clamp(2rem, 6vw, 3.2rem); }
+      .hero-cta { flex-direction: column; align-items: center; }
+      .btn-primary, .btn-secondary { width: 100%; max-width: 280px; text-align: center; padding: 14px 20px; }
 
       /* Sections */
       .section { padding: 48px 16px; }
 
       /* Events */
-      .events-grid { grid-template-columns: 1fr; }
+      .events { padding: 60px 16px; }
+      .events-title { font-size: 1.6rem; }
 
       /* Flow */
       .flow-steps { gap: 16px; }
@@ -560,7 +526,7 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="nav-links">
-      <a href="#events-section">Events</a>
+      <a href="#events">Events</a>
       <a href="/hub.html">Hub</a>
       <a href="/about.html">About</a>
       <a href="subscribe.html" class="nav-join">Join</a>
@@ -570,36 +536,33 @@
   <!-- ════════════════════════════════════════════════════════
        2. HERO
        ════════════════════════════════════════════════════════ -->
-  <section class="hero" id="hero">
-    <span class="hero-eyebrow">Charleston, SC · 500+ members · All events free</span>
-    <h1>Meet the people building<br>in Charleston.</h1>
-    <p class="hero-sub">Show up to the next event. That's where it happens.</p>
-    <div class="hero-cta">
-      <a href="#events-section" class="btn-primary">
-        <i class="fas fa-calendar-alt"></i> Join the Next Event
-      </a>
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-outline">
-        <i class="fab fa-meetup"></i> View All Events
-      </a>
-    </div>
-    <div class="hero-scroll" aria-hidden="true">
-      <i class="fas fa-chevron-down"></i>
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="hero-title">
+        Meet the people building in Charleston.
+      </h1>
+      <p class="hero-sub">
+        Not online. Not someday.<br>
+        This week.
+      </p>
+      <div class="hero-cta">
+        <a href="#events" class="btn-primary">Join the Next Event</a>
+        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="btn-secondary">See Who's Building</a>
+      </div>
     </div>
   </section>
 
   <!-- ════════════════════════════════════════════════════════
-       3. UPCOMING EVENTS
+       3. EVENTS
        ════════════════════════════════════════════════════════ -->
-  <div class="section" id="events-section">
-    <p class="section-title" data-aos="fade-up">Upcoming Events</p>
-    <p class="section-proof" data-aos="fade-up" data-aos-delay="40">Last event had 40+ builders show up.</p>
-
-    <div class="events-grid" id="homepage-events" data-aos="fade-up" data-aos-delay="80">
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
-      <div class="event-card skeleton" aria-hidden="true"><div style="height:100px;"></div></div>
+  <section id="events" class="events">
+    <div id="events-featured" class="events-header">
+      <p class="events-label">Next Event</p>
+      <h2 class="events-title skeleton" style="height:2rem;width:80%;margin:10px auto 0;border-radius:6px;">&nbsp;</h2>
+      <p class="events-sub skeleton" style="height:1rem;width:60%;margin:12px auto 0;border-radius:4px;">&nbsp;</p>
     </div>
-  </div>
+    <div id="events-secondary" class="events-list"></div>
+  </section>
 
   <hr class="divider">
 
@@ -802,7 +765,8 @@
       }
 
       async function loadHomepageEvents() {
-        var container = document.getElementById('homepage-events');
+        var featured = document.getElementById('events-featured');
+        var secondary = document.getElementById('events-secondary');
         var events = [];
         var TIMEOUT_MS = 6000;
 
@@ -819,28 +783,42 @@
         }
 
         var now = Date.now();
+        var upcoming = events
+          .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
+          .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
 
-        if (container) {
-          var upcoming = events
-            .filter(function (e) { return e?.startDate && new Date(e.startDate).getTime() > now; })
-            .sort(function (a, b) { return new Date(a.startDate) - new Date(b.startDate); });
-
+        if (featured) {
           if (upcoming.length === 0) {
-            container.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:6px;"></i>No upcoming events right now — <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" style="color:var(--cyan);text-decoration:none;">check Meetup</a> or join the newsletter.</p>';
+            featured.innerHTML =
+              '<p class="events-label">Next Event</p>' +
+              '<h2 class="events-title">Coming Soon</h2>' +
+              '<p class="events-sub">No upcoming events right now.</p>' +
+              '<a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:24px;">Check Meetup</a>';
           } else {
-            container.innerHTML = upcoming.slice(0, 3).map(function (ev) {
-              var title = safeText(ev.title || 'Event');
-              var link = safeText(ev.link || '#');
-              var location = safeText(ev.location || '');
-              var date = safeText(formatDate(ev.startDate));
-              return '<div class="event-card">' +
-                '<div class="event-date">' + date + '</div>' +
-                '<h3><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + title + '</a></h3>' +
-                (location ? '<p class="event-location">\uD83D\uDCCD ' + location + '</p>' : '') +
-                '<a href="' + link + '" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--cyan);letter-spacing:0.06em;text-decoration:none;margin-top:8px;">RSVP Now <i class="fas fa-arrow-right"></i></a>' +
-                '</div>';
-            }).join('');
+            var ev = upcoming[0];
+            var title = safeText(ev.title || 'Event');
+            var link = safeText(ev.link || '#');
+            var desc = safeText((ev.description || '').substring(0, 120));
+            var date = safeText(formatDate(ev.startDate));
+            featured.innerHTML =
+              '<p class="events-label">Next Event</p>' +
+              '<h2 class="events-title">' + title + ' — ' + date + '</h2>' +
+              (desc ? '<p class="events-sub">' + desc + (ev.description && ev.description.length > 120 ? '…' : '') + '</p>' : '') +
+              '<p class="events-signal">Last event had 40+ builders</p>' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="btn-primary" style="margin-top:24px;">RSVP Now</a>';
           }
+        }
+
+        if (secondary && upcoming.length > 1) {
+          secondary.innerHTML = upcoming.slice(1, 3).map(function (ev) {
+            var title = safeText(ev.title || 'Event');
+            var link = safeText(ev.link || '#');
+            var date = safeText(formatDate(ev.startDate));
+            return '<div class="event-card">' +
+              '<h3>' + title + ' — ' + date + '</h3>' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="event-link">View Event →</a>' +
+              '</div>';
+          }).join('');
         }
       }
 
