@@ -705,9 +705,10 @@
           } else {
             var ev = upcoming[0];
             var title = safeText(ev.title || 'Event')
-              .replace(/^CharlestonHacks\s*[-–—:]\s*/i, '');
+              .replace(/CharlestonHacks\s*(Presents\s*:?\s*)?[-–—:]?\s*/gi, '')
+              .replace(/\*\*/g, '')
+              .trim();
             var link = safeText(ev.link || '#');
-            var desc = safeText((ev.description || '').substring(0, 120));
             var date = safeText(formatDate(ev.startDate));
 
             // Time proximity
@@ -720,21 +721,19 @@
             else if (daysAway <= 14) proximity = date + ' · ' + daysAway + ' days away';
             else proximity = date;
 
-            // Social signal
+            // Social signal — specific if available, confident if not
             var rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || 0;
             var signal = '';
-            if (rsvpCount >= 10) {
-              signal = rsvpCount + ' people going · Last event had 40+';
-            } else if (rsvpCount > 0) {
-              signal = rsvpCount + ' people already going · 20+ expected';
+            if (rsvpCount >= 5) {
+              signal = rsvpCount + ' people going';
             } else {
-              signal = '20+ people expected · Last event had 40+';
+              signal = 'Builders, designers, and founders already going';
             }
 
             heroEvent.innerHTML =
               '<p class="events-label">Next Event — ' + proximity + '</p>' +
               '<h1 class="hero-title">' + title + '</h1>' +
-              (desc ? '<p class="hero-sub">' + desc + (ev.description && ev.description.length > 120 ? '…' : '') + '</p>' : '') +
+              '<p class="hero-sub">Bring what you\'re building. Or just show up.</p>' +
               '<p class="events-signal" style="margin-top:16px;">' + signal + '</p>';
             if (heroCta) { heroCta.style.display = 'flex'; }
             if (heroRsvp) { heroRsvp.href = link; heroRsvp.textContent = 'RSVP Now'; }
@@ -744,7 +743,9 @@
         if (moreList && upcoming.length > 1) {
           moreList.innerHTML = upcoming.slice(1, 3).map(function (ev) {
             var title = safeText(ev.title || 'Event')
-              .replace(/^CharlestonHacks\s*[-–—:]\s*/i, '');
+              .replace(/CharlestonHacks\s*(Presents\s*:?\s*)?[-–—:]?\s*/gi, '')
+              .replace(/\*\*/g, '')
+              .trim();
             var link = safeText(ev.link || '#');
             var date = safeText(formatDate(ev.startDate));
             return '<div class="event-card">' +
