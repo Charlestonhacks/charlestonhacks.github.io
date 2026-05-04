@@ -36,6 +36,8 @@
        ══════════════════════════════════════════════════════════ */
     :root {
       --cyan: #00e0ff;
+      --violet: #7b5cff;
+      --rose: #ff4edb;
       --cyan-glow: rgba(0, 224, 255, 0.15);
       --magenta-glow: rgba(170, 76, 255, 0.12);
       --gold: #c9a35e;
@@ -87,6 +89,11 @@
         #000;
       z-index: -3;
       pointer-events: none;
+    }
+    body {
+      background-image:
+        linear-gradient(120deg, rgba(0, 224, 255, 0.03), transparent 40%),
+        linear-gradient(300deg, rgba(123, 92, 255, 0.05), transparent 42%);
     }
 
     /* ══════════════════════════════════════════════════════════
@@ -185,6 +192,19 @@
       box-shadow:
         0 16px 44px rgba(0, 0, 0, 0.45),
         inset 0 1px 0 rgba(255, 255, 255, 0.07);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-inner::before {
+      content: "";
+      position: absolute;
+      top: -60%;
+      right: -28%;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 78, 219, 0.16) 0%, rgba(0, 224, 255, 0.04) 45%, transparent 70%);
+      pointer-events: none;
     }
     .hero-eyebrow {
       font-size: 0.68rem;
@@ -200,6 +220,10 @@
       line-height: 1.15;
       color: #fff;
       text-shadow: 0 0 22px rgba(0, 224, 255, 0.15);
+      background: linear-gradient(95deg, #ffffff 24%, #9ceeff 60%, #e1d5ff 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .hero-sub {
       margin-top: 16px;
@@ -233,7 +257,7 @@
        BUTTONS
        ══════════════════════════════════════════════════════════ */
     .btn-primary {
-      background: linear-gradient(135deg, #4cecff, #00c6e6);
+      background: linear-gradient(135deg, #64f2ff, #4fa3ff 55%, #7b5cff 100%);
       color: #000;
       font-family: var(--font-display);
       font-size: 0.82rem;
@@ -245,12 +269,12 @@
       cursor: pointer;
       text-decoration: none;
       display: inline-block;
-      box-shadow: 0 6px 20px rgba(0,224,255,0.25);
+      box-shadow: 0 10px 30px rgba(79, 163, 255, 0.34);
       transition: transform var(--transition), box-shadow var(--transition);
     }
     .btn-primary:hover {
       transform: translateY(-1px);
-      box-shadow: 0 10px 28px rgba(0,224,255,0.46);
+      box-shadow: 0 14px 36px rgba(79, 163, 255, 0.46);
     }
     .btn-secondary {
       border: 1px solid rgba(255,255,255,0.25);
@@ -341,7 +365,18 @@
       text-align: left;
       background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
       box-shadow: 0 10px 28px rgba(0,0,0,0.3);
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .event-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.1) 48%, transparent 65%);
+      transform: translateX(-120%);
+      transition: transform 0.75s ease;
+      pointer-events: none;
     }
     .event-card:hover {
       border-color: rgba(0,224,255,0.5);
@@ -351,6 +386,7 @@
         0 0 0 1px var(--cyan-glow),
         0 0 22px var(--magenta-glow);
     }
+    .event-card:hover::after { transform: translateX(120%); }
     .event-card h3 {
       font-size: 0.92rem;
       font-weight: 700;
@@ -397,10 +433,16 @@
       gap: 16px;
       text-decoration: none;
       color: inherit;
-      padding: 8px 0;
-      transition: opacity var(--transition);
+      padding: 10px 12px;
+      transition: opacity var(--transition), background var(--transition);
+      border-radius: 10px;
+      border: 1px solid transparent;
     }
-    .flow-step:hover { opacity: 0.75; }
+    .flow-step:hover {
+      opacity: 0.92;
+      background: rgba(123, 92, 255, 0.08);
+      border-color: rgba(123, 92, 255, 0.24);
+    }
     .flow-num {
       font-size: 1.3rem;
       font-weight: 800;
@@ -430,9 +472,9 @@
       letter-spacing: 0.06em;
       color: var(--text-dim);
       text-decoration: none;
-      transition: color var(--transition);
+      transition: color var(--transition), transform var(--transition);
     }
-    .depth-link:hover { color: var(--cyan); }
+    .depth-link:hover { color: var(--cyan); transform: translateY(-1px); }
 
     /* ══════════════════════════════════════════════════════════
        FOOTER
