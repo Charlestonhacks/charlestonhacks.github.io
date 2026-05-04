@@ -177,19 +177,19 @@
 
     .hero {
       padding: 118px 20px 54px;
-      text-align: center;
+      text-align: left;
       position: relative;
       z-index: 1;
-      min-height: 80vh;
+      min-height: 92vh;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .hero-inner {
-      width: min(680px, 100%);
+      width: min(1020px, 100%);
       margin: 0 auto;
-      padding: 32px 24px;
+      padding: clamp(36px, 5vw, 62px);
       border: 1px solid rgba(255, 255, 255, 0.09);
       border-radius: 20px;
       background: linear-gradient(145deg, rgba(10, 15, 20, 0.78), rgba(0, 0, 0, 0.55));
@@ -232,7 +232,7 @@
     }
 
     .hero-title {
-      font-size: clamp(2.1rem, 5vw, 3.55rem);
+      font-size: clamp(3rem, 8vw, 6rem);
       font-weight: 800;
       letter-spacing: -0.025em;
       line-height: 1.13;
@@ -629,7 +629,8 @@
       <a href="#events">Events</a>
       <a href="/hub.html">Hub</a>
       <a href="/about.html">About</a>
-      <a href="subscribe.html" class="nav-join">Join</a>
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Next Event</a>
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="nav-join">Attend</a>
     </div>
   </nav>
 
@@ -643,11 +644,11 @@
           <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
         </div>
         <div id="hero-cta" class="hero-cta" style="display:none;">
-          <a id="hero-rsvp" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary">RSVP Now</a>
-          <a href="subscribe.html" class="btn-secondary">Join the List</a>
+          <a id="hero-rsvp" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary">Attend Event</a>
+          
         </div>
         <p class="hero-secondary">
-          <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">See who’s building →</a>
+          <a href="#events-more">See more upcoming events ↓</a>
         </p>
       </div>
     </section>
@@ -765,6 +766,7 @@
     <p>© 2026 CharlestonHacks · Charleston, SC ·
       <a href="/">Home</a> ·
       <a href="/about.html">About</a> ·
+      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Next Event</a> ·
       <a href="/hub.html">Hub</a> ·
       <a href="subscribe.html">Newsletter</a>
     </p>
@@ -919,7 +921,7 @@
           heroEvent.innerHTML =
             '<p class="events-label">Next Event</p>' +
             '<h1 class="hero-title">New event dropping soon</h1>' +
-            '<p class="hero-sub">Follow us on Meetup to get notified the moment it’s live.</p>' +
+            '<p class="hero-sub">Charleston, SC · Follow Meetup now and be first in line.</p>' +
             '<p class="events-signal" style="margin-top:16px;">500+ members · builders, hackers, and makers in Charleston</p>';
           if (heroCta) heroCta.style.display = 'flex';
           if (heroRsvp) {
@@ -956,12 +958,12 @@
         heroEvent.innerHTML =
           '<p class="events-label">Next Event — ' + proximity + '</p>' +
           '<h1 class="hero-title">' + cleanTitle(ev.title || ev.name) + '</h1>' +
-          '<p class="hero-sub">Bring what you’re building. Or just show up.</p>' +
+          '<p class="hero-sub">' + date + ' · Charleston, SC · Doors open for builders and curious newcomers.</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
         if (heroCta) heroCta.style.display = 'flex';
         if (heroRsvp) {
           heroRsvp.href = link;
-          heroRsvp.textContent = 'RSVP Now';
+          heroRsvp.textContent = 'Attend Event';
         }
       }
 
