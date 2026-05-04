@@ -702,13 +702,10 @@
           
         </div>
         <p class="hero-secondary">
-          <a href="#events-more">See more upcoming events ↓</a>
+          <a href="#events-section">See upcoming events ↓</a>
         </p>
       </div>
     </section>
-
-    <div id="events-more" class="events-list" aria-live="polite" style="padding:0 20px 48px;"></div>
-
 
 
     <section class="section" id="photo-reel" aria-label="Community photo reel" style="padding-top:22px;padding-bottom:28px;">
@@ -1022,40 +1019,27 @@
       }
 
       function renderMoreEvents(upcoming) {
-        const moreList = document.getElementById('events-more');
         const homepageEvents = document.getElementById('homepage-events');
+        if (!homepageEvents) return;
 
-        if (moreList) {
-          moreList.innerHTML = upcoming.slice(1, 3).map(function (ev) {
-            const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
-            const date = safeText(formatDate(getStart(ev)));
-            return '<div class="event-card">' +
-              '<h3>' + cleanTitle(ev.title || ev.name) + ' — ' + date + '</h3>' +
-              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="event-link">View Event →</a>' +
-              '</div>';
-          }).join('');
+        const eventsToShow = upcoming.slice(1, 4);
+        if (!eventsToShow.length) {
+          homepageEvents.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:0.4rem;"></i>No additional upcoming events right now. Check back soon.</p>';
+          return;
         }
 
-        if (homepageEvents) {
-          const eventsToShow = upcoming.slice(0, 3);
-          if (!eventsToShow.length) {
-            homepageEvents.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:0.4rem;"></i>No upcoming events right now. Check back soon.</p>';
-            return;
-          }
-
-          homepageEvents.innerHTML = eventsToShow.map(function (ev) {
-            const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
-            const location = safeText(ev.location || ev.venue || '');
-            const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
-            const date = safeText(formatDate(getStart(ev)));
-            return '<div class="event-card">' +
-              '<div class="event-date">' + date + '</div>' +
-              '<h3><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + cleanTitle(ev.title || ev.name) + '</a></h3>' +
-              (location ? '<p class="event-location">📍 ' + location + '</p>' : '') +
-              (description ? '<p class="event-desc">' + description + (description.length >= 130 ? '…' : '') + '</p>' : '') +
-              '</div>';
-          }).join('');
-        }
+        homepageEvents.innerHTML = eventsToShow.map(function (ev) {
+          const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
+          const location = safeText(ev.location || ev.venue || '');
+          const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
+          const date = safeText(formatDate(getStart(ev)));
+          return '<div class="event-card">' +
+            '<div class="event-date">' + date + '</div>' +
+            '<h3><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + cleanTitle(ev.title || ev.name) + '</a></h3>' +
+            (location ? '<p class="event-location">📍 ' + location + '</p>' : '') +
+            (description ? '<p class="event-desc">' + description + (description.length >= 130 ? '…' : '') + '</p>' : '') +
+            '</div>';
+        }).join('');
       }
 
       async function loadEvents() {
