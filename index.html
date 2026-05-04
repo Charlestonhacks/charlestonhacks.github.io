@@ -774,10 +774,11 @@
           if (upcoming.length === 0) {
             heroEvent.innerHTML =
               '<p class="events-label">Next Event</p>' +
-              '<h1 class="hero-title">Coming Soon</h1>' +
-              '<p class="hero-sub">No upcoming events right now — check back soon.</p>';
+              '<h1 class="hero-title">New event dropping soon</h1>' +
+              '<p class="hero-sub">Follow us on Meetup to get notified the moment it\'s live.</p>' +
+              '<p class="events-signal" style="margin-top:16px;">500+ members · 40+ at the last event</p>';
             if (heroCta) { heroCta.style.display = 'flex'; }
-            if (heroRsvp) { heroRsvp.textContent = 'Check Meetup'; }
+            if (heroRsvp) { heroRsvp.textContent = 'Follow on Meetup'; }
           } else {
             var ev = upcoming[0];
             var title = safeText(ev.title || 'Event');
@@ -791,16 +792,19 @@
             var proximity = '';
             if (daysAway <= 0) proximity = 'Today';
             else if (daysAway === 1) proximity = 'Tomorrow';
-            else if (daysAway <= 7) proximity = daysAway + ' days away';
+            else if (daysAway <= 7) proximity = 'In ' + daysAway + ' days';
+            else if (daysAway <= 14) proximity = date + ' · ' + daysAway + ' days away';
             else proximity = date;
 
             // Social signal
             var rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || 0;
             var signal = '';
-            if (rsvpCount > 0) {
+            if (rsvpCount >= 10) {
               signal = rsvpCount + ' people going · Last event had 40+';
+            } else if (rsvpCount > 0) {
+              signal = rsvpCount + ' people already going · 20+ expected';
             } else {
-              signal = 'Last event had 40+ builders';
+              signal = '20+ people expected · Last event had 40+';
             }
 
             heroEvent.innerHTML =
