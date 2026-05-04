@@ -176,68 +176,105 @@
     }
 
     .hero {
-      padding: 118px 20px 54px;
+      padding: 106px 20px 50px;
       text-align: left;
       position: relative;
       z-index: 1;
-      min-height: 92vh;
+      min-height: calc(100vh - 66px);
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(4px);
+      pointer-events: none;
+      animation: floatOrb 16s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .hero::before {
+      width: clamp(220px, 30vw, 420px);
+      height: clamp(220px, 30vw, 420px);
+      right: 4%;
+      top: 11%;
+      background: radial-gradient(circle, rgba(0, 224, 255, 0.3) 0%, rgba(0, 224, 255, 0.06) 48%, transparent 75%);
+    }
+
+    .hero::after {
+      width: clamp(240px, 32vw, 450px);
+      height: clamp(240px, 32vw, 450px);
+      left: -4%;
+      bottom: -10%;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.32) 0%, rgba(139, 92, 246, 0.08) 52%, transparent 76%);
+      animation-delay: -6s;
     }
 
     .hero-inner {
-      width: min(1020px, 100%);
+      width: min(1040px, 100%);
       margin: 0 auto;
-      padding: clamp(36px, 5vw, 62px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      border-radius: 20px;
-      background: linear-gradient(145deg, rgba(10, 15, 20, 0.78), rgba(0, 0, 0, 0.55));
-      backdrop-filter: blur(10px);
-      box-shadow: 0 18px 48px rgba(0,0,0,0.48), inset 0 1px 0 rgba(255,255,255,0.07);
+      padding: clamp(34px, 5vw, 64px);
+      border: 1px solid rgba(176, 241, 255, 0.28);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(5, 13, 22, 0.78), rgba(4, 10, 18, 0.58));
+      backdrop-filter: blur(14px);
+      box-shadow: 0 28px 68px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(255,255,255,0.09);
       position: relative;
       overflow: hidden;
+      z-index: 1;
     }
 
     .hero-inner::before {
       content: '';
       position: absolute;
-      top: -60%;
-      right: -28%;
-      width: 340px;
-      height: 340px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 78, 219, 0.16) 0%, rgba(0, 224, 255, 0.05) 45%, transparent 70%);
+      inset: 0;
+      background: radial-gradient(circle at 84% 14%, rgba(0, 224, 255, 0.16), transparent 42%), radial-gradient(circle at 20% 90%, rgba(139, 92, 246, 0.15), transparent 45%);
+      pointer-events: none;
+    }
+
+    .hero-inner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.08) 45%, transparent 65%);
+      transform: translateX(-140%);
+      animation: panelSweep 9s ease-in-out infinite;
       pointer-events: none;
     }
 
     .hero-eyebrow {
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--text-dim);
-      margin-bottom: 34px;
+      color: rgba(226, 245, 255, 0.82);
+      margin-bottom: 12px;
       position: relative;
       z-index: 1;
     }
 
     .events-label {
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--cyan);
-      margin-bottom: 10px;
+      font-size: 0.86rem;
+      letter-spacing: 0.03em;
+      text-transform: none;
+      color: rgba(154, 239, 255, 0.9);
+      margin-bottom: 12px;
       position: relative;
       z-index: 1;
     }
 
     .hero-title {
-      font-size: clamp(3rem, 8vw, 6rem);
+      font-size: clamp(4rem, 11vw, 9rem);
       font-weight: 800;
-      letter-spacing: -0.025em;
-      line-height: 1.13;
+      letter-spacing: -0.045em;
+      line-height: 0.9;
       color: #fff;
-      text-shadow: 0 0 22px rgba(0, 224, 255, 0.15);
+      text-shadow: 0 0 30px rgba(0, 224, 255, 0.22);
       background: linear-gradient(95deg, #fff 24%, #9ceeff 60%, #e1d5ff 100%);
       -webkit-background-clip: text;
       background-clip: text;
@@ -247,8 +284,8 @@
     }
 
     .hero-sub {
-      margin-top: 16px;
-      font-size: 1rem;
+      margin-top: 14px;
+      font-size: clamp(1rem, 1.7vw, 1.2rem);
       color: rgba(255,255,255,0.66);
       line-height: 1.6;
       font-family: var(--font-body);
@@ -257,8 +294,8 @@
     }
 
     .events-signal {
-      font-size: 0.84rem;
-      color: var(--cyan);
+      font-size: 0.95rem;
+      color: rgba(154, 239, 255, 0.9);
       font-family: var(--font-body);
       opacity: 0.9;
       position: relative;
@@ -289,7 +326,7 @@
       border-bottom: 1px solid rgba(255,255,255,0.15);
       padding-bottom: 2px;
     }
-    .hero-secondary a:hover { color: var(--cyan); border-color: var(--cyan); }
+    .hero-secondary a:hover { color: rgba(154, 239, 255, 0.9); border-color: rgba(154, 239, 255, 0.9); }
 
     .btn-primary, .btn-secondary {
       font-family: var(--font-display);
@@ -317,6 +354,21 @@
       color: #fff;
       padding: 13px 22px;
       background: transparent;
+    }
+
+    .btn-primary {
+      font-size: 0.94rem;
+      padding: 16px 30px;
+    }
+
+    @keyframes floatOrb {
+      0%, 100% { transform: translate3d(0, 0, 0); }
+      50% { transform: translate3d(0, -18px, 0); }
+    }
+
+    @keyframes panelSweep {
+      0%, 70%, 100% { transform: translateX(-140%); }
+      85% { transform: translateX(130%); }
     }
     .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-1px); }
 
@@ -557,7 +609,7 @@
       display: block;
       transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
     }
-    .cta-card:hover { border-color: var(--cyan); background: rgba(0,224,255,0.045); transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,224,255,0.10); }
+    .cta-card:hover { border-color: rgba(154, 239, 255, 0.9); background: rgba(0,224,255,0.045); transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,224,255,0.10); }
     .cta-icon { font-size: 2rem; display: block; margin-bottom: 10px; }
     .cta-card h3 { font-size: 0.98rem; color: #fff; margin-bottom: 8px; }
     .cta-card p { font-family: var(--font-body); font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; }
@@ -571,7 +623,7 @@
       border-top: 1px solid var(--border);
     }
     footer a { color: var(--text-dim); text-decoration: none; transition: color var(--transition); }
-    footer a:hover { color: var(--cyan); }
+    footer a:hover { color: rgba(154, 239, 255, 0.9); }
     footer a i { font-size: 1.1rem; }
 
     .content-section {
@@ -601,10 +653,12 @@
       .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
       .nav-toggle { display: block; }
 
-      .hero { padding: 82px 16px 52px; min-height: 72vh; }
-      .hero-inner { padding: 28px 18px; }
-      .hero-title { font-size: clamp(1.8rem, 8vw, 2.8rem); }
-      .hero-cta { flex-direction: column; align-items: center; }
+      .hero { padding: 84px 14px 44px; min-height: calc(100vh - 58px); }
+      .hero-inner { padding: 28px 18px; border-radius: 20px; }
+      .hero-title { font-size: clamp(2.5rem, 14vw, 4rem); }
+      .hero-cta { flex-direction: column; align-items: stretch; }
+      .btn-primary { width: 100%; text-align: center; }
+      .hero-secondary { font-size: 0.84rem; }
       .btn-primary, .btn-secondary { width: 100%; max-width: 290px; text-align: center; padding: 14px 20px; }
       .section { padding: 50px 16px; }
       .events-list { padding-left: 0 !important; padding-right: 0 !important; }
@@ -637,9 +691,9 @@
   <main>
     <section class="hero" id="events">
       <div class="hero-inner">
-        <p class="hero-eyebrow">CharlestonHacks</p>
+        <p class="hero-eyebrow">CharlestonHacks presents</p>
         <div id="hero-event">
-          <p class="events-label">Next Event</p>
+          <p class="events-label">Next event — loading…</p>
           <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
           <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
         </div>
@@ -919,7 +973,7 @@
 
         if (!upcoming.length) {
           heroEvent.innerHTML =
-            '<p class="events-label">Next Event</p>' +
+            '<p class="events-label">Next event — loading…</p>' +
             '<h1 class="hero-title">New event dropping soon</h1>' +
             '<p class="hero-sub">Charleston, SC · Follow Meetup now and be first in line.</p>' +
             '<p class="events-signal" style="margin-top:16px;">500+ members · builders, hackers, and makers in Charleston</p>';
@@ -956,7 +1010,7 @@
         const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
 
         heroEvent.innerHTML =
-          '<p class="events-label">Next Event — ' + proximity + '</p>' +
+          '<p class="events-label">Next event — ' + proximity.toLowerCase() + '</p>' +
           '<h1 class="hero-title">' + cleanTitle(ev.title || ev.name) + '</h1>' +
           '<p class="hero-sub">' + date + ' · Charleston, SC · Doors open for builders and curious newcomers.</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
