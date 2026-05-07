@@ -1275,8 +1275,8 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
       if (category === "all" || category === "projects") {
         const { data } = await state.supabase
           .from("projects")
-          .select("id, name, description")
-          .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
+          .select("id, title, description")
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
           .limit(5);
         
         if (data) {
@@ -1284,7 +1284,7 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
             type: "projects",
             icon: "fa-lightbulb",
             color: "#00ff88",
-            title: item.name,
+            title: item.title,
             subtitle: item.description ? item.description.substring(0, 60) + "..." : "Project",
             data: item
           })));
@@ -1470,7 +1470,7 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
         const { data, error } = await state.supabase
           .from("organizations")
           .select("*")
-          .or(`name.ilike.%${q}%,description.ilike.%${q}%,location.ilike.%${q}%`)
+          .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
           .limit(10);
         if (error) console.warn("Organizations search error:", error);
         else organizations = data;
@@ -1480,7 +1480,7 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
         const { data, error } = await state.supabase
           .from("projects")
           .select("*")
-          .or(`name.ilike.%${q}%,description.ilike.%${q}%,skills_needed.ilike.%${q}%`)
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
           .limit(10);
         if (error) console.warn("Projects search error:", error);
         else {
