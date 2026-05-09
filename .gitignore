@@ -86,6 +86,7 @@ dump.sql
 # Prevent accidental markdown files in root (except README.md)
 /*.md
 !README.md
+!CONTRIBUTING.md
 !docs/**/*.md
 !supabase/sql/**/*.md
 
