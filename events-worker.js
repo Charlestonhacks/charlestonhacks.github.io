@@ -5,7 +5,11 @@
  *
  * Fetches the public Meetup iCal feed — no API key required.
  * Returns JSON matching the shape the frontend already expects:
- *   { events: [{ title, link, startDate, description, location }] }
+ *   { events: [{ title, link, startDate, description, location, nearifyJoinUrl? }] }
+ *
+ * If a Nearify join URL is available for an event, it will be included
+ * as `nearifyJoinUrl`. The frontend uses this to render a primary
+ * "Join Live Network" CTA alongside the standard Meetup link.
  */
 
 const ICAL_URL = 'https://www.meetup.com/charlestonhacks/events/ical/';

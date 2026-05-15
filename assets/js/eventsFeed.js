@@ -60,28 +60,49 @@ export async function loadEvents({
       const description = safeText(event?.description || "");
       const location = safeText(event?.location || "");
       const dateStr = safeText(formatDateShort(event?.startDate));
+      const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(event.nearifyJoinUrl) : null;
 
       const eventEl = document.createElement("div");
-      eventEl.style.marginBottom = "1.5rem";
-      eventEl.style.paddingBottom = "1rem";
-      eventEl.style.borderBottom = "1px solid #333";
+      eventEl.className = "ch-event-card";
+
+      // Build CTA section based on Nearify availability
+      let ctaHtml = "";
+      if (nearifyJoinUrl) {
+        ctaHtml = `
+          <div class="ch-event-cta">
+            <span class="ch-nearify-badge">Live Nearify Experience Available</span>
+            <a href="${nearifyJoinUrl}" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">
+              Join Live Network
+            </a>
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">
+              View on Meetup
+            </a>
+          </div>
+        `;
+      } else {
+        ctaHtml = `
+          <div class="ch-event-cta">
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">
+              Join on Meetup
+            </a>
+          </div>
+        `;
+      }
 
       eventEl.innerHTML = `
-        <div style="font-size:0.75rem;color:#00e0ff;margin-bottom:4px;text-transform:uppercase;">${dateStr}</div>
-        <h3 style="margin:0 0 8px 0;font-size:1.1rem;">
-          <a href="${link}" target="_blank" rel="noopener noreferrer"
-             style="color:#fff;text-decoration:none;border-bottom:1px solid #444;transition:border-color 0.3s;"
-             onmouseover="this.style.borderColor='#00e0ff'"
-             onmouseout="this.style.borderColor='#444'">${title}</a>
+        <div class="ch-event-date">${dateStr}</div>
+        <h3 class="ch-event-title">
+          <a href="${nearifyJoinUrl || link}" target="_blank" rel="noopener noreferrer">${title}</a>
         </h3>
-        ${location ? `<p style="font-size:0.85rem;color:#aaa;margin:4px 0;">📍 ${location}</p>` : ""}
+        ${location ? `<p class="ch-event-location">📍 ${location}</p>` : ""}
         ${
           description
-            ? `<p style="font-size:0.9rem;color:#888;margin-top:5px;line-height:1.4;">${description.substring(0, 150)}${
+            ? `<p class="ch-event-desc">${description.substring(0, 150)}${
                 description.length > 150 ? "..." : ""
               }</p>`
             : ""
         }
+        ${ctaHtml}
       `;
 
       list.appendChild(eventEl);
