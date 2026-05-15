@@ -26,6 +26,7 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+  <link rel="stylesheet" href="/assets/css/events.css">
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
@@ -964,8 +965,8 @@
           if (heroCta) heroCta.style.display = 'flex';
           if (heroRsvp) {
             heroRsvp.href = buildNearifyLink('Event');
-            heroRsvp.textContent = 'Join on Nearify';
-            console.log('[CTA Override] Using Nearify link for event:', NEARIFY_EVENT_ID);
+            heroRsvp.textContent = 'Join Live Network';
+            console.log('[CTA] Using Nearify link (no events):', NEARIFY_EVENT_ID);
 
             let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
             if (!fallback) {
@@ -974,7 +975,7 @@
               heroRsvp.parentNode.appendChild(fallback);
             }
 
-            fallback.innerHTML = `Prefer Meetup? <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener">RSVP here</a>`;
+            fallback.innerHTML = `Prefer Meetup? <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener">View on Meetup</a>`;
           }
           return;
         }
@@ -1012,9 +1013,11 @@
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
         if (heroCta) heroCta.style.display = 'flex';
         if (heroRsvp) {
-          heroRsvp.href = buildNearifyLink(event.name || event.title);
-          heroRsvp.textContent = 'Join on Nearify';
-          console.log('[CTA Override] Using Nearify link for event:', NEARIFY_EVENT_ID);
+          // Prefer worker-provided nearifyJoinUrl, fall back to buildNearifyLink
+          const nearifyUrl = ev.nearifyJoinUrl ? safeText(ev.nearifyJoinUrl) : buildNearifyLink(event.name || event.title);
+          heroRsvp.href = nearifyUrl;
+          heroRsvp.textContent = 'Join Live Network';
+          console.log('[CTA] Using Nearify link for event:', ev.nearifyJoinUrl ? 'worker-provided' : NEARIFY_EVENT_ID);
 
           let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
           if (!fallback) {
@@ -1023,7 +1026,7 @@
             heroRsvp.parentNode.appendChild(fallback);
           }
 
-          fallback.innerHTML = `Prefer Meetup? <a href="${link}" target="_blank" rel="noopener">RSVP here</a>`;
+          fallback.innerHTML = `Prefer Meetup? <a href="${link}" target="_blank" rel="noopener">View on Meetup</a>`;
         }
       }
 
@@ -1039,16 +1042,34 @@
 
         homepageEvents.innerHTML = eventsToShow.map(function (ev) {
           const event = ev;
-        const meetupUrl = event.link;
-        const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
+          const meetupUrl = event.link;
+          const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
+          const nearifyJoinUrl = ev.nearifyJoinUrl ? safeText(ev.nearifyJoinUrl) : null;
           const location = safeText(ev.location || ev.venue || '');
           const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
           const date = safeText(formatDate(getStart(ev)));
+
+          let ctaHtml = '';
+          if (nearifyJoinUrl) {
+            ctaHtml =
+              '<div class="ch-event-cta">' +
+              '<span class="ch-nearify-badge">Live Nearify Experience Available</span>' +
+              '<a href="' + nearifyJoinUrl + '" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">Join Live Network</a>' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">View on Meetup</a>' +
+              '</div>';
+          } else {
+            ctaHtml =
+              '<div class="ch-event-cta">' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">Join on Meetup</a>' +
+              '</div>';
+          }
+
           return '<div class="event-card">' +
             '<div class="event-date">' + date + '</div>' +
-            '<h3><a href="' + link + '" target="_blank" rel="noopener noreferrer">' + cleanTitle(ev.title || ev.name) + '</a></h3>' +
+            '<h3><a href="' + (nearifyJoinUrl || link) + '" target="_blank" rel="noopener noreferrer">' + cleanTitle(ev.title || ev.name) + '</a></h3>' +
             (location ? '<p class="event-location">📍 ' + location + '</p>' : '') +
             (description ? '<p class="event-desc">' + description + (description.length >= 130 ? '…' : '') + '</p>' : '') +
+            ctaHtml +
             '</div>';
         }).join('');
       }
