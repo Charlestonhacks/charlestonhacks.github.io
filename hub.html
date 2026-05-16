@@ -185,6 +185,8 @@
     <a href="/about.html">About</a>
     <a href="/hub.html">Member Portal</a>
     <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Next Event</a>
+    <!-- TODO: Gate behind admin role check once role system exists -->
+    <a href="/admin/" id="nav-admin-link" hidden>Admin</a>
   </nav>
 
   <!-- Upcoming event countdown bar -->
@@ -434,6 +436,11 @@
       const { data: { session } } = await supabase.auth.getSession();
       localStorage.setItem("ch:lastScreen", "index");
       window.__CH_SESSION__ = session || null;
+
+      // Show admin nav link for signed-in users
+      // TODO: Gate behind admin role check once role system exists
+      const adminLink = document.getElementById('nav-admin-link');
+      if (adminLink && session?.user) adminLink.hidden = false;
     } catch (e) {
       console.warn("Auth gate session check failed:", e);
     } finally {
