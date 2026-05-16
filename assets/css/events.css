@@ -264,6 +264,25 @@ h1 {
   border-color: rgba(0, 224, 255, 0.5);
 }
 
+/* ── Source Badges ───────────────────────────────────────────────────── */
+
+.ch-source-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.ch-source-community {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
 /* ── Responsive ─────────────────────────────────────────────────────── */
 
 @media (max-width: 600px) {

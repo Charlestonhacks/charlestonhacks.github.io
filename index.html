@@ -900,10 +900,35 @@
         '/assets/data/events.json'
       ];
 
-      const NEARIFY_EVENT_ID = "2c7cf86a-e329-4065-baa7-ff5c32b45343";
+      // ── Source detection helpers ──────────────────────────────────────
+      // Determine if an event is hosted by CharlestonHacks based on its link URL or title
+      function isCharlestonHacksEvent(ev) {
+        const link = (ev.link || ev.url || '').toLowerCase();
+        const title = (ev.title || ev.name || '').toLowerCase();
+        // Check Meetup group slug
+        if (link.includes('meetup.com/charlestonhacks')) return true;
+        // Check title patterns
+        if (title.includes('charlestonhacks') || title.includes('charleston hacks') || title.includes('harborhack')) return true;
+        // Check source field if worker ever adds it
+        const source = (ev.source || '').toLowerCase();
+        if (source.includes('charlestonhacks') || source === 'charlestonhacks') return true;
+        return false;
+      }
 
-      function buildNearifyLink(eventName) {
-        return `https://nearify.org/join/?event=${NEARIFY_EVENT_ID}&name=${encodeURIComponent(eventName || "Event")}`;
+      function getSourceLabel(ev) {
+        if (isCharlestonHacksEvent(ev)) return 'CharlestonHacks';
+        // Try to extract organizer from link or sourceLabel
+        if (ev.sourceLabel) return ev.sourceLabel;
+        const link = (ev.link || '').toLowerCase();
+        if (link.includes('meetup.com/chs-amazon-web-services')) return 'Charleston AWS Meetup';
+        if (link.includes('meetup.com/')) {
+          // Extract group name from meetup URL: meetup.com/{group}/events/...
+          const match = link.match(/meetup\.com\/([^/]+)/);
+          if (match && match[1] !== 'charlestonhacks') {
+            return match[1].replace(/-/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
+          }
+        }
+        return 'Community Event';
       }
 
       function safeText(s) {
@@ -964,23 +989,16 @@
             '<p class="events-signal" style="margin-top:16px;">500+ members · builders, hackers, and makers in Charleston</p>';
           if (heroCta) heroCta.style.display = 'flex';
           if (heroRsvp) {
-            heroRsvp.href = buildNearifyLink('Event');
-            heroRsvp.textContent = 'Join Live Network';
-            console.log('[CTA] Using Nearify link (no events):', NEARIFY_EVENT_ID);
-
-            let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
-            if (!fallback) {
-              fallback = document.createElement('p');
-              fallback.className = 'cta-secondary';
-              heroRsvp.parentNode.appendChild(fallback);
-            }
-
-            fallback.innerHTML = `Prefer Meetup? <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener">View on Meetup</a>`;
+            heroRsvp.href = 'https://www.meetup.com/charlestonhacks/';
+            heroRsvp.textContent = 'View on Meetup';
+            console.log('[Hero] No upcoming events — showing Meetup fallback');
           }
           return;
         }
 
         const ev = upcoming[0];
+        const isCH = isCharlestonHacksEvent(ev);
+        const sourceLabel = getSourceLabel(ev);
         const start = getStart(ev);
         const date = safeText(formatDate(start));
         const msAway = new Date(start).getTime() - Date.now();
@@ -1002,22 +1020,42 @@
 
         const rsvpCount = ev.rsvpCount || ev.yes_rsvp_count || ev.attendee_count || 0;
         const signal = rsvpCount >= 5 ? rsvpCount + ' people going' : 'Builders, designers, and founders already going';
-        const event = ev;
-        const meetupUrl = event.link;
+        const meetupUrl = ev.link;
         const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
+
+        // Source-aware hero copy
+        const presentsLabel = isCH ? 'CharlestonHacks Presents' : safeText(sourceLabel);
+        const heroSubText = isCH
+          ? date + ' · Charleston, SC · Doors open for builders and curious newcomers.'
+          : date + ' · Charleston, SC · A community event via ' + safeText(sourceLabel) + '.';
+        const sourceBadge = isCH
+          ? ''
+          : '<span class="ch-source-badge ch-source-community">' + safeText(sourceLabel) + '</span>';
+
+        // Use cleanTitle only for CH events (strips "CharlestonHacks Presents:" prefix)
+        const displayTitle = isCH ? cleanTitle(ev.title || ev.name) : safeText(ev.title || ev.name || 'Event');
 
         heroEvent.innerHTML =
           '<p class="events-label">Next event — ' + proximity.toLowerCase() + '</p>' +
-          '<h1 class="hero-title">' + cleanTitle(ev.title || ev.name) + '</h1>' +
-          '<p class="hero-sub">' + date + ' · Charleston, SC · Doors open for builders and curious newcomers.</p>' +
+          sourceBadge +
+          '<h1 class="hero-title">' + displayTitle + '</h1>' +
+          '<p class="hero-sub">' + heroSubText + '</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
+
         if (heroCta) heroCta.style.display = 'flex';
         if (heroRsvp) {
-          // Prefer worker-provided nearifyJoinUrl, fall back to buildNearifyLink
-          const nearifyUrl = ev.nearifyJoinUrl ? safeText(ev.nearifyJoinUrl) : buildNearifyLink(event.name || event.title);
-          heroRsvp.href = nearifyUrl;
-          heroRsvp.textContent = 'Join Live Network';
-          console.log('[CTA] Using Nearify link for event:', ev.nearifyJoinUrl ? 'worker-provided' : NEARIFY_EVENT_ID);
+          // CTA must always use the CURRENT event's nearifyJoinUrl — never a hardcoded ID
+          if (ev.nearifyJoinUrl) {
+            heroRsvp.href = safeText(ev.nearifyJoinUrl);
+            heroRsvp.textContent = 'Join Live Network';
+            console.log('[Hero] CTA → nearifyJoinUrl:', ev.nearifyJoinUrl);
+          } else {
+            heroRsvp.href = link;
+            heroRsvp.textContent = 'View Event';
+            console.log('[Hero] CTA → Meetup fallback (no nearifyJoinUrl):', link);
+          }
+
+          console.log('[Hero] Event:', ev.title, '| Source:', sourceLabel, '| isCH:', isCH);
 
           let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
           if (!fallback) {
@@ -1026,7 +1064,11 @@
             heroRsvp.parentNode.appendChild(fallback);
           }
 
-          fallback.innerHTML = `Prefer Meetup? <a href="${link}" target="_blank" rel="noopener">View on Meetup</a>`;
+          if (ev.nearifyJoinUrl) {
+            fallback.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="ch-link-meetup">View on Meetup</a>`;
+          } else {
+            fallback.innerHTML = '';
+          }
         }
       }
 
@@ -1041,14 +1083,21 @@
         }
 
         homepageEvents.innerHTML = eventsToShow.map(function (ev) {
-          const event = ev;
-          const meetupUrl = event.link;
-          const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
+          const link = safeText(ev.link || ev.url || 'https://www.meetup.com/charlestonhacks/');
           const nearifyJoinUrl = ev.nearifyJoinUrl ? safeText(ev.nearifyJoinUrl) : null;
           const location = safeText(ev.location || ev.venue || '');
           const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
           const date = safeText(formatDate(getStart(ev)));
+          const isCH = isCharlestonHacksEvent(ev);
+          const sourceLabel = getSourceLabel(ev);
+          const displayTitle = isCH ? cleanTitle(ev.title || ev.name) : safeText(ev.title || ev.name || 'Event');
 
+          // Source badge
+          const sourceBadge = isCH
+            ? ''
+            : '<span class="ch-source-badge ch-source-community">' + safeText(sourceLabel) + '</span>';
+
+          // CTA — always use the event's own nearifyJoinUrl, never a hardcoded fallback
           let ctaHtml = '';
           if (nearifyJoinUrl) {
             ctaHtml =
@@ -1060,13 +1109,16 @@
           } else {
             ctaHtml =
               '<div class="ch-event-cta">' +
-              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">Join on Meetup</a>' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">View Event</a>' +
               '</div>';
           }
 
+          console.log('[EventCard]', ev.title, '| Source:', sourceLabel, '| nearifyJoinUrl:', nearifyJoinUrl || '(none)');
+
           return '<div class="event-card">' +
+            sourceBadge +
             '<div class="event-date">' + date + '</div>' +
-            '<h3><a href="' + (nearifyJoinUrl || link) + '" target="_blank" rel="noopener noreferrer">' + cleanTitle(ev.title || ev.name) + '</a></h3>' +
+            '<h3><a href="' + (nearifyJoinUrl || link) + '" target="_blank" rel="noopener noreferrer">' + displayTitle + '</a></h3>' +
             (location ? '<p class="event-location">📍 ' + location + '</p>' : '') +
             (description ? '<p class="event-desc">' + description + (description.length >= 130 ? '…' : '') + '</p>' : '') +
             ctaHtml +
@@ -1084,6 +1136,7 @@
           })
           .sort(function (a, b) { return new Date(getStart(a)) - new Date(getStart(b)); });
 
+        console.log('[Events] Loaded', upcoming.length, 'upcoming events');
         renderHero(upcoming);
         renderMoreEvents(upcoming);
       }
