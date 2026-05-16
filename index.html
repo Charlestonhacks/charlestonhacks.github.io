@@ -294,6 +294,17 @@
       z-index: 1;
     }
 
+    .hero-hosted-by {
+      margin-top: 8px;
+      margin-bottom: -4px;
+      font-size: 0.82rem;
+      color: rgba(251, 191, 36, 0.85);
+      letter-spacing: 0.02em;
+      font-family: var(--font-body);
+      position: relative;
+      z-index: 1;
+    }
+
     .events-signal {
       font-size: 0.95rem;
       color: rgba(154, 239, 255, 0.9);
@@ -692,7 +703,7 @@
   <main>
     <section class="hero" id="events">
       <div class="hero-inner">
-        <p class="hero-eyebrow">CharlestonHacks presents</p>
+        <p class="hero-eyebrow" id="hero-eyebrow">CharlestonHacks presents</p>
         <div id="hero-event">
           <p class="events-label">Next event — loading…</p>
           <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
@@ -982,6 +993,8 @@
         if (!heroEvent) return;
 
         if (!upcoming.length) {
+          const heroEyebrow = document.getElementById('hero-eyebrow');
+          if (heroEyebrow) heroEyebrow.textContent = 'CharlestonHacks presents';
           heroEvent.innerHTML =
             '<p class="events-label">Next event — loading…</p>' +
             '<h1 class="hero-title">New event dropping soon</h1>' +
@@ -1024,21 +1037,26 @@
         const link = safeText(meetupUrl || ev.url || 'https://www.meetup.com/charlestonhacks/');
 
         // Source-aware hero copy
-        const presentsLabel = isCH ? 'CharlestonHacks Presents' : safeText(sourceLabel);
         const heroSubText = isCH
           ? date + ' · Charleston, SC · Doors open for builders and curious newcomers.'
-          : date + ' · Charleston, SC · A community event via ' + safeText(sourceLabel) + '.';
-        const sourceBadge = isCH
+          : date + ' · Charleston, SC';
+        const hostedByLine = isCH
           ? ''
-          : '<span class="ch-source-badge ch-source-community">' + safeText(sourceLabel) + '</span>';
+          : '<p class="hero-hosted-by">Hosted by ' + safeText(sourceLabel) + '</p>';
 
         // Use cleanTitle only for CH events (strips "CharlestonHacks Presents:" prefix)
         const displayTitle = isCH ? cleanTitle(ev.title || ev.name) : safeText(ev.title || ev.name || 'Event');
 
+        // Update the eyebrow above #hero-event
+        const heroEyebrow = document.getElementById('hero-eyebrow');
+        if (heroEyebrow) {
+          heroEyebrow.textContent = isCH ? 'CharlestonHacks presents' : 'In the ecosystem';
+        }
+
         heroEvent.innerHTML =
           '<p class="events-label">Next event — ' + proximity.toLowerCase() + '</p>' +
-          sourceBadge +
           '<h1 class="hero-title">' + displayTitle + '</h1>' +
+          hostedByLine +
           '<p class="hero-sub">' + heroSubText + '</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
 
