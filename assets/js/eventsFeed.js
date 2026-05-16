@@ -3,13 +3,41 @@
  * - Fetches events from the Cloudflare Worker
  * - Renders into #events-list
  * - Handles modal open/close for #events-overlay
+ * - Source-aware: distinguishes CharlestonHacks vs community/partner events
  */
 
 console.log("📜 eventsFeed.js loaded");
 
 const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
 
-// Render helpers
+// ── Source detection ────────────────────────────────────────────────────
+
+function isCharlestonHacksEvent(ev) {
+  const link = (ev?.link || ev?.url || "").toLowerCase();
+  const title = (ev?.title || ev?.name || "").toLowerCase();
+  if (link.includes("meetup.com/charlestonhacks")) return true;
+  if (title.includes("charlestonhacks") || title.includes("charleston hacks") || title.includes("harborhack")) return true;
+  const source = (ev?.source || "").toLowerCase();
+  if (source.includes("charlestonhacks") || source === "charlestonhacks") return true;
+  return false;
+}
+
+function getSourceLabel(ev) {
+  if (isCharlestonHacksEvent(ev)) return "CharlestonHacks";
+  if (ev?.sourceLabel) return ev.sourceLabel;
+  const link = (ev?.link || "").toLowerCase();
+  if (link.includes("meetup.com/chs-amazon-web-services")) return "Charleston AWS Meetup";
+  if (link.includes("meetup.com/")) {
+    const match = link.match(/meetup\.com\/([^/]+)/);
+    if (match && match[1] !== "charlestonhacks") {
+      return match[1].replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+  }
+  return "Community Event";
+}
+
+// ── Render helpers ──────────────────────────────────────────────────────
+
 function safeText(s) {
   return String(s ?? "").replace(/[<>&"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
 }
@@ -61,11 +89,20 @@ export async function loadEvents({
       const location = safeText(event?.location || "");
       const dateStr = safeText(formatDateShort(event?.startDate));
       const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(event.nearifyJoinUrl) : null;
+      const isCH = isCharlestonHacksEvent(event);
+      const sourceLabel = getSourceLabel(event);
+
+      console.log("[EventsFeed]", event?.title, "| Source:", sourceLabel, "| nearifyJoinUrl:", nearifyJoinUrl || "(none)");
 
       const eventEl = document.createElement("div");
       eventEl.className = "ch-event-card";
 
-      // Build CTA section based on Nearify availability
+      // Source badge for non-CharlestonHacks events
+      const sourceBadgeHtml = isCH
+        ? ""
+        : `<span class="ch-source-badge ch-source-community">${safeText(sourceLabel)}</span>`;
+
+      // Build CTA section — always use the event's own nearifyJoinUrl, never a hardcoded fallback
       let ctaHtml = "";
       if (nearifyJoinUrl) {
         ctaHtml = `
@@ -83,13 +120,14 @@ export async function loadEvents({
         ctaHtml = `
           <div class="ch-event-cta">
             <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">
-              Join on Meetup
+              View Event
             </a>
           </div>
         `;
       }
 
       eventEl.innerHTML = `
+        ${sourceBadgeHtml}
         <div class="ch-event-date">${dateStr}</div>
         <h3 class="ch-event-title">
           <a href="${nearifyJoinUrl || link}" target="_blank" rel="noopener noreferrer">${title}</a>
