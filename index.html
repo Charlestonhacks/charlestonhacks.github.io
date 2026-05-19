@@ -707,6 +707,9 @@
           <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
           <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
         </div>
+        <div id="hero-cta" class="hero-cta" style="display:none;">
+          <a id="hero-rsvp" href="#events-section" class="btn-primary">Join Live Network</a>
+        </div>
         <p class="hero-secondary">
           <a href="#events-section">See upcoming events ↓</a>
         </p>
@@ -1045,6 +1048,20 @@
           hostedByLine +
           '<p class="hero-sub">' + heroSubText + '</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
+
+        // Show the join button if a nearifyJoinUrl is available
+        const heroCta = document.getElementById('hero-cta');
+        const heroRsvp = document.getElementById('hero-rsvp');
+        if (heroCta && heroRsvp) {
+          if (ev.nearifyJoinUrl) {
+            heroRsvp.href = safeText(ev.nearifyJoinUrl);
+            heroRsvp.textContent = 'Join Live Network';
+          } else {
+            heroRsvp.href = '#events-section';
+            heroRsvp.textContent = 'See Events';
+          }
+          heroCta.style.display = 'flex';
+        }
       }
 
       function renderMoreEvents(upcoming) {
