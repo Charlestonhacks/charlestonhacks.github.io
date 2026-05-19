@@ -692,11 +692,9 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="nav-links" id="primary-nav">
-      <a href="#events">Events</a>
+      <a href="#events-section">Events</a>
       <a href="/hub.html">Member Portal</a>
       <a href="/about.html">About</a>
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Next Event</a>
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="nav-join">Attend</a>
     </div>
   </nav>
 
@@ -708,10 +706,6 @@
           <p class="events-label">Next event — loading…</p>
           <h1 class="hero-title skeleton" style="height:3rem;width:80%;margin:10px auto 0;border-radius:8px;">&nbsp;</h1>
           <p class="hero-sub skeleton" style="height:1rem;width:50%;margin:16px auto 0;border-radius:4px;">&nbsp;</p>
-        </div>
-        <div id="hero-cta" class="hero-cta" style="display:none;">
-          <a id="hero-rsvp" href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer" class="btn-primary">Attend Event</a>
-          
         </div>
         <p class="hero-secondary">
           <a href="#events-section">See upcoming events ↓</a>
@@ -810,7 +804,7 @@
     <p>© 2026 CharlestonHacks · Charleston, SC ·
       <a href="/">Home</a> ·
       <a href="/about.html">About</a> ·
-      <a href="https://www.meetup.com/charlestonhacks/" target="_blank" rel="noopener noreferrer">Next Event</a> ·
+      <a href="#events-section">Events</a> ·
       <a href="/hub.html">Member Portal</a> ·
       <a href="subscribe.html">Newsletter</a>
     </p>
@@ -988,8 +982,6 @@
 
       function renderHero(upcoming) {
         const heroEvent = document.getElementById('hero-event');
-        const heroCta = document.getElementById('hero-cta');
-        const heroRsvp = document.getElementById('hero-rsvp');
         if (!heroEvent) return;
 
         if (!upcoming.length) {
@@ -1000,12 +992,6 @@
             '<h1 class="hero-title">New event dropping soon</h1>' +
             '<p class="hero-sub">Charleston, SC · Follow Meetup now and be first in line.</p>' +
             '<p class="events-signal" style="margin-top:16px;">500+ members · builders, hackers, and makers in Charleston</p>';
-          if (heroCta) heroCta.style.display = 'flex';
-          if (heroRsvp) {
-            heroRsvp.href = 'https://www.meetup.com/charlestonhacks/';
-            heroRsvp.textContent = 'View on Meetup';
-            console.log('[Hero] No upcoming events — showing Meetup fallback');
-          }
           return;
         }
 
@@ -1059,35 +1045,6 @@
           hostedByLine +
           '<p class="hero-sub">' + heroSubText + '</p>' +
           '<p class="events-signal" style="margin-top:16px;">' + safeText(signal) + '</p>';
-
-        if (heroCta) heroCta.style.display = 'flex';
-        if (heroRsvp) {
-          // CTA must always use the CURRENT event's nearifyJoinUrl — never a hardcoded ID
-          if (ev.nearifyJoinUrl) {
-            heroRsvp.href = safeText(ev.nearifyJoinUrl);
-            heroRsvp.textContent = 'Join Live Network';
-            console.log('[Hero] CTA → nearifyJoinUrl:', ev.nearifyJoinUrl);
-          } else {
-            heroRsvp.href = link;
-            heroRsvp.textContent = 'View Event';
-            console.log('[Hero] CTA → Meetup fallback (no nearifyJoinUrl):', link);
-          }
-
-          console.log('[Hero] Event:', ev.title, '| Source:', sourceLabel, '| isCH:', isCH);
-
-          let fallback = heroRsvp.parentNode.querySelector('.cta-secondary');
-          if (!fallback) {
-            fallback = document.createElement('p');
-            fallback.className = 'cta-secondary';
-            heroRsvp.parentNode.appendChild(fallback);
-          }
-
-          if (ev.nearifyJoinUrl) {
-            fallback.innerHTML = `<a href="${link}" target="_blank" rel="noopener" class="ch-link-meetup">View on Meetup</a>`;
-          } else {
-            fallback.innerHTML = '';
-          }
-        }
       }
 
       function renderMoreEvents(upcoming) {
