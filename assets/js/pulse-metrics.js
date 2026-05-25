@@ -75,20 +75,34 @@ async function loadPulseMetrics() {
       return;
     }
 
-    // ── Events this year from local JSON ─────────────────────────────────
+    // ── Events this year — same waterfall the homepage events section uses ──
+    // Try the live Cloudflare Worker first, fall back to the static JSON.
+    const EVENTS_URLS = [
+      'https://charlestonhacks-events.dmhamilton1.workers.dev',
+      'https://charlestonhacks-events-worker.deckerdb26354.workers.dev',
+      '/assets/data/events.json',
+    ];
     const currentYear = new Date().getFullYear();
     let eventsThisYear = 0;
-    try {
-      const resp = await fetch('/assets/data/events.json');
-      if (resp.ok) {
+    for (const url of EVENTS_URLS) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 6000);
+        const resp = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!resp.ok) continue;
         const json = await resp.json();
-        eventsThisYear = (json.events || []).filter(e => {
-          try { return new Date(e.startDate).getFullYear() === currentYear; }
-          catch { return false; }
+        const list = Array.isArray(json) ? json : (json.events || []);
+        eventsThisYear = list.filter(e => {
+          try {
+            const d = e.startDate || e.start_date || e.starts_at || e.date || '';
+            return new Date(d).getFullYear() === currentYear;
+          } catch { return false; }
         }).length;
+        break; // stop at first successful source
+      } catch {
+        // try next URL
       }
-    } catch {
-      // Non-fatal — events count stays 0; hardcoded fallback remains
     }
 
     // ── Determine whether the pulse section is already scrolled into view ──
