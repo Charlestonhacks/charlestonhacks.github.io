@@ -58,36 +58,76 @@
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
   <style>
-    .ch-top-logo {
-      position: fixed;
-      top: 14px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9999; /* above bg canvas + most UI */
-      pointer-events: none; /* prevents blocking clicks on portals */
+    /* ===== Top Nav (same as home page) ===== */
+    .top-nav {
       display: flex;
       align-items: center;
-      justify-content: center;
-      width: min(92vw, 520px);
-    }
-    .ch-top-logo img {
-      width: min(92vw, 320px);
-      height: auto;
-      display: block;
-      filter: drop-shadow(0 10px 24px rgba(0,0,0,.55));
-      opacity: 0.98;
+      padding: 0 24px;
+      height: 58px;
+      border-bottom: 1px solid rgba(0,224,255,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
+      z-index: 10002;
+      gap: 8px;
     }
 
-    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 96px mobile) */
-    .main-wrapper { padding-top: 130px; }
+    .nav-logo img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
+
+    .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .nav-links a {
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      padding: 7px 10px;
+      border-radius: 7px;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a:hover { color: #00e0ff; background: rgba(0,224,255,0.06); }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.72);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 6px;
+      margin-left: auto;
+    }
 
     @media (max-width: 768px) {
-      .ch-top-logo { top: 10px; }
-      .ch-top-logo img { width: min(92vw, 260px); }
-      /* flex-start prevents the centering algorithm from adding a second gap
-         equal to padding-top below the logo */
-      .main-wrapper { padding-top: 108px; justify-content: flex-start; }
-      /* 55px icon bar + ~34px iPhone home-indicator safe area + 16px buffer */
+      .top-nav { padding: 0 16px; height: 54px; }
+      .nav-logo img { width: 140px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 54px;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.97);
+        border-bottom: 1px solid rgba(0,224,255,0.1);
+        padding: 12px 16px;
+        gap: 4px;
+        backdrop-filter: blur(12px);
+      }
+      .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
+      .nav-toggle { display: block; }
+    }
+
+    .ch-top-logo { display: none; }
+
+    /* Push card below the fixed nav bar */
+    .main-wrapper { padding-top: 80px; }
+
+    @media (max-width: 768px) {
+      .main-wrapper { padding-top: 70px; justify-content: flex-start; }
       .ch-tagline { bottom: 105px; font-size: 0.6rem; }
     }
 
@@ -109,11 +149,11 @@
       text-transform: uppercase;
     }
 
-    /* Countdown banner */
+    /* Countdown banner - sits below the nav bar */
     #event-countdown-banner {
       display: none;
       position: fixed;
-      top: 0;
+      top: 58px;
       left: 0;
       right: 0;
       z-index: 10001;
@@ -137,18 +177,13 @@
     #event-countdown-banner a:hover { text-decoration: underline; }
     #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
     #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
-    /* Shift logo + wrapper down when banner is visible */
-    body.has-countdown-banner .ch-top-logo { top: 44px; }
-    body.has-countdown-banner .main-wrapper { padding-top: 160px; }
+    /* Shift content down when banner is visible */
+    body.has-countdown-banner .main-wrapper { padding-top: 110px; }
     @media (max-width: 768px) {
-      #event-countdown-banner { font-size: 0.58rem; padding: 5px 10px; }
-      body.has-countdown-banner .ch-top-logo { top: 38px; }
-      body.has-countdown-banner .main-wrapper { padding-top: 140px; }
+      #event-countdown-banner { top: 54px; font-size: 0.58rem; padding: 5px 10px; }
+      body.has-countdown-banner .main-wrapper { padding-top: 100px; }
     }
-    .hub-mini-nav{position:fixed;top:10px;right:14px;z-index:10002;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
-    .hub-mini-nav a{font-family:Arial,sans-serif;font-size:.7rem;letter-spacing:.06em;padding:6px 10px;border:1px solid rgba(255,255,255,.2);border-radius:999px;text-decoration:none;color:rgba(255,255,255,.78);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);}
-    .hub-mini-nav a:hover{color:#00e0ff;border-color:rgba(0,224,255,.45);}
-    @media (max-width: 768px){.hub-mini-nav{top:6px;right:8px;}.hub-mini-nav a{font-size:.62rem;padding:5px 8px;}}
+    .hub-mini-nav { display: none; }
   </style>
   <script type="application/ld+json">
   {
@@ -180,7 +215,19 @@
 </head>
 
 <body>
-  <nav class="hub-mini-nav" aria-label="Primary" hidden>
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
+      <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links" id="primary-nav">
+      <a href="/#events-section">Events</a>
+      <a href="/hub.html">Member Portal</a>
+      <a href="/bbs.html">Community Chat</a>
+      <a href="/about.html">About</a>
+    </div>
   </nav>
 
   <!-- Upcoming event countdown bar -->
@@ -188,7 +235,7 @@
 
   <canvas id="neural-bg"></canvas>
 
-  <!-- Top-center logo removed -->
+  <!-- Tagline -->
   <p class="ch-tagline">Charleston's community for builders, hackers &amp; makers</p>
 
   <!-- Splash Screen -->
@@ -415,6 +462,31 @@
       </div>
     </div>
   </div>
+
+  <!-- Hamburger menu toggle (same as home page) -->
+  <script>
+    (function () {
+      const toggle = document.querySelector('.nav-toggle');
+      const links = document.querySelector('.nav-links');
+      if (!toggle || !links) return;
+
+      toggle.addEventListener('click', function () {
+        const open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        const icon = toggle.querySelector('i');
+        if (icon) icon.className = open ? 'fas fa-times' : 'fas fa-bars';
+      });
+
+      links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          const icon = toggle.querySelector('i');
+          if (icon) icon.className = 'fas fa-bars';
+        });
+      });
+    })();
+  </script>
 
   <!-- Core modules you already use -->
   <script type="module">
