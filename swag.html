@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <title>CharlestonHacks Swag Voting</title>
+  <title>CharlestonHacks Swag — Vote for Your Favorite Merch</title>
+  <meta name="description" content="Vote for your favorite CharlestonHacks merchandise. See what's trending and help decide the next batch of official swag.">
+  <meta property="og:title" content="CharlestonHacks Swag — Vote for Your Favorite Merch">
+  <meta property="og:description" content="Vote for your favorite CharlestonHacks merchandise. See what's trending.">
+  <meta property="og:image" content="https://charlestonhacks.com/images/websitepanel.webp">
+  <meta property="og:url" content="https://charlestonhacks.com/swag.html">
+  <meta property="og:type" content="website">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Britannic+Bold:wght@400;700&display=swap" rel="stylesheet">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6NDKG07DY6');
+  </script>
+
+  <!-- ✅ FIX: "Britannic Bold" is not a Google Font, so that URL returns HTML and triggers CORB.
+       Use a real Google Font instead (Montserrat), and keep Britannic Bold as a fallback if it exists locally. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
   <style>
@@ -21,7 +40,8 @@
       background: var(--background-color);
       color: var(--text-color);
       min-height: 100vh;
-      font-family: 'Britannic Bold', Arial, sans-serif;
+      /* ✅ FIX: use a web-safe Google Font + keep Britannic as a local fallback */
+      font-family: "Montserrat", "Britannic Bold", "Arial Black", Arial, sans-serif;
       text-align: center;
       margin: 0;
     }
@@ -239,6 +259,10 @@
       .lightbox .vote-btn { font-size: 1rem; padding: 10px 20px; }
     }
   </style>
+  <link rel="canonical" href="https://charlestonhacks.com/swag.html"/>
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+  <link rel="manifest" href="/manifest.json"/>
 </head>
 
 <body>
@@ -277,8 +301,8 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.2/+esm";
 
     const supabase = createClient(
-      "https://hvmotpzhliufzomewzfl.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bW90cHpobGl1ZnpvbWV3emZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NzY2NDUsImV4cCI6MjA1ODE1MjY0NX0.foHTGZVtRjFvxzDfMf1dpp0Zw4XFfD-FPZK-zRnjc6s"
+      "https://mqbsjlgnsirqsmfnreqd.supabase.co",
+      "sb_publishable_hKGoZiLtCe6BxgQjG23h2Q_hbGC-At3"
     );
 
     const swagItems = [
@@ -288,7 +312,7 @@
       { name: "Hat2", img: "icons/hat2.webp" },
       { name: "Hoodie", img: "icons/hoodie.webp" },
       { name: "Mug", img: "icons/mug1.webp" },
-       { name: "Mug", img: "icons/mug2.webp" },
+      { name: "Mug", img: "icons/mug2.webp" },
       { name: "Gauntlet", img: "icons/gauntlet.webp" }
     ];
 
@@ -355,23 +379,50 @@
 
     async function voteForSwag(swagName) {
       try {
-        const { data, error } = await supabase.from('swag_votes').select('*').eq('swag', swagName).single();
-        let currentVotes = data?.votes || 0;
-        if (data)
-          await supabase.from('swag_votes').update({ votes: currentVotes + 1 }).eq('swag', swagName);
-        else
-          await supabase.from('swag_votes').insert([{ swag: swagName, votes: 1 }]);
+        const { data, error: selErr } = await supabase
+          .from('swag_votes')
+          .select('id, votes')
+          .eq('swag', swagName)
+          .maybeSingle();
+
+        if (selErr) throw selErr;
+
+        if (data) {
+          const { error: upErr } = await supabase
+            .from('swag_votes')
+            .update({ votes: data.votes + 1 })
+            .eq('id', data.id);
+          if (upErr) throw upErr;
+        } else {
+          const { error: insErr } = await supabase
+            .from('swag_votes')
+            .insert([{ swag: swagName, votes: 1 }]);
+          if (insErr) throw insErr;
+        }
+
         showVoteOverlay(swagName);
+        if (typeof gtag === "function") {
+          gtag("event", "swag_vote", { swag_item: swagName });
+        }
         loadLeaderboard();
       } catch (err) {
         console.error("Voting error:", err);
+        showVoteOverlay(null, err.message || "Vote failed — please try again.");
       }
     }
 
-    function showVoteOverlay(swagName) {
-      voteOverlay.textContent = `Vote Registered for ${swagName}!`;
+    function showVoteOverlay(swagName, errMsg) {
+      if (errMsg) {
+        voteOverlay.textContent = errMsg;
+        voteOverlay.style.background = "rgba(220,50,50,0.95)";
+        voteOverlay.style.color = "#fff";
+      } else {
+        voteOverlay.textContent = `Vote Registered for ${swagName}!`;
+        voteOverlay.style.background = "";
+        voteOverlay.style.color = "";
+      }
       voteOverlay.classList.add('active');
-      setTimeout(() => voteOverlay.classList.remove('active'), 1500);
+      setTimeout(() => voteOverlay.classList.remove('active'), 2000);
     }
 
     lightboxVote.onclick = () => voteForSwag(swagItems[currentIndex].name);
@@ -388,6 +439,7 @@
       const counts = {};
       swagItems.forEach(i => counts[i.name] = 0);
       data?.forEach(r => counts[r.swag] = r.votes);
+
       leaderboardRows.innerHTML = Object.entries(counts)
         .sort((a,b) => b[1]-a[1])
         .map(([s,c],i)=>`

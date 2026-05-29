@@ -26,10 +26,10 @@ window.addEventListener('profile-loaded', (e) => {
 });
 
 /**
- * Enhanced openStartModal with recommendations
+ * Enhanced openStartModal with sequential wizard
  */
 async function openEnhancedStartModal() {
-  console.log('🚀 Opening enhanced START modal');
+  console.log('🚀 Opening enhanced START modal (sequential mode)');
 
   const modal = document.getElementById('start-modal');
   const backdrop = document.getElementById('start-modal-backdrop');
@@ -39,18 +39,35 @@ async function openEnhancedStartModal() {
     return;
   }
 
-  // Show modal
+  // Show modal with no backdrop effects to allow synapse interaction
   modal.style.display = 'block';
   backdrop.style.display = 'block';
+  backdrop.style.background = 'transparent';
+  backdrop.style.backdropFilter = 'none';
+  backdrop.style.pointerEvents = 'none';
 
   // Animate in
   setTimeout(() => {
     modal.style.opacity = '1';
-    modal.style.transform = 'translateX(0)';
+    modal.style.transform = 'translate(-50%, -50%)';
   }, 10);
 
-  // Load and display recommendations
-  await populateRecommendations();
+  // Initialize sequential wizard
+  if (window.startFlowSequential && typeof window.startFlowSequential.init === 'function') {
+    const userData = cachedUserProfile;
+    const supabase = cachedSupabase || window.supabase;
+
+    if (!userData) {
+      console.warn('⚠️ User profile not yet available, waiting...');
+      setTimeout(() => populateRecommendations(), 500);
+      return;
+    }
+
+    window.startFlowSequential.init(userData, supabase);
+  } else {
+    // Fallback to old flow
+    await populateRecommendations();
+  }
 }
 
 /**
@@ -166,13 +183,15 @@ function generateOptionHTML(option, isRecommended, currentUser) {
   const colors = {
     focus: { primary: '#00e0ff', secondary: 'rgba(0,224,255,0.15)' },
     projects: { primary: '#00ff88', secondary: 'rgba(0,255,136,0.15)' },
-    people: { primary: '#ffd700', secondary: 'rgba(255,215,0,0.15)' }
+    people: { primary: '#ffd700', secondary: 'rgba(255,215,0,0.15)' },
+    organizations: { primary: '#a855f7', secondary: 'rgba(168,85,247,0.15)' }
   };
 
   const icons = {
     focus: 'compass',
     projects: 'rocket',
-    people: 'users'
+    people: 'users',
+    organizations: 'building'
   };
 
   const color = colors[option.type] || colors.focus;
@@ -262,7 +281,8 @@ function getOptionDescription(type) {
   const descriptions = {
     focus: 'Dive into the theme where your interests and activity overlap most',
     projects: 'Explore active projects that match your skills and interests',
-    people: 'Connect with people who share your interests and goals'
+    people: 'Connect with people who share your interests and goals',
+    organizations: 'Discover organizations and opportunities in your field'
   };
   return descriptions[type] || '';
 }
@@ -357,7 +377,7 @@ function closeStartModal() {
 
   if (modal) {
     modal.style.opacity = '0';
-    modal.style.transform = 'translateX(100%)';
+    modal.style.transform = 'translate(-50%, -50%) scale(0.9)';
     setTimeout(() => {
       modal.style.display = 'none';
     }, 300);
@@ -365,6 +385,9 @@ function closeStartModal() {
 
   if (backdrop) {
     backdrop.style.display = 'none';
+    // Keep backdrop transparent and non-interactive
+    backdrop.style.background = 'transparent';
+    backdrop.style.backdropFilter = 'none';
   }
 }
 
@@ -380,7 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Remove existing listeners
     const newBtn = startBtn.cloneNode(true);
     startBtn.parentNode.replaceChild(newBtn, startBtn);
-    
+
     // Add new enhanced handler
     newBtn.addEventListener('click', openEnhancedStartModal);
   }
@@ -391,32 +414,63 @@ document.addEventListener('DOMContentLoaded', () => {
     style.id = 'start-integration-styles';
     style.textContent = `
       @keyframes recommendedPulse {
-        0%, 100% { 
+        0%, 100% {
           box-shadow: 0 0 30px rgba(0,224,255,0.25);
         }
-        50% { 
+        50% {
           box-shadow: 0 0 40px rgba(0,224,255,0.4);
         }
       }
-      
+
       .start-option {
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      
+
       .start-option:hover {
         transform: translateY(-4px);
       }
-      
+
       .select-option-btn:hover {
         transform: translateY(-2px) scale(1.02);
       }
-      
+
       .why-this-btn:hover {
         transform: scale(1.1);
+      }
+
+      .start-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      }
+
+      @keyframes celebration {
+        0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+        50% { transform: scale(1.2) rotate(10deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      #save-summary-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,255,136,0.5);
+      }
+
+      #close-summary-btn:hover {
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.5);
       }
     `;
     document.head.appendChild(style);
   }
+
+  // Auto-open START modal on first load or new day
+  window.addEventListener('profile-loaded', () => {
+    if (window.startFlowSequential && window.startFlowSequential.shouldAutoOpen()) {
+      console.log('🚀 Auto-opening START modal for first-time or new day');
+      setTimeout(() => {
+        openEnhancedStartModal();
+      }, 1500); // Delay to let the app fully initialize
+    }
+  });
 });
 
 // Export functions

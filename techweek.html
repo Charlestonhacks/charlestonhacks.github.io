@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 
 <head>
   <meta charset="utf-8" />
@@ -11,13 +11,13 @@
   <meta property="og:title" content="30 Second AI Film Fest and Charleston Tech Week" />
   <meta property="og:description" content="Join us for the 30 Second AI Film Fest during Charleston Tech Week. Create innovative, AI-powered short films in just 3 hours!" />
   <meta property="og:image" content="images/banner.png" />
-  <meta property="og:url" content="https://charlestonhacks.github.io/techweek.html" />
+  <meta property="og:url" content="https://charlestonhacks.com/techweek.html" />
 
   <!-- Preload main banner -->
-  <link rel="preload" as="image" href="images/banner.png">
+  <link rel="preload" as="image" href="images/squarebanner.jpg">
 
-  <!-- Core styles -->
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Core styles: main.css provides #main / .post.featured / header.major layout -->
+  <link rel="stylesheet" href="assets/css/main.css" />
   <noscript>
     <link rel="stylesheet" href="assets/css/noscript.css" />
   </noscript>
@@ -30,17 +30,68 @@
     crossorigin="anonymous"
     referrerpolicy="no-referrer"
   />
+
+  <style>
+    /* Banner image: full-width, centered */
+    .zoom-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 1.5rem auto;
+      border-radius: 6px;
+    }
+
+    /* Back-button alignment */
+    header.major {
+      text-align: left;
+    }
+
+    /* Film buttons row */
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem auto;
+    }
+
+    .btn {
+      padding: 0.75em 1.6em;
+      background: #c9a35e;
+      color: #121212;
+      font-weight: bold;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.2s;
+      display: inline-block;
+    }
+
+    .btn:hover {
+      background: #e5c88a;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 
-<body class="is-preload">
-  <!-- —— Neural background canvas —— -->
-  <canvas id="neural-bg"></canvas>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-6NDKG07DY6');
+</script>
 
-  <!-- —— Main content —— -->
+<body class="is-preload">
+
+  <!-- Main content -->
   <div id="main">
     <article class="post featured">
+
       <header class="major">
-        <a href="index.html"><img src="assets/chbackbuttonred.png" alt="Back" style="width:200px;"></a>
+        <a href="index.html">
+          <img src="assets/chbackbuttonred.png" alt="Back to Home" style="width:200px;">
+        </a>
       </header>
 
       <img src="images/squarebanner.jpg" alt="Hackathon Poster" class="zoom-image" />
@@ -58,8 +109,10 @@
         unforgettable. Use AI tools to push creative boundaries.
       </p>
 
-      <p><strong>Date &amp; Time:</strong> May 1, 2025 | 6–9 PM<br>
-      <strong>Location:</strong> Simmons Center, College of Charleston, Room 180</p>
+      <p>
+        <strong>Date &amp; Time:</strong> May 1, 2025 | 6–9 PM<br>
+        <strong>Location:</strong> Simmons Center, College of Charleston, Room 180
+      </p>
 
       <hr>
 
@@ -73,24 +126,32 @@
 
       <hr>
 
-      <p>
-        Congrats to all participants! Special thanks to our AI film sponsor, OpenArt.
-      </p>
+      <p>Congrats to all participants! Special thanks to our AI film sponsor, OpenArt.</p>
 
       <h3>Winners</h3>
-      <p>Audience Favorite: “What?” by Max Krause &amp; Mike Astle<br>
-         Best Film: “Six Words” by John Doyle<br>
-         Most Creative Use of AI: “Final Arc” by Imran Mujawar
+      <p>
+        Audience Favorite: "What?" by Max Krause &amp; Mike Astle<br>
+        Best Film: "Six Words" by John Doyle<br>
+        Most Creative Use of AI: "Final Arc" by Imran Mujawar
       </p>
 
-      <!-- film buttons -->
-       <div class="button-container">
-    <a class="btn" href="https://youtu.be/x4Yqf4iGZrc" target="_blank">Film 1</a>
-    <a class="btn" href="https://youtu.be/ZqfAhiZOMao" target="_blank">Film 2</a>
-    <a class="btn" href="https://youtu.be/GBzS9xmxiTA" target="_blank">Film 3</a>
-  </div>
+      <div class="button-container">
+        <a class="btn" href="https://youtu.be/x4Yqf4iGZrc" target="_blank">Film 1</a>
+        <a class="btn" href="https://youtu.be/ZqfAhiZOMao" target="_blank">Film 2</a>
+        <a class="btn" href="https://youtu.be/GBzS9xmxiTA" target="_blank">Film 3</a>
+      </div>
 
-  <!-- —— Neural background module —— -->
-  <script type="module" src="assets/js/neuralBackground.js"></script>
+    </article>
+  </div><!-- /#main -->
+
+  <!-- Scripts (required for is-preload / main.css transitions) -->
+  <script src="assets/js/jquery.min.js"></script>
+  <script src="assets/js/jquery.scrollex.min.js"></script>
+  <script src="assets/js/jquery.scrolly.min.js"></script>
+  <script src="assets/js/browser.min.js"></script>
+  <script src="assets/js/breakpoints.min.js"></script>
+  <script src="assets/js/util.js"></script>
+  <script src="assets/js/main.js"></script>
+
 </body>
 </html>

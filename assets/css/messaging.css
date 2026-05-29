@@ -26,6 +26,7 @@
 
 .conversations-header {
   padding: 1.5rem;
+  padding-right: 3.5rem; /* Add extra padding to avoid X button */
   border-bottom: 1px solid rgba(0, 224, 255, 0.2);
   display: flex;
   align-items: center;
@@ -658,14 +659,17 @@
 }
 
 @media (max-width: 768px) {
-  /* Full-screen modal behavior (your modal container is outside messaging.js) */
+  /* Full-screen modal behavior - override ALL constraints */
   #messages-modal {
     position: fixed !important;
     inset: 0 !important;
     z-index: 10050 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
 
-  #messages-modal .modal-content {
+  #messages-modal .modal-content,
+  #messages-modal .messages-modal-content {
     width: 100vw !important;
     height: 100dvh !important;
     max-width: none !important;
@@ -676,13 +680,24 @@
     overflow: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+    position: relative !important;
+  }
+
+  /* Close button positioning for mobile */
+  #messages-modal .modal-close {
+    position: absolute !important;
+    top: calc(0.5rem + var(--safe-top, 0px)) !important;
+    right: 0.5rem !important;
+    z-index: 10051 !important;
   }
 
   #messages-container {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow: hidden !important;
-    padding-bottom: var(--safe-bottom) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
   }
 
   /* Kill desktop height math inside full-screen */
@@ -692,6 +707,8 @@
     padding: 0 !important;
     gap: 0 !important;
     grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   /* Default mobile state = show conversations list, hide chat (like WhatsApp) */
@@ -699,6 +716,7 @@
     display: flex !important;
     border-radius: 0 !important;
     height: 100% !important;
+    flex: 1 1 auto !important;
   }
 
   #messages-container .chat-panel {
@@ -715,6 +733,8 @@
   #messages-container .chat-panel.mobile-show {
     display: flex !important;
     flex-direction: column !important;
+    height: 100% !important;
+    flex: 1 1 auto !important;
   }
 
   /* Header becomes sticky like an app nav bar */
@@ -725,35 +745,82 @@
     padding-top: calc(0.75rem + var(--safe-top)) !important;
     padding-bottom: 0.75rem !important;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+    flex-shrink: 0 !important;
   }
 
-  /* Message list = only scroll region */
+  /* Message list = scrollable area - THIS IS KEY */
   #messages-container .messages-area {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch !important;
     overscroll-behavior: contain !important;
     padding: 1rem !important;
+    /* NO bottom padding needed - input is in flow */
+    padding-bottom: 1rem !important;
   }
 
-  /* Composer pinned to bottom */
+  /* Composer - part of flex layout, NOT fixed */
   #messages-container .message-input-container {
-    position: sticky !important;
-    bottom: 0 !important;
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    flex-shrink: 0 !important;
     z-index: 6 !important;
-    padding: 0.75rem 0.75rem calc(0.75rem + var(--safe-bottom)) !important;
-    background: rgba(10,14,39,0.95) !important;
+    /* Generous padding for better thumb reach */
+    padding: 1.25rem 1rem !important;
+    /* Add safe area for devices with home indicator */
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px)) !important;
+    background: rgba(10,14,39,0.98) !important;
     backdrop-filter: blur(10px) !important;
+    border-top: 1px solid rgba(0,224,255,0.2) !important;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.3) !important;
   }
 
-  /* Prevent iOS zoom */
+  /* When keyboard opens, browser handles scrolling naturally */
+  #messages-container .message-input-container.keyboard-open {
+    background: rgba(10,14,39,1) !important;
+  }
+
+  /* Prevent iOS zoom on input focus */
   #messages-container .message-input {
     font-size: 16px !important;
+    max-height: 120px !important;
+    overflow-y: auto !important;
+    resize: none !important;
+    /* Better touch target */
+    min-height: 48px !important;
+    padding: 0.875rem 1rem !important;
+    line-height: 1.5 !important;
   }
 
   /* Make send button thumb-friendly */
   #messages-container .send-button {
-    min-height: 44px !important;
+    min-height: 48px !important;
+    min-width: 48px !important;
+    padding: 0.875rem 1.25rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Improve input wrapper spacing */
+  #messages-container .message-input-wrapper {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+
+  /* Better gap between input and send button */
+  #messages-container .message-input-container {
+    gap: 0.75rem !important;
+    display: flex !important;
+    align-items: flex-end !important;
+  }
+
+  /* Ensure chat panel uses full height properly */
+  #messages-container .chat-panel.mobile-show {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 }

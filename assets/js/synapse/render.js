@@ -85,15 +85,57 @@ export function setupDefs(svg) {
 }
 
 export function getLinkColor(link) {
+  // Check type first, then status
+  
+  // Project-member links (person → project)
+  if (link.type === "project-member") {
+    if (link.status === "pending") {
+      return "rgba(255, 107, 107, 0.4)"; // Light red for pending project requests
+    }
+    return "#ff6b6b"; // Red for approved project members
+  }
+
+  // Organization member links
+  if (link.type === "organization") {
+    return "rgba(168, 85, 247, 0.5)"; // Purple for org membership
+  }
+
   // Handle person-to-person connection links
   if (link.type === "connection") {
     if (link.status === "accepted") {
       return COLORS.edgeAccepted; // Green for accepted connections
     } else if (link.status === "pending") {
-      return "rgba(255, 255, 255, 0.15)"; // Subtle gray for pending
+      return "rgba(255, 170, 0, 0.5)"; // Orange for pending (more visible than gray)
     }
   }
 
+  // Theme participation links
+  if (link.status === "theme-participant") {
+    // Per yellow instructions: Use theme color for visual relationship
+    // Get the theme color from the source node (theme)
+    const themeId = typeof link.source === 'object' && link.source.theme_id
+      ? link.source.theme_id
+      : (typeof link.source === 'string' && link.source.startsWith('theme:'))
+        ? link.source.replace('theme:', '')
+        : null;
+
+    if (themeId) {
+      const themeColor = getThemeColor(themeId);
+      // Opacity based on engagement level
+      const alpha = link.engagement_level === "leading" ? 0.9 :
+                    link.engagement_level === "active" ? 0.7 : 0.5;
+      return themeColor.replace(')', `, ${alpha})`).replace('#', 'rgba(').replace(/^rgba\(([\da-f]{2})([\da-f]{2})([\da-f]{2})/, (_, r, g, b) => {
+        return `rgba(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}`;
+      });
+    }
+
+    // Fallback to engagement-based colors
+    if (link.engagement_level === "leading") return "rgba(255, 215, 0, 0.7)";
+    if (link.engagement_level === "active") return "rgba(0, 224, 255, 0.7)";
+    return "rgba(0, 224, 255, 0.4)";
+  }
+
+  // Legacy status-based colors (fallback)
   switch (link.status) {
     case "accepted":
       return COLORS.edgeAccepted;
@@ -101,37 +143,27 @@ export function getLinkColor(link) {
       return COLORS.edgePending;
     case "suggested":
       return COLORS.edgeSuggested;
-    case "project-member":
-      return "#ff6b6b";
-    case "theme-participant":
-      // Per yellow instructions: Use theme color for visual relationship
-      // Get the theme color from the source node (theme)
-      const themeId = typeof link.source === 'object' && link.source.theme_id
-        ? link.source.theme_id
-        : (typeof link.source === 'string' && link.source.startsWith('theme:'))
-          ? link.source.replace('theme:', '')
-          : null;
-
-      if (themeId) {
-        const themeColor = getThemeColor(themeId);
-        // Opacity based on engagement level
-        const alpha = link.engagement_level === "leading" ? 0.9 :
-                      link.engagement_level === "active" ? 0.7 : 0.5;
-        return themeColor.replace(')', `, ${alpha})`).replace('#', 'rgba(').replace(/^rgba\(([\da-f]{2})([\da-f]{2})([\da-f]{2})/, (_, r, g, b) => {
-          return `rgba(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b, 16)}`;
-        });
-      }
-
-      // Fallback to engagement-based colors
-      if (link.engagement_level === "leading") return "rgba(255, 215, 0, 0.7)";
-      if (link.engagement_level === "active") return "rgba(0, 224, 255, 0.7)";
-      return "rgba(0, 224, 255, 0.4)";
     default:
       return COLORS.edgeDefault;
   }
 }
 
 export function getLinkWidth(link) {
+  // Check type first
+  
+  // Project-member links
+  if (link.type === "project-member") {
+    if (link.status === "pending") {
+      return 1.5; // Thinner for pending project requests
+    }
+    return 2.5; // Medium thickness for approved project members
+  }
+
+  // Organization member links
+  if (link.type === "organization") {
+    return 2;
+  }
+
   // Handle person-to-person connection links
   if (link.type === "connection") {
     if (link.status === "accepted") {
@@ -141,6 +173,15 @@ export function getLinkWidth(link) {
     }
   }
 
+  // Theme participation links
+  if (link.status === "theme-participant") {
+    // Width based on engagement level
+    if (link.engagement_level === "leading") return 3;
+    if (link.engagement_level === "active") return 2;
+    return 1.5; // interested/observer
+  }
+
+  // Legacy status-based widths (fallback)
   switch (link.status) {
     case "accepted":
       return 3;
@@ -148,11 +189,6 @@ export function getLinkWidth(link) {
       return 2;
     case "suggested":
       return 1;
-    case "theme-participant":
-      // Width based on engagement level
-      if (link.engagement_level === "leading") return 3;
-      if (link.engagement_level === "active") return 2;
-      return 1.5; // interested/observer
     default:
       return 1;
   }
@@ -172,10 +208,17 @@ export function renderLinks(container, links) {
     .attr("stroke-width", d => getLinkWidth(d))
     .attr("stroke-dasharray", d => d.status === "pending" ? "4,4" : "none")
     .attr("opacity", d => {
+      // Project-member links
+      if (d.type === "project-member") {
+        if (d.status === "pending") return 0.5; // Semi-transparent for pending
+        return 0.8; // More visible for approved
+      }
+      // Organization member links
+      if (d.type === "organization") return 0.6;
       // Connection links (person-to-person)
       if (d.type === "connection") {
-        if (d.status === "accepted") return 0.8; // More visible for accepted
-        if (d.status === "pending") return 0.3; // Very subtle for pending
+        if (d.status === "accepted") return 0.9; // Very visible for accepted
+        if (d.status === "pending") return 0.6; // More visible for pending (was 0.3)
       }
       // Theme and other links
       if (d.status === "suggested") return 0.4;
@@ -186,7 +229,24 @@ export function renderLinks(container, links) {
   return linkEls;
 }
 
-export function renderNodes(container, nodes, { onNodeClick } = {}) {
+export function renderNodes(container, nodes, { onNodeClick, connectionsData = [], currentUserCommunityId = null } = {}) {
+  // Build a set of connected user IDs for quick lookup
+  const connectedUserIds = new Set();
+  if (connectionsData && currentUserCommunityId) {
+    connectionsData.forEach(conn => {
+      const status = String(conn.status || "").toLowerCase();
+      // Only mark as connected if accepted
+      if (status === 'accepted' || status === 'active' || status === 'connected') {
+        if (conn.from_user_id === currentUserCommunityId) {
+          connectedUserIds.add(conn.to_user_id);
+        }
+        if (conn.to_user_id === currentUserCommunityId) {
+          connectedUserIds.add(conn.from_user_id);
+        }
+      }
+    });
+  }
+  
   const nodeEls = container
     .append("g")
     .attr("class", "nodes")
@@ -202,6 +262,47 @@ export function renderNodes(container, nodes, { onNodeClick } = {}) {
 
   nodeEls.each(function (d) {
     const node = d3.select(this);
+    
+    // Check if this person is connected to current user
+    const isConnected = d.type === "person" && connectedUserIds.has(d.id);
+
+    if (d.type === "organization") {
+      const radius = 28;
+      const orgColor = "#a855f7"; // Purple for organizations
+
+      // Outer ring
+      node
+        .append("circle")
+        .attr("r", radius + 5)
+        .attr("fill", "none")
+        .attr("stroke", orgColor)
+        .attr("stroke-width", 2)
+        .attr("stroke-opacity", 0.5)
+        .attr("stroke-dasharray", "6,3")
+        .attr("class", "org-outer-ring");
+
+      // Main circle
+      node
+        .append("circle")
+        .attr("r", radius)
+        .attr("fill", "rgba(168, 85, 247, 0.3)")
+        .attr("stroke", orgColor)
+        .attr("stroke-width", 2.5)
+        .attr("filter", "url(#glow)")
+        .attr("class", "node-circle");
+
+      // Organization icon
+      node
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("dy", "0.35em")
+        .attr("fill", orgColor)
+        .attr("font-size", "18px")
+        .attr("pointer-events", "none")
+        .text("🏢");
+
+      return;
+    }
 
     if (d.type === "project") {
       const size = Math.max(35, Math.min(60, 30 + (d.team_size * 4)));
@@ -250,6 +351,18 @@ export function renderNodes(container, nodes, { onNodeClick } = {}) {
     // Enhanced people nodes with better visual hierarchy
     const radius = d.isCurrentUser ? 55 : d.shouldShowImage ? 32 : d.isSuggested ? 24 : 16;
 
+    // Add connection indicator ring for connected people (not current user)
+    if (isConnected && !d.isCurrentUser) {
+      node
+        .append("circle")
+        .attr("r", radius + 6)
+        .attr("fill", "none")
+        .attr("stroke", "#00ff88") // Green for connected
+        .attr("stroke-width", 2.5)
+        .attr("stroke-opacity", 0.8)
+        .attr("class", "connection-indicator-ring");
+    }
+
     // Add outer ring for current user
     if (d.isCurrentUser) {
       node
@@ -270,10 +383,16 @@ export function renderNodes(container, nodes, { onNodeClick } = {}) {
       .attr("r", radius)
       .attr("fill", () => {
         if (d.isCurrentUser) return COLORS.nodeCurrentUser;
+        // Slightly different fill for connected vs unconnected
+        if (isConnected) return d.shouldShowImage ? COLORS.nodeDefault : "rgba(0, 255, 136, 0.3)";
         return d.shouldShowImage ? COLORS.nodeDefault : "rgba(0, 224, 255, 0.4)";
       })
-      .attr("stroke", () => (d.isCurrentUser ? "#fff" : COLORS.nodeDefault))
-      .attr("stroke-width", d.isCurrentUser ? 4 : 2)
+      .attr("stroke", () => {
+        if (d.isCurrentUser) return "#fff";
+        if (isConnected) return "#00ff88"; // Green stroke for connected
+        return COLORS.nodeDefault; // Cyan stroke for unconnected
+      })
+      .attr("stroke-width", d.isCurrentUser ? 4 : isConnected ? 2.5 : 2)
       .attr("filter", "url(#glow)")
       .attr("class", "node-circle");
   });
@@ -320,14 +439,21 @@ export function renderNodes(container, nodes, { onNodeClick } = {}) {
   // Labels
   nodeEls
     .append("text")
-    .attr("dy", (d) => (d.type === "project" ? 40 : d.isCurrentUser ? 60 : 35))
+    .attr("dy", (d) => (d.type === "organization" ? 42 : d.type === "project" ? 40 : d.isCurrentUser ? 60 : 35))
     .attr("text-anchor", "middle")
-    .attr("fill", (d) => (d.type === "project" ? "#ff6b6b" : "#fff"))
-    .attr("font-size", (d) => (d.type === "project" ? "12px" : d.isCurrentUser ? "14px" : "11px"))
+    .attr("fill", (d) => (d.type === "organization" ? "#a855f7" : d.type === "project" ? "#ff6b6b" : "#fff"))
+    .attr("font-size", (d) => (d.type === "organization" ? "11px" : d.type === "project" ? "12px" : d.isCurrentUser ? "14px" : "11px"))
     .attr("font-family", "system-ui, sans-serif")
-    .attr("font-weight", (d) => (d.type === "project" ? "bold" : d.isCurrentUser ? "bold" : "normal"))
+    .attr("font-weight", (d) => (d.type === "organization" ? "600" : d.type === "project" ? "bold" : d.isCurrentUser ? "bold" : "normal"))
     .attr("pointer-events", "none")
     .text((d) => truncateName(d.name));
+
+  // Dispatch event for progressive disclosure system
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('synapse:nodes-rendered', {
+      detail: { nodeEls, nodes }
+    }));
+  }, 100);
 
   return nodeEls;
 }
@@ -410,7 +536,87 @@ export function renderThemeCircles(container, themeNodes, { onThemeHover, onThem
     // NOTE: Projects are now rendered as a separate overlay layer (see renderThemeProjectsOverlay)
     // This ensures they appear on top of theme circles and remain clickable
 
-    // Single interactive border (clickable area)
+    // Enhanced interactive border with wider hit area and better feedback
+    const hitAreaRadius = radius + 15; // Wider hit area extending beyond visual ring
+    
+    // Invisible wider hit area for easier clicking
+    themeGroup
+      .append("circle")
+      .attr("r", hitAreaRadius)
+      .attr("fill", "transparent")
+      .attr("stroke", "none")
+      .attr("class", "theme-hit-area")
+      .style("cursor", "pointer")
+      .style("pointer-events", "all")
+      .on("mouseenter", function(event) {
+        // Enhance visual feedback on hover
+        const border = themeGroup.select(".theme-interactive-border");
+        const background = themeGroup.select(".theme-background");
+        
+        border
+          .transition()
+          .duration(150)
+          .attr("stroke-opacity", 1)
+          .attr("stroke-width", 4)
+          .style("filter", "drop-shadow(0 0 8px " + themeColor + ")");
+          
+        background
+          .transition()
+          .duration(150)
+          .attr("stroke-opacity", 0.8)
+          .attr("stroke-width", 3);
+          
+        onThemeHover?.(event, d, true);
+      })
+      .on("mouseleave", function(event) {
+        // Reset visual state
+        const border = themeGroup.select(".theme-interactive-border");
+        const background = themeGroup.select(".theme-background");
+        
+        border
+          .transition()
+          .duration(150)
+          .attr("stroke-opacity", 0.6)
+          .attr("stroke-width", 2)
+          .style("filter", "none");
+          
+        background
+          .transition()
+          .duration(150)
+          .attr("stroke-opacity", isDiscoverable ? 0.2 : (userHasJoined ? 0.4 : 0.2))
+          .attr("stroke-width", userHasJoined ? 2 : 1);
+          
+        onThemeHover?.(event, d, false);
+      })
+      .on("click", (event) => {
+        event.stopPropagation();
+        
+        console.log("🎯 Theme clicked:", d.title, "ID:", d.theme_id);
+        
+        // Add selection feedback
+        const border = themeGroup.select(".theme-interactive-border");
+        border
+          .transition()
+          .duration(100)
+          .attr("stroke-width", 6)
+          .attr("stroke-opacity", 1)
+          .style("filter", "drop-shadow(0 0 12px " + themeColor + ")")
+          .transition()
+          .delay(100)
+          .duration(200)
+          .attr("stroke-width", 4)
+          .attr("stroke-opacity", 0.8);
+        
+        // Call the theme click handler
+        try {
+          onThemeClick?.(event, d);
+          console.log("✅ Theme click handler called successfully");
+        } catch (error) {
+          console.error("❌ Theme click handler failed:", error);
+        }
+      });
+
+    // Visual border (non-interactive, just for display)
     themeGroup
       .append("circle")
       .attr("r", radius)
@@ -419,28 +625,7 @@ export function renderThemeCircles(container, themeNodes, { onThemeHover, onThem
       .attr("stroke-width", 2)
       .attr("stroke-opacity", 0.6)
       .attr("class", "theme-interactive-border")
-      .style("cursor", "pointer")
-      .style("pointer-events", "all")
-      .on("mouseenter", function(event) {
-        d3.select(this)
-          .transition()
-          .duration(150)
-          .attr("stroke-opacity", 1)
-          .attr("stroke-width", 3);
-        onThemeHover?.(event, d, true);
-      })
-      .on("mouseleave", function(event) {
-        d3.select(this)
-          .transition()
-          .duration(150)
-          .attr("stroke-opacity", 0.6)
-          .attr("stroke-width", 2);
-        onThemeHover?.(event, d, false);
-      })
-      .on("click", (event) => {
-        event.stopPropagation();
-        onThemeClick?.(event, d);
-      });
+      .style("pointer-events", "none"); // Visual only, hit area handles interaction
 
     // Simplified progress indicator (only if significant progress)
     const now = Date.now();
@@ -527,78 +712,127 @@ export function renderThemeCircles(container, themeNodes, { onThemeHover, onThem
       .attr("class", "theme-info-background");
   });
 
-  // Enhanced CSS animations for radial project positioning
-  if (!document.querySelector('#theme-animations')) {
+  // Enhanced CSS animations for theme interaction
+  if (!document.querySelector('#theme-interaction-styles')) {
     const style = document.createElement('style');
-    style.id = 'theme-animations';
+    style.id = 'theme-interaction-styles';
     style.textContent = `
+      .theme-container {
+        /* Removed transform on hover to prevent flickering */
+        will-change: opacity;
+      }
+      
+      .theme-hit-area {
+        transition: all 0.15s ease;
+        will-change: opacity;
+      }
+      
+      .theme-interactive-border {
+        transition: all 0.15s ease;
+        will-change: stroke-width, stroke-opacity, filter;
+      }
+      
+      .theme-background {
+        transition: all 0.15s ease;
+        will-change: stroke-width, stroke-opacity;
+      }
+      
       .theme-container:hover .theme-background {
-        filter: brightness(1.2);
-        transition: filter 0.2s ease;
+        filter: brightness(1.1);
       }
       
       .theme-container:hover .project-indicator {
-        transform: scale(1.1);
-        transition: transform 0.2s ease;
-      }
-      
-      .theme-container:hover .theme-info-background {
-        fill: rgba(0,0,0,0.6);
-        stroke-opacity: 0.5;
-        transition: all 0.2s ease;
+        transform: scale(1.05);
       }
       
       .theme-container:hover .theme-labels text {
         opacity: 1.0 !important;
-        transition: opacity 0.2s ease;
       }
       
-      .project-indicator {
-        transition: transform 0.2s ease;
-      }
-      
-      .project-indicator:hover {
-        transform: scale(1.3) !important;
-        filter: drop-shadow(0 0 8px rgba(255,255,255,0.3));
-      }
-      
-      .project-shape {
-        transition: all 0.2s ease;
-      }
-      
-      .project-glow {
-        transition: all 0.2s ease;
-      }
-      
-      .project-title {
-        transition: opacity 0.2s ease;
-        filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
-      }
-      
-      .theme-interactive-border {
-        transition: stroke-opacity 0.15s ease, stroke-width 0.15s ease;
-      }
-      
-      /* Animation for projects appearing */
-      @keyframes projectAppear {
-        from {
-          opacity: 0;
-          transform: scale(0.5);
+      /* Enhanced pulse animation for selected themes */
+      @keyframes theme-selected-pulse {
+        0% { 
+          stroke-width: 6px; 
+          stroke-opacity: 1; 
+          filter: drop-shadow(0 0 12px currentColor);
         }
-        to {
-          opacity: 1;
-          transform: scale(1);
+        50% { 
+          stroke-width: 8px; 
+          stroke-opacity: 0.8; 
+          filter: drop-shadow(0 0 16px currentColor);
+        }
+        100% { 
+          stroke-width: 4px; 
+          stroke-opacity: 0.8; 
+          filter: drop-shadow(0 0 8px currentColor);
         }
       }
       
-      .project-indicator {
-        animation: projectAppear 0.3s ease-out;
+      .theme-selected .theme-interactive-border {
+        animation: theme-selected-pulse 0.4s ease-out;
+        stroke-width: 4px !important;
+        stroke-opacity: 0.9 !important;
+        filter: drop-shadow(0 0 12px currentColor) !important;
+      }
+      
+      /* Improved hover feedback */
+      .theme-container:hover .theme-interactive-border {
+        stroke-width: 3px;
+        stroke-opacity: 0.8;
+        filter: drop-shadow(0 0 8px currentColor);
+      }
+      
+      /* Better visual hierarchy for theme rings */
+      .theme-container .theme-background {
+        pointer-events: none;
+      }
+      
+      .theme-container .theme-interactive-border {
+        pointer-events: none;
+      }
+      
+      .theme-container .theme-hit-area {
+        pointer-events: all;
       }
     `;
     document.head.appendChild(style);
   }
 
   return d3.select(themesGroup.node());
+}
+
+// Function to highlight a selected theme
+export function highlightSelectedTheme(themeId) {
+  console.log("🎯 Highlighting theme:", themeId);
+  
+  // Remove previous selection
+  d3.selectAll('.theme-container').classed('theme-selected', false);
+  
+  // Add selection to new theme
+  if (themeId) {
+    const themeSelector = `.theme-${themeId}`;
+    const themeElement = d3.select(themeSelector);
+    
+    if (!themeElement.empty()) {
+      themeElement.classed('theme-selected', true);
+      console.log("✅ Theme highlighted successfully:", themeId);
+    } else {
+      console.warn("⚠️ Theme element not found for highlighting:", themeId, "selector:", themeSelector);
+      // Try to find any theme containers for debugging
+      const allThemes = d3.selectAll('.theme-container');
+      console.log("🔍 Available theme containers:", allThemes.size());
+      allThemes.each(function(d) {
+        console.log("  - Theme container:", d?.theme_id, "class:", this.className.baseVal);
+      });
+    }
+  }
+}
+
+// Function to clear all theme selections
+export function clearThemeSelection() {
+  console.log("🧹 Clearing all theme selections");
+  const cleared = d3.selectAll('.theme-container').classed('theme-selected', false);
+  console.log("✅ Cleared selections from", cleared.size(), "theme containers");
 }
 
 /**
@@ -665,16 +899,34 @@ export function renderThemeProjectsOverlay(container, themeNodes) {
     const maxProjectsPerRing = 8;
 
     theme.projects.forEach((project, index) => {
-      // Simple approach: distribute all projects evenly around the circle
+      // FIXED: Add theme-specific offset to prevent overlap between themes
+      const themeOffset = (theme.theme_id || '').slice(-2); // Use last 2 chars of theme ID
+      const themeOffsetAngle = parseInt(themeOffset, 16) || 0; // Convert to number
+      const themeAngleOffset = (themeOffsetAngle / 255) * Math.PI * 0.5; // 0 to π/2 offset
+      
+      // FIXED: Ensure even distribution around the circle
       const angleStep = (2 * Math.PI) / projectCount;
-      const projectAngle = index * angleStep;
-
+      const projectAngle = (index * angleStep) + themeAngleOffset; // Add theme offset
+      
       // If we have many projects, use rings
       const ring = Math.floor(index / maxProjectsPerRing);
       const ringDistance = baseDistance + (ring * 40);
       
+      // FIXED: Use proper trigonometry for even spacing
       const projectX = (theme.x || 0) + Math.cos(projectAngle) * ringDistance;
       const projectY = (theme.y || 0) + Math.sin(projectAngle) * ringDistance;
+
+      // Debug logging for project positioning
+      console.log(`🎯 Project "${project.title}" positioned:`, {
+        themeId: theme.theme_id,
+        index,
+        angle: (projectAngle * 180 / Math.PI).toFixed(1) + '°',
+        themeOffset: themeAngleOffset.toFixed(2),
+        x: projectX.toFixed(1),
+        y: projectY.toFixed(1),
+        ring,
+        distance: ringDistance
+      });
 
       // Project visual indicator
       const projectGroup = projectsOverlayGroup

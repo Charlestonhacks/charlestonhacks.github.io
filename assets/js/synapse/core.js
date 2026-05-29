@@ -1,6 +1,6 @@
 // assets/js/synapse/core.js
 // Synapse Core — init, svg, simulation wiring (modularized)
-// Version: 6.0 - Fixed theme click handler null safety (2026-01-13)
+// Version: 7.0 - Added Progressive Disclosure System (2026-02-04)
 
 import { initConnections } from "../connections.js";
 import { openNodePanel } from "../node-panel.js";
@@ -14,6 +14,8 @@ import {
   renderThemeCircles,
   renderThemeProjectsOverlay,
   drawProjectCircles,
+  highlightSelectedTheme,
+  clearThemeSelection,
 } from "./render.js";
 import { showSynapseNotification } from "./ui.js";
 import { setupSynapseRealtime } from "./realtime.js";
@@ -28,6 +30,9 @@ import {
   markInterested,
   renderThemeOverlayCard,
 } from "./themes.js";
+
+import ProgressiveDisclosure from "./progressive-disclosure.js";
+import QuietMode from "./quiet-mode.js";
 
 /* ==========================================================================
    STATE
@@ -44,6 +49,7 @@ let links = [];
 let nodeEls = null;
 let linkEls = null;
 let themeEls = null;
+let projectEls = null;
 
 let connectionsData = [];
 let projectMembersData = [];
@@ -51,8 +57,42 @@ let currentUserCommunityId = null;
 
 let initialized = false;
 let projectCircles = null;
-let showFullCommunity = true; // Default to Discovery Mode (show full community)
+let showFullCommunity = true; // Always show full community (Discovery Mode)
 let userManuallyToggledMode = false; // Track if user manually changed the mode
+
+// Readiness tracking for focus reliability
+let _ready = false;
+let __pendingFocus = null; // Single pending focus: { type: 'node'|'theme'|'activity', id?: string }
+
+/* ==========================================================================
+   READINESS TRACKING
+   ========================================================================== */
+
+/**
+ * Mark Synapse as ready and replay any pending focus
+ */
+function markSynapseReady() {
+  if (_ready) return; // Already ready
+  
+  _ready = true;
+  console.log('✅ Synapse ready - nodes and graph loaded');
+  
+  // Replay pending focus if any
+  if (__pendingFocus) {
+    const pending = __pendingFocus;
+    __pendingFocus = null; // Clear before replaying
+    
+    console.log('🔄 Replaying queued focus:', pending);
+    
+    if (pending.type === 'node') {
+      window.synapseApi.focusNode(pending.id);
+    } else if (pending.type === 'theme') {
+      window.synapseApi.focusTheme(pending.id);
+    } else if (pending.type === 'activity') {
+      window.synapseApi.showActivity();
+    }
+  }
+}
 
 /* ==========================================================================
    PUBLIC API
@@ -103,6 +143,77 @@ export async function initSynapseView() {
   await reloadAllData();
   await buildGraph();
 
+  // Quiet Mode v1 (Default - Radical Simplification)
+  // Feature flag: quietMode overrides Progressive Disclosure
+  const quietMode = true; // Default to Quiet Mode
+  
+  if (quietMode) {
+    try {
+      console.log('🤫 Initializing Quiet Mode (v1)...');
+      QuietMode.init({
+        svg,
+        container,
+        nodes,
+        links,
+        nodeEls,
+        linkEls,
+        themeEls,
+        projectEls,
+        zoomBehavior,
+        simulation,
+        currentUserCommunityId
+      });
+      console.log('✅ Quiet Mode initialized');
+      
+      // Expose for debugging
+      window.QuietMode = QuietMode;
+      
+      // Initialize auto-disable functionality
+      if (window.QuietModeAutoDisable) {
+        console.log('🔇 Initializing Quiet Mode Auto-Disable...');
+        window.QuietModeAutoDisable.init({
+          svg,
+          container,
+          nodes,
+          links,
+          nodeEls,
+          linkEls,
+          themeEls,
+          projectEls,
+          zoomBehavior,
+          simulation,
+          currentUserCommunityId
+        });
+        console.log('✅ Quiet Mode Auto-Disable initialized');
+      }
+    } catch (e) {
+      console.error('❌ Quiet Mode init failed:', e);
+    }
+  } else {
+    // Progressive Disclosure System (Mobile-First UX)
+    try {
+      console.log('🎨 Initializing Progressive Disclosure System...');
+      ProgressiveDisclosure.init({
+        svg,
+        container,
+        nodes,
+        links,
+        nodeEls,
+        linkEls,
+        themeEls,
+        projectEls,
+        zoomBehavior,
+        simulation
+      });
+      console.log('✅ Progressive Disclosure initialized');
+      
+      // Expose for debugging
+      window.ProgressiveDisclosure = ProgressiveDisclosure;
+    } catch (e) {
+      console.error('❌ Progressive Disclosure init failed:', e);
+    }
+  }
+
   // Realtime refresh (connections/projects/themes)
   setupSynapseRealtime(supabase, async () => {
     await reloadAllData();
@@ -127,16 +238,267 @@ export async function initSynapseView() {
   window.refreshThemeCircles = refreshThemeCircles;
   window.refreshSynapseConnections = refreshSynapseConnections;
   window.refreshSynapseProjectCircles = refreshSynapseProjectCircles;
-  window.toggleFullCommunityView = toggleFullCommunityView;
+  // toggleFullCommunityView removed - always in Discovery Mode now
+  window.openThemeCard = openThemeCard; // Expose for search results
 
-  // Expose state for UI components
-  window.synapseShowFullCommunity = showFullCommunity;
+  // Expose theme selection functions for debugging
+  window.highlightSelectedTheme = highlightSelectedTheme;
+  window.clearThemeSelection = clearThemeSelection;
+  
+  // Add test function for theme selection
+  window.testThemeSelection = function(themeId) {
+    console.log("🎯 Testing theme selection for:", themeId);
+    if (themeId) {
+      highlightSelectedTheme(themeId);
+      console.log("✅ Theme highlighted:", themeId);
+    } else {
+      clearThemeSelection();
+      console.log("✅ All theme selections cleared");
+    }
+  };
+
+  // Expose state for UI components (always true now)
+  window.synapseShowFullCommunity = true;
 
   // Expose functions needed by Illuminate Pathways
   window.getSynapseStats = getSynapseStats;
   window.getRecommendations = getRecommendations;
   window.showConnectPathways = showConnectPathways;
   window.clearConnectPathways = clearConnectPathways;
+  window.illuminatePathways = illuminatePathways; // Expose for Intelligence Layer
+  
+  // Expose pathway animation functions for Intelligence Layer
+  window.showRecommendationPathways = PathwayAnimations.showRecommendationPathways;
+  window.clearAllPathways = PathwayAnimations.clearAllPathways;
+
+  // Expose filtering function for category buttons
+  window.filterSynapseByCategory = filterSynapseByCategory;
+  window.refreshSynapseView = refreshSynapseConnections;
+
+  // ================================================================
+  // SYNAPSE API - Bridge for START Suggestions
+  // ================================================================
+  window.synapseApi = {
+    /**
+     * Open Synapse view (switch from START to Synapse)
+     */
+    open: () => {
+      console.log('🌐 synapseApi.open() called');
+      
+      // Close START modal if open
+      if (window.EnhancedStartUI && window.EnhancedStartUI.close) {
+        window.EnhancedStartUI.close();
+      } else if (window.closeStartModal) {
+        window.closeStartModal();
+      }
+      
+      // Explicitly show Synapse view
+      const synapseView = document.getElementById('synapse-main-view');
+      if (synapseView) {
+        synapseView.style.display = 'block';
+        synapseView.style.visibility = 'visible';
+        synapseView.style.opacity = '1';
+        synapseView.style.zIndex = '1';
+        console.log('✅ Synapse view made visible');
+      } else {
+        console.warn('⚠️ synapse-main-view element not found');
+      }
+      
+      // Hide dashboard pane if it exists
+      const dashboardPane = document.getElementById('dashboard-pane');
+      if (dashboardPane) {
+        dashboardPane.style.display = 'none';
+        console.log('✅ Dashboard pane hidden');
+      }
+      
+      // Try legacy showView if it exists
+      if (window.showView) {
+        window.showView('synapse');
+      }
+    },
+    
+    /**
+     * Focus on a specific node (person, project, org)
+     */
+    focusNode: (nodeId) => {
+      console.log('🎯 synapseApi.focusNode() called:', nodeId);
+      
+      if (!nodeId) {
+        console.warn('⚠️ focusNode called without nodeId');
+        return;
+      }
+      
+      // If Synapse not ready, queue the focus
+      if (!_ready) {
+        console.log('⏳ Synapse not ready yet - queueing focus request');
+        __pendingFocus = { type: 'node', id: nodeId };
+        return;
+      }
+      
+      // Dispatch event for focus system to handle
+      window.dispatchEvent(new CustomEvent('synapse:focus-node', {
+        detail: { nodeId }
+      }));
+    },
+    
+    /**
+     * Focus on a theme
+     */
+    focusTheme: (themeId) => {
+      console.log('🎯 synapseApi.focusTheme() called:', themeId);
+      
+      if (!themeId) {
+        console.warn('⚠️ focusTheme called without themeId');
+        return;
+      }
+      
+      // If Synapse not ready, queue the focus
+      if (!_ready) {
+        console.log('⏳ Synapse not ready yet - queueing focus request');
+        __pendingFocus = { type: 'theme', id: themeId };
+        return;
+      }
+      
+      // Dispatch event for theme focus
+      window.dispatchEvent(new CustomEvent('synapse:focus-theme', {
+        detail: { themeId }
+      }));
+    },
+    
+    /**
+     * Show activity view (center on current user)
+     */
+    showActivity: () => {
+      console.log('📊 synapseApi.showActivity() called');
+      
+      // If Synapse not ready, queue the focus
+      if (!_ready) {
+        console.log('⏳ Synapse not ready yet - queueing focus request');
+        __pendingFocus = { type: 'activity' };
+        return;
+      }
+      
+      // Dispatch event to center on current user
+      window.dispatchEvent(new CustomEvent('synapse:show-activity', {
+        detail: { userId: currentUserCommunityId }
+      }));
+    },
+    
+    /**
+     * Debug interface - read-only access to Synapse state
+     */
+    debug: {
+      getNodes: () => nodes,
+      getLinks: () => links,
+      isReady: () => _ready
+    }
+  };
+  
+  // ================================================================
+  // EVENT LISTENERS - Handle synapseApi events
+  // ================================================================
+  
+  // Listen for focus-node events
+  window.addEventListener('synapse:focus-node', (event) => {
+    const { nodeId, skipToast } = event.detail; // NEW: skipToast flag
+    console.log('🎯 Handling synapse:focus-node event:', nodeId);
+    
+    if (!nodeId || !nodes || !svg || !container || !zoomBehavior) {
+      console.warn('⚠️ Cannot focus node - missing dependencies');
+      return;
+    }
+    
+    // Find the node
+    const node = nodes.find(n => n.id === nodeId);
+    if (!node) {
+      console.warn('⚠️ Node not found:', nodeId);
+      console.log('ℹ️ Falling back to activity view (centering on current user)');
+      
+      // Only show toast if not skipped (e.g., when clicking pathway animations)
+      if (!skipToast) {
+        showSynapseNotification(
+          'Person not found in current view. They may not be in the network yet.',
+          'info',
+          6000
+        );
+      }
+      
+      // Fallback: center on current user instead
+      const userNode = findCurrentUserNode(nodes, currentUserCommunityId);
+      if (userNode) {
+        setFocusOnNode(userNode, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
+      }
+      return;
+    }
+    
+    // Focus on the node
+    setFocusOnNode(node, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
+  });
+  
+  // Listen for focus-theme events
+  window.addEventListener('synapse:focus-theme', (event) => {
+    const { themeId } = event.detail;
+    console.log('🎯 Handling synapse:focus-theme event:', themeId);
+    
+    if (!themeId || !nodes || !svg || !container || !zoomBehavior) {
+      console.warn('⚠️ Cannot focus theme - missing dependencies');
+      return;
+    }
+    
+    // Find the theme node (theme nodes have id format "theme:<uuid>")
+    const themeNodeId = themeId.startsWith('theme:') ? themeId : `theme:${themeId}`;
+    const themeNode = nodes.find(n => n.id === themeNodeId || n.theme_id === themeId);
+    
+    if (!themeNode) {
+      console.warn('⚠️ Theme node not found:', themeId);
+      console.log('ℹ️ Falling back to activity view (centering on current user)');
+      
+      // Show helpful toast notification
+      showSynapseNotification(
+        'This theme isn\'t in your current view. You may need to join it or enable Discovery Mode.',
+        'info',
+        8000
+      );
+      
+      // Fallback: center on current user instead
+      const userNode = findCurrentUserNode(nodes, currentUserCommunityId);
+      if (userNode) {
+        setFocusOnNode(userNode, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
+      }
+      return;
+    }
+    
+    // Focus on the theme and open its card
+    setFocusOnNode(themeNode, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
+    
+    // Open theme card after a short delay
+    setTimeout(() => {
+      openThemeCard(themeNode);
+    }, 400);
+  });
+  
+  // Listen for show-activity events
+  window.addEventListener('synapse:show-activity', (event) => {
+    const { userId } = event.detail;
+    console.log('📊 Handling synapse:show-activity event:', userId);
+    
+    const targetUserId = userId || currentUserCommunityId;
+    
+    if (!targetUserId || !nodes || !svg || !container || !zoomBehavior) {
+      console.warn('⚠️ Cannot show activity - missing dependencies');
+      return;
+    }
+    
+    // Find the user node
+    const userNode = findCurrentUserNode(nodes, targetUserId);
+    if (!userNode) {
+      console.warn('⚠️ User node not found:', targetUserId);
+      return;
+    }
+    
+    // Center on the user
+    setFocusOnNode(userNode, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
+  });
 
   // Handy for console debugging
   try {
@@ -161,32 +523,146 @@ export async function refreshSynapseProjectCircles() {
   await rebuildGraph();
 }
 
-export async function toggleFullCommunityView(show) {
-  if (typeof show === "boolean") {
-    showFullCommunity = show;
-  } else {
-    showFullCommunity = !showFullCommunity;
-  }
+// toggleFullCommunityView removed - always in Discovery Mode
+// Visual indicators on nodes show connection status instead
 
-  // Mark that user manually toggled (disable auto-discovery)
-  userManuallyToggledMode = true;
-
-  // Expose state globally for UI components
-  window.synapseShowFullCommunity = showFullCommunity;
-
-  console.log(
-    `🌐 Synapse view mode: ${showFullCommunity ? "Full Community (Discovery Mode)" : "My Network"}`,
-    `(showFullCommunity=${showFullCommunity}, userManuallyToggled=true)`
-  );
-
-  // Per yellow comments: In discovery mode, show themes user is not connected to
-  // This allows users to discover new themes through the start sequence
-  await reloadAllData();
-  await rebuildGraph();
+// Filter synapse view by category
+export function filterSynapseByCategory(category) {
+  console.log(`🔍 Filtering synapse view by category: ${category}`);
   
-  // Update discovery button if it exists
-  if (typeof window.updateDiscoveryButtonState === 'function') {
-    window.updateDiscoveryButtonState();
+  if (!svg) {
+    console.warn('⚠️ SVG not available yet');
+    return;
+  }
+  
+  // Select ALL node elements directly from SVG (not using cached nodeEls)
+  const allNodes = svg.selectAll('.synapse-node');
+  const allLinks = svg.selectAll('.synapse-link');
+  const themeCircles = svg.selectAll('.theme-circle');
+  
+  console.log(`📊 Found ${allNodes.size()} visual nodes, ${allLinks.size()} links, ${themeCircles.size()} theme circles`);
+  
+  // Debug: Log what types we have in the nodes array
+  const nodeTypes = {};
+  nodes.forEach(n => {
+    nodeTypes[n.type] = (nodeTypes[n.type] || 0) + 1;
+  });
+  console.log('📊 Available node types in data:', nodeTypes);
+  
+  // Map category to node type (defined at function scope)
+  const typeMap = {
+    'people': 'person',
+    'projects': 'project',
+    'organizations': 'organization',
+    'themes': 'theme',
+    'discovery': 'all' // Discovery mode shows all nodes
+  };
+  
+  if (category === 'all' || category === 'discovery') {
+    // Show everything
+    allNodes
+      .transition()
+      .duration(300)
+      .style('opacity', 1)
+      .style('pointer-events', 'auto');
+    
+    // Only filter links if they exist (admin mode)
+    if (!allLinks.empty()) {
+      allLinks
+        .transition()
+        .duration(300)
+        .style('opacity', d => {
+          if (d.type === "project-member") {
+            return d.status === "pending" ? 0.5 : 0.8;
+          }
+          return 0.6;
+        });
+    }
+    
+    // Show theme circles
+    if (!themeCircles.empty()) {
+      themeCircles
+        .transition()
+        .duration(300)
+        .style('opacity', 1)
+        .style('pointer-events', 'auto');
+    }
+    
+    console.log(`✅ Filter applied: showing all ${allNodes.size()} nodes`);
+  } else {
+    const filterType = typeMap[category];
+    
+    if (!filterType) {
+      console.warn(`⚠️ Unknown category: ${category}`);
+      return;
+    }
+    
+    console.log(`📊 Filtering for type: "${filterType}"`);
+    
+    // Count how many nodes match
+    let matchCount = 0;
+    const matchedNodes = [];
+    allNodes.each(function(d) {
+      if (d && d.type === filterType) {
+        matchCount++;
+        matchedNodes.push(d.name);
+      }
+    });
+    console.log(`📊 Found ${matchCount} visual nodes of type "${filterType}":`, matchedNodes);
+    
+    // Filter nodes - only show nodes of the target type
+    allNodes
+      .transition()
+      .duration(300)
+      .style('opacity', d => {
+        if (!d) return 0.15;
+        const isMatch = d.type === filterType;
+        return isMatch ? 1 : 0.15;
+      })
+      .style('pointer-events', d => {
+        if (!d) return 'none';
+        return d.type === filterType ? 'auto' : 'none';
+      });
+    
+    // Handle theme circles separately
+    if (!themeCircles.empty()) {
+      const themeOpacity = category === 'themes' ? 1 : 0.15;
+      console.log(`🎨 Setting ${themeCircles.size()} theme circles opacity to: ${themeOpacity}`);
+      themeCircles
+        .transition()
+        .duration(300)
+        .style('opacity', themeOpacity)
+        .style('pointer-events', category === 'themes' ? 'auto' : 'none');
+    }
+    
+    // Filter links - only if they exist (admin mode)
+    if (!allLinks.empty()) {
+      allLinks
+        .transition()
+        .duration(300)
+        .style('opacity', d => {
+          if (!d) return 0.05;
+          
+          const sourceType = typeof d.source === 'object' ? d.source.type : 
+                            nodes.find(n => n.id === d.source)?.type;
+          const targetNodeType = typeof d.target === 'object' ? d.target.type : 
+                            nodes.find(n => n.id === d.target)?.type;
+          
+          // Show link if either end connects to a visible node of the filter type
+          const sourceVisible = sourceType === filterType;
+          const targetVisible = targetNodeType === filterType;
+          
+          if (sourceVisible || targetVisible) {
+            if (d.type === "project-member") {
+              return d.status === "pending" ? 0.3 : 0.6;
+            }
+            return 0.4;
+          }
+          return 0.05;
+        });
+    }
+    
+    console.log(`✅ Filter applied: ${category} (showing ${matchCount} ${filterType} nodes)`);
   }
 }
 
@@ -237,6 +713,19 @@ function setupSVG() {
     .scaleExtent([0.2, 4])
     .on("zoom", (event) => {
       container.attr("transform", event.transform);
+      
+      // Progressive Disclosure: Notify of zoom changes
+      if (window.ProgressiveDisclosure && window.ProgressiveDisclosure.handleZoomChange) {
+        window.ProgressiveDisclosure.handleZoomChange(event.transform.k, {
+          svg,
+          container,
+          nodes,
+          links,
+          nodeEls,
+          linkEls,
+          themeEls
+        });
+      }
     });
 
   svg.call(zoomBehavior);
@@ -254,7 +743,43 @@ function setupSVG() {
 
     // Clear focus effects when clicking background
     clearFocusEffects(nodeEls, linkEls);
+    
+    // Clear theme selection when clicking background
+    clearThemeSelection();
   });
+}
+
+/* ==========================================================================
+   ERROR HANDLING
+   ========================================================================== */
+
+function showSVGDimensionError() {
+  const errorDiv = document.createElement('div');
+  errorDiv.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 107, 107, 0.95);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    z-index: 10000;
+    max-width: 500px;
+    text-align: center;
+  `;
+  errorDiv.innerHTML = `
+    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+    <h3 style="margin-bottom: 1rem;">Visualization Layout Error</h3>
+    <p style="margin-bottom: 1.5rem; opacity: 0.9;">
+      The network visualization container has zero dimensions. This usually happens when the page layout hasn't finished loading.
+    </p>
+    <button onclick="location.reload()" style="padding: 0.75rem 2rem; background: white; color: #ff6b6b; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+      Reload Page
+    </button>
+  `;
+  document.body.appendChild(errorDiv);
 }
 
 /* ==========================================================================
@@ -276,6 +801,14 @@ async function reloadAllData() {
   links = loaded.links || [];
   connectionsData = loaded.connectionsData || [];
   projectMembersData = loaded.projectMembersData || [];
+
+  // Expose data globally for debugging
+  window.synapseData = {
+    nodes,
+    links,
+    connectionsData,
+    projectMembersData
+  };
 
   console.log("📊 Synapse data loaded:", {
     nodes: nodes.length,
@@ -445,7 +978,8 @@ function calculateNestedPosition(
   allLinks,
   centerX,
   centerY,
-  currentUserCommunityId
+  currentUserCommunityId,
+  showFullCommunity = true // Default to true (Discovery Mode)
 ) {
   const themes = allNodes.filter((n) => n.type === "theme");
 
@@ -458,8 +992,10 @@ function calculateNestedPosition(
     const userThemes = currentUser?.themes || [];
     const userProjects = currentUser?.projects || [];
 
-    // Check if user participates in this theme OR has projects in this theme
-    const isUserConnected = userThemes.includes(node.theme_id);
+    // Use the pre-computed user_is_participant flag from data loading
+    // This is already calculated correctly in data.js based on theme_participants table
+    const isUserConnected = node.user_is_participant === true;
+    
     const hasProjectsInTheme = (node.projects || []).some(project =>
       userProjects.includes(project.id)
     );
@@ -470,6 +1006,8 @@ function calculateNestedPosition(
     // Debug logging for theme visibility
     if (!shouldShowTheme) {
       console.log(`🔍 Hiding theme "${node.name || node.title}":`, {
+        theme_id: node.theme_id,
+        user_is_participant: node.user_is_participant,
         isUserConnected,
         hasProjectsInTheme,
         userProjects,
@@ -478,6 +1016,8 @@ function calculateNestedPosition(
       });
     } else {
       console.log(`✅ Showing theme "${node.name || node.title}":`, {
+        theme_id: node.theme_id,
+        user_is_participant: node.user_is_participant,
         isUserConnected,
         hasProjectsInTheme,
         userProjects,
@@ -485,32 +1025,27 @@ function calculateNestedPosition(
       });
     }
 
-    // In non-discovery mode, hide themes user has no connection to
-    if (!shouldShowTheme && !showFullCommunity) {
-      // Position far off-screen or mark as hidden
-      return {
-        x: centerX + 10000, // Off-screen
-        y: centerY + 10000,
-        themeRadius: 0,
-        parentTheme: null,
-        isUserTheme: false,
-        hidden: true, // Mark as hidden
-      };
-    }
-
+    // ✅ FIXED: Always show ALL themes in Discovery Mode (which is always enabled)
+    // Separate user's themes (close) from discoverable themes (far)
+    
     if (shouldShowTheme) {
-      // User's themes - concentric around center
+      // User's themes - position close to center in inner orbit
       const myThemes = themes
         .filter((t) => {
-          const hasThemeParticipation = userThemes.includes(t.theme_id);
+          // Use pre-computed user_is_participant flag
+          const hasThemeParticipation = t.user_is_participant === true;
           const hasThemeProjects = (t.projects || []).some(p => userProjects.includes(p.id));
           return hasThemeParticipation || hasThemeProjects;
         })
         .sort((a, b) => String(a.id).localeCompare(String(b.id))); // stable order
 
       const myIndex = myThemes.findIndex((t) => t.id === node.id);
-      const baseThemeRadius = 220;
-      const themeRadiusIncrement = 140;
+      
+      if (myIndex === -1) {
+        console.warn('⚠️ Theme marked as shouldShowTheme but not found in myThemes:', node.title);
+      }
+      
+      const baseThemeRadius = 180;
 
       // Find most active theme (most projects or participants)
       const mostActiveThemeId = themes.reduce((max, theme) => {
@@ -521,25 +1056,38 @@ function calculateNestedPosition(
 
       const isUserTheme = node.theme_id === mostActiveThemeId;
 
+      // Position themes as independent nodes in a circle around the user
+      const themeCount = Math.max(1, myThemes.length);
+      const orbitDistance = baseThemeRadius * 1.8 + (themeCount > 3 ? themeCount * 20 : 0);
+      const angleStep = (2 * Math.PI) / themeCount;
+      const startAngle = -Math.PI / 2; // Start from top
+      const angle = startAngle + myIndex * angleStep;
+
       return {
-        x: centerX, // All user themes centered on user
-        y: centerY,
-        themeRadius: baseThemeRadius + Math.max(0, myIndex) * themeRadiusIncrement,
+        x: centerX + Math.cos(angle) * orbitDistance,
+        y: centerY + Math.sin(angle) * orbitDistance,
+        themeRadius: baseThemeRadius,
         parentTheme: null,
         isUserTheme,
-        hidden: false,
+        hidden: false, // ✅ Never hide user's themes
       };
-    } else {
+    } else if (showFullCommunity) {
       // Discovery mode: show unconnected themes in outer orbit
       const otherThemes = themes
         .filter((t) => {
-          const hasThemeParticipation = userThemes.includes(t.theme_id);
+          // Use pre-computed user_is_participant flag
+          const hasThemeParticipation = t.user_is_participant === true;
           const hasThemeProjects = (t.projects || []).some(p => userProjects.includes(p.id));
           return !hasThemeParticipation && !hasThemeProjects;
         })
         .sort((a, b) => String(a.id).localeCompare(String(b.id))); // stable order
 
       const otherIndex = otherThemes.findIndex((t) => t.id === node.id);
+      
+      if (otherIndex === -1) {
+        console.warn('⚠️ Theme not found in otherThemes:', node.title);
+      }
+      
       const orbitR = 900; // Further out for discovery
       const angle = (otherIndex / Math.max(1, otherThemes.length)) * 2 * Math.PI;
 
@@ -549,8 +1097,19 @@ function calculateNestedPosition(
         themeRadius: 180,
         parentTheme: null,
         isUserTheme: false,
-        hidden: false,
+        hidden: false, // ✅ Never hide discoverable themes in Discovery Mode
         isDiscoverable: true, // Mark as discoverable theme
+      };
+    } else {
+      // Fallback: hide theme if not in Discovery Mode and user not connected
+      console.warn('⚠️ Hiding theme (not in Discovery Mode):', node.title);
+      return {
+        x: centerX + 10000,
+        y: centerY + 10000,
+        themeRadius: 0,
+        parentTheme: null,
+        isUserTheme: false,
+        hidden: true,
       };
     }
   }
@@ -591,7 +1150,22 @@ function calculateNestedPosition(
       }
     }
 
-    // If person has no theme participation, hide them (unless in discovery mode)
+    // ✅ CRITICAL FIX: Show people with connections even if they have no themes
+    // Check if this person is connected to the current user (accepted or pending)
+    if (node.isConnectedToCurrentUser) {
+      console.log(`✅ Showing connected person without themes: ${node.name}`);
+      // Position near center since they have no theme
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = 300 + Math.random() * 200;
+      return {
+        x: centerX + Math.cos(angle) * distance,
+        y: centerY + Math.sin(angle) * distance,
+        parentTheme: null,
+        hidden: false,
+      };
+    }
+
+    // If person has no theme participation AND no connection, hide them (unless in discovery mode)
     if (!showFullCommunity) {
       return {
         x: centerX + 10000, // Off-screen
@@ -610,6 +1184,62 @@ function calculateNestedPosition(
     };
   }
 
+  // ----------------------------
+  // PROJECTS - Position freely, not contained in themes
+  // ----------------------------
+  if (node.type === "project") {
+    // Projects should be positioned based on their connections to users
+    // Start them near their theme for initial layout, but let forces move them
+    if (node.theme_id) {
+      const parentTheme = allNodes.find(
+        (n) => n.type === "theme" && n.theme_id === node.theme_id
+      );
+      
+      if (parentTheme && !parentTheme.hidden) {
+        // Start near theme but don't set parentTheme (so no containment)
+        const angle = Math.random() * 2 * Math.PI;
+        const distance = (parentTheme.themeRadius || 180) * 0.6;
+        
+        return {
+          x: parentTheme.x + Math.cos(angle) * distance,
+          y: parentTheme.y + Math.sin(angle) * distance,
+          parentTheme: null, // ✅ No parentTheme = no containment
+          hidden: false,
+        };
+      }
+    }
+    
+    // If no theme or theme is hidden, position randomly around center
+    const angle = Math.random() * 2 * Math.PI;
+    const distance = 300 + Math.random() * 200;
+    return {
+      x: centerX + Math.cos(angle) * distance,
+      y: centerY + Math.sin(angle) * distance,
+      parentTheme: null, // ✅ No parentTheme = no containment
+      hidden: false,
+    };
+  }
+
+  // ----------------------------
+  // ORGANIZATIONS - Position in outer ring
+  // ----------------------------
+  if (node.type === "organization") {
+    const orgs = allNodes.filter((n) => n.type === "organization");
+    const orgIndex = orgs.findIndex((o) => o.id === node.id);
+    const orgCount = Math.max(1, orgs.length);
+    const orgOrbitRadius = 550 + orgCount * 25;
+    const angleStep = (2 * Math.PI) / orgCount;
+    const startAngle = Math.PI / 4; // Start from 45 degrees
+    const angle = startAngle + orgIndex * angleStep;
+
+    return {
+      x: centerX + Math.cos(angle) * orgOrbitRadius,
+      y: centerY + Math.sin(angle) * orgOrbitRadius,
+      parentTheme: null,
+      hidden: false,
+    };
+  }
+
   return { x: centerX, y: centerY, parentTheme: null, hidden: false };
 }
 
@@ -620,6 +1250,7 @@ function calculateNestedPosition(
 /**
  * ✅ FIXED:
  * containment measures from the *parent theme position* (not from center)
+ * Projects are NOT contained - they can move freely to connect with users
  */
 function createContainmentForce(simulationNodes, allNodes) {
   return function containmentForce(alpha) {
@@ -627,6 +1258,7 @@ function createContainmentForce(simulationNodes, allNodes) {
 
     simulationNodes.forEach((node) => {
       if (node.type === "theme") return;
+      if (node.type === "project") return; // ✅ Projects are free to move
       if (node.x == null || node.y == null || !node.parentTheme) return;
       if (node.isUserCenter) return;
 
@@ -640,10 +1272,7 @@ function createContainmentForce(simulationNodes, allNodes) {
       const dy = node.y - parentTheme.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      const maxRadius =
-        node.type === "project"
-          ? parentTheme.themeRadius * 0.75
-          : parentTheme.themeRadius * 0.9;
+      const maxRadius = parentTheme.themeRadius * 0.9;
 
       if (distance > maxRadius) {
         const overflow = distance - maxRadius;
@@ -656,35 +1285,9 @@ function createContainmentForce(simulationNodes, allNodes) {
   };
 }
 
-function createProjectContainmentForce(allNodes) {
-  return function projectContainmentForce(alpha) {
-    const strength = 0.6;
-    const projectCircleRadius = 35;
-
-    allNodes.forEach((node) => {
-      if (node.type !== "person" || node.x == null || node.y == null) return;
-      if (node.isUserCenter) return;
-      if (!node.projects || node.projects.length === 0) return;
-
-      const project = allNodes.find(
-        (n) => n.type === "project" && n.id === node.projects[0]
-      );
-      if (!project || project.x == null || project.y == null) return;
-
-      const dx = node.x - project.x;
-      const dy = node.y - project.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-
-      if (distance > projectCircleRadius) {
-        const overflow = distance - projectCircleRadius;
-        const force = (overflow * strength * alpha) / (distance || 1);
-
-        node.vx -= (dx / distance) * force;
-        node.vy -= (dy / distance) * force;
-      }
-    });
-  };
-}
+// ✅ REMOVED: Project containment force
+// Projects now connect to users via links, not containment
+// This allows the force-directed layout to position projects naturally
 
 /* ==========================================================================
    GRAPH BUILD / REBUILD
@@ -794,7 +1397,8 @@ async function buildGraph() {
       links,
       centerX,
       centerY,
-      currentUserCommunityId
+      currentUserCommunityId,
+      showFullCommunity // Pass showFullCommunity parameter
     );
 
     node.x = position.x;
@@ -843,29 +1447,29 @@ async function buildGraph() {
   // If no visible nodes, this might be the issue
   if (visibleNodes.length === 0) {
     console.warn("⚠️ No visible nodes! This might be why nothing is showing.");
-    console.log("🔍 All nodes:", nodes.map(n => ({ id: n.id, type: n.type, hidden: n.hidden })));
+    console.log("🔍 All nodes:", nodes.map(n => ({ id: n.id, type: n.type, name: n.name || n.title, hidden: n.hidden })));
+    console.log("🔍 showFullCommunity:", showFullCommunity);
+    console.log("🔍 currentUserCommunityId:", currentUserCommunityId);
+    
+    // Check if current user node exists
+    const currentUserNode = nodes.find(n => n.id === currentUserCommunityId);
+    if (currentUserNode) {
+      console.log("🔍 Current user node:", {
+        id: currentUserNode.id,
+        name: currentUserNode.name,
+        themes: currentUserNode.themes,
+        projects: currentUserNode.projects,
+        hidden: currentUserNode.hidden
+      });
+    } else {
+      console.error("❌ Current user node NOT FOUND! This is the problem.");
+    }
   }
 
-  // If no visible nodes, automatically enable discovery mode for new users
-  // BUT only if user hasn't manually toggled the mode
-  if (visibleNodes.length <= 10 && !userManuallyToggledMode) { // Limited content - enable discovery
-    console.log("🔍 Limited content found, enabling discovery mode...");
-    if (!showFullCommunity) {
-      showFullCommunity = true;
-      window.synapseShowFullCommunity = showFullCommunity; // Update global state
-      console.log("🌐 Discovery mode enabled - reloading data...");
-      
-      // Update button if it exists
-      if (typeof window.updateDiscoveryButtonState === 'function') {
-        window.updateDiscoveryButtonState();
-      }
-      
-      await reloadAllData();
-      await rebuildGraph();
-      return;
-    }
-  } else if (visibleNodes.length <= 10 && userManuallyToggledMode) {
-    console.log("🔍 Limited content found, but user manually toggled mode - respecting user choice");
+  // Auto-enable Discovery Mode is now disabled - users must manually click the button
+  // This respects user preference to start with "My Network" view
+  if (visibleNodes.length <= 10 && !userManuallyToggledMode) {
+    console.log("🔍 Limited content found. Discovery Mode available via button.");
   }
 
   // ✅ Use only visible nodes and links for simulation
@@ -890,14 +1494,22 @@ async function buildGraph() {
         .forceLink(simulationLinks)
         .id((d) => d.id)
         .distance((d) => {
-          // Only theme participation links now
+          // Project-member links should pull projects toward users
+          if (d.type === "project-member") return 120;
+          // Theme participation links
           if (d.type === "theme" || d.status === "theme-participant") return 40;
+          // Connection links between people
+          if (d.type === "connection") return 80;
           if (d.status === "suggested") return 100;
           return 80;
         })
         .strength((d) => {
+          // Strong pull for project-member links so projects move toward users
+          if (d.type === "project-member") return 0.4;
           // Stronger attraction to themes
           if (d.type === "theme" || d.status === "theme-participant") return 0.3;
+          // Weaker for person-to-person connections
+          if (d.type === "connection") return 0.2;
           if (d.status === "suggested") return 0.1;
           return 0.05;
         })
@@ -910,16 +1522,59 @@ async function buildGraph() {
         .forceCollide()
         .radius((d) => {
           if (d.type === "theme") return 0; // themes are separate visuals; keep collision out of it
-          if (d.isCurrentUser) return 35;
-          return 25;
+          if (d.type === "project") return 35; // Projects need collision radius (increased to prevent overlap)
+          if (d.isCurrentUser) return 60; // Current user node is larger, needs more space
+          if (d.shouldShowImage) return 35; // Nodes with images are larger
+          return 28; // Default nodes (increased to prevent overlap)
         })
-        .strength(0.8)
+        .strength(1.0) // Increased from 0.8 to 1.0 for stronger collision prevention
+        .iterations(3) // Add iterations for better collision resolution
     )
     .velocityDecay(0.6)
     .alphaDecay(0.05)
     .alphaMin(0.001);
 
   // RENDERING ORDER: Background to foreground for proper z-index layering
+  
+  // Render sanity check: Ensure SVG has dimensions before rendering
+  const svgRect = svg.node().getBoundingClientRect();
+  console.log('📐 SVG dimensions before render:', {
+    width: svgRect.width,
+    height: svgRect.height,
+    visible: svgRect.width > 0 && svgRect.height > 0
+  });
+  
+  if (svgRect.width === 0 || svgRect.height === 0) {
+    console.warn('⚠️ SVG has zero dimensions, waiting for layout...');
+    
+    // Use ResizeObserver to wait for layout
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        if (width > 0 && height > 0) {
+          console.log('✅ SVG layout ready, re-rendering...', { width, height });
+          resizeObserver.disconnect();
+          // Re-trigger render
+          setTimeout(() => rebuildGraph(), 100);
+          return;
+        }
+      }
+    });
+    
+    resizeObserver.observe(svg.node());
+    
+    // Fallback timeout
+    setTimeout(() => {
+      resizeObserver.disconnect();
+      const newRect = svg.node().getBoundingClientRect();
+      if (newRect.width === 0 || newRect.height === 0) {
+        console.error('❌ SVG still has zero dimensions after timeout');
+        showSVGDimensionError();
+      }
+    }, 5000);
+    
+    return; // Don't render yet
+  }
 
   // 1. Theme circles (background layer) - render FIRST without projects
   const visibleThemeNodes = visibleNodes.filter((n) => n.type === "theme");
@@ -931,22 +1586,55 @@ async function buildGraph() {
   }
 
   // 2. Links (middle layer) - connection links and theme participation links
+  // Only show links for admin users in Discovery Mode
+  let isAdmin = false;
+  let isDiscoveryMode = window.synapseShowFullCommunity || false;
+  
+  if (typeof window.isAdminUser === 'function') {
+    isAdmin = window.isAdminUser();
+    console.log(`🔐 Admin check result: ${isAdmin}`);
+  } else {
+    console.warn('⚠️ isAdminUser function not available yet - defaulting to non-admin');
+  }
+  
+  console.log(`🌐 Discovery Mode: ${isDiscoveryMode} (always true now)`);
+  
+  // Always show connection links in Discovery Mode (for all users)
+  // This makes connection status visible to everyone
   linkEls = renderLinks(container, simulationLinks);
+  console.log('🔗 Showing connection links for all users');
 
-  // 3. Project overlays (on top of themes, clickable layer)
-  let projectOverlayEls = null;
-  if (visibleThemeNodes.length > 0) {
-    projectOverlayEls = renderThemeProjectsOverlay(container, visibleThemeNodes);
+  // 3. Project nodes (independent, not overlays) - render as actual nodes
+  const visibleProjectNodes = visibleNodes.filter((n) => n.type === "project");
+  if (visibleProjectNodes.length > 0) {
+    projectEls = renderNodes(container, visibleProjectNodes, { 
+      onNodeClick,
+      connectionsData,
+      currentUserCommunityId
+    });
   }
 
-  // 4. People nodes only (foreground layer) - render LAST so they appear on top
-  const visiblePeopleNodes = visibleNodes.filter((n) => n.type === "person");
-  nodeEls = renderNodes(container, visiblePeopleNodes, { onNodeClick });
+  // 4. People and organization nodes (foreground layer) - render LAST so they appear on top
+  // Sort so current user's node is rendered last (appears on top in SVG)
+  const visibleInteractiveNodes = visibleNodes
+    .filter((n) => n.type === "person" || n.type === "organization")
+    .sort((a, b) => {
+      // Current user should be last (rendered on top)
+      if (a.isCurrentUser) return 1;
+      if (b.isCurrentUser) return -1;
+      return 0;
+    });
+  nodeEls = renderNodes(container, visibleInteractiveNodes, { 
+    onNodeClick,
+    connectionsData,
+    currentUserCommunityId
+  });
 
-  // Drag for nodes
+  // Drag for nodes - use clickDistance to allow click events to fire
   nodeEls.call(
     d3
       .drag()
+      .clickDistance(5)
       .on("start", dragStarted)
       .on("drag", dragged)
       .on("end", dragEnded)
@@ -955,6 +1643,9 @@ async function buildGraph() {
   // Performance monitoring
   const perfEnd = performance.now();
   console.log(`⚡ Graph built in ${(perfEnd - perfStart).toFixed(2)}ms with ${totalElements} DOM elements`);
+
+  // Mark Synapse as ready - nodes and graph are now loaded
+  markSynapseReady();
 
   // Tick
   let tickCount = 0;
@@ -992,6 +1683,23 @@ async function buildGraph() {
       }
     }
 
+    // Mobile boundary clamping: keep nodes inside visible viewport
+    // Accounts for top UI chrome (~70px) and bottom search bar (~130px on mobile)
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const topPad = 70;    // below top nav/header
+      const botPad = 140;   // above bottom search bar + mode switcher
+      const sidePad = 40;   // left/right edge buffer
+      visibleNodes.forEach((d) => {
+        if (d.type === "theme") return; // themes are pinned separately
+        const r = d.isCurrentUser ? 55 : (d.shouldShowImage ? 30 : 24);
+        if (d.x != null) d.x = Math.max(sidePad + r, Math.min(w - sidePad - r, d.x));
+        if (d.y != null) d.y = Math.max(topPad + r, Math.min(h - botPad - r, d.y));
+      });
+    }
+
     // Update link positions - simplified for single line elements
     linkEls
       .attr("x1", (d) => d.source.x)
@@ -1001,31 +1709,9 @@ async function buildGraph() {
 
     nodeEls.attr("transform", (d) => `translate(${d.x},${d.y})`);
 
-    // Update project overlay positions (they should move with their parent themes)
-    if (projectOverlayEls) {
-      projectOverlayEls.selectAll(".project-overlay").attr("transform", function(d) {
-        if (d && d.theme_x !== undefined && d.theme_y !== undefined) {
-          // Find the current position of the parent theme
-          const theme = visibleThemes.find(t => t.theme_id === d.theme_id);
-          if (theme) {
-            const baseDistance = Math.min((theme.themeRadius || 250) * 0.35, 80);
-            const maxProjectsPerRing = 8;
-            const ring = d.ring || 0;
-            const positionInRing = d.positionInRing || 0;
-            const projectsInThisRing = d.projectsInThisRing || 1;
-
-            const angleStep = (2 * Math.PI) / projectsInThisRing;
-            const projectAngle = positionInRing * angleStep;
-            const ringDistance = baseDistance + (ring * 40);
-
-            const projectX = (theme.x || 0) + Math.cos(projectAngle) * ringDistance;
-            const projectY = (theme.y || 0) + Math.sin(projectAngle) * ringDistance;
-
-            return `translate(${projectX}, ${projectY})`;
-          }
-        }
-        return d3.select(this).attr("transform"); // Keep existing transform if no theme found
-      });
+    // Update project node positions (they're now independent nodes, not overlays)
+    if (projectEls) {
+      projectEls.attr("transform", (d) => `translate(${d.x},${d.y})`);
     }
 
     try {
@@ -1047,6 +1733,16 @@ function handleThemeHover(event, themeNode, isEntering) {
 async function openThemeCard(themeNode) {
   const d3 = window.d3;
 
+  // Add visual selection feedback
+  highlightSelectedTheme(themeNode.theme_id);
+
+  console.log("🎯 Opening theme card for:", {
+    themeId: themeNode.theme_id,
+    themeName: themeNode.title || themeNode.name,
+    embeddedProjects: themeNode.projects?.length || 0,
+    themeNode: themeNode
+  });
+
   const scale = 1.2;
 
   svg
@@ -1062,18 +1758,62 @@ async function openThemeCard(themeNode) {
 
   const themeTags = themeNode.tags || [];
 
-  const relatedProjects = nodes.filter((n) => {
+  // Get projects from the theme node itself (they're embedded in the theme data)
+  const embeddedProjects = themeNode.projects || [];
+  console.log("📦 Embedded projects in theme:", embeddedProjects.map(p => ({
+    id: p.id,
+    title: p.title || p.name,
+    theme_id: p.theme_id
+  })));
+
+  // Also find any additional project nodes that match this theme
+  const additionalProjectNodes = nodes.filter((n) => {
     if (n.type !== "project") return false;
+    if (embeddedProjects.some(p => p.id === n.id)) return false; // Don't duplicate
 
-    if (n.theme_id === themeNode.theme_id) return true;
+    // Primary match: same theme_id
+    if (n.theme_id === themeNode.theme_id) {
+      console.log("✅ Found additional project node by theme_id:", {
+        projectTitle: n.title || n.name,
+        projectThemeId: n.theme_id,
+        targetThemeId: themeNode.theme_id
+      });
+      return true;
+    }
 
+    // Secondary match: shared tags
     const projectTags = n.tags || [];
-    return projectTags.some((tag) => themeTags.includes(tag));
+    const hasSharedTag = projectTags.some((tag) => themeTags.includes(tag));
+    if (hasSharedTag) {
+      console.log("✅ Found additional project node by shared tags:", {
+        projectTitle: n.title || n.name,
+        projectTags: projectTags,
+        themeTags: themeTags,
+        sharedTags: projectTags.filter(tag => themeTags.includes(tag))
+      });
+      return true;
+    }
+
+    return false;
+  });
+
+  // Combine embedded projects with any additional project nodes
+  const allRelatedProjects = [...embeddedProjects, ...additionalProjectNodes];
+
+  console.log("🎯 All related projects found:", {
+    embedded: embeddedProjects.length,
+    additional: additionalProjectNodes.length,
+    total: allRelatedProjects.length,
+    projects: allRelatedProjects.map(p => ({
+      id: p.id,
+      title: p.title || p.name,
+      theme_id: p.theme_id
+    }))
   });
 
   nodeEls?.style("opacity", (d) => {
     if (!d) return 0.2;
-    if (d.type === "project" && relatedProjects.some((p) => p.id === d.id)) {
+    if (d.type === "project" && allRelatedProjects.some((p) => p.id === d.id)) {
       return 1;
     }
     return 0.2;
@@ -1084,7 +1824,7 @@ async function openThemeCard(themeNode) {
     const sourceId = typeof d.source === "object" ? d.source?.id : d.source;
     const targetId = typeof d.target === "object" ? d.target?.id : d.target;
 
-    const isRelatedLink = relatedProjects.some(
+    const isRelatedLink = allRelatedProjects.some(
       (p) => sourceId === p?.id || targetId === p?.id
     );
     return isRelatedLink ? 0.6 : 0.1;
@@ -1092,7 +1832,7 @@ async function openThemeCard(themeNode) {
 
   themeEls?.style("opacity", (d) => (d?.id === themeNode?.id ? 1 : 0.3));
 
-  await openThemeProjectsPanel(themeNode, relatedProjects);
+  await openThemeProjectsPanel(themeNode, allRelatedProjects);
 }
 
 async function openThemeProjectsPanel(themeNode, relatedProjects) {
@@ -1115,6 +1855,9 @@ async function openThemeProjectsPanel(themeNode, relatedProjects) {
 }
 
 function clearThemeFocus() {
+  // Clear theme selection visual feedback
+  clearThemeSelection();
+  
   nodeEls?.style("opacity", 1);
   linkEls?.style("opacity", (d) => {
     if (d.status === "suggested") return 0.5;
@@ -1130,10 +1873,38 @@ function clearThemeFocus() {
 function onNodeClick(event, d) {
   event.stopPropagation();
 
+  // ✅ PERFORMANCE: Record interaction to trigger ACTIVE state
+  if (window.AnimationLifecycle) {
+    window.AnimationLifecycle.recordInteraction();
+  }
+
   setFocusOnNode(d, svg, container, zoomBehavior, nodeEls, linkEls, nodes);
 
   if (d.type === "theme") {
     openThemeCard(d);
+    return;
+  }
+
+  if (d.type === "organization") {
+    try {
+      openNodePanel({
+        id: d.org_id || d.id,
+        name: d.name,
+        type: "organization",
+        description: d.description,
+        website: d.website,
+        industry: d.industry,
+        size: d.size,
+        location: d.location,
+        logo_url: d.logo_url,
+        verified: d.verified,
+        slug: d.slug,
+        member_count: d.member_count,
+        ...d,
+      });
+    } catch (e) {
+      console.warn("openNodePanel for organization failed:", e);
+    }
     return;
   }
 
@@ -1153,13 +1924,27 @@ function onNodeClick(event, d) {
    DRAG
    ========================================================================== */
 
+let dragMoved = false;
+
 function dragStarted(event, d) {
+  // ✅ PERFORMANCE: Record interaction to trigger ACTIVE state
+  if (window.AnimationLifecycle) {
+    window.AnimationLifecycle.recordInteraction();
+  }
+  
+  dragMoved = false;
   if (!event.active) simulation.alphaTarget(0.3).restart();
   d.fx = d.x;
   d.fy = d.y;
 }
 
 function dragged(event, d) {
+  // ✅ PERFORMANCE: Record interaction to keep ACTIVE state
+  if (window.AnimationLifecycle) {
+    window.AnimationLifecycle.recordInteraction();
+  }
+  
+  dragMoved = true;
   d.fx = event.x;
   d.fy = event.y;
 }
@@ -1168,6 +1953,11 @@ function dragEnded(event, d) {
   if (!event.active) simulation.alphaTarget(0);
   d.fx = null;
   d.fy = null;
+
+  // If the user didn't actually drag, treat as a click
+  if (!dragMoved) {
+    onNodeClick(event.sourceEvent, d);
+  }
 }
 
 /* ==========================================================================

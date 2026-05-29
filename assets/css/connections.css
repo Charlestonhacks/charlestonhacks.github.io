@@ -779,6 +779,18 @@
 /* MOBILE RESPONSIVE */
 /* ======================== */
 @media (max-width: 768px) {
+  /* Profile card: clamp width, center horizontally, float above search bar */
+  .synapse-profile-card {
+    width: min(300px, calc(100vw - 32px)) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    bottom: 150px !important; /* above search bar */
+    right: auto !important;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+  }
+
   .connection-requests-panel {
     top: 70px;
     right: 10px;
@@ -834,7 +846,7 @@
   }
 
   .connections-fab {
-    bottom: 20px;
+    bottom: 196px; /* above mode switcher (~64px) + 132px base */
     right: 20px;
     width: 52px;
     height: 52px;

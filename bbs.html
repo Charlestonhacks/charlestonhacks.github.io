@@ -1,458 +1,115 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-US">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CharlestonHacks BBS</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>BBS — CharlestonHacks</title>
+  <meta name="description" content="CharlestonHacks Community BBS — real-time chat and Zork for Charleston's builders, hackers, and makers.">
+  <link rel="canonical" href="https://charlestonhacks.com/bbs.html">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-6NDKG07DY6");
+  </script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       height: 100%;
       background: #000;
-      font-family: 'Courier New', monospace;
       color: #0f0;
+      font-family: monospace;
     }
 
-    /* ===== TOP NAV BAR ===== */
-    .top-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      background: rgba(10, 14, 39, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 2px solid rgba(0, 224, 255, 0.3);
-      padding: 0.75rem 1.5rem;
+    /* Nav */
+    .bbs-nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-    }
-
-    .nav-logo a {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      gap: 0.75rem;
-    }
-
-    .nav-logo img {
-      height: 36px;
-      width: auto;
-    }
-
-    .nav-logo .fallback-text {
-      display: none;
-      color: #00e0ff;
-      font-size: 1.3rem;
-      font-weight: bold;
-      font-family: 'Orbitron', Arial, sans-serif;
-    }
-
-    /* Hamburger Button */
-    .hamburger {
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      padding: 8px;
-      z-index: 1001;
-    }
-
-    .hamburger span {
-      display: block;
-      width: 26px;
-      height: 3px;
-      background: #00e0ff;
-      border-radius: 2px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-
-    .hamburger.active span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 6px);
-    }
-
-    .hamburger.active span:nth-child(2) {
-      opacity: 0;
-    }
-
-    .hamburger.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(5px, -6px);
-    }
-
-    /* Slide-out Menu */
-    .nav-menu {
-      position: fixed;
+      padding: 12px 20px;
+      border-bottom: 1px solid #0f03;
+      background: #000;
+      position: sticky;
       top: 0;
-      right: -300px;
-      width: 280px;
-      height: 100vh;
-      background: rgba(10, 14, 39, 0.98);
-      border-left: 2px solid rgba(0, 224, 255, 0.3);
-      backdrop-filter: blur(15px);
-      padding: 5rem 1.5rem 2rem;
-      transition: right 0.3s ease;
-      z-index: 999;
-      overflow-y: auto;
+      z-index: 10;
     }
-
-    .nav-menu.open {
-      right: 0;
-    }
-
-    .nav-menu a {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.9rem 1rem;
-      color: #fff;
+    .bbs-nav a {
+      color: #0f0;
       text-decoration: none;
-      font-family: Arial, sans-serif;
-      font-size: 0.95rem;
-      border-radius: 8px;
-      transition: background 0.2s ease;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .bbs-nav a:hover { opacity: 1; }
+    .bbs-nav .brand {
+      font-size: 0.85rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.9;
     }
 
-    .nav-menu a:hover {
-      background: rgba(0, 224, 255, 0.1);
-      color: #00e0ff;
+    /* BBS fill container */
+    #bbs-modal {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px 40px;
+      min-height: calc(100vh - 45px);
     }
 
-    .nav-menu a i {
-      width: 20px;
+    /* Override modal sizing so it fills the page nicely */
+    #bbs-modal #bbs-wrapper {
+      width: min(100%, 760px) !important;
+      max-height: none !important;
+    }
+
+    #bbs-modal #bbs-screen {
+      height: min(480px, 55vh) !important;
+    }
+
+    /* Hide the close button — navigation is via the top nav */
+    #bbs-modal #bbs-close {
+      display: none !important;
+    }
+
+    /* Hint line */
+    .bbs-hint {
       text-align: center;
-      color: #00e0ff;
-    }
-
-    .nav-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 998;
-    }
-
-    .nav-overlay.visible {
-      display: block;
-    }
-
-    /* ===== BBS CONTENT ===== */
-    .bbs-page {
-      padding-top: 70px;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .bbs-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      max-width: 800px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 1.5rem;
-      gap: 1rem;
-    }
-
-    .bbs-title {
-      color: #0f0;
-      text-align: center;
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      text-shadow: 0 0 10px #0f0;
-      margin-bottom: 0.5rem;
-    }
-
-    .bbs-screen {
-      flex: 1;
-      background: #000;
-      color: #0f0;
-      overflow-y: auto;
-      padding: 12px;
-      border: 2px solid #0f0;
-      border-radius: 8px;
-      font-size: clamp(0.85rem, 2vw, 1rem);
-      line-height: 1.5;
-      box-shadow: 0 0 15px rgba(0, 255, 0, 0.15);
-      min-height: 200px;
-    }
-
-    .bbs-form {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .bbs-form input {
-      flex: 1;
-      min-width: 200px;
-      background: #000;
-      color: #0f0;
-      border: 2px solid #0f0;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 0.95rem;
-      border-radius: 6px;
-    }
-
-    .bbs-form input::placeholder {
-      color: #060;
-    }
-
-    .bbs-form input:focus {
-      outline: none;
-      box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
-    }
-
-    .bbs-form button {
-      padding: 10px 20px;
-      background: #0f0;
-      color: #000;
-      border: none;
-      font-family: monospace;
-      font-weight: bold;
-      cursor: pointer;
-      border-radius: 6px;
-      transition: background 0.2s;
-    }
-
-    .bbs-form button:hover {
-      background: #0c0;
-    }
-
-    .bbs-online {
-      color: #0f0;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
-    /* Responsive */
-    @media (max-width: 600px) {
-      .top-nav {
-        padding: 0.6rem 1rem;
-      }
-      .nav-logo img {
-        height: 28px;
-      }
-      .bbs-container {
-        padding: 1rem;
-      }
+      color: #0f06;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      padding: 6px 16px 0;
     }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation Bar -->
-  <nav class="top-nav">
-    <div class="nav-logo">
-      <a href="index.html">
-        <img src="charlestonhackslogo.svg" alt="CharlestonHacks"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <span class="fallback-text">CharlestonHacks</span>
-      </a>
-    </div>
-    <button class="hamburger" id="hamburger-btn" aria-label="Toggle navigation menu" aria-expanded="false">
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
+  <nav class="bbs-nav">
+    <a href="/"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Home</a>
+    <span class="brand">⬛ CharlestonHacks BBS</span>
   </nav>
 
-  <!-- Slide-out Navigation Menu -->
-  <div class="nav-overlay" id="nav-overlay"></div>
-  <div class="nav-menu" id="nav-menu">
-    <a href="index.html"><i class="fas fa-home"></i> Home</a>
-    <a href="dashboard.html"><i class="fas fa-rocket"></i> Dashboard</a>
-    <a href="news.html"><i class="fas fa-newspaper"></i> News</a>
-    <a href="Poster.html"><i class="fas fa-image"></i> Event Poster</a>
-    <a href="docs.html"><i class="fas fa-book"></i> Docs</a>
-    <a href="experimental.html"><i class="fas fa-flask"></i> Sandbox</a>
-    <a href="swag.html"><i class="fas fa-store"></i> Swag</a>
-    <a href="donations.html"><i class="fas fa-heart"></i> Support</a>
-    <a href="cardmatchgame.html"><i class="fas fa-gamepad"></i> Card Game</a>
-  </div>
+  <p class="bbs-hint">Type a message and press Send &nbsp;·&nbsp; Type <strong>zork</strong> to play Zork &nbsp;·&nbsp; Username stored locally</p>
 
-  <!-- BBS Content -->
-  <div class="bbs-page">
-    <div class="bbs-container">
-      <h1 class="bbs-title">CharlestonHacks BBS</h1>
-
-      <div class="bbs-screen" id="bbs-screen"></div>
-
-      <form class="bbs-form" id="bbs-form">
-        <input id="bbs-input" placeholder="type message..." autocomplete="off">
-        <button type="submit">Send</button>
-      </form>
-
-      <div class="bbs-online">
-        Online: <span id="bbs-online">loading…</span>
-      </div>
-    </div>
-  </div>
+  <!-- BBS mounts here -->
+  <div id="bbs-modal"></div>
 
   <script type="module">
-    import { startZork, sendZorkCommand, getZorkState, setZorkState } from "./assets/js/zorkLoader.js";
-    import { supabase } from "./assets/js/supabaseClient.js";
-    import { saveZorkState, loadZorkState } from "./assets/js/zork-supabase.js";
-
-    // ===== Hamburger Menu =====
-    const hamburger = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
-    const navOverlay = document.getElementById('nav-overlay');
-
-    function toggleMenu() {
-      const isOpen = navMenu.classList.toggle('open');
-      hamburger.classList.toggle('active');
-      navOverlay.classList.toggle('visible');
-      hamburger.setAttribute('aria-expanded', isOpen);
-    }
-
-    hamburger.addEventListener('click', toggleMenu);
-    navOverlay.addEventListener('click', toggleMenu);
-
-    // ===== BBS Logic =====
-    const screen = document.getElementById('bbs-screen');
-    const form = document.getElementById('bbs-form');
-    const input = document.getElementById('bbs-input');
-    const onlineDiv = document.getElementById('bbs-online');
-
-    let currentMode = 'chat';
-
-    function write(text) {
-      text.split('\n').forEach(line => {
-        const div = document.createElement('div');
-        div.textContent = line;
-        screen.appendChild(div);
-      });
-      screen.scrollTop = screen.scrollHeight;
-    }
-
-    function loadOrGenerateUsername() {
-      const stored = localStorage.getItem('bbs_username');
-      if (stored) return stored;
-      const g = 'Guest' + Math.floor(Math.random() * 9999);
-      localStorage.setItem('bbs_username', g);
-      return g;
-    }
-
-    async function loadMessages() {
-      const { data } = await supabase
-        .from('bbs_messages')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      screen.innerHTML = '';
-      data?.forEach(msg => write(`[${msg.username}] ${msg.text}`));
-    }
-
-    async function loadOnlineUsers() {
-      const { data } = await supabase.from('bbs_online_active').select('*');
-      const names = data?.map(u => u.username) || [];
-      onlineDiv.textContent = names.length ? names.join(', ') : 'none';
-    }
-
-    async function heartbeat(username) {
-      await supabase.from('bbs_online').upsert({
-        username,
-        last_seen: new Date().toISOString(),
-        zork_mode: currentMode === 'zork'
-      });
-    }
-
-    async function saveGame(username) {
-      const state = getZorkState();
-      if (!state) {
-        write('No game is active to save.\n');
-        return;
-      }
-      const encoded = new TextEncoder().encode(JSON.stringify(state));
-      await saveZorkState(username, encoded);
-      write('Game saved.\n');
-    }
-
-    async function restoreGame(username) {
-      const data = await loadZorkState(username);
-      if (!data) {
-        write('No saved game found.\n');
-        return;
-      }
-      const json = JSON.parse(new TextDecoder().decode(data));
-      setZorkState(json);
-      write('Game restored.\n');
-    }
-
-    // Initialize
-    const username = loadOrGenerateUsername();
-    window.bbsUsername = username;
-
-    await loadMessages();
-
-    supabase
-      .channel('bbs_messages_channel')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'bbs_messages' },
-        (payload) => {
-          const msg = payload.new;
-          if (msg.username !== username) {
-            write(`[${msg.username}] ${msg.text}`);
-          }
-        }
-      )
-      .subscribe();
-
-    heartbeat(username);
-    setInterval(() => heartbeat(username), 10000);
-
-    loadOnlineUsers();
-    setInterval(() => loadOnlineUsers(), 7000);
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const text = input.value.trim();
-      input.value = '';
-      if (!text) return;
-
-      if (currentMode === 'zork') {
-        if (text === '/exit') {
-          write('Exited ZORK mode.\n');
-          currentMode = 'chat';
-          return;
-        }
-        if (text === 'save') {
-          await saveGame(username);
-          return;
-        }
-        if (text === 'restore') {
-          await restoreGame(username);
-          return;
-        }
-        sendZorkCommand(text, (txt) => write(txt));
-        return;
-      }
-
-      if (text === 'zork' || text === 'play zork' || text === '/zork') {
-        write('Initializing ZORK… Type /exit to leave.\n');
-        currentMode = 'zork';
-        startZork((txt) => write(txt));
-        return;
-      }
-
-      write(`[${username}] ${text}`);
-
-      const { error } = await supabase.from('bbs_messages').insert({
-        username,
-        text
-      });
-
-      if (error) console.error('[BBS] Insert error:', error);
-    });
+    import { initBBS } from "/assets/js/bbs.js";
+    document.addEventListener("DOMContentLoaded", initBBS);
   </script>
+
 </body>
 </html>

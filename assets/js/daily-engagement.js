@@ -113,8 +113,7 @@ const DailyEngagement = (function () {
         if (!state.supabase) throw new Error("Supabase not available");
 
         // Get current user (fast + accurate)
-        const { data: { user }, error: userError } = await state.supabase.auth.getUser();
-        if (userError) throw userError;
+        const user = await window.bootstrapSession.getAuthUser();
         if (!user) throw new Error("No user logged in");
 
         state.currentUser = user;
@@ -596,18 +595,20 @@ const DailyEngagement = (function () {
 
   function showXPNotification(amount, reason) {
     const notification = document.createElement("div");
+    notification.className = 'xp-notification';
     notification.style.cssText = `
       position: fixed;
       bottom: 2rem;
-      right: 2rem;
+      left: 2rem;
       background: linear-gradient(135deg, #00e0ff, #0080ff);
       color: white;
       padding: 1rem 1.5rem;
       border-radius: 12px;
       font-weight: bold;
-      z-index: 9999;
+      z-index: 1999;
       box-shadow: 0 4px 20px rgba(0,224,255,0.4);
-      animation: slideInRight 0.3s ease;
+      animation: slideInLeft 0.3s ease;
+      max-width: 300px;
     `;
 
     notification.innerHTML = `
@@ -747,7 +748,7 @@ window.DailyEngagement = DailyEngagement;
 
       if (!sb) return;
 
-      const { data: { user } } = await sb.auth.getUser();
+      const user = await sb.auth.getUser().then(r => r.data?.user);
       if (user) {
         // Let profile-loaded win if it arrives quickly; otherwise init after a short delay
         setTimeout(() => tryInit("getUser-fallback"), 400);

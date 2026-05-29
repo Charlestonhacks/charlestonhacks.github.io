@@ -130,3 +130,172 @@ h1 {
     font-size: 1.1rem;
   }
 }
+
+/* ── CharlestonHacks Event Cards (eventsFeed.js render) ─────────────── */
+
+.ch-event-card {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  background: rgba(22, 41, 69, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: border-color 0.3s ease;
+}
+
+.ch-event-card:hover {
+  border-color: rgba(0, 224, 255, 0.2);
+}
+
+.ch-event-date {
+  font-size: 0.75rem;
+  color: #00e0ff;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ch-event-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+}
+
+.ch-event-title a {
+  color: #fff;
+  text-decoration: none;
+  border-bottom: 1px solid #444;
+  transition: border-color 0.3s;
+}
+
+.ch-event-title a:hover {
+  border-color: #00e0ff;
+}
+
+.ch-event-location {
+  font-size: 0.85rem;
+  color: #aaa;
+  margin: 4px 0;
+}
+
+.ch-event-desc {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* ── CTA Section ────────────────────────────────────────────────────── */
+
+.ch-event-cta {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Nearify badge label */
+.ch-nearify-badge {
+  display: inline-block;
+  width: 100%;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a78bfa;
+  margin-bottom: -0.25rem;
+}
+
+/* Primary CTA — Nearify Join */
+.ch-btn-nearify {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+}
+
+.ch-btn-nearify:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.45);
+}
+
+.ch-btn-nearify:active {
+  transform: translateY(0);
+}
+
+/* Secondary link — View on Meetup (when Nearify is primary) */
+.ch-link-meetup {
+  font-size: 0.8rem;
+  color: #8fa3bf;
+  text-decoration: none;
+  border-bottom: 1px dashed #555;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.ch-link-meetup:hover {
+  color: #00e0ff;
+  border-color: #00e0ff;
+}
+
+/* Fallback CTA — Meetup only (no Nearify) */
+.ch-btn-meetup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  background: rgba(0, 224, 255, 0.12);
+  border: 1px solid rgba(0, 224, 255, 0.3);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ch-btn-meetup:hover {
+  background: rgba(0, 224, 255, 0.2);
+  border-color: rgba(0, 224, 255, 0.5);
+}
+
+/* ── Source Badges ───────────────────────────────────────────────────── */
+
+.ch-source-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.ch-source-community {
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .ch-event-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .ch-btn-nearify,
+  .ch-btn-meetup {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+}

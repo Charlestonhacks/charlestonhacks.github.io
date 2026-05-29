@@ -25,17 +25,28 @@ if (window.supabase) {
   // Create new client only if one doesn't exist
   try {
     supabaseInstance = createClient(
-      "https://hvmotpzhliufzomewzfl.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh2bW90cHpobGl1ZnpvbWV3emZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1NzY2NDUsImV4cCI6MjA1ODE1MjY0NX0.foHTGZVtRjFvxzDfMf1dpp0Zw4XFfD-FPZK-zRnjc6s",
+      "https://mqbsjlgnsirqsmfnreqd.supabase.co",
+      "sb_publishable_hKGoZiLtCe6BxgQjG23h2Q_hbGC-At3",
       {
         auth: {
           autoRefreshToken: true,
           persistSession: true,
-          detectSessionInUrl: true,
+          detectSessionInUrl: false, // Disable - auth.js handles URL parsing to avoid lock
           storage: window.localStorage, // Explicit localStorage usage
           storageKey: 'supabase.auth.token', // Consistent storage key
           flowType: 'pkce', // Use PKCE flow for better security
           debug: false, // Disable debug to reduce noise
+        },
+        realtime: {
+          params: {
+            eventsPerSecond: 10 // Limit events to prevent overwhelming the connection
+          },
+          timeout: 10000, // 10 second timeout for connection attempts
+          heartbeatIntervalMs: 30000, // Send heartbeat every 30 seconds
+          reconnectAfterMs: (tries) => {
+            // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
+            return Math.min(1000 * Math.pow(2, tries), 30000);
+          }
         },
         global: {
           headers: {
@@ -46,6 +57,17 @@ if (window.supabase) {
     );
     window.supabase = supabaseInstance;
     console.log("✅ Supabase client initialized");
+    console.log("ℹ️ WebSocket errors are expected and handled gracefully - system uses polling fallback");
+    
+    // ✅ SUPABASE OPTIMIZATION: Initialize bootstrap session and realtime manager
+    if (window.bootstrapSession) {
+      window.bootstrapSession.initialize(supabaseInstance);
+      console.log("✅ Bootstrap session initialized");
+    }
+    if (window.realtimeManager) {
+      window.realtimeManager.initialize(supabaseInstance);
+      console.log("✅ Realtime manager initialized");
+    }
   } catch (error) {
     console.error("❌ Failed to initialize Supabase client:", error);
     throw error;
@@ -76,18 +98,30 @@ export async function signInWithGoogle() {
 }
 
 // ======================================================================
-// 3. ENSURE COMMUNITY USER EXISTS (NEVER OVERWRITE EXISTING DATA!)
+// 3. ENSURE COMMUNITY USER EXISTS (MIGRATED TO USE BOOTSTRAP SESSION)
 // ======================================================================
 export async function ensureCommunityUser() {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const session = sessionData?.session;
+  // ✅ SUPABASE OPTIMIZATION: Use bootstrap session if available
+  if (window.bootstrapSession?.isInitialized) {
+    console.log('✅ Using bootstrapSession.getCommunityUser()');
+    const communityUser = await window.bootstrapSession.getCommunityUser();
+    if (communityUser) {
+      console.log(`✅ Community user loaded via bootstrap: ${communityUser.email}`);
+      return communityUser;
+    }
+    // If bootstrap returns null, fall through to legacy logic
+  }
 
-  if (!session?.user) {
+  // LEGACY FALLBACK (will be removed after full migration)
+  console.warn('⚠️ Using legacy ensureCommunityUser (should migrate to bootstrap)');
+  
+  // Use the global user set by auth.js to avoid calling getSession()
+  const user = window.currentAuthUser;
+
+  if (!user) {
     console.warn("⚠️ No logged-in user for community sync");
     return;
   }
-
-  const user = session.user;
 
   // --- STEP 1: CHECK IF PROFILE ALREADY EXISTS (by user_id) ---
   const { data: existingProfile, error: fetchError } = await supabase
@@ -179,9 +213,8 @@ export async function ensureCommunityUser() {
  * Fetch all CYNQ cards for the current user
  */
 export async function getCYNQCards() {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
-  
+  const user = window.currentAuthUser;
+
   if (!user) {
     throw new Error("User not authenticated");
   }
@@ -200,9 +233,8 @@ export async function getCYNQCards() {
  * Create a new CYNQ card
  */
 export async function createCYNQCard(cardData) {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
-  
+  const user = window.currentAuthUser;
+
   if (!user) {
     throw new Error("User not authenticated");
   }
@@ -252,9 +284,8 @@ export async function deleteCYNQCard(cardId) {
  * Get CYNQ cards by stage
  */
 export async function getCYNQCardsByStage(stage) {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData?.session?.user;
-  
+  const user = window.currentAuthUser;
+
   if (!user) {
     throw new Error("User not authenticated");
   }
@@ -301,24 +332,11 @@ export async function moveCYNQCard(cardId, newStage) {
 }
 
 // ======================================================================
-// 5. AUTH STATE LISTENER → ALWAYS ENSURE PROFILE EXISTS
+// 5. AUTH STATE LISTENER
 // ======================================================================
-supabase.auth.onAuthStateChange(async (event, session) => {
-  console.log("⚡ Auth State Change:", event);
-
-  if (event === "SIGNED_IN" && session?.user) {
-    console.log("🟢 User logged in:", session.user.email);
-    await ensureCommunityUser();
-  }
-
-  if (event === "TOKEN_REFRESHED" && session?.user) {
-    console.log("🔄 Session refreshed");
-  }
-
-  if (event === "SIGNED_OUT") {
-    console.log("🟡 User signed out");
-  }
-});
+// NOTE: Auth state changes are handled by auth.js to avoid duplicate
+// listeners and lock contention. The ensureCommunityUser() function
+// is called from profile.js after successful authentication.
 
 // ======================================================================
 // 6. UTILITY FUNCTIONS
@@ -328,23 +346,21 @@ supabase.auth.onAuthStateChange(async (event, session) => {
  * Check if user is authenticated
  */
 export async function isAuthenticated() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return !!session?.user;
+  return !!window.currentAuthUser;
 }
 
 /**
  * Get current user
  */
 export async function getCurrentUser() {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.user || null;
+  return window.currentAuthUser || null;
 }
 
 /**
  * Get user profile from community table
  */
 export async function getUserProfile() {
-  const user = await getCurrentUser();
+  const user = window.currentAuthUser;
   if (!user) return null;
 
   const { data, error } = await supabase

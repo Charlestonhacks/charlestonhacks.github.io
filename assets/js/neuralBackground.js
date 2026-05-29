@@ -1,6 +1,7 @@
 // neuralBackground.js
-const canvas = document.getElementById('neural-bg');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("neural-bg");
+const ctx = canvas.getContext("2d");
+
 let width, height;
 let nodes = [];
 
@@ -9,7 +10,7 @@ function resize() {
   height = canvas.height = window.innerHeight;
 }
 
-window.addEventListener('resize', resize);
+window.addEventListener("resize", resize);
 resize();
 
 class Node {
@@ -30,8 +31,8 @@ class Node {
 
   draw() {
     const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 8);
-    gradient.addColorStop(0, '#0ff');
-    gradient.addColorStop(1, 'transparent');
+    gradient.addColorStop(0, "#0ff");
+    gradient.addColorStop(1, "transparent");
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, 2.2, 0, Math.PI * 2);
@@ -49,9 +50,10 @@ class Node {
 function connectNodes() {
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
-      let dx = nodes[i].x - nodes[j].x;
-      let dy = nodes[i].y - nodes[j].y;
-      let dist = Math.sqrt(dx * dx + dy * dy);
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
       if (dist < 100) {
         ctx.strokeStyle = `rgba(0, 255, 255, ${1 - dist / 100})`;
         ctx.lineWidth = 0.6;
@@ -65,25 +67,36 @@ function connectNodes() {
 }
 
 function drawTooltip(text, x, y) {
-  ctx.font = '12px sans-serif';
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+  ctx.font = "12px sans-serif";
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
   ctx.fillRect(x + 10, y - 20, ctx.measureText(text).width + 10, 20);
-  ctx.fillStyle = '#fff';
+  ctx.fillStyle = "#fff";
   ctx.fillText(text, x + 15, y - 5);
 }
 
-let mouseX = -1, mouseY = -1;
-canvas.addEventListener('mousemove', e => {
+let mouseX = -1,
+  mouseY = -1;
+
+canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
   mouseY = e.clientY - rect.top;
 });
 
+let animationId = null;
+let isAnimating = false;
+
 function animate() {
+  // Stop if not animating
+  if (!isAnimating) {
+    animationId = null;
+    return;
+  }
+
   ctx.clearRect(0, 0, width, height);
-  nodes.forEach(n => n.update());
+  nodes.forEach((n) => n.update());
   connectNodes();
-  nodes.forEach(n => n.draw());
+  nodes.forEach((n) => n.draw());
 
   // Hover logic
   for (let node of nodes) {
@@ -93,9 +106,70 @@ function animate() {
     }
   }
 
-  requestAnimationFrame(animate);
+  animationId = requestAnimationFrame(animate);
 }
 
-// Initialize nodes and start animation
+function startAnimation() {
+  if (isAnimating) return;
+  isAnimating = true;
+  animate();
+  console.log("🌌 Neural background animation started");
+}
+
+function stopAnimation() {
+  isAnimating = false;
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+  console.log("🌌 Neural background animation stopped");
+}
+
+// Option A: if Lifecycle is IDLE after registration, kick it to ACTIVE
+function kickLifecycleToActiveIfIdle() {
+  try {
+    if (window.AnimationLifecycle?.isIdle?.()) {
+      window.AnimationLifecycle.startAnimations?.();
+    }
+  } catch (e) {
+    // never fail page boot because of lifecycle
+    console.warn("AnimationLifecycle kick-to-active failed:", e);
+  }
+}
+
+function registerWithLifecycle() {
+  window.AnimationLifecycle.registerSystem({
+    name: "NeuralBackground",
+    onActive() {
+      startAnimation();
+    },
+    onIdle() {
+      stopAnimation();
+    },
+    onSleep() {
+      stopAnimation();
+    },
+  });
+
+  console.log("✅ Neural background registered with Animation Lifecycle");
+  kickLifecycleToActiveIfIdle(); // ✅ Option A added here
+}
+
+// Initialize nodes
 for (let i = 0; i < 80; i++) nodes.push(new Node(i + 1));
-animate();
+
+// Register with Animation Lifecycle Controller
+if (window.AnimationLifecycle) {
+  registerWithLifecycle();
+} else {
+  // Fallback: wait for lifecycle to be available
+  setTimeout(() => {
+    if (window.AnimationLifecycle) {
+      registerWithLifecycle();
+    } else {
+      // If lifecycle still not available, start animation (fallback)
+      console.warn("⚠️ Animation Lifecycle not available, starting neural background anyway");
+      startAnimation();
+    }
+  }, 1000);
+}

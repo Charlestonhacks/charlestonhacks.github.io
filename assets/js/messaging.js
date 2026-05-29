@@ -250,6 +250,84 @@ const MessagingModule = (function () {
     header.insertBefore(btn, header.firstChild);
   }
 
+  function setupMobileKeyboardHandling() {
+    if (!isMobile()) return;
+
+    const messageInput = document.querySelector(".message-input");
+    const inputContainer = document.getElementById("message-input-container");
+    const messagesArea = document.getElementById("messages-area");
+    const chatPanel = document.querySelector(".chat-panel");
+    
+    if (!messageInput || !inputContainer || !messagesArea) return;
+
+    // Handle focus - keyboard opening
+    messageInput.addEventListener("focus", () => {
+      // Add class to indicate keyboard is open
+      inputContainer.classList.add('keyboard-open');
+      
+      // Scroll to bottom of messages immediately
+      setTimeout(() => {
+        if (messagesArea) {
+          messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+      }, 100);
+      
+      // Scroll again after keyboard animation completes
+      setTimeout(() => {
+        if (messagesArea) {
+          messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+        // Ensure input is in view
+        if (inputContainer) {
+          inputContainer.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 400);
+    });
+
+    // Handle blur - keyboard closing
+    messageInput.addEventListener("blur", () => {
+      // Remove keyboard open class
+      inputContainer.classList.remove('keyboard-open');
+    });
+
+    // Use Visual Viewport API for better keyboard detection
+    if (window.visualViewport) {
+      let lastHeight = window.visualViewport.height;
+      
+      const handleViewportChange = () => {
+        const currentHeight = window.visualViewport.height;
+        const heightDiff = lastHeight - currentHeight;
+        
+        // If viewport shrunk significantly (keyboard opened)
+        if (heightDiff > 150) {
+          inputContainer.classList.add('keyboard-open');
+          
+          // Scroll messages to bottom
+          setTimeout(() => {
+            if (messagesArea) {
+              messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+          }, 100);
+        } else if (heightDiff < -150) {
+          // Keyboard closed
+          inputContainer.classList.remove('keyboard-open');
+        }
+        
+        lastHeight = currentHeight;
+      };
+
+      window.visualViewport.addEventListener("resize", handleViewportChange);
+      window.visualViewport.addEventListener("scroll", handleViewportChange);
+    }
+
+    // Auto-resize textarea as user types
+    messageInput.addEventListener("input", function() {
+      this.style.height = "auto";
+      const newHeight = Math.min(this.scrollHeight, 120);
+      this.style.height = newHeight + "px";
+    });
+  }
+
   function applyResponsiveLayout() {
     // Called after render, and on resize.
     if (!document.getElementById("messages-container")) return;
@@ -561,8 +639,9 @@ const MessagingModule = (function () {
       state.realtimeChannel = null;
     }
 
-    state.realtimeChannel = window.supabase
-      .channel("messaging")
+    // Register with realtimeManager (deduped, delayed)
+    state.realtimeChannel = window.realtimeManager?.subscribeOnce('messaging', (supabase, context) => {
+      return supabase.channel("messaging")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, async (payload) => {
         const newMessage = payload.new;
         if (!newMessage) return;
@@ -599,22 +678,7 @@ const MessagingModule = (function () {
         await updateUnreadCount();
       })
       .subscribe();
-
-    window.__IE_MSG_RT_CHANNEL__ = state.realtimeChannel;
-
-    if (!window.__IE_MSG_RT_CLEANUP_REGISTERED__) {
-      window.__IE_MSG_RT_CLEANUP_REGISTERED__ = true;
-      window.addEventListener("beforeunload", () => {
-        try {
-          if (window.__IE_MSG_RT_CHANNEL__) {
-            window.supabase?.removeChannel(window.__IE_MSG_RT_CHANNEL__);
-            window.__IE_MSG_RT_CHANNEL__ = null;
-          }
-        } catch (e) {
-          console.warn("Failed to cleanup messaging channel:", e);
-        }
-      });
-    }
+    });
   }
 
   // ============================================================
@@ -760,7 +824,7 @@ const MessagingModule = (function () {
 
       <div class="messages-area" id="messages-area"></div>
 
-      <div class="message-input-container">
+      <div class="message-input-container" id="message-input-container">
         <div class="message-input-wrapper">
           <textarea class="message-input"
             placeholder="Type a message..."
@@ -775,6 +839,9 @@ const MessagingModule = (function () {
 
     // Mobile: inject back button
     ensureMobileBackButton();
+
+    // Setup keyboard handling for mobile
+    setupMobileKeyboardHandling();
 
     renderMessages();
   }

@@ -4,7 +4,8 @@
 // Actionable side panel that appears when clicking network nodes
 // Shows profile details, mutual connections, and clear CTAs
 
-console.log("%c👤 Node Panel Loading...", "color:#0ff; font-weight: bold; font-size: 16px");
+const NODE_PANEL_VERSION = 'v2.2-' + Date.now();
+console.log(`%c👤 Node Panel ${NODE_PANEL_VERSION} (Project Approval Fix)`, "color:#0ff; font-weight: bold; font-size: 16px");
 
 let currentNodeData = null;
 let panelElement = null;
@@ -21,6 +22,9 @@ export function initNodePanel() {
     currentUserProfile = e.detail.profile;
   });
 
+  // Expose functions globally
+  window.createProjectInTheme = createProjectInTheme;
+
   console.log('✅ Node panel initialized');
 }
 
@@ -34,7 +38,7 @@ function createPanelElement() {
     right: -450px;
     width: 420px;
     height: 100vh;
-    background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(26, 26, 46, 0.98));
+    background: linear-gradient(135deg, rgba(10, 14, 39, 0.73), rgba(26, 26, 46, 0.73));
     border-left: 2px solid rgba(0, 224, 255, 0.5);
     backdrop-filter: blur(10px);
     z-index: 2000;
@@ -44,9 +48,71 @@ function createPanelElement() {
     box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
   `;
 
-  // Custom scrollbar
+  // Custom scrollbar and collapsible section styles
   const style = document.createElement('style');
   style.textContent = `
+    /* Mobile responsive styles for node panel */
+    @media (max-width: 768px) {
+      #node-side-panel {
+        width: 100vw !important;
+        right: -100vw !important;
+        border-left: none !important;
+        height: 100vh !important;
+        height: 100dvh !important; /* Dynamic viewport height for mobile browsers */
+      }
+      
+      #node-side-panel.open {
+        right: 0 !important;
+      }
+      
+      /* Adjust padding for mobile */
+      #node-side-panel .node-panel-header {
+        padding: 1rem !important;
+      }
+      
+      #node-side-panel .panel-section-header {
+        padding: 0.75rem 1rem !important;
+      }
+      
+      /* Make buttons stack on mobile */
+      #node-side-panel .action-buttons,
+      #node-side-panel [style*="display: flex"][style*="gap"] {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+      }
+      
+      #node-side-panel button[style*="flex: 1"] {
+        width: 100% !important;
+        flex: none !important;
+      }
+      
+      /* Adjust font sizes for mobile */
+      #node-side-panel h2 {
+        font-size: 1.25rem !important;
+      }
+      
+      #node-side-panel h3 {
+        font-size: 1.1rem !important;
+      }
+      
+      /* Make profile images smaller on mobile */
+      #node-side-panel img[style*="width: 120px"],
+      #node-side-panel img[style*="width: 100px"] {
+        width: 80px !important;
+        height: 80px !important;
+      }
+      
+      /* Adjust skill tags for mobile */
+      #node-side-panel [style*="flex-wrap: wrap"] {
+        gap: 0.35rem !important;
+      }
+      
+      #node-side-panel [style*="flex-wrap: wrap"] > * {
+        font-size: 0.75rem !important;
+        padding: 0.25rem 0.5rem !important;
+      }
+    }
+    
     #node-side-panel::-webkit-scrollbar {
       width: 8px;
     }
@@ -60,11 +126,100 @@ function createPanelElement() {
     #node-side-panel::-webkit-scrollbar-thumb:hover {
       background: rgba(0, 224, 255, 0.5);
     }
+    
+    /* Collapsible section styles */
+    .panel-section {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .panel-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      background: rgba(0, 224, 255, 0.05);
+      transition: background 0.2s;
+    }
+    
+    .panel-section-header:hover {
+      background: rgba(0, 224, 255, 0.1);
+    }
+    
+    .panel-section-title {
+      color: #00e0ff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .panel-section-toggle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+      transition: transform 0.3s;
+    }
+    
+    .panel-section-toggle.collapsed {
+      transform: rotate(-90deg);
+    }
+    
+    .panel-section-content {
+      max-height: 1000px;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+      opacity: 1;
+    }
+    
+    .panel-section-content.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+    
+    .panel-section-inner {
+      padding: 1rem 1.5rem;
+    }
+
+    /* Responsive styles for mobile */
+    @media (max-width: 768px) {
+      #node-side-panel {
+        width: 100vw !important;
+        right: -100vw !important;
+      }
+      
+      #node-side-panel.open {
+        right: 0 !important;
+      }
+      
+      /* Make action bars full width on mobile */
+      #node-side-panel [style*="width: 420px"] {
+        width: 100% !important;
+      }
+    }
   `;
   document.head.appendChild(style);
 
   document.body.appendChild(panelElement);
 }
+
+// Toggle collapsible section
+window.togglePanelSection = function(sectionId) {
+  const content = document.getElementById(`${sectionId}-content`);
+  const toggle = document.getElementById(`${sectionId}-toggle`);
+  
+  if (!content || !toggle) return;
+  
+  const isCollapsed = content.classList.contains('collapsed');
+  
+  if (isCollapsed) {
+    content.classList.remove('collapsed');
+    toggle.classList.remove('collapsed');
+  } else {
+    content.classList.add('collapsed');
+    toggle.classList.add('collapsed');
+  }
+};
 
 // Open panel with node data
 export async function openNodePanel(nodeData) {
@@ -74,14 +229,29 @@ export async function openNodePanel(nodeData) {
 
   // Show panel
   panelElement.style.right = '0';
+  panelElement.classList.add('open');
 
   // Load full data
   await loadNodeDetails(nodeData);
+  
+  // Update presence for this user (if it's a person)
+  if (nodeData.type === 'person' && window.PresenceUI) {
+    const userId = nodeData.user_id || nodeData.id;
+    window.PresenceUI.updatePresenceForUser(userId);
+    
+    // Dispatch event for presence UI
+    window.dispatchEvent(new CustomEvent('profile-panel-opened', {
+      detail: { userId }
+    }));
+  }
 }
 
 // Close panel
 export function closeNodePanel() {
-  panelElement.style.right = '-450px';
+  // Check if mobile
+  const isMobile = window.innerWidth <= 768;
+  panelElement.style.right = isMobile ? '-100vw' : '-450px';
+  panelElement.classList.remove('open');
   currentNodeData = null;
 }
 
@@ -102,11 +272,11 @@ async function loadNodeDetails(nodeData) {
       return;
     }
 
-    // Determine if this is a person or project
-    const isProject = nodeData.type === 'project';
-
-    if (isProject) {
+    // Determine node type and render appropriate panel
+    if (nodeData.type === 'project') {
       await renderProjectPanel(nodeData);
+    } else if (nodeData.type === 'organization') {
+      await renderOrganizationPanel(nodeData);
     } else {
       await renderPersonPanel(nodeData);
     }
@@ -126,6 +296,50 @@ async function loadNodeDetails(nodeData) {
 async function renderThemeLensPanel(themeData) {
   const { name, description, tags, expires_at, relatedProjects, onClearFocus } = themeData;
 
+  // Get current user info
+  let currentUserCommunityId = null;
+  let isCreator = false;
+  let isParticipant = false;
+  
+  // Remove 'theme:' prefix from theme ID
+  const cleanThemeId = themeData.id ? themeData.id.replace(/^theme:/, '') : null;
+  
+  try {
+    const user = await window.bootstrapSession.getAuthUser();
+    if (user) {
+      const { data: currentUserProfile } = await supabase
+        .from('community')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+      
+      currentUserCommunityId = currentUserProfile?.id;
+
+      // Check if user created this theme
+      isCreator = themeData.created_by === currentUserCommunityId;
+      
+      // Check if user is a participant
+      if (cleanThemeId && currentUserCommunityId) {
+        try {
+          const { data: participation } = await supabase
+            .from('theme_participants')
+            .select('id')
+            .eq('theme_id', cleanThemeId)
+            .eq('community_id', currentUserCommunityId)
+            .maybeSingle();
+          
+          isParticipant = !!participation;
+          console.log('Participation check:', { cleanThemeId, currentUserCommunityId, isParticipant });
+        } catch (err) {
+          console.warn('Error checking participation:', err);
+          isParticipant = false;
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error checking user status:', error);
+  }
+
   // Calculate time remaining
   const now = Date.now();
   const expires = new Date(expires_at).getTime();
@@ -136,7 +350,7 @@ async function renderThemeLensPanel(themeData) {
   panelElement.innerHTML = `
     <div class="node-panel-header" style="background: linear-gradient(135deg, rgba(0,224,255,0.15), rgba(0,224,255,0.05)); padding: 1.5rem; border-bottom: 1px solid rgba(0,224,255,0.3);">
       <div style="display: flex; justify-content: space-between; align-items: start;">
-        <div>
+        <div style="flex: 1;">
           <h2 style="color: #00e0ff; margin: 0 0 0.5rem 0; font-size: 1.5rem;">
             ✨ ${escapeHtml(name)}
           </h2>
@@ -144,7 +358,7 @@ async function renderThemeLensPanel(themeData) {
             Theme Circle • ${timeText}
           </div>
         </div>
-        <button onclick="window.closeNodePanel?.()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer;">
+        <button onclick="window.closeNodePanel?.()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; flex-shrink: 0;">
           <i class="fas fa-times"></i>
         </button>
       </div>
@@ -162,6 +376,38 @@ async function renderThemeLensPanel(themeData) {
               ${escapeHtml(tag)}
             </span>
           `).join('')}
+        </div>
+      ` : ''}
+      
+      ${currentUserCommunityId ? `
+        <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+          ${!isParticipant && !isCreator ? `
+            <button onclick="joinTheme('${themeData.id}', '${escapeHtml(name)}')"
+              onmouseover="this.style.background='linear-gradient(135deg, rgba(0,224,255,0.3), rgba(0,224,255,0.2))'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,224,255,0.4)';"
+              onmouseout="this.style.background='linear-gradient(135deg, rgba(0,224,255,0.2), rgba(0,224,255,0.1))'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+              style="flex: 1; padding: 0.75rem; background: linear-gradient(135deg, rgba(0,224,255,0.2), rgba(0,224,255,0.1)); border: 1px solid rgba(0,224,255,0.4); 
+              border-radius: 8px; color: #00e0ff; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
+              <i class="fas fa-user-plus"></i> Join Theme
+            </button>
+          ` : ''}
+          ${isCreator ? `
+            <button onclick="deleteTheme('${themeData.id}', '${escapeHtml(name)}')"
+              onmouseover="this.style.background='rgba(255,68,68,0.25)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,68,68,0.3)';"
+              onmouseout="this.style.background='rgba(255,68,68,0.15)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+              style="flex: 1; padding: 0.75rem; background: rgba(255,68,68,0.15); border: 1px solid rgba(255,68,68,0.4); 
+              border-radius: 8px; color: #ff4444; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
+              <i class="fas fa-trash"></i> Delete Theme
+            </button>
+          ` : ''}
+          ${isParticipant && !isCreator ? `
+            <button onclick="leaveTheme('${themeData.id}', '${escapeHtml(name)}')"
+              onmouseover="this.style.background='rgba(255,170,0,0.25)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,170,0,0.3)';"
+              onmouseout="this.style.background='rgba(255,170,0,0.15)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+              style="flex: 1; padding: 0.75rem; background: rgba(255,170,0,0.15); border: 1px solid rgba(255,170,0,0.4); 
+              border-radius: 8px; color: #ffaa00; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
+              <i class="fas fa-sign-out-alt"></i> Leave Theme
+            </button>
+          ` : ''}
         </div>
       ` : ''}
     </div>
@@ -185,7 +431,7 @@ async function renderThemeLensPanel(themeData) {
       `}
 
       <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255,255,255,0.1);">
-        <button onclick="if(typeof window.openProjectsModal === 'function') window.openProjectsModal();"
+        <button onclick="createProjectInTheme('${themeData.id}', '${escapeHtml(name)}')"
           style="width: 100%; padding: 0.875rem; background: linear-gradient(135deg, rgba(0,224,255,0.2), rgba(0,224,255,0.1)); border: 1px solid rgba(0,224,255,0.4); border-radius: 8px; color: #00e0ff; cursor: pointer; font-weight: 700; font-size: 1rem;">
           <i class="fas fa-plus-circle"></i> Create Project in ${escapeHtml(name)}
         </button>
@@ -204,8 +450,19 @@ async function renderThemeLensPanel(themeData) {
 }
 
 function renderThemeProjectCard(project) {
+  // Create a safe project ID for the onclick handler
+  const safeProjectData = JSON.stringify({
+    id: project.id,
+    title: project.title || project.name,
+    name: project.title || project.name,
+    description: project.description,
+    status: project.status,
+    team_size: project.team_size,
+    theme_id: project.theme_id
+  }).replace(/"/g, '&quot;');
+
   return `
-    <div class="theme-project-card" style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.3); border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.2s;" onclick="window.openProjectDetails?.('${project.id}')">
+    <div class="theme-project-card" style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.3); border-radius: 8px; padding: 1rem; cursor: pointer; transition: all 0.2s;" onclick="window.openProjectDetails(JSON.parse('${safeProjectData}'))">
       <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
         <h4 style="color: #00e0ff; margin: 0; font-size: 1rem;">
           ${escapeHtml(project.name || project.title)}
@@ -225,7 +482,7 @@ function renderThemeProjectCard(project) {
         <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">
           <i class="fas fa-users"></i> ${project.team_size || 0} members
         </div>
-        <button onclick="event.stopPropagation(); window.joinProject?.('${project.id}');"
+        <button onclick="event.stopPropagation(); window.joinProjectFromPanel?.('${project.id}');"
           style="padding: 0.5rem 1rem; background: linear-gradient(135deg, #00e0ff, #00a8cc); border: none; border-radius: 6px; color: #000; cursor: pointer; font-weight: 700; font-size: 0.85rem;">
           <i class="fas fa-plus"></i> Join
         </button>
@@ -239,6 +496,158 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Render organization panel
+async function renderOrganizationPanel(nodeData) {
+  // Extract the actual organization ID (remove 'org:' prefix if present)
+  const orgId = nodeData.id?.startsWith('org:') ? nodeData.id.replace('org:', '') : nodeData.id;
+
+  // Fetch organization data from organizations table
+  const { data: org, error } = await supabase
+    .from('organizations')
+    .select('*')
+    .eq('id', orgId)
+    .single();
+
+  if (error || !org) {
+    console.error('Error loading organization:', error);
+    // Use node data as fallback
+    const fallbackOrg = {
+      name: nodeData.name || 'Unknown Organization',
+      description: nodeData.description || '',
+      industry: nodeData.industry || '',
+      location: nodeData.location || '',
+      website: nodeData.website || '',
+      logo_url: nodeData.logo_url || ''
+    };
+    renderOrganizationContent(fallbackOrg, []);
+    return;
+  }
+
+  // Try to load members (may fail if table doesn't exist or has RLS issues)
+  let members = [];
+  try {
+    const { data: memberData, error: membersError } = await supabase
+      .from('organization_members')
+      .select(`
+        role,
+        community:community_id(id, name, image_url)
+      `)
+      .eq('organization_id', orgId);
+
+    if (!membersError && memberData) {
+      members = memberData;
+    }
+  } catch (e) {
+    console.warn('Could not load organization members:', e);
+  }
+
+  renderOrganizationContent(org, members);
+}
+
+function renderOrganizationContent(org, members) {
+  const initials = org.name ? org.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'ORG';
+
+  let html = `
+    <div style="padding: 2rem; padding-bottom: 220px;">
+      <!-- Close Button -->
+      <button onclick="closeNodePanel()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Organization Header -->
+      <div style="margin-bottom: 2rem; text-align: center;">
+        <div style="width: 80px; height: 80px; border-radius: 16px; background: linear-gradient(135deg, #a855f7, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; margin: 0 auto 1rem; border: 3px solid #a855f7; overflow: hidden;">
+          ${org.logo_url ?
+            `<img src="${escapeHtml(org.logo_url)}" style="width: 100%; height: 100%; object-fit: cover;">` :
+            `<i class="fas fa-building"></i>`
+          }
+        </div>
+
+        <h2 style="color: #a855f7; font-size: 1.75rem; margin-bottom: 0.5rem;">${escapeHtml(org.name)}</h2>
+
+        ${org.industry ? `
+          <div style="margin-bottom: 0.5rem;">
+            <span style="background: rgba(168,85,247,0.2); color: #a855f7; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem;">
+              <i class="fas fa-tag"></i> ${escapeHtml(org.industry)}
+            </span>
+          </div>
+        ` : ''}
+
+        ${org.location ? `
+          <div style="color: #aaa; font-size: 0.9rem;">
+            <i class="fas fa-map-marker-alt"></i> ${escapeHtml(org.location)}
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- Description -->
+      ${org.description ? `
+        <div style="margin-bottom: 2rem;">
+          <h3 style="color: #a855f7; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
+            <i class="fas fa-info-circle"></i> About
+          </h3>
+          <p style="color: #ddd; line-height: 1.6;">${escapeHtml(org.description)}</p>
+        </div>
+      ` : ''}
+
+      <!-- Website -->
+      ${org.website ? `
+        <div style="margin-bottom: 2rem;">
+          <h3 style="color: #a855f7; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
+            <i class="fas fa-globe"></i> Website
+          </h3>
+          <a href="${escapeHtml(org.website)}" target="_blank" rel="noopener noreferrer"
+             style="color: #a855f7; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+            ${escapeHtml(org.website)}
+            <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
+          </a>
+        </div>
+      ` : ''}
+
+      <!-- Members -->
+      ${members.length > 0 ? `
+        <div style="margin-bottom: 2rem;">
+          <h3 style="color: #a855f7; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
+            <i class="fas fa-users"></i> Members (${members.length})
+          </h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+            ${members.map(member => {
+              const user = member.community;
+              if (!user) return '';
+              const memberInitials = user.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
+              const roleLabel = member.role === 'owner' ? '(Owner)' : member.role === 'admin' ? '(Admin)' : '';
+              return `
+                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(168,85,247,0.05); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(168,85,247,0.2);">
+                  ${user.image_url ?
+                    `<img src="${escapeHtml(user.image_url)}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">` :
+                    `<div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #a855f7, #8b5cf6); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: white;">${memberInitials}</div>`
+                  }
+                  <span style="color: white; font-size: 0.85rem;">${escapeHtml(user.name)} ${roleLabel}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : `
+        <div style="margin-bottom: 2rem; text-align: center; padding: 2rem; background: rgba(168,85,247,0.05); border-radius: 12px; border: 1px dashed rgba(168,85,247,0.3);">
+          <i class="fas fa-users" style="font-size: 2rem; color: rgba(168,85,247,0.3); margin-bottom: 0.75rem;"></i>
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem;">No members yet or membership data unavailable</p>
+        </div>
+      `}
+
+      <!-- Join Button -->
+      <div style="position: fixed; bottom: 0; left: 0; right: 0; padding: 1rem; background: linear-gradient(to top, rgba(10,14,39,1), rgba(10,14,39,0.9)); border-top: 1px solid rgba(168,85,247,0.3);">
+        <button onclick="if(typeof joinOrganization === 'function') joinOrganization('${escapeHtml(org.id)}'); else if(typeof window.joinOrganization === 'function') window.joinOrganization('${escapeHtml(org.id)}'); else alert('Join feature unavailable');"
+          style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #a855f7, #8b5cf6); border: none; border-radius: 12px; color: white; font-weight: bold; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+          <i class="fas fa-plus"></i> Join Organization
+        </button>
+      </div>
+    </div>
+  `;
+
+  panelElement.innerHTML = html;
 }
 
 // Render person profile panel
@@ -257,11 +666,12 @@ async function renderPersonPanel(nodeData) {
   // Get connection status
   let connectionStatus = 'none';
   let connectionId = null;
+  let connectionDirection = null; // 'incoming' or 'outgoing'
 
   if (currentUserProfile && profile.id !== currentUserProfile.id) {
     const { data: connections } = await supabase
       .from('connections')
-      .select('id, status')
+      .select('id, status, from_user_id, to_user_id')
       .or(`and(from_user_id.eq.${currentUserProfile.id},to_user_id.eq.${profile.id}),and(from_user_id.eq.${profile.id},to_user_id.eq.${currentUserProfile.id})`)
       .order('created_at', { ascending: false })
       .limit(1);
@@ -269,6 +679,13 @@ async function renderPersonPanel(nodeData) {
     if (connections && connections.length > 0) {
       connectionStatus = connections[0].status;
       connectionId = connections[0].id;
+      
+      // Determine direction
+      if (connections[0].from_user_id === currentUserProfile.id) {
+        connectionDirection = 'outgoing'; // I sent the request
+      } else {
+        connectionDirection = 'incoming'; // They sent me the request
+      }
     }
   }
 
@@ -276,11 +693,28 @@ async function renderPersonPanel(nodeData) {
   const mutualConnections = await getMutualConnections(profile.id);
 
   // Get endorsements
-  const { data: endorsements } = await supabase
+  const { data: endorsementsData } = await supabase
     .from('endorsements')
-    .select('skill, endorser:community!endorsements_endorser_community_id_fkey(name)')
+    .select('skill, endorser_community_id')
     .eq('endorsed_community_id', profile.id)
     .limit(5);
+  
+  // Fetch endorser names
+  let endorsements = [];
+  if (endorsementsData && endorsementsData.length > 0) {
+    const endorserIds = [...new Set(endorsementsData.map(e => e.endorser_community_id))];
+    const { data: endorserProfiles } = await supabase
+      .from('community')
+      .select('id, name')
+      .in('id', endorserIds);
+    
+    const profileMap = {};
+    (endorserProfiles || []).forEach(p => profileMap[p.id] = p);
+    endorsements = endorsementsData.map(e => ({
+      skill: e.skill,
+      endorser: profileMap[e.endorser_community_id]
+    }));
+  }
 
   // Get shared projects
   const sharedProjects = await getSharedProjects(profile.id);
@@ -299,22 +733,66 @@ async function renderPersonPanel(nodeData) {
   const initials = profile.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
   let html = `
-    <div style="padding: 2rem; padding-bottom: 100px;">
+    <div style="padding-bottom: 220px;">
       <!-- Close Button -->
-      <button onclick="closeNodePanel()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; transition: all 0.2s;">
+      <button onclick="closeNodePanel()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; z-index: 10;">
         <i class="fas fa-times"></i>
       </button>
 
       <!-- Profile Header -->
-      <div style="text-align: center; margin-bottom: 2rem;">
-        ${profile.image_url ?
-          `<img src="${profile.image_url}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #00e0ff; margin-bottom: 1rem;">` :
-          `<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #00e0ff, #0080ff); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; color: white; margin: 0 auto 1rem; border: 3px solid #00e0ff;">${initials}</div>`
-        }
+      <div style="text-align: center; padding: 2rem; padding-bottom: 1.5rem;">
+        <div style="position: relative; display: inline-block; margin-bottom: 1rem;">
+          ${profile.image_url ?
+            `<img src="${profile.image_url}" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #00e0ff;">` :
+            `<div style="width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #00e0ff, #0080ff); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: bold; color: white; border: 3px solid #00e0ff;">${initials}</div>`
+          }
+          <!-- Presence Indicator Dot -->
+          <div data-presence-user-id="${profile.id}" 
+               style="width: 24px; height: 24px; border-radius: 50%; background-color: #666; border: 3px solid #0a0e27; position: absolute; bottom: 5px; right: 5px; z-index: 10; transition: all 0.3s ease;"
+               title="Offline"></div>
+        </div>
 
         <h2 style="color: #00e0ff; font-size: 1.75rem; margin-bottom: 0.5rem;">${profile.name}</h2>
 
+        <!-- Presence Status -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <i class="fas fa-circle" data-presence-status-user-id="${profile.id}" style="font-size: 0.5rem; color: #666;"></i>
+          <span data-presence-status-user-id="${profile.id}" style="color: #666; font-size: 0.85rem;">offline</span>
+        </div>
+
+        <!-- Last Seen -->
+        <div data-presence-lastseen-user-id="${profile.id}" style="color: #888; font-size: 0.75rem; margin-bottom: 0.5rem;">
+          Last seen: unknown
+        </div>
+
         ${profile.user_role ? `<div style="color: #aaa; font-size: 0.9rem; margin-bottom: 0.5rem;">${profile.user_role}</div>` : ''}
+
+        <!-- Show email to admins or connected users -->
+        ${((typeof window.isAdminUser === 'function' && window.isAdminUser()) || connectionStatus === 'accepted') && profile.email ? `
+          <a href="mailto:${profile.email}" style="color: rgba(255,170,0,0.9); font-size: 0.85rem; margin-bottom: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(255,170,0,0.1); border: 1px solid rgba(255,170,0,0.3); border-radius: 6px; display: inline-block; text-decoration: none; transition: all 0.2s; cursor: pointer;" onmouseover="this.style.background='rgba(255,170,0,0.2)'; this.style.borderColor='rgba(255,170,0,0.5)'" onmouseout="this.style.background='rgba(255,170,0,0.1)'; this.style.borderColor='rgba(255,170,0,0.3)'">
+            <i class="fas fa-envelope"></i> ${profile.email}
+          </a>
+        ` : ''}
+
+        <!-- Level and Streak Badges (shown on mobile, hidden on desktop) -->
+        ${profile.id === currentUserProfile?.id ? `
+          <div class="mobile-only-badges" style="display: none; gap: 0.75rem; justify-content: center; margin: 1rem 0; flex-wrap: wrap;">
+            <!-- Level Badge -->
+            <div style="padding: 0.5rem 1rem; background: rgba(0,224,255,0.15); border: 1px solid rgba(0,224,255,0.3); border-radius: 8px; display: flex; flex-direction: column; align-items: center; min-width: 120px;">
+              <div style="color: #00e0ff; font-size: 0.75rem; font-weight: 600;">Level 6</div>
+              <div style="color: #aaa; font-size: 0.65rem;">Leader</div>
+              <div style="color: #888; font-size: 0.6rem; margin-top: 0.25rem;">2173 / 5000 XP</div>
+            </div>
+            <!-- Streak Badge -->
+            <div style="padding: 0.5rem 1rem; background: rgba(255,59,48,0.15); border: 1px solid rgba(255,59,48,0.3); border-radius: 8px; display: flex; align-items: center; gap: 0.5rem; min-width: 140px;">
+              <i class="fas fa-fire" style="color: #ff3b30; font-size: 1rem;"></i>
+              <div style="display: flex; flex-direction: column;">
+                <div style="color: #ff3b30; font-size: 0.85rem; font-weight: 700;">25 Day Streak</div>
+                <div style="color: #ff8a80; font-size: 0.6rem;">Keep it going!</div>
+              </div>
+            </div>
+          </div>
+        ` : ''}
 
         ${profile.availability ? `
           <div style="display: inline-block; background: rgba(0,255,136,0.2); color: #00ff88; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.85rem; margin-bottom: 1rem;">
@@ -334,102 +812,144 @@ async function renderPersonPanel(nodeData) {
         </div>
       </div>
 
-      <!-- Bio -->
+      <!-- Bio Section (Collapsible) -->
       ${profile.bio ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="color: #00e0ff; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
-            <i class="fas fa-user"></i> About
-          </h3>
-          <p style="color: #ddd; line-height: 1.6;">${profile.bio}</p>
+        <div class="panel-section">
+          <div class="panel-section-header" onclick="togglePanelSection('bio')">
+            <div class="panel-section-title">
+              <i class="fas fa-user"></i> ABOUT
+            </div>
+            <i class="fas fa-chevron-down panel-section-toggle" id="bio-toggle"></i>
+          </div>
+          <div class="panel-section-content" id="bio-content">
+            <div class="panel-section-inner">
+              <p style="color: #ddd; line-height: 1.6; margin: 0;">${profile.bio}</p>
+            </div>
+          </div>
         </div>
       ` : ''}
 
-      <!-- Skills -->
+      <!-- Skills Section (Collapsible) -->
       ${profile.skills ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="color: #00e0ff; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
-            <i class="fas fa-code"></i> Skills
-          </h3>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            ${profile.skills.split(',').map(skill => `
-              <span style="background: rgba(0,224,255,0.1); color: #00e0ff; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid rgba(0,224,255,0.3);">
-                ${skill.trim()}
-              </span>
-            `).join('')}
-          </div>
-        </div>
-      ` : ''}
-
-      <!-- Endorsements -->
-      ${endorsements && endorsements.length > 0 ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="color: #00e0ff; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
-            <i class="fas fa-star"></i> Top Endorsements
-          </h3>
-          ${endorsements.slice(0, 3).map(e => `
-            <div style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.2); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="color: #00e0ff; font-weight: bold; margin-bottom: 0.25rem;">${e.skill}</div>
-              <div style="color: #aaa; font-size: 0.85rem;">Endorsed by ${e.endorser?.name || 'Unknown'}</div>
+        <div class="panel-section">
+          <div class="panel-section-header" onclick="togglePanelSection('skills')">
+            <div class="panel-section-title">
+              <i class="fas fa-code"></i> SKILLS
             </div>
-          `).join('')}
-        </div>
-      ` : ''}
-
-      <!-- Mutual Connections -->
-      ${mutualConnections.length > 0 ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="color: #00e0ff; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
-            <i class="fas fa-user-friends"></i> ${mutualConnections.length} Mutual Connection${mutualConnections.length !== 1 ? 's' : ''}
-          </h3>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            ${mutualConnections.slice(0, 5).map(conn => {
-              const connInitials = conn.name.split(' ').map(n => n[0]).join('').toUpperCase();
-              return `
-                <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(0,224,255,0.05); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(0,224,255,0.2);">
-                  ${conn.image_url ?
-                    `<img src="${conn.image_url}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">` :
-                    `<div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #00e0ff, #0080ff); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: white;">${connInitials}</div>`
-                  }
-                  <span style="color: white; font-size: 0.85rem;">${conn.name}</span>
-                </div>
-              `;
-            }).join('')}
-            ${mutualConnections.length > 5 ? `
-              <div style="color: #aaa; font-size: 0.85rem; padding: 0.5rem;">
-                +${mutualConnections.length - 5} more
+            <i class="fas fa-chevron-down panel-section-toggle" id="skills-toggle"></i>
+          </div>
+          <div class="panel-section-content" id="skills-content">
+            <div class="panel-section-inner">
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                ${profile.skills.split(',').map(skill => `
+                  <span style="background: rgba(0,224,255,0.1); color: #00e0ff; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; border: 1px solid rgba(0,224,255,0.3);">
+                    ${skill.trim()}
+                  </span>
+                `).join('')}
               </div>
-            ` : ''}
+            </div>
           </div>
         </div>
       ` : ''}
 
-      <!-- Shared Projects -->
-      ${sharedProjects.length > 0 ? `
-        <div style="margin-bottom: 2rem;">
-          <h3 style="color: #00e0ff; font-size: 1rem; margin-bottom: 0.75rem; text-transform: uppercase;">
-            <i class="fas fa-project-diagram"></i> Shared Projects
-          </h3>
-          ${sharedProjects.map(proj => `
-            <div style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.2); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
-              <div style="color: #00e0ff; font-weight: bold;">${proj.title}</div>
+      <!-- Endorsements Section (Collapsible) -->
+      ${endorsements && endorsements.length > 0 ? `
+        <div class="panel-section">
+          <div class="panel-section-header" onclick="togglePanelSection('endorsements')">
+            <div class="panel-section-title">
+              <i class="fas fa-star"></i> TOP ENDORSEMENTS
             </div>
-          `).join('')}
+            <i class="fas fa-chevron-down panel-section-toggle" id="endorsements-toggle"></i>
+          </div>
+          <div class="panel-section-content" id="endorsements-content">
+            <div class="panel-section-inner">
+              ${endorsements.slice(0, 3).map(e => `
+                <div style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.2); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
+                  <div style="color: #00e0ff; font-weight: bold; margin-bottom: 0.25rem;">${e.skill}</div>
+                  <div style="color: #aaa; font-size: 0.85rem;">Endorsed by ${e.endorser?.name || 'Unknown'}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Mutual Connections Section (Collapsible) -->
+      ${mutualConnections.length > 0 ? `
+        <div class="panel-section">
+          <div class="panel-section-header" onclick="togglePanelSection('mutual')">
+            <div class="panel-section-title">
+              <i class="fas fa-user-friends"></i> ${mutualConnections.length} ${profile.id === currentUserProfile?.id ? 'CONNECTION' : 'MUTUAL CONNECTION'}${mutualConnections.length !== 1 ? 'S' : ''}
+            </div>
+            <i class="fas fa-chevron-down panel-section-toggle" id="mutual-toggle"></i>
+          </div>
+          <div class="panel-section-content" id="mutual-content">
+            <div class="panel-section-inner">
+              <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                ${mutualConnections.slice(0, 5).map(conn => {
+                  const connInitials = conn.name.split(' ').map(n => n[0]).join('').toUpperCase();
+                  return `
+                    <div style="display: flex; align-items: center; gap: 0.5rem; background: rgba(0,224,255,0.05); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid rgba(0,224,255,0.2);">
+                      ${conn.image_url ?
+                        `<img src="${conn.image_url}" style="width: 30px; height: 30px; border-radius: 50%; object-fit: cover;">` :
+                        `<div style="width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, #00e0ff, #0080ff); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: white;">${connInitials}</div>`
+                      }
+                      <span style="color: white; font-size: 0.85rem;">${conn.name}</span>
+                    </div>
+                  `;
+                }).join('')}
+                ${mutualConnections.length > 5 ? `
+                  <div style="color: #aaa; font-size: 0.85rem; padding: 0.5rem;">
+                    +${mutualConnections.length - 5} more
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Shared Projects Section (Collapsible) -->
+      ${sharedProjects.length > 0 ? `
+        <div class="panel-section">
+          <div class="panel-section-header" onclick="togglePanelSection('projects')">
+            <div class="panel-section-title">
+              <i class="fas fa-project-diagram"></i> ${profile.id === currentUserProfile?.id ? 'PROJECTS' : 'SHARED PROJECTS'}
+            </div>
+            <i class="fas fa-chevron-down panel-section-toggle" id="projects-toggle"></i>
+          </div>
+          <div class="panel-section-content" id="projects-content">
+            <div class="panel-section-inner">
+              ${sharedProjects.map(proj => `
+                <div style="background: rgba(0,224,255,0.05); border: 1px solid rgba(0,224,255,0.2); border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem;">
+                  <div style="color: #00e0ff; font-weight: bold;">${proj.title}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- Edit Profile Button (Own Profile Only) -->
+      ${profile.id === currentUserProfile?.id ? `
+        <div style="padding: 1.5rem;">
+          <button onclick="closeNodePanel(); window.openProfileEditor?.();" style="width: 100%; padding: 0.85rem; background: linear-gradient(135deg, #00e0ff, #0080ff); border: none; border-radius: 10px; color: white; font-weight: 700; cursor: pointer; font-size: 1rem; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,224,255,0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(0,224,255,0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(0,224,255,0.3)';">
+            <i class="fas fa-edit"></i> Edit Profile
+          </button>
         </div>
       ` : ''}
     </div>
 
     <!-- Action Bar (Fixed at Bottom) -->
-    <div style="position: fixed; bottom: 0; right: 0; width: 420px; background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(26, 26, 46, 0.98)); border-top: 2px solid rgba(0, 224, 255, 0.5); padding: 1.5rem; backdrop-filter: blur(10px);">
+    <div style="position: fixed; bottom: 0; right: 0; width: 420px; background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(26, 26, 46, 0.98)); border-top: 2px solid rgba(0, 224, 255, 0.5); padding: 1.5rem; backdrop-filter: blur(10px); z-index: 100;">
       ${profile.id === currentUserProfile?.id ? `
-        <!-- Own Profile -->
-        <button onclick="closeNodePanel(); window.openProfileEditor?.();" style="width: 100%; padding: 0.75rem; background: linear-gradient(135deg, #00e0ff, #0080ff); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 1rem;">
-          <i class="fas fa-edit"></i> Edit Profile
-        </button>
+        <!-- Own Profile - Action bar hidden for own profile -->
+        <div style="display: none;"></div>
       ` : `
         <!-- Other User Actions -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
           <!-- Message button - always available -->
-          <button onclick="sendMessage('${profile.id}')" style="padding: 0.75rem; background: linear-gradient(135deg, #00e0ff, #0080ff); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+          <button onclick="sendMessage('${profile.id}')" style="padding: 0.75rem; background: linear-gradient(135deg, #00e0ff, #0080ff); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
             <i class="fas fa-comment"></i> Message
           </button>
 
@@ -438,7 +958,16 @@ async function renderPersonPanel(nodeData) {
             <button onclick="endorseSkill('${profile.id}')" style="padding: 0.75rem; background: rgba(0,224,255,0.1); border: 1px solid rgba(0,224,255,0.3); border-radius: 8px; color: #00e0ff; font-weight: bold; cursor: pointer;">
               <i class="fas fa-star"></i> Endorse
             </button>
-          ` : connectionStatus === 'pending' ? `
+          ` : connectionStatus === 'pending' && connectionDirection === 'incoming' ? `
+            <!-- Incoming request: Show Accept/Decline -->
+            <button onclick="acceptConnectionFromPanel('${connectionId}')" style="padding: 0.75rem; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 8px; color: #00ff88; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(0,255,136,0.2)'" onmouseout="this.style.background='rgba(0,255,136,0.1)'">
+              <i class="fas fa-check"></i> Accept
+            </button>
+            <button onclick="declineConnectionFromPanel('${connectionId}')" style="padding: 0.75rem; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); border-radius: 8px; color: #ff6b6b; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.2)'" onmouseout="this.style.background='rgba(255,107,107,0.1)'">
+              <i class="fas fa-times"></i> Decline
+            </button>
+          ` : connectionStatus === 'pending' && connectionDirection === 'outgoing' ? `
+            <!-- Outgoing request: Show Withdraw -->
             <button onclick="withdrawConnectionFromPanel('${profile.id}')" style="padding: 0.75rem; background: rgba(255,170,0,0.2); border: 1px solid rgba(255,170,0,0.5); border-radius: 8px; color: #ffaa00; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,170,0,0.3)'" onmouseout="this.style.background='rgba(255,170,0,0.2)'">
               <i class="fas fa-times-circle"></i> Withdraw
             </button>
@@ -450,9 +979,14 @@ async function renderPersonPanel(nodeData) {
         </div>
 
         ${connectionStatus === 'accepted' ? `
-          <button onclick="inviteToProject('${profile.id}')" style="width: 100%; padding: 0.75rem; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 8px; color: #00ff88; font-weight: bold; cursor: pointer;">
-            <i class="fas fa-plus-circle"></i> Invite to Project
-          </button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+            <button onclick="inviteToProject('${profile.id}')" style="padding: 0.75rem; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); border-radius: 8px; color: #00ff88; font-weight: bold; cursor: pointer;">
+              <i class="fas fa-plus-circle"></i> Invite to Project
+            </button>
+            <button onclick="removeConnectionFromPanel('${connectionId}')" style="padding: 0.75rem; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); border-radius: 8px; color: #ff6b6b; font-weight: bold; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,107,107,0.2)'" onmouseout="this.style.background='rgba(255,107,107,0.1)'">
+              <i class="fas fa-user-times"></i> Disconnect
+            </button>
+          </div>
         ` : ''}
       `}
     </div>
@@ -460,7 +994,6 @@ async function renderPersonPanel(nodeData) {
 
   panelElement.innerHTML = html;
 }
-
 // Render project panel
 async function renderProjectPanel(nodeData) {
   // Fetch full project data
@@ -498,9 +1031,20 @@ async function renderProjectPanel(nodeData) {
 
   // Check if current user is the creator
   const isCreator = project.creator_id === currentUserProfile?.id;
+  
+  console.log('🔍 Project panel debug:', {
+    projectId: project.id,
+    projectTitle: project.title,
+    creatorId: project.creator_id,
+    currentUserId: currentUserProfile?.id,
+    isCreator,
+    isMember,
+    hasPendingRequest,
+    pendingRequestsCount: pendingRequests.length
+  });
 
   let html = `
-    <div style="padding: 2rem; padding-bottom: 100px;">
+    <div style="padding: 2rem; padding-bottom: 220px;">
       <!-- Close Button -->
       <button onclick="closeNodePanel()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">
         <i class="fas fa-times"></i>
@@ -682,7 +1226,8 @@ async function getMutualConnections(userId) {
     const { data: mutuals } = await supabase
       .from('community')
       .select('id, name, image_url')
-      .in('id', mutualIds);
+      .in('id', mutualIds)
+      .or('is_hidden.is.null,is_hidden.eq.false');
 
     return mutuals || [];
 
@@ -822,6 +1367,118 @@ window.withdrawConnectionFromPanel = async function(userId) {
   }
 };
 
+window.acceptConnectionFromPanel = async function(connectionId) {
+  try {
+    if (!currentUserProfile) {
+      alert('Please log in to accept connection requests');
+      return;
+    }
+
+    // Import the accept function from connections.js
+    const { acceptConnectionRequest } = await import('./connections.js');
+    
+    // Accept the connection
+    const result = await acceptConnectionRequest(connectionId);
+    
+    if (result.success) {
+      showToastNotification('✓ Connection accepted!', 'success');
+      
+      // Reload panel to update connection status
+      await loadNodeDetails(currentNodeData);
+    } else {
+      throw new Error(result.error?.message || 'Failed to accept connection');
+    }
+
+  } catch (error) {
+    console.error('Error accepting connection:', error);
+    alert('Failed to accept connection request: ' + error.message);
+  }
+};
+
+window.declineConnectionFromPanel = async function(connectionId) {
+  try {
+    if (!currentUserProfile) {
+      alert('Please log in to decline connection requests');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm(
+      'Are you sure you want to decline this connection request?\n\n' +
+      'The person will not be notified, but they can send another request in the future.'
+    );
+
+    if (!confirmed) {
+      return; // User cancelled
+    }
+
+    // Import the decline function from connections.js
+    const { declineConnectionRequest } = await import('./connections.js');
+    
+    // Decline the connection
+    const result = await declineConnectionRequest(connectionId);
+    
+    if (result.success) {
+      showToastNotification('Connection request declined', 'info');
+      
+      // Reload panel to update connection status
+      await loadNodeDetails(currentNodeData);
+    } else {
+      throw new Error(result.error?.message || 'Failed to decline connection');
+    }
+
+  } catch (error) {
+    console.error('Error declining connection:', error);
+    alert('Failed to decline connection request: ' + error.message);
+  }
+};
+
+window.removeConnectionFromPanel = async function(connectionId) {
+  try {
+    if (!currentUserProfile) {
+      alert('Please log in to remove connections');
+      return;
+    }
+
+    // Show confirmation dialog
+    const confirmed = confirm(
+      '⚠️ Are you sure you want to remove this connection?\n\n' +
+      'This will permanently disconnect you from this person. ' +
+      'You will need to send a new connection request to reconnect.'
+    );
+
+    if (!confirmed) {
+      return; // User cancelled
+    }
+
+    // Delete the connection
+    const { error: deleteError } = await supabase
+      .from('connections')
+      .delete()
+      .eq('id', connectionId);
+
+    if (deleteError) {
+      console.error('Error removing connection:', deleteError);
+      alert('Failed to remove connection');
+      return;
+    }
+
+    showToastNotification('✓ Connection removed', 'info');
+
+    // Close panel and refresh network view
+    closeNodePanel();
+    
+    // Refresh the network visualization
+    if (window.refreshNetworkView) {
+      await window.refreshNetworkView();
+    }
+
+  } catch (error) {
+    console.error('Error removing connection:', error);
+    alert('Failed to remove connection: ' + error.message);
+  }
+};
+
 window.sendMessage = async function(userId) {
   try {
     console.log('📨 Opening message for user:', userId);
@@ -919,7 +1576,7 @@ window.confirmEndorsement = async function(userId, skill, userName, button) {
   button.style.opacity = '0.5';
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await window.bootstrapSession.getAuthUser();
     if (!user) {
       alert('Please log in to endorse');
       return;
@@ -943,7 +1600,7 @@ window.confirmEndorsement = async function(userId, skill, userName, button) {
       .eq('endorser_community_id', endorserProfile.id)
       .eq('endorsed_community_id', userId)
       .eq('skill', skill)
-      .single();
+      .maybeSingle();
 
     if (existing) {
       alert('You already endorsed this skill!');
@@ -954,9 +1611,9 @@ window.confirmEndorsement = async function(userId, skill, userName, button) {
     const { error } = await supabase
       .from('endorsements')
       .insert({
-        endorser_id: user.id,
+        endorser_id: endorserProfile.id,           // Fixed: use community ID
         endorser_community_id: endorserProfile.id,
-        endorsed_id: userId,
+        endorsed_id: userId,                        // userId is already community.id from button
         endorsed_community_id: userId,
         skill: skill
       });
@@ -1019,7 +1676,7 @@ function showToastNotification(message, type = 'info') {
 
 window.inviteToProject = async function(userId) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await window.bootstrapSession.getAuthUser();
     if (!user) {
       alert('Please log in to invite to projects');
       return;
@@ -1142,7 +1799,7 @@ window.confirmProjectInvitation = async function(userId, projectId, projectTitle
 
     // Log activity
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await window.bootstrapSession.getAuthUser();
       await supabase
         .from('activity_log')
         .insert({
@@ -1169,7 +1826,7 @@ window.confirmProjectInvitation = async function(userId, projectId, projectTitle
 
 window.joinProjectFromPanel = async function(projectId) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const user = await window.bootstrapSession.getAuthUser();
     if (!user) {
       alert('Please log in to join a project');
       return;
@@ -1423,6 +2080,7 @@ window.editProjectFromPanel = async function(projectId) {
 };
 
 window.manageProjectRequests = async function(projectId) {
+  console.log('🔧 manageProjectRequests called for project:', projectId);
   try {
     // Ensure supabase is available
     if (!supabase) supabase = window.supabase;
@@ -1599,10 +2257,14 @@ window.approveJoinRequest = async function(projectId, requestId, userId) {
       `;
     }
 
+    // Wait a moment for database to fully commit
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Reload panel if it's currently showing this project
     if (currentNodeData?.id === projectId) {
-      console.log('🔄 Reloading node panel...');
-      await loadNodeDetails(currentNodeData);
+      console.log('🔄 Reloading node panel with fresh data...');
+      // Force refetch by passing just the ID
+      await loadNodeDetails({ id: projectId, type: 'project' });
     }
 
     // Refresh synapse view to show updated project membership
@@ -1611,6 +2273,16 @@ window.approveJoinRequest = async function(projectId, requestId, userId) {
       await window.refreshSynapseConnections();
     } else {
       console.warn('⚠️ window.refreshSynapseConnections not available');
+    }
+
+    // Close the modal if all requests have been processed
+    const remainingRequests = document.querySelectorAll('[data-request-id]');
+    if (remainingRequests.length === 0) {
+      console.log('✅ All requests processed, closing modal...');
+      const modal = document.querySelector('div[style*="position: fixed"][style*="z-index: 10000"]');
+      if (modal) {
+        modal.remove();
+      }
     }
 
   } catch (error) {
@@ -1652,14 +2324,28 @@ window.declineJoinRequest = async function(projectId, requestId) {
       `;
     }
 
+    // Wait a moment for database to fully commit
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     // Reload panel if it's currently showing this project
     if (currentNodeData?.id === projectId) {
-      await loadNodeDetails(currentNodeData);
+      // Force refetch by passing just the ID
+      await loadNodeDetails({ id: projectId, type: 'project' });
     }
 
     // Refresh synapse view to show updated project membership
     if (typeof window.refreshSynapseConnections === 'function') {
       await window.refreshSynapseConnections();
+    }
+
+    // Close the modal if all requests have been processed
+    const remainingRequests = document.querySelectorAll('[data-request-id]');
+    if (remainingRequests.length === 0) {
+      console.log('✅ All requests processed, closing modal...');
+      const modal = document.querySelector('div[style*="position: fixed"][style*="z-index: 10000"]');
+      if (modal) {
+        modal.remove();
+      }
     }
 
   } catch (error) {
@@ -1683,7 +2369,7 @@ window.openProfileEditor = async function () {
     // Ensure we have the latest current user profile
     if (!currentUserProfile?.id) {
       // Try to hydrate from auth user_id
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await window.bootstrapSession.getAuthUser();
       if (!user) {
         alert("Please log in to edit your profile.");
         return;
@@ -2036,6 +2722,307 @@ async function saveProfileEditor() {
     if (label) label.textContent = "Save Changes";
   }
 }
+
+// Function to create a project in a specific theme
+async function createProjectInTheme(themeId, themeName) {
+  console.log("🎯 Creating project in theme:", { themeId, themeName });
+  
+  try {
+    // Close the node panel first
+    closeNodePanel();
+    
+    // Open the projects modal
+    if (typeof window.openProjectsModal === 'function') {
+      await window.openProjectsModal();
+      
+      // Show the create project form
+      if (typeof window.showCreateProjectForm === 'function') {
+        await window.showCreateProjectForm();
+        
+        // Pre-select the theme in the dropdown
+        setTimeout(() => {
+          const themeSelect = document.getElementById('project-theme');
+          if (themeSelect) {
+            // Try to find and select the theme
+            for (let option of themeSelect.options) {
+              if (option.value === themeId) {
+                option.selected = true;
+                console.log("✅ Pre-selected theme in dropdown:", themeName);
+                break;
+              }
+            }
+          } else {
+            console.warn("⚠️ Theme select dropdown not found");
+          }
+        }, 100); // Small delay to ensure form is rendered
+        
+      } else {
+        console.warn("⚠️ showCreateProjectForm function not available");
+      }
+    } else {
+      console.warn("⚠️ openProjectsModal function not available");
+      alert("Project creation is not available at the moment. Please try again later.");
+    }
+  } catch (error) {
+    console.error("❌ Failed to create project in theme:", error);
+    alert("Failed to open project creation form. Please try again.");
+  }
+}
+
+// Join theme function
+window.joinTheme = async function(themeId, themeName) {
+  try {
+    const user = await window.bootstrapSession.getAuthUser();
+    if (!user) {
+      alert('Please log in to join themes');
+      return;
+    }
+    
+    const { data: userProfile } = await supabase
+      .from('community')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!userProfile) {
+      alert('Profile not found');
+      return;
+    }
+    
+    // Remove 'theme:' prefix if present
+    const cleanThemeId = themeId.replace(/^theme:/, '');
+    
+    console.log('Joining theme:', { 
+      originalThemeId: themeId, 
+      cleanThemeId, 
+      communityId: userProfile.id,
+      themeName 
+    });
+    
+    // Verify theme exists before trying to join
+    const { data: themeExists, error: themeCheckError } = await supabase
+      .from('theme_circles')
+      .select('id, title')
+      .eq('id', cleanThemeId)
+      .single();
+    
+    if (themeCheckError || !themeExists) {
+      console.error('Theme not found:', { cleanThemeId, error: themeCheckError });
+      alert(`Theme not found in database.\n\nTheme ID: ${cleanThemeId}\n\nPlease refresh the page and try again.`);
+      return;
+    }
+    
+    console.log('Theme found:', themeExists);
+    
+    // Add to theme_participants
+    const { error } = await supabase
+      .from('theme_participants')
+      .insert({
+        theme_id: cleanThemeId,
+        community_id: userProfile.id,
+        engagement_level: 'interested',  // Use 'interested' - one of the allowed values
+        joined_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error('Join theme error:', error);
+      
+      // Check if table doesn't exist
+      if (error.code === '42P01' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        alert('Theme participation feature is not yet set up in the database.\n\nPlease contact an administrator to run the theme_participants migration.');
+        return;
+      }
+      
+      // Check for duplicate - user already joined
+      if (error.code === '23505') {
+        showToastNotification('✓ You are already a member of this theme!', 'info');
+        closeNodePanel();
+        return;
+      }
+      
+      if (error.code === '23503') {
+        alert('Invalid theme or user ID. Please refresh and try again.');
+      } else {
+        throw error;
+      }
+      return;
+    }
+    
+    showToastNotification(`✓ You've joined "${themeName}"!`, 'success');
+    
+    // Close panel
+    closeNodePanel();
+    
+    console.log('🔄 Refreshing synapse after joining theme...');
+    
+    // Reload synapse data if available
+    if (window.reloadAllData && typeof window.reloadAllData === 'function') {
+      console.log('🔄 Calling reloadAllData...');
+      await window.reloadAllData();
+      if (window.rebuildGraph && typeof window.rebuildGraph === 'function') {
+        console.log('🔄 Calling rebuildGraph...');
+        await window.rebuildGraph();
+      }
+    } else {
+      console.warn('⚠️ reloadAllData not available, forcing page reload...');
+      // Force a full page reload to refresh the synapse
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  } catch (error) {
+    console.error('Error joining theme:', error);
+    alert('Failed to join theme. Please try again.');
+  }
+};
+
+// Leave theme function
+window.leaveTheme = async function(themeId, themeName) {
+  if (!confirm(`Are you sure you want to leave "${themeName}"?\n\nYou can rejoin later if you change your mind.`)) {
+    return;
+  }
+  
+  try {
+    const user = await window.bootstrapSession.getAuthUser();
+    if (!user) {
+      alert('Please log in to leave themes');
+      return;
+    }
+    
+    const { data: userProfile } = await supabase
+      .from('community')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!userProfile) {
+      alert('Profile not found');
+      return;
+    }
+    
+    // Remove 'theme:' prefix if present
+    const cleanThemeId = themeId.replace(/^theme:/, '');
+    
+    // Remove from theme_participants
+    const { error } = await supabase
+      .from('theme_participants')
+      .delete()
+      .eq('theme_id', cleanThemeId)
+      .eq('community_id', userProfile.id);
+    
+    if (error) throw error;
+    
+    showToastNotification(`✓ You've left "${themeName}"`, 'success');
+    
+    // Close panel
+    closeNodePanel();
+    
+    console.log('🔄 Refreshing synapse after leaving theme...');
+    
+    // Reload synapse data if available
+    if (window.reloadAllData && typeof window.reloadAllData === 'function') {
+      console.log('🔄 Calling reloadAllData...');
+      await window.reloadAllData();
+      if (window.rebuildGraph && typeof window.rebuildGraph === 'function') {
+        console.log('🔄 Calling rebuildGraph...');
+        await window.rebuildGraph();
+      }
+    } else {
+      console.warn('⚠️ reloadAllData not available, forcing page reload...');
+      // Force a full page reload to refresh the synapse
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+  } catch (error) {
+    console.error('Error leaving theme:', error);
+    alert('Failed to leave theme. Please try again.');
+  }
+};
+
+// Delete theme function
+window.deleteTheme = async function(themeId, themeName) {
+  if (!confirm(`⚠️ Are you sure you want to DELETE "${themeName}"?\n\nThis will:\n• Remove the theme permanently\n• Remove all participants\n• Unlink all projects from this theme\n\nThis action CANNOT be undone!`)) {
+    return;
+  }
+  
+  // Double confirmation for destructive action
+  const confirmText = prompt(`Type "${themeName}" to confirm deletion:`);
+  if (confirmText !== themeName) {
+    alert('Theme name did not match. Deletion cancelled.');
+    return;
+  }
+  
+  try {
+    const user = await window.bootstrapSession.getAuthUser();
+    if (!user) {
+      alert('Please log in to delete themes');
+      return;
+    }
+    
+    const { data: userProfile } = await supabase
+      .from('community')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!userProfile) {
+      alert('Profile not found');
+      return;
+    }
+    
+    // Remove 'theme:' prefix if present
+    const cleanThemeId = themeId.replace(/^theme:/, '');
+    
+    // Verify user is the creator
+    const { data: theme } = await supabase
+      .from('theme_circles')
+      .select('created_by')
+      .eq('id', cleanThemeId)
+      .single();
+    
+    if (!theme || theme.created_by !== userProfile.id) {
+      alert('You can only delete themes you created');
+      return;
+    }
+    
+    // Unlink projects from this theme
+    await supabase
+      .from('projects')
+      .update({ theme_id: null })
+      .eq('theme_id', cleanThemeId);
+    
+    // Delete theme participants
+    await supabase
+      .from('theme_participants')
+      .delete()
+      .eq('theme_id', cleanThemeId);
+    
+    // Delete the theme
+    const { error } = await supabase
+      .from('theme_circles')
+      .delete()
+      .eq('id', cleanThemeId);
+    
+    if (error) throw error;
+    
+    showToastNotification(`✓ "${themeName}" has been deleted`, 'success');
+    
+    // Close panel and refresh
+    closeNodePanel();
+    
+    // Reload synapse data if available
+    if (window.reloadAllData) {
+      await window.reloadAllData();
+      if (window.rebuildGraph) {
+        await window.rebuildGraph();
+      }
+    }
+  } catch (error) {
+    console.error('Error deleting theme:', error);
+    alert('Failed to delete theme. Please try again.');
+  }
+};
 
 
 // Initialize on DOM ready

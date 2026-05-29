@@ -317,6 +317,7 @@ export function animatePathway(sourceId, targetId, options = {}) {
     glowIntensity = 10,
     onComplete = null,
     forceDirect = false, // if true, draw direct even if no accepted path
+    targetNode = null, // NEW: pass the target node data for click handling
   } = options;
 
   let path = findShortestPath(sourceId, targetId, false);
@@ -345,7 +346,8 @@ export function animatePathway(sourceId, targetId, options = {}) {
     .append("g")
     .attr("class", "animated-pathway")
     .attr("data-source", sourceId)
-    .attr("data-target", targetId);
+    .attr("data-target", targetId)
+    .style("cursor", "pointer"); // Make it clear this is clickable
 
   // Draw segments
   const segments = [];
@@ -360,10 +362,42 @@ export function animatePathway(sourceId, targetId, options = {}) {
       .attr("stroke", color)
       .attr("stroke-width", 4)
       .attr("opacity", 0)
-      .attr("filter", `drop-shadow(0 0 ${glowIntensity}px ${color})`);
+      .attr("filter", `drop-shadow(0 0 ${glowIntensity}px ${color})`)
+      .style("cursor", "pointer") // Make segments clickable
+      .style("pointer-events", "all"); // Ensure they're interactive
 
     segments.push({ pathEl: seg, source: a, target: b });
   }
+
+  // Get target node data for click handler (define outside the handler)
+  const targetNodeData = targetNode || getNodeById(targetId);
+
+  // NEW: Add click handler to open target node's profile
+  const handlePathwayClick = (event) => {
+    event.stopPropagation();
+    
+    if (!targetNodeData) {
+      console.warn("Cannot open profile - target node data not available");
+      return;
+    }
+    
+    console.log("🎯 Pathway clicked - opening profile for:", targetNodeData.name);
+    
+    // Import openNodePanel if available
+    if (typeof window.openNodePanel === 'function') {
+      window.openNodePanel({
+        id: targetNodeData.id,
+        name: targetNodeData.name,
+        type: targetNodeData.type || "person",
+        ...targetNodeData,
+      });
+    } else {
+      console.warn("openNodePanel not available");
+    }
+  };
+  
+  // Add click handler to the group
+  group.on("click", handlePathwayClick);
 
   const updatePositions = () => {
     for (const s of segments) {
@@ -400,7 +434,7 @@ export function animatePathway(sourceId, targetId, options = {}) {
     segments[idx].pathEl
       .transition()
       .duration(Math.max(150, duration / segments.length))
-      .attr("opacity", 0.85)
+      .attr("opacity", 0.95) // Increased from 0.85 for better visibility
       .on("end", () => {
         idx++;
         step();
@@ -415,6 +449,7 @@ export function animatePathway(sourceId, targetId, options = {}) {
     segments,
     pathNodes,
     updatePositions,
+    targetNode: targetNodeData, // Store target node data
   };
 
   activePathways.push(entry);
@@ -498,6 +533,24 @@ export function highlightRecommendedNodes(recommendations) {
       const g = D3.select(this);
       const baseRadius = d?.type === "project" ? 50 : (d?.isCurrentUser ? 35 : 28);
 
+      // CRITICAL: Make the node visible and bright (override Quiet Mode dimming)
+      g.style("opacity", 1)
+        .style("pointer-events", "auto")
+        .style("display", "block");
+      
+      // Brighten the node circle
+      g.select("circle")
+        .style("opacity", 1)
+        .style("filter", "brightness(1.2)");
+      
+      // Show the avatar/image if present
+      g.select("image")
+        .style("opacity", 1);
+      
+      // Show the label
+      g.select("text")
+        .style("opacity", 1);
+
       const glow = g
         .insert("circle", ":first-child")
         .attr("class", "recommendation-glow")
@@ -523,7 +576,7 @@ export function highlightRecommendedNodes(recommendations) {
     });
   }
 
-  console.log(`✨ Highlighted ${recommendations.length} recommended nodes`);
+  console.log(`✨ Highlighted ${recommendations.length} recommended nodes (made visible and bright)`);
 }
 
 /* ==========================================================================
@@ -593,6 +646,7 @@ export async function showRecommendationPathways(limit = 5) {
         duration: 1600,
         particleCount: 2,
         glowIntensity: 12,
+        targetNode: rec.node, // Pass the target node data for click handling
       });
     }, i * 350);
   });

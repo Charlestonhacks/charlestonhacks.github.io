@@ -1,109 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeetupMashup2</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>MeetupMashup #2 — CharlestonHacks</title>
 
-        .scroll-container {
-            width: 100%;
-            height: 400px; /* Adjust height as needed */
-            overflow-x: scroll;
-            overflow-y: hidden;
-            white-space: nowrap;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-6NDKG07DY6');
+  </script>
 
-        .scroll-container a {
-            display: inline-block;
-            height: 100%;
-            margin-right: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
+  <!-- Lightbox2 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" />
 
-        .scroll-container a:last-child {
-            margin-right: 0;
-        }
+  <style>
+    /* ==========================================================
+       MeetupMashup #2 (Aligned with Events aesthetic)
+       - Dark gray base (#181818)
+       - Red hover glow accents
+       - Clickable header image + title back to index
+       - Horizontal filmstrip preview + Lightbox full pages
+       - Single back button at bottom (chbackbuttonred.png)
+       ========================================================== */
 
-        .scroll-container img {
-            height: 100%;
-            border-radius: 5px;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .logo-container {
-            display: flex;
-            justify-content: center; /* Centers the logo */
-            align-items: center;
-            width: 100%; /* Ensures it scales across all screen sizes */
-            margin-top: 20px; /* Adjust spacing as needed */
-        }
+    html, body {
+      min-height: 100vh;
+      background-color: #181818;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      overflow-x: hidden;
+    }
 
-        .responsive-logo {
-            width: 50%; /* Adjusts to 50% of the parent container */
-            max-width: 400px; /* Prevents it from being too large on big screens */
-            height: auto; /* Maintains aspect ratio */
-        }
+    a { color: inherit; text-decoration: none; }
 
-        /* Adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .responsive-logo {
-                width: 80%; /* Takes up more space on smaller screens */
-                max-width: 300px;
-            }
-        }
+    /* Header */
+    .header-wrap {
+      text-align: center;
+      padding: 20px 16px 10px;
+    }
 
-        @media (max-width: 480px) {
-            .responsive-logo {
-                width: 90%; /* Almost full width on very small screens */
-                max-width: 250px;
-            }
-        }
-    </style>
+    .events-header-img {
+      display: block;
+      margin: 10px auto 10px;
+      width: 400px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      filter: drop-shadow(0 0 6px rgba(255,255,255,0.28));
+    }
+    .events-header-img:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 12px rgba(255, 100, 100, 0.6));
+    }
+
+    h1.page-title {
+      text-align: center;
+      font-size: 2.4rem;
+      margin-top: 6px;
+      margin-bottom: 8px;
+      color: #fff;
+      cursor: pointer;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    h1.page-title:hover { color: #ff5555; transform: scale(1.03); }
+
+    .subtitle {
+      margin: 0 auto;
+      max-width: 900px;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.75);
+      padding: 6px 0 14px;
+    }
+
+    @media (max-width: 800px) {
+      .events-header-img { width: 300px; }
+      h1.page-title { font-size: 2rem; }
+    }
+    @media (max-width: 650px) {
+      .events-header-img { width: 250px; }
+      h1.page-title { font-size: 1.8rem; }
+    }
+    @media (max-width: 480px) {
+      .events-header-img { width: 200px; }
+      h1.page-title { font-size: 1.6rem; }
+      .subtitle { font-size: 0.95rem; }
+    }
+
+    /* Main container */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 16px 10px;
+    }
+
+    /* Section header (matches Events vibe) */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,0.10);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+      margin-bottom: 12px;
+    }
+
+    .section-head .left {
+      display: grid;
+      gap: 3px;
+    }
+    .section-head .left strong {
+      font-size: 1.05rem;
+      letter-spacing: 0.2px;
+    }
+    .section-head .left span {
+      font-size: 0.92rem;
+      color: rgba(255,255,255,0.70);
+    }
+
+    .tip-pill {
+      font-size: 0.86rem;
+      color: rgba(255,255,255,0.75);
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.25);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 680px) {
+      .section-head { flex-direction: column; align-items: flex-start; }
+      .tip-pill { white-space: normal; }
+    }
+
+    /* ==========================================================
+       Filmstrip (preview cards) — full pages via Lightbox
+       ========================================================== */
+    .filmstrip {
+      height: clamp(260px, 36vh, 380px);
+      display: flex;
+      gap: 18px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 10px 6px 18px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Optional: keep scrollbar visible but subtle (events page shows more chrome) */
+    .filmstrip::-webkit-scrollbar { height: 12px; }
+    .filmstrip::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.07);
+      border-radius: 999px;
+    }
+    .filmstrip::-webkit-scrollbar-thumb {
+      background: rgba(255, 85, 85, 0.45);
+      border-radius: 999px;
+      border: 2px solid rgba(0,0,0,0.35);
+    }
+
+    .frame {
+      position: relative;
+      flex: 0 0 clamp(360px, 42vw, 560px);
+      height: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      scroll-snap-align: start;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+      transform: translateZ(0);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(0,0,0,0.25);
+    }
+
+    .frame:hover {
+      transform: translateY(-5px) scale(1.01);
+      box-shadow: 0 0 25px rgba(255, 80, 80, 0.65);
+    }
+
+    /* Preview behavior:
+       - cover = consistent filmstrip look (cropped)
+       - full page is visible in Lightbox */
+    .frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Caption pill */
+    .caption {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      background: rgba(0,0,0,0.50);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      max-width: calc(100% - 20px);
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    /* If you want ZERO cropping in previews, uncomment:
+       .frame img { object-fit: contain; background: rgba(0,0,0,0.25); }
+    */
+
+    /* ==========================================================
+       Lightbox skin (subtle match to dark/red aesthetic)
+       ========================================================== */
+    .lb-outerContainer,
+    .lb-dataContainer{
+      background: rgba(12,12,12,0.95) !important;
+      border: 1px solid rgba(255,255,255,0.10) !important;
+      border-radius: 10px !important;
+      box-shadow: 0 18px 55px rgba(0,0,0,0.70) !important;
+    }
+    .lb-image{
+      border-radius: 8px !important;
+    }
+    .lb-data .lb-caption{
+      color: rgba(255,255,255,0.88) !important;
+    }
+    .lb-data .lb-number{
+      color: rgba(255,255,255,0.55) !important;
+    }
+    .lb-nav a.lb-prev,
+    .lb-nav a.lb-next{
+      opacity: 0.95 !important;
+      filter: drop-shadow(0 0 12px rgba(255, 80, 80, 0.25));
+    }
+
+    /* Footer + back button */
+    footer {
+      background-color: transparent;
+      text-align: center;
+      padding: 28px 20px 64px;
+      margin-top: 20px;
+      position: relative;
+    }
+
+    .footer-back-button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 22px;
+    }
+
+    .footer-back-button img {
+      max-width: 240px;
+      width: 60vw;
+      height: auto;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .footer-back-button img:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 8px rgba(255, 80, 80, 0.6));
+    }
+
+    @media (max-width: 500px) {
+      .footer-back-button img { max-width: 92vw; }
+    }
+
+    .copyright {
+      margin-top: 16px;
+      font-size: 16px;
+      color: rgba(255,255,255,0.85);
+    }
+  </style>
 </head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
 
-  gtag('config', 'G-6NDKG07DY6');
-</script>
 <body>
 
-    <h1 style="text-align: center; margin-top: 20px;">Welcome to MeetupMashup #2</h1>
-    <p style="text-align: center;">Explore our highlights below:</p>
+  <!-- Header (click logo/title to go back) -->
+  <div class="header-wrap">
+    <a href="index.html" aria-label="Back to Home">
+      <!-- Reuse your events header image OR swap to your preferred CH logo -->
+      <!-- If you don't have header events.webp on this page, change the src to your logo -->
+      <img src="images/header events.webp" alt="CharlestonHacks" class="events-header-img" />
+    </a>
 
-    <div class="scroll-container">
-        <a href="images/mm25.jpg" data-lightbox="mashup" data-title="Meetup Mashup 2 Poster"><img src="images/mm25.jpg" alt="Meetup Mashup 2 Poster"></a>
-        <a href="images/mmc1.jpg" data-lightbox="mashup" data-title="Doug and Dave"><img src="images/mmc1.jpg" alt="comic pg 1"></a>
-        <a href="images/mmc2.jpg" data-lightbox="mashup" data-title="Comic 1"><img src="images/mmc2.jpg" alt="Comic pg 2"></a>
-        <a href="images/mmc3.jpg" data-lightbox="mashup" data-title="Comic 2"><img src="images/mmc3.jpg" alt="Comic pg 3"></a>
-        <a href="images/mmc4.jpg" data-lightbox="mashup" data-title="Comic 3"><img src="images/mmc4.jpg" alt="Comic pg 4"></a>
-        <a href="images/mmc5.jpg" data-lightbox="mashup" data-title="Letter"><img src="images/mmc5.jpg" alt="Comic pg 5"></a>
+    <a href="index.html" aria-label="Back to Home">
+      <h1 class="page-title">MeetupMashup #2</h1>
+    </a>
+
+    <p class="subtitle">Swipe the strip, then click any frame to view the full page.</p>
+  </div>
+
+  <main>
+    <div class="section-head">
+      <div class="left">
+        <strong>Gallery Strip</strong>
+        <span>Preview frames (cropped) • Full pages open in Lightbox</span>
+      </div>
+      <div class="tip-pill">Tip: trackpad swipe → • shift + mousewheel →</div>
     </div>
 
-    <!-- Footer -->
-    <footer id="footer" style="text-align: center; padding: 20px; background-color: #f4f4f9; margin-top: 20px; border-top: 2px solid #ddd;">
-        <a class="logo-container" href="index.html">
-            <img src="images/CHARLESTONHACKS Grey off center-01-01.png" alt="Charleston Hacks Logo" class="responsive-logo">
-        </a>
-        <p style="margin-top: 10px; font-size: 16px; color: #333;">© 2025 MeetupMashup. All rights reserved.</p>
-    </footer>
+    <div class="filmstrip" role="list" aria-label="MeetupMashup #2 gallery">
+      <a class="frame" role="listitem" href="images/mm25.jpg" data-lightbox="mashup" data-title="Meetup Mashup 2 Poster">
+        <img src="images/mm25.jpg" alt="Meetup Mashup 2 Poster" />
+        <span class="caption">Meetup Mashup 2 Poster</span>
+      </a>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+      <a class="frame" role="listitem" href="images/mmc1.jpg" data-lightbox="mashup" data-title="Doug and Dave">
+        <img src="images/mmc1.jpg" alt="Comic page 1" />
+        <span class="caption">Doug and Dave</span>
+      </a>
+
+      <a class="frame" role="listitem" href="images/mmc2.jpg" data-lightbox="mashup" data-title="Comic 1">
+        <img src="images/mmc2.jpg" alt="Comic page 2" />
+        <span class="caption">Comic 1</span>
+      </a>
+
+      <a class="frame" role="listitem" href="images/mmc3.jpg" data-lightbox="mashup" data-title="Comic 2">
+        <img src="images/mmc3.jpg" alt="Comic page 3" />
+        <span class="caption">Comic 2</span>
+      </a>
+
+      <a class="frame" role="listitem" href="images/mmc4.jpg" data-lightbox="mashup" data-title="Comic 3">
+        <img src="images/mmc4.jpg" alt="Comic page 4" />
+        <span class="caption">Comic 3</span>
+      </a>
+
+      <a class="frame" role="listitem" href="images/mmc5.jpg" data-lightbox="mashup" data-title="Letter">
+        <img src="images/mmc5.jpg" alt="Letter page" />
+        <span class="caption">Letter</span>
+      </a>
+    </div>
+  </main>
+
+  <!-- Footer (single back button only) -->
+  <footer>
+    <div class="footer-back-button">
+      <a href="index.html" aria-label="Back to Home">
+        <img src="assets/chbackbuttonred.png" alt="Back to Home" />
+      </a>
+    </div>
+    <p class="copyright">© 2025 CharlestonHacks. All rights reserved.</p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+  <script>
+    // Lightbox behavior tuned to feel more “app-like”
+    if (window.lightbox) {
+      lightbox.option({
+        resizeDuration: 180,
+        fadeDuration: 180,
+        imageFadeDuration: 180,
+        wrapAround: true,
+        disableScrolling: true,
+        alwaysShowNavOnTouchDevices: true
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,11 +1,28 @@
+/* ==========================================================
+   Base Layout
+   ========================================================== */
+
+html,
+body {
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
-  font-family: system-ui, sans-serif;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   background: #000;
   color: #fff;
+
+  /* Prevent sideways drift; allow vertical scrolling */
   overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
+
+/* ==========================================================
+   Background Canvas (disabled per instructions)
+   ========================================================== */
 
 canvas#neural-bg {
   position: fixed;
@@ -13,9 +30,14 @@ canvas#neural-bg {
   width: 100%;
   height: 100%;
   z-index: -5;
+
   /* Per yellow instructions: Remove synapse background */
   display: none !important;
 }
+
+/* ==========================================================
+   Page Containers
+   ========================================================== */
 
 .container {
   position: relative;
@@ -31,11 +53,16 @@ canvas#neural-bg {
 .header-img {
   width: 420px;
   max-width: 90%;
-  transition: 0.3s ease;
+  transition: transform 0.3s ease;
 }
+
 .header-img:hover {
   transform: scale(1.05);
 }
+
+/* ==========================================================
+   Buttons
+   ========================================================== */
 
 .action-btn {
   background: #ffcf33;
@@ -44,10 +71,18 @@ canvas#neural-bg {
   padding: 10px 14px;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: bold;
-  transition: 0.2s ease;
+  font-weight: 700;
+  transition: background 0.2s ease;
 }
 
 .action-btn:hover {
   background: #ffd95c;
 }
+
+/* ==========================================================
+   NOTE
+   ==========================================================
+   BTC overlay scrolling is now handled in portal.css under:
+   #matrix-btc-overlay .btc-data-container
+   Keep base.css focused on global layout/structure.
+   ========================================================== */

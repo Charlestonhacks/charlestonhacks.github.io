@@ -3,13 +3,41 @@
  * - Fetches events from the Cloudflare Worker
  * - Renders into #events-list
  * - Handles modal open/close for #events-overlay
+ * - Source-aware: distinguishes CharlestonHacks vs community/partner events
  */
 
 console.log("📜 eventsFeed.js loaded");
 
-const FEED_URL = "https://charlestonhacks-events-worker.deckerdb26354.workers.dev";
+const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
 
-// Render helpers
+// ── Source detection ────────────────────────────────────────────────────
+
+function isCharlestonHacksEvent(ev) {
+  const link = (ev?.link || ev?.url || "").toLowerCase();
+  const title = (ev?.title || ev?.name || "").toLowerCase();
+  if (link.includes("meetup.com/charlestonhacks")) return true;
+  if (title.includes("charlestonhacks") || title.includes("charleston hacks") || title.includes("harborhack")) return true;
+  const source = (ev?.source || "").toLowerCase();
+  if (source.includes("charlestonhacks") || source === "charlestonhacks") return true;
+  return false;
+}
+
+function getSourceLabel(ev) {
+  if (isCharlestonHacksEvent(ev)) return "CharlestonHacks";
+  if (ev?.sourceLabel) return ev.sourceLabel;
+  const link = (ev?.link || "").toLowerCase();
+  if (link.includes("meetup.com/chs-amazon-web-services")) return "Charleston AWS Meetup";
+  if (link.includes("meetup.com/")) {
+    const match = link.match(/meetup\.com\/([^/]+)/);
+    if (match && match[1] !== "charlestonhacks") {
+      return match[1].replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+  }
+  return "Community Event";
+}
+
+// ── Render helpers ──────────────────────────────────────────────────────
+
 function safeText(s) {
   return String(s ?? "").replace(/[<>&"]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
 }
@@ -60,28 +88,59 @@ export async function loadEvents({
       const description = safeText(event?.description || "");
       const location = safeText(event?.location || "");
       const dateStr = safeText(formatDateShort(event?.startDate));
+      const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(event.nearifyJoinUrl) : null;
+      const isCH = isCharlestonHacksEvent(event);
+      const sourceLabel = getSourceLabel(event);
+
+      console.log("[EventsFeed]", event?.title, "| Source:", sourceLabel, "| nearifyJoinUrl:", nearifyJoinUrl || "(none)");
 
       const eventEl = document.createElement("div");
-      eventEl.style.marginBottom = "1.5rem";
-      eventEl.style.paddingBottom = "1rem";
-      eventEl.style.borderBottom = "1px solid #333";
+      eventEl.className = "ch-event-card";
+
+      // Source badge for non-CharlestonHacks events
+      const sourceBadgeHtml = isCH
+        ? ""
+        : `<span class="ch-source-badge ch-source-community">${safeText(sourceLabel)}</span>`;
+
+      // Build CTA section — always use the event's own nearifyJoinUrl, never a hardcoded fallback
+      let ctaHtml = "";
+      if (nearifyJoinUrl) {
+        ctaHtml = `
+          <div class="ch-event-cta">
+            <span class="ch-nearify-badge">Live Nearify Experience Available</span>
+            <a href="${nearifyJoinUrl}" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">
+              Join Live Network
+            </a>
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">
+              View on Meetup
+            </a>
+          </div>
+        `;
+      } else {
+        ctaHtml = `
+          <div class="ch-event-cta">
+            <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">
+              View Event
+            </a>
+          </div>
+        `;
+      }
 
       eventEl.innerHTML = `
-        <div style="font-size:0.75rem;color:#00e0ff;margin-bottom:4px;text-transform:uppercase;">${dateStr}</div>
-        <h3 style="margin:0 0 8px 0;font-size:1.1rem;">
-          <a href="${link}" target="_blank" rel="noopener noreferrer"
-             style="color:#fff;text-decoration:none;border-bottom:1px solid #444;transition:border-color 0.3s;"
-             onmouseover="this.style.borderColor='#00e0ff'"
-             onmouseout="this.style.borderColor='#444'">${title}</a>
+        ${sourceBadgeHtml}
+        <div class="ch-event-date">${dateStr}</div>
+        <h3 class="ch-event-title">
+          <a href="${nearifyJoinUrl || link}" target="_blank" rel="noopener noreferrer">${title}</a>
         </h3>
-        ${location ? `<p style="font-size:0.85rem;color:#aaa;margin:4px 0;">📍 ${location}</p>` : ""}
+        ${location ? `<p class="ch-event-location">📍 ${location}</p>` : ""}
         ${
           description
-            ? `<p style="font-size:0.9rem;color:#888;margin-top:5px;line-height:1.4;">${description.substring(0, 150)}${
+            ? `<p class="ch-event-desc">${description.substring(0, 150)}${
                 description.length > 150 ? "..." : ""
               }</p>`
             : ""
         }
+        ${ctaHtml}
       `;
 
       list.appendChild(eventEl);

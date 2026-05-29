@@ -4,7 +4,11 @@
 // This file coordinates auth.js, profile.js, and dashboard.js
 // All modules are loaded as scripts and communicate via window object and events
 
-console.log("🚀 CharlestonHacks Innovation Engine starting...");
+// Import centralized logger
+const log = window.log || console;
+
+log.moduleLoad('main.js');
+log.info('🚀 CharlestonHacks Innovation Engine starting...');
 
 // ================================================================
 // INITIALIZE ON DOM READY
@@ -12,12 +16,12 @@ console.log("🚀 CharlestonHacks Innovation Engine starting...");
 document.addEventListener("DOMContentLoaded", async () => {
   // One-time init guard - prevents double-binding and ghost listeners
   if (window.__IE_MAIN_INIT_DONE__) {
-    console.log("⚠️ Main already initialized, skipping...");
+    log.once('main-already-init', '⚠️ Main already initialized, skipping...');
     return;
   }
   window.__IE_MAIN_INIT_DONE__ = true;
 
-  console.log("🎨 DOM ready, initializing systems...");
+  log.debug('🎨 DOM ready, initializing systems...');
 
   // Wait for required globals from other scripts
   await waitForGlobals();
@@ -33,9 +37,97 @@ document.addEventListener("DOMContentLoaded", async () => {
   //    - 'profile-new'
   //    - 'user-logged-out'
   //    - 'app-ready'
-  console.log("✅ System ready!");
+  
+  // 4) Initialize Unified Network Discovery (if enabled)
+  window.addEventListener('profile-loaded', async (e) => {
+    const { user, profile } = e.detail;
+    
+    // Initialize bootstrap session context
+    if (window.bootstrapSession && user && profile) {
+      log.debug('🔐 Bootstrap session context available');
+    }
+    
+    if (user && window.unifiedNetworkIntegration) {
+      log.debug('🧠 Attempting to initialize Unified Network Discovery...');
+      
+      try {
+        const initialized = await window.unifiedNetworkIntegration.init(user.id, 'synapse-svg');
+        
+        if (initialized) {
+          log.info('✅ Unified Network Discovery active');
+        } else {
+          log.info('ℹ️ Using legacy synapse visualization');
+        }
+        
+        // Initialize synapse bridge after both systems are loaded
+        // This ensures seamless integration between unified network and legacy synapse
+        if (window.synapseBridge) {
+          log.debug('🌉 Initializing synapse bridge...');
+          window.synapseBridge.init();
+        }
+      } catch (error) {
+        log.error('❌ Unified Network initialization failed:', error);
+      }
+    }
+    
+    // Initialize presence tracking with community profile ID
+    if (profile?.id && window.PresenceSessionManager && window.supabase) {
+      log.debug('👋 Initializing presence tracking...');
+      try {
+        await window.PresenceSessionManager.initialize(window.supabase, profile.id);
+        log.info('✅ Presence tracking active');
+      } catch (error) {
+        log.error('❌ Presence tracking initialization failed:', error);
+      }
+    }
+    
+    // Initialize presence UI
+    if (window.PresenceUI && window.supabase) {
+      log.debug('👁️ Initializing presence UI...');
+      try {
+        await window.PresenceUI.init(window.supabase, profile?.id);
+        log.info('✅ Presence UI active');
+      } catch (error) {
+        log.error('❌ Presence UI initialization failed:', error);
+      }
+    }
+    
+    // Delayed realtime startup (after shell render + bootstrap)
+    if (window.realtimeManager && window.bootstrapSession) {
+      log.debug('⏱️ Scheduling delayed realtime startup...');
+      
+      // Use requestIdleCallback for best performance, fallback to setTimeout
+      const startRealtime = async () => {
+        try {
+          const context = await window.bootstrapSession.getSessionContext();
+          if (context) {
+            await window.realtimeManager.startRealtime(context);
+            log.info('✅ Realtime subscriptions started');
+          }
+        } catch (error) {
+          log.error('❌ Realtime startup failed:', error);
+        }
+      };
+      
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(startRealtime, { timeout: 3000 });
+      } else {
+        setTimeout(startRealtime, 3000);
+      }
+    }
+    
+    // Load admin panel AFTER authentication
+    // This prevents it from showing on the login page
+    if (user) {
+      log.debug('🎛️ Loading admin panel...');
+      const script = document.createElement('script');
+      script.src = 'assets/js/unified-network-admin.js?v=1';
+      document.body.appendChild(script);
+    }
+  });
+  
+  log.info('✅ System ready!');
 });
-
 // Helper to wait for required globals to exist
 function waitForGlobals() {
   return new Promise((resolve) => {
@@ -51,7 +143,7 @@ function waitForGlobals() {
       if (ok) return resolve();
 
       if (Date.now() - start > TIMEOUT_MS) {
-        console.warn("⏱️ waitForGlobals timed out — continuing best-effort.");
+        log.warn('⏱️ waitForGlobals timed out — continuing best-effort.');
         return resolve();
       }
 

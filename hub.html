@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+
+  <!-- Small network wins -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+  <link rel="preconnect" href="https://api.coingecko.com" crossorigin>
+
+  <!-- Preload key visuals -->
+  <link rel="preload" as="image" href="icons/card.png">
+  <link rel="preload" as="image" href="images/charlestonhackslogo.svg">
+
+  <!-- Neuron redirect (keeps querystring, removes source=neuron) -->
+  <script>
+    (function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("source") === "neuron") {
+        params.delete("source");
+        const qs = params.toString();
+        window.location.replace("/neural.html" + (qs ? "?" + qs : ""));
+      }
+    })();
+  </script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag("js", new Date());
+    gtag("config", "G-6NDKG07DY6");
+  </script>
+
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Member Portal — CharlestonHacks</title>
+  <meta name="description" content="Your gateway to the CharlestonHacks community. Access events, projects, the Innovation Engine, community chat, and more from one interactive portal."/>
+  <meta property="og:title" content="CharlestonHacks Member Portal">
+  <meta property="og:description" content="Access events, projects, the Innovation Engine, and community tools from one interactive portal.">
+  <meta property="og:image" content="https://charlestonhacks.com/images/websitepanel.webp"/>
+  <meta property="og:url" content="https://charlestonhacks.com/hub.html"/>
+  <meta property="og:type" content="website"/>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CharlestonHacks Member Portal">
+  <meta name="twitter:description" content="Access events, projects, the Innovation Engine, and community tools from one interactive portal.">
+  <meta name="theme-color" content="#0a0a0a"/>
+  <link rel="canonical" href="https://charlestonhacks.com/hub.html"/>
+
+  <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png"/>
+  <link rel="manifest" href="/manifest.json"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="/assets/css/portal.css"/>
+  <link rel="stylesheet" href="/assets/css/events.css"/>
+
+  <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
+  <style>
+    .ch-top-logo {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999; /* above bg canvas + most UI */
+      pointer-events: none; /* prevents blocking clicks on portals */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: min(92vw, 520px);
+    }
+    .ch-top-logo img {
+      width: min(92vw, 320px);
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 10px 24px rgba(0,0,0,.55));
+      opacity: 0.98;
+    }
+
+    /* Push card below the fixed logo (logo bottom ≈ 119px desktop, 96px mobile) */
+    .main-wrapper { padding-top: 130px; }
+
+    @media (max-width: 768px) {
+      .ch-top-logo { top: 10px; }
+      .ch-top-logo img { width: min(92vw, 260px); }
+      /* flex-start prevents the centering algorithm from adding a second gap
+         equal to padding-top below the logo */
+      .main-wrapper { padding-top: 108px; justify-content: flex-start; }
+      /* 55px icon bar + ~34px iPhone home-indicator safe area + 16px buffer */
+      .ch-tagline { bottom: 105px; font-size: 0.6rem; }
+    }
+
+    .ch-tagline {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9998;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.45);
+      font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+      letter-spacing: 0.1em;
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+      font-family: 'Orbitron', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* Countdown banner */
+    #event-countdown-banner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10001;
+      background: linear-gradient(90deg, rgba(0,30,40,0.96) 0%, rgba(0,12,20,0.98) 100%);
+      border-bottom: 1px solid rgba(0,224,255,0.25);
+      backdrop-filter: blur(6px);
+      padding: 6px 16px;
+      text-align: center;
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(0.6rem, 2vw, 0.75rem);
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.85);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #event-countdown-banner a {
+      color: #00e0ff;
+      text-decoration: none;
+    }
+    #event-countdown-banner a:hover { text-decoration: underline; }
+    #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
+    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
+    /* Shift logo + wrapper down when banner is visible */
+    body.has-countdown-banner .ch-top-logo { top: 44px; }
+    body.has-countdown-banner .main-wrapper { padding-top: 160px; }
+    @media (max-width: 768px) {
+      #event-countdown-banner { font-size: 0.58rem; padding: 5px 10px; }
+      body.has-countdown-banner .ch-top-logo { top: 38px; }
+      body.has-countdown-banner .main-wrapper { padding-top: 140px; }
+    }
+    .hub-mini-nav{position:fixed;top:10px;right:14px;z-index:10002;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+    .hub-mini-nav a{font-family:Arial,sans-serif;font-size:.7rem;letter-spacing:.06em;padding:6px 10px;border:1px solid rgba(255,255,255,.2);border-radius:999px;text-decoration:none;color:rgba(255,255,255,.78);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);}
+    .hub-mini-nav a:hover{color:#00e0ff;border-color:rgba(0,224,255,.45);}
+    @media (max-width: 768px){.hub-mini-nav{top:6px;right:8px;}.hub-mini-nav a{font-size:.62rem;padding:5px 8px;}}
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "CharlestonHacks",
+    "url": "https://charlestonhacks.com",
+    "logo": "https://charlestonhacks.com/images/charlestonhackslogo.svg",
+    "description": "Charleston's community for builders, hackers, and makers. Hosting hackathons, meetups, and innovation events in Charleston, SC.",
+    "email": "hello@charlestonhacks.com",
+    "location": {
+      "@type": "Place",
+      "name": "Charleston, South Carolina",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Charleston",
+        "addressRegion": "SC",
+        "addressCountry": "US"
+      }
+    },
+    "sameAs": [
+      "https://www.linkedin.com/company/charlestonhacks",
+      "https://www.instagram.com/charlestonhacks/",
+      "https://www.facebook.com/charlestonhacks",
+      "https://www.meetup.com/charlestonhacks/"
+    ]
+  }
+  </script>
+</head>
+
+<body>
+  <nav class="hub-mini-nav" aria-label="Primary" hidden>
+  </nav>
+
+  <!-- Upcoming event countdown bar -->
+  <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <canvas id="neural-bg"></canvas>
+
+  <!-- Top-center logo removed -->
+  <p class="ch-tagline">Charleston's community for builders, hackers &amp; makers</p>
+
+  <!-- Splash Screen -->
+  <div id="splash-overlay" role="dialog" aria-modal="true" aria-labelledby="splash-title">
+    <div id="splash-content">
+      <h1 id="splash-title">Welcome to CharlestonHacks</h1>
+      <p style="font-size:.9rem;opacity:.8;margin:.5rem 0 1.5rem;line-height:1.6;">
+        Charleston's community for builders, hackers &amp; makers.<br>
+        Where would you like to go?
+      </p>
+
+      <label style="font-size:.85rem;display:block;margin-bottom:1.5rem;">
+        <input type="checkbox" id="dont-show-again"> Don't show this again
+      </label>
+
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <button id="community-site-btn" class="btn">
+          Community Hub
+          <span style="display:block;font-size:.75rem;opacity:.7;font-weight:normal;margin-top:.2rem;">Events · Newsletter · Connect</span>
+        </button>
+        <button id="public-site-btn" class="btn"
+          style="background:transparent;border:2px solid var(--cyan);color:var(--cyan);">
+          News &amp; Updates
+          <span style="display:block;font-size:.75rem;opacity:.7;font-weight:normal;margin-top:.2rem;">Latest announcements &amp; event recaps</span>
+        </button>
+      </div>
+
+      <p style="font-size:.8rem;opacity:.7;margin-top:2rem;">
+        © 2026 CharlestonHacks. All rights reserved.
+      </p>
+    </div>
+  </div>
+
+  <!-- First Visit Tutorial -->
+  <div id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+    <div class="tutorial-content">
+      <h2 id="tutorial-title">Discover 9 Portals</h2>
+      <p>Each icon on the card opens a different dimension of CharlestonHacks.</p>
+
+      <div class="tutorial-step">
+        <i class="fas fa-mouse-pointer"></i>
+        <strong>Hover</strong> over the card icons to preview each portal
+      </div>
+
+      <div class="tutorial-step">
+        <i class="fas fa-hand-pointer"></i>
+        <strong>Click</strong> to enter and discover new features
+      </div>
+
+      <div class="tutorial-step">
+        <i class="fas fa-brain"></i>
+        Dive into the <strong>Innovation Engine</strong>
+      </div>
+
+      <button id="skip-tutorial">Start Exploring</button>
+    </div>
+  </div>
+
+  <!-- Sounds (lazy) -->
+  <audio id="cardflipSound" src="assets/atmospherel.m4a" preload="none"></audio>
+  <audio id="chimeSound" src="assets/chime.mp3" preload="none"></audio>
+  <audio id="keysSound" src="assets/keys.m4a" preload="none"></audio>
+
+  <!-- Main Content -->
+  <main>
+    <h1 class="sr-only">CharlestonHacks — Charleston's community for builders, hackers and makers. Explore interactive portals to innovation, collaboration, and local tech events.</h1>
+    <div class="main-wrapper">
+      <div class="media-container">
+
+        <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
+        <div class="card-stage">
+          <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
+          <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
+
+          <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
+            <source src="" type="video/mp4">
+          </video>
+
+          <!-- Interactive Portal Buttons -->
+          <button type="button" class="clickable-area top-left"
+                  data-sound="chime" data-url="Poster.html"
+                  data-info="📋 Event Poster - View the official event artwork"
+                  data-portal="poster" aria-label="Event Poster Portal">
+            <img src="images/informationbutton.webp" alt="">
+          </button>
+
+          <button type="button" class="clickable-area top-center"
+                  data-sound="chime" data-url="docs.html"
+                  data-info="📚 Documentation - Explore guides and resources"
+                  data-portal="docs" aria-label="Documentation Portal">
+            <img src="images/crestn.svg" alt="">
+          </button>
+
+          <!-- Top-right: BTC tracker overlay -->
+          <button type="button" class="clickable-area top-right"
+                  data-sound="cardflip" data-url="#"
+                  data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
+                  data-portal="btc" aria-label="Bitcoin Tracker Portal">
+            <img src="images/btcbutton.webp" alt="">
+          </button>
+
+          <button type="button" class="clickable-area middle-left"
+                  data-sound="chime" data-url="experimental.html"
+                  data-info="🧪 Sandbox - Experimental features and tools"
+                  data-portal="sandbox" aria-label="Sandbox Portal">
+            <img src="images/experiment.webp" alt="">
+          </button>
+
+          <button type="button" class="clickable-area middle-right"
+                  data-sound="chime" data-url="swag.html"
+                  data-info="🗳️ Swag Vote - Vote on official CharlestonHacks merchandise"
+                  data-portal="swag" aria-label="Swag Vote Portal">
+            <img src="images/case.webp" alt="">
+          </button>
+
+          <button type="button" class="clickable-area bottom-left"
+                  data-sound="chime" data-url="news.html"
+                  data-info="📰 News Feed - Latest updates and announcements"
+                  data-portal="news" aria-label="News Portal">
+            <img src="images/newsbutton.webp" alt="">
+          </button>
+
+          <button type="button" class="clickable-area bottom-center"
+                  data-sound="keys" data-url="donations.html"
+                  data-info="💝 Support Us - Become a sponsor or donate"
+                  data-portal="sponsor" aria-label="Sponsorship Portal">
+            <img src="images/keysn.svg" alt="">
+          </button>
+
+          <button type="button" class="clickable-area bottom-right"
+                  data-sound="chime" data-url="cardmatchgame.html"
+                  data-info="🎮 Avatar Matching Game - Learn about us"
+                  data-portal="game" aria-label="Game Portal">
+            <img src="images/peoplebutton.webp" alt="">
+          </button>
+
+         <!-- Center Portal: Innovation Engine -->
+<button type="button"
+        class="clickable-area center"
+        data-sound="chime"
+        data-url="https://deckerd451.github.io/innovation-engine/"
+        data-info="🚀 Innovation Engine Dashboard - Connect with the community"
+        data-portal="innovation"
+        aria-label="Innovation Engine Portal">
+  <img src="images/innovationenginebutton.webp" alt="">
+  <span class="sr-only">Innovation Engine</span>
+</button>
+
+          <!-- Tooltip -->
+          <div id="infoLine" class="info-line" role="tooltip">
+            <span id="infoParticle"></span><span id="infoText"></span>
+          </div>
+        </div>
+        <!-- /card-stage -->
+
+      </div>
+    </div>
+
+    <!-- Icon Bar -->
+    <section class="icons-container" role="navigation" aria-label="Quick Access">
+      <a href="https://github.com/sponsors/deckerd451" target="_blank" title="Sponsor on GitHub" aria-label="Sponsor on GitHub">
+        <i class="fas fa-heart"></i>
+      </a>
+      <a href="https://deckerd451.github.io/innovation-engine/" title="Innovation Engine" aria-label="Innovation Engine">
+        <i class="fas fa-people-arrows"></i>
+      </a>
+      <a href="subscribe.html" title="Newsletter Signup" aria-label="Newsletter Signup">
+        <i class="fas fa-envelope-open-text"></i>
+      </a>
+      <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" title="LinkedIn" aria-label="LinkedIn">
+        <i class="fab fa-linkedin"></i>
+      </a>
+      <a href="https://www.instagram.com/charlestonhacks/" target="_blank" title="Instagram" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="mailto:hello@charlestonhacks.com" title="Email Us" aria-label="Email">
+        <i class="fas fa-envelope"></i>
+      </a>
+      <a href="https://www.facebook.com/charlestonhacks" target="_blank" title="Facebook" aria-label="Facebook">
+        <i class="fab fa-facebook"></i>
+      </a>
+      <a href="#" id="open-calendar" title="Charleston Events Calendar" aria-label="Events Calendar" style="cursor:pointer;">
+        <i class="fas fa-calendar-alt"></i>
+      </a>
+    </section>
+  </main>
+
+  <!-- Events Modal -->
+  <div id="events-overlay" role="dialog" aria-modal="true" aria-labelledby="events-title">
+    <div class="events-modal">
+      <h2 id="events-title">Upcoming Charleston Events</h2>
+      <div id="events-list" role="list"></div>
+      <button id="close-overlay">Close</button>
+    </div>
+  </div>
+
+  <!-- Matrix-Style Bitcoin Tracker -->
+  <div id="matrix-btc-overlay" hidden inert aria-hidden="true" role="dialog" aria-modal="true" aria-label="Bitcoin Tracker">
+    <canvas id="matrix-canvas"></canvas>
+    <button class="btc-close-btn" id="close-matrix-btc" aria-label="Close Bitcoin Tracker">×</button>
+
+    <div class="btc-data-container" id="btc-data-container">
+      <div class="btc-loading" id="btc-loading">LOADING BTC DATA...</div>
+
+      <div id="btc-content" style="display:none;">
+        <div class="btc-main-price" id="btc-main-price">$0.00</div>
+        <div class="btc-label">BITCOIN / USD</div>
+        <p style="font-size:.75rem;color:#888;margin:.25rem 0 1rem;letter-spacing:.04em;">
+          Charleston's tech community monitors the open financial network rewriting how value moves.
+        </p>
+
+        <div class="btc-stats-grid">
+          <div class="btc-stat-card"><div class="btc-stat-label">24h Change</div><div class="btc-stat-value" id="btc-24h-change">+0.00%</div></div>
+          <div class="btc-stat-card"><div class="btc-stat-label">24h High</div><div class="btc-stat-value" id="btc-24h-high">--</div></div>
+          <div class="btc-stat-card"><div class="btc-stat-label">24h Low</div><div class="btc-stat-value" id="btc-24h-low">--</div></div>
+          <div class="btc-stat-card"><div class="btc-stat-label">Market Cap</div><div class="btc-stat-value" id="btc-market-cap">$0.00B</div></div>
+          <div class="btc-stat-card"><div class="btc-stat-label">24h Volume</div><div class="btc-stat-value" id="btc-volume">$0.00B</div></div>
+          <div class="btc-stat-card"><div class="btc-stat-label">Last Update</div><div class="btc-stat-value" id="btc-last-update">--:--:--</div></div>
+        </div>
+
+        <div class="btc-mini-chart">
+          <div class="chart-placeholder">📈 Live price tracking • Data from CoinGecko API</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core modules you already use -->
+  <script type="module">
+    import "/assets/js/animation-lifecycle.js";
+    import "/assets/js/neuralBackground.js";
+    import { supabase } from "/assets/js/supabaseClient.js";
+
+    window.__CH_AUTH_READY__ = false;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      localStorage.setItem("ch:lastScreen", "index");
+      window.__CH_SESSION__ = session || null;
+
+      // Show admin nav link for signed-in users
+      // TODO: Gate behind admin role check once role system exists
+      const adminLink = document.getElementById('nav-admin-link');
+      if (adminLink && session?.user) adminLink.hidden = false;
+    } catch (e) {
+      console.warn("Auth gate session check failed:", e);
+    } finally {
+      window.__CH_AUTH_READY__ = true;
+    }
+  </script>
+
+  <!-- Portal logic -->
+  <script type="module" src="/assets/js/portal.js"></script>
+
+  <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
+  <script type="module">
+    const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
+    const banner = document.getElementById("event-countdown-banner");
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function renderCountdown(eventTitle, eventLink, target) {
+      const tick = () => {
+        const diff = target - Date.now();
+        if (diff <= 0) {
+          banner.style.display = "none";
+          document.body.classList.remove("has-countdown-banner");
+          return;
+        }
+        const days  = Math.floor(diff / 86400000);
+        const hrs   = Math.floor((diff % 86400000) / 3600000);
+        const mins  = Math.floor((diff % 3600000)  / 60000);
+        const secs  = Math.floor((diff % 60000)    / 1000);
+
+        const timeStr = days > 0
+          ? `${days}d ${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`
+          : `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
+
+        const titleHtml = eventLink
+          ? `<a href="${eventLink}" target="_blank" rel="noopener noreferrer">${eventTitle}</a>`
+          : eventTitle;
+
+        banner.innerHTML =
+          `<span class="cd-label">NEXT EVENT</span>${titleHtml}&ensp;` +
+          `<span class="cd-time">${timeStr}</span>`;
+      };
+
+      banner.style.display = "block";
+      document.body.classList.add("has-countdown-banner");
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    async function initCountdown() {
+      try {
+        const res = await fetch(FEED_URL);
+        if (!res.ok) return;
+        const data = await res.json();
+        const events = Array.isArray(data) ? data : (data?.events ?? []);
+
+        const now = Date.now();
+        const upcoming = events
+          .filter(e => e?.startDate && new Date(e.startDate).getTime() > now)
+          .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+
+        if (!upcoming.length) return;
+
+        const next = upcoming[0];
+        const target = new Date(next.startDate).getTime();
+        const title = String(next.title ?? "Upcoming Event")
+          .replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
+        const link = next.link ?? null;
+        renderCountdown(title, link, target);
+      } catch {
+        /* silently skip — banner stays hidden */
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initCountdown);
+    } else {
+      initCountdown();
+    }
+  </script>
+</body>
+</html>

@@ -51,6 +51,42 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
   const openModal = (id) => $(id)?.classList.add("active");
   const closeModal = (id) => $(id)?.classList.remove("active");
 
+  // -----------------------------
+  // Message Notification Chime
+  // -----------------------------
+  function playMessageChime() {
+    try {
+      // Create a simple notification sound using Web Audio API
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800; // High pitch for notification
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+
+      // Animate notification bell
+      const bell = $("notifications-bell");
+      if (bell) {
+        bell.style.animation = "bellRing 0.5s ease-in-out 3";
+        setTimeout(() => {
+          bell.style.animation = "";
+        }, 1500);
+      }
+    } catch (e) {
+      console.warn("Could not play notification chime:", e);
+    }
+  }
+
+  // Expose globally for message handlers
+  window.playMessageChime = playMessageChime;
+
   const on = (el, evt, fn, opts) => {
     if (el && typeof el.addEventListener === "function") {
       el.addEventListener(evt, fn, opts);
@@ -172,11 +208,12 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
 
     // Header actions
     on($("user-menu"), "click", () => window.openProfileModal());
+    // Notification bell now opens messages modal
     on($("notifications-bell"), "click", async () => {
-      if (typeof window.toggleConnectionsPanel === "function") {
-        window.toggleConnectionsPanel();
+      if (typeof window.openMessagesModal === "function") {
+        window.openMessagesModal();
       } else {
-        console.warn("Connection requests panel not available");
+        console.warn("Messages modal not available");
       }
     });
 
@@ -185,14 +222,100 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
     on($("global-search"), "keydown", (e) => {
       if (e.key === "Enter") handleSearch();
     });
+    
+    // Predictive search as user types
+    setupPredictiveSearch();
 
-    // Bottom bar buttons
+    // Setup category filter buttons
+    setupCategoryButtons();
+
+    // Bottom bar buttons - modals
     on($("btn-messages"), "click", () => window.openMessagesModal());
-    on($("btn-projects"), "click", () => window.openProjectsModal());
+    on($("btn-projects-modal"), "click", () => window.openProjectsModal());
     on($("btn-endorsements"), "click", () => window.openEndorsementsModal());
-    on($("btn-bbs"), "click", () => initBBS());
     on($("btn-profile"), "click", () => window.openProfileModal());
-    on($("btn-quickconnect"), "click", () => window.openQuickConnectModal());
+
+    // Bottom bar buttons - filter toggles
+    on($("btn-themes"), "click", () => {
+      if (typeof window.toggleSynapseFilter === "function") {
+        window.toggleSynapseFilter('themes');
+      }
+    });
+    on($("btn-projects"), "click", () => {
+      if (typeof window.toggleSynapseFilter === "function") {
+        window.toggleSynapseFilter('projects');
+      }
+    });
+
+    // PEOPLE button - dual functionality: toggle filter on click, show connections on long press
+    let peopleButtonPressTimer = null;
+    const peopleBtn = $("btn-people");
+    if (peopleBtn) {
+      // Regular click - toggle filter
+      on(peopleBtn, "click", (e) => {
+        if (peopleButtonPressTimer) return; // Was a long press, ignore click
+        if (typeof window.toggleSynapseFilter === "function") {
+          window.toggleSynapseFilter('people');
+        }
+      });
+
+      // Long press - show connections panel
+      on(peopleBtn, "mousedown", (e) => {
+        peopleButtonPressTimer = setTimeout(() => {
+          if (typeof window.toggleConnectionsPanel === "function") {
+            window.toggleConnectionsPanel();
+          }
+          peopleButtonPressTimer = null;
+        }, 500); // 500ms = long press
+      });
+
+      on(peopleBtn, "mouseup", () => {
+        if (peopleButtonPressTimer) {
+          clearTimeout(peopleButtonPressTimer);
+          peopleButtonPressTimer = null;
+        }
+      });
+
+      on(peopleBtn, "mouseleave", () => {
+        if (peopleButtonPressTimer) {
+          clearTimeout(peopleButtonPressTimer);
+          peopleButtonPressTimer = null;
+        }
+      });
+
+      // Context menu (right-click) - show connections panel
+      on(peopleBtn, "contextmenu", (e) => {
+        e.preventDefault();
+        if (typeof window.toggleConnectionsPanel === "function") {
+          window.toggleConnectionsPanel();
+        }
+      });
+    }
+    // START button (centered - main logic in HTML inline script)
+    on($("btn-start-center"), "click", () => {
+      if (typeof window.openStartModal === "function") {
+        window.openStartModal();
+      } else if (typeof openStartModal === "function") {
+        openStartModal();
+      }
+    });
+
+    // Compatibility wiring for legacy START button references
+    on($("btn-start-header"), "click", () => {
+      if (typeof window.openStartModal === "function") {
+        window.openStartModal();
+      } else if (typeof openStartModal === "function") {
+        openStartModal();
+      }
+    });
+
+    on($("btn-start-fullwidth"), "click", () => {
+      if (typeof window.openStartModal === "function") {
+        window.openStartModal();
+      } else if (typeof openStartModal === "function") {
+        openStartModal();
+      }
+    });
     on($("btn-filters"), "click", () => toggleFilters());
     on($("btn-legend"), "click", () => toggleLegend());
   }
@@ -272,6 +395,13 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
     };
     window.closeQuickConnectModal = () => closeModal("quick-connect-modal");
 
+    // Notification Center Modal
+    window.openNotificationCenter = async () => {
+      openModal("notification-center-modal");
+      await loadNotifications("all");
+    };
+    window.closeNotificationCenter = () => closeModal("notification-center-modal");
+
     // Network Stats Modal
     window.openNetworkStatsModal = async () => {
       openModal("network-stats-modal");
@@ -281,6 +411,10 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
 
     // Endorsements tabs
     window.showEndorsementsTab = showEndorsementsTab;
+
+    // Notification center tabs
+    window.showNotificationsTab = showNotificationsTab;
+    window.clearAllNotifications = clearAllNotifications;
 
     // Projects form controls
     window.showCreateProjectForm = showCreateProjectForm;
@@ -636,9 +770,9 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
     // Start loading dashboard counters
     await refreshCounters();
 
-    // Set up periodic refresh
+    // Set up periodic refresh with longer interval to reduce connection issues
     if (!state.refreshTimer) {
-      state.refreshTimer = setInterval(refreshCounters, 30000);
+      state.refreshTimer = setInterval(refreshCounters, 60000); // Increased from 30s to 60s
     }
 
     console.log("✅ Dashboard fully initialized");
@@ -656,6 +790,71 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
 
     safeText("user-name-header", name);
     safeText("user-initials-header", initials || "?");
+    
+    // Also update left-side profile button
+    safeText("user-initials-left", initials || "?");
+    safeText("user-name-dropdown", name);
+    safeText("user-initials-dropdown", initials || "?");
+    
+    // Update level and XP display
+    updateLevelDisplay(p);
+  }
+  
+  function updateLevelDisplay(profile) {
+    if (!profile) return;
+    
+    // Get XP and calculate level
+    const xp = profile.xp || 0;
+    const level = calculateLevel(xp);
+    const levelTitle = getLevelTitle(level);
+    const nextLevelXP = xpForNextLevel(level);
+    const currentLevelXP = xpForLevel(level);
+    const progressXP = xp - currentLevelXP;
+    const requiredXP = nextLevelXP - currentLevelXP;
+    
+    // Update level display in profile button
+    const levelDisplay = document.querySelector('#user-profile-combined .level-display');
+    if (levelDisplay) {
+      levelDisplay.innerHTML = `Level ${level} <span style="color:#aaa; font-weight:400; font-size:0.75rem;">${levelTitle}</span>`;
+    }
+    
+    // Update XP display in profile button
+    const xpDisplay = document.querySelector('#user-profile-combined .xp-display');
+    if (xpDisplay) {
+      xpDisplay.textContent = `${progressXP} / ${requiredXP} XP`;
+    }
+  }
+  
+  function calculateLevel(xp) {
+    if (xp >= 10000) return 8;
+    if (xp >= 5000) return 7;
+    if (xp >= 2000) return 6;
+    if (xp >= 1000) return 5;
+    if (xp >= 500) return 4;
+    if (xp >= 200) return 3;
+    if (xp >= 100) return 2;
+    return 1;
+  }
+  
+  function getLevelTitle(level) {
+    if (level >= 8) return 'Pioneer';
+    if (level >= 7) return 'Visionary';
+    if (level >= 6) return 'Leader';
+    if (level >= 5) return 'Innovator';
+    if (level >= 4) return 'Collaborator';
+    if (level >= 3) return 'Builder';
+    if (level >= 2) return 'Explorer';
+    return 'Newcomer';
+  }
+  
+  function xpForLevel(level) {
+    const thresholds = [0, 0, 100, 200, 500, 1000, 2000, 5000, 10000];
+    return thresholds[level] || 0;
+  }
+  
+  function xpForNextLevel(level) {
+    const thresholds = [0, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+    return thresholds[level] || 20000;
   }
 
   // -----------------------------
@@ -722,41 +921,72 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
   // Counters
   // -----------------------------
   async function refreshCounters() {
-    await Promise.allSettled([
+    // Add connection check and error handling
+    if (!state.supabase || !navigator.onLine) {
+      console.log('⚠️ Skipping counter refresh - no connection');
+      return;
+    }
+
+    console.log('🔄 Refreshing dashboard counters...');
+    
+    const results = await Promise.allSettled([
       countUnreadMessages(),
       countActiveProjects(),
       countEndorsementsReceived(),
       countNetworkSize(),
     ]);
+
+    // Log any failures for debugging
+    results.forEach((result, index) => {
+      const counterNames = ['messages', 'projects', 'endorsements', 'community'];
+      if (result.status === 'rejected') {
+        console.warn(`⚠️ Counter ${counterNames[index]} failed:`, result.reason?.message || result.reason);
+      }
+    });
   }
 
   async function countUnreadMessages() {
     if (!state.communityProfile?.id) return;
 
     try {
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+
       const { count, error } = await state.supabase
         .from("messages")
         .select("id", { count: "exact", head: true })
         .eq("read", false)
-        .neq("sender_id", state.communityProfile.id);
+        .neq("sender_id", state.communityProfile.id)
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       safeText("unread-messages", count ?? 0);
-    } catch {
+    } catch (error) {
+      console.warn('⚠️ Failed to count unread messages:', error.message);
       safeText("unread-messages", 0);
     }
   }
 
   async function countActiveProjects() {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const { count, error } = await state.supabase
         .from("projects")
         .select("id", { count: "exact", head: true })
-        .eq("status", "active");
+        .eq("status", "active")
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       safeText("active-projects", count ?? 0);
-    } catch {
+    } catch (error) {
+      console.warn('⚠️ Failed to count active projects:', error.message);
       safeText("active-projects", 0);
     }
   }
@@ -764,27 +994,41 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
   async function countEndorsementsReceived() {
     if (!state.communityProfile?.id) return;
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const { count, error } = await state.supabase
         .from("endorsements")
         .select("id", { count: "exact", head: true })
-        .eq("endorsed_community_id", state.communityProfile.id);
+        .eq("endorsed_community_id", state.communityProfile.id)
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       safeText("total-endorsements", count ?? 0);
-    } catch {
+    } catch (error) {
+      console.warn('⚠️ Failed to count endorsements:', error.message);
       safeText("total-endorsements", 0);
     }
   }
 
   async function countNetworkSize() {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const { count, error } = await state.supabase
         .from("community")
-        .select("id", { count: "exact", head: true });
+        .select("id", { count: "exact", head: true })
+        .abortSignal(controller.signal);
+
+      clearTimeout(timeoutId);
 
       if (error) throw error;
       safeText("network-size", count ?? 0);
-    } catch {
+    } catch (error) {
+      console.warn('⚠️ Failed to count network size:', error.message);
       safeText("network-size", 0);
     }
   }
@@ -792,14 +1036,412 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
   // -----------------------------
   // Search + Quick Connect
   // -----------------------------
+  let activeSearchCategory = "all"; // Track active search category
+
+  // Setup category filter buttons
+  function setupCategoryButtons() {
+    const buttons = document.querySelectorAll(".search-category-btn");
+    
+    // Function to update button styles
+    const updateButtonStyles = () => {
+      buttons.forEach((b) => {
+        if (b.dataset.category === activeSearchCategory) {
+          // Active state
+          const color = getCategoryColor(activeSearchCategory);
+          b.style.background = `linear-gradient(135deg, ${color.gradient})`;
+          b.style.border = "none";
+          b.style.color = "white";
+        } else {
+          // Inactive state
+          const color = getCategoryColor(b.dataset.category);
+          b.style.background = color.bg;
+          b.style.border = color.border;
+          b.style.color = color.text;
+        }
+      });
+    };
+    
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        activeSearchCategory = btn.dataset.category;
+        updateButtonStyles();
+
+        // Update placeholder
+        const searchInput = $("global-search");
+        if (searchInput) {
+          searchInput.placeholder = getPlaceholderText(activeSearchCategory);
+        }
+
+        // Filter the synapse view based on category
+        filterSynapseByCategory(activeSearchCategory);
+      });
+    });
+    
+    // Initialize button styles on load
+    updateButtonStyles();
+  }
+
+  // Filter synapse view by category
+  function filterSynapseByCategory(category) {
+    console.log(`🔍 Requesting synapse filter: ${category}`);
+    
+    // Call the synapse core filter function
+    if (typeof window.filterSynapseByCategory === 'function') {
+      window.filterSynapseByCategory(category);
+    } else {
+      console.warn('⚠️ Synapse filter function not available yet');
+    }
+  }
+
+  // Helper to convert category name to node type
+  function getCategoryType(category) {
+    const typeMap = {
+      'people': 'person',
+      'projects': 'project',
+      'organizations': 'organization',
+      'themes': 'theme'
+    };
+    return typeMap[category] || null;
+  }
+
+  function getCategoryColor(category) {
+    const colors = {
+      all: { gradient: "#00e0ff, #0080ff", bg: "rgba(0,224,255,0.15)", border: "1px solid rgba(0,224,255,0.3)", text: "#00e0ff" },
+      people: { gradient: "#00e0ff, #0080ff", bg: "rgba(0,224,255,0.15)", border: "1px solid rgba(0,224,255,0.3)", text: "#00e0ff" },
+      organizations: { gradient: "#a855f7, #8b3fd9", bg: "rgba(168,85,247,0.15)", border: "1px solid rgba(168,85,247,0.3)", text: "#a855f7" },
+      projects: { gradient: "#00ff88, #00cc6a", bg: "rgba(0,255,136,0.15)", border: "1px solid rgba(0,255,136,0.3)", text: "#00ff88" },
+      themes: { gradient: "#ffaa00, #ff8800", bg: "rgba(255,170,0,0.15)", border: "1px solid rgba(255,170,0,0.3)", text: "#ffaa00" }
+    };
+    return colors[category] || colors.all;
+  }
+
+  function getPlaceholderText(category) {
+    const placeholders = {
+      all: "Search everything...",
+      people: "Search people by name, bio, or skill...",
+      organizations: "Search organizations...",
+      projects: "Search projects...",
+      themes: "Search themes..."
+    };
+    return placeholders[category] || placeholders.all;
+  }
+
   async function handleSearch() {
     const q = $("global-search")?.value?.trim();
     if (!q) return;
+    
+    // Hide suggestions when performing full search
+    hideSuggestions();
+    
+    // Update modal title
+    const title = $("quick-connect-title");
+    const subtitle = $("quick-connect-subtitle");
+    if (title) {
+      const categoryName = activeSearchCategory === "all" ? "All Categories" : 
+        activeSearchCategory.charAt(0).toUpperCase() + activeSearchCategory.slice(1);
+      title.innerHTML = `<i class="fas fa-search"></i> Search Results: "${escapeHtml(q)}"`;
+    }
+    if (subtitle) {
+      const categoryName = activeSearchCategory === "all" ? "all categories" : activeSearchCategory;
+      subtitle.textContent = `Searching in ${categoryName}`;
+    }
+    
     openModal("quick-connect-modal");
-    await renderSearchResults(q);
+    await renderSearchResults(q, activeSearchCategory);
+  }
+  
+  // Predictive Search Setup
+  let searchTimeout = null;
+  let currentSuggestionIndex = -1;
+  
+  function setupPredictiveSearch() {
+    const searchInput = $("global-search");
+    const suggestionsBox = $("search-suggestions");
+    
+    if (!searchInput || !suggestionsBox) return;
+    
+    // Handle input changes
+    searchInput.addEventListener("input", (e) => {
+      const query = e.target.value.trim();
+      
+      // Clear previous timeout
+      if (searchTimeout) clearTimeout(searchTimeout);
+      
+      // Hide suggestions if query is too short
+      if (query.length < 2) {
+        hideSuggestions();
+        return;
+      }
+      
+      // Debounce the search
+      searchTimeout = setTimeout(() => {
+        fetchSuggestions(query);
+      }, 300);
+    });
+    
+    // Handle keyboard navigation
+    searchInput.addEventListener("keydown", (e) => {
+      const suggestionsBox = $("search-suggestions");
+      if (!suggestionsBox || suggestionsBox.style.display === "none") return;
+      
+      const suggestions = suggestionsBox.querySelectorAll(".search-suggestion-item");
+      if (!suggestions.length) return;
+      
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        currentSuggestionIndex = Math.min(currentSuggestionIndex + 1, suggestions.length - 1);
+        updateSuggestionHighlight(suggestions);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        currentSuggestionIndex = Math.max(currentSuggestionIndex - 1, -1);
+        updateSuggestionHighlight(suggestions);
+      } else if (e.key === "Enter" && currentSuggestionIndex >= 0) {
+        e.preventDefault();
+        suggestions[currentSuggestionIndex].click();
+      } else if (e.key === "Escape") {
+        hideSuggestions();
+      }
+    });
+    
+    // Hide suggestions when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+        hideSuggestions();
+      }
+    });
+  }
+  
+  function updateSuggestionHighlight(suggestions) {
+    suggestions.forEach((item, index) => {
+      if (index === currentSuggestionIndex) {
+        item.style.background = "rgba(0,224,255,0.2)";
+      } else {
+        item.style.background = "transparent";
+      }
+    });
+  }
+  
+  async function fetchSuggestions(query) {
+    const suggestionsBox = $("search-suggestions");
+    if (!suggestionsBox) return;
+    
+    const q = query.toLowerCase();
+    const category = activeSearchCategory;
+    
+    try {
+      let suggestions = [];
+      
+      // Fetch based on active category
+      if (category === "all" || category === "people") {
+        const { data } = await state.supabase
+          .from("community")
+          .select("id, name, bio, skills, image_url")
+          .or(`name.ilike.%${q}%,bio.ilike.%${q}%,skills.ilike.%${q}%`)
+          .limit(5);
+        
+        if (data) {
+          suggestions.push(...data.map(item => ({
+            type: "people",
+            icon: "fa-user",
+            color: "#00e0ff",
+            title: item.name,
+            subtitle: item.bio ? item.bio.substring(0, 60) + "..." : "Member",
+            image: item.image_url,
+            data: item
+          })));
+        }
+      }
+      
+      if (category === "all" || category === "organizations") {
+        const { data } = await state.supabase
+          .from("organizations")
+          .select("id, name, description, logo_url")
+          .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(5);
+        
+        if (data) {
+          suggestions.push(...data.map(item => ({
+            type: "organizations",
+            icon: "fa-building",
+            color: "#a855f7",
+            title: item.name,
+            subtitle: item.description ? item.description.substring(0, 60) + "..." : "Organization",
+            image: item.logo_url,
+            data: item
+          })));
+        }
+      }
+      
+      if (category === "all" || category === "projects") {
+        const { data } = await state.supabase
+          .from("projects")
+          .select("id, title, description")
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(5);
+        
+        if (data) {
+          suggestions.push(...data.map(item => ({
+            type: "projects",
+            icon: "fa-lightbulb",
+            color: "#00ff88",
+            title: item.title,
+            subtitle: item.description ? item.description.substring(0, 60) + "..." : "Project",
+            data: item
+          })));
+        }
+      }
+      
+      if (category === "all" || category === "themes") {
+        const { data } = await state.supabase
+          .from("theme_circles")
+          .select("id, title, description")
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(5);
+        
+        if (data) {
+          suggestions.push(...data.map(item => ({
+            type: "themes",
+            icon: "fa-palette",
+            color: "#ffaa00",
+            title: item.title,
+            subtitle: item.description ? item.description.substring(0, 60) + "..." : "Theme",
+            data: item
+          })));
+        }
+      }
+      
+      // Limit total suggestions
+      suggestions = suggestions.slice(0, 8);
+      
+      if (suggestions.length > 0) {
+        renderSuggestions(suggestions, query);
+      } else {
+        hideSuggestions();
+      }
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      hideSuggestions();
+    }
+  }
+  
+  function renderSuggestions(suggestions, query) {
+    const suggestionsBox = $("search-suggestions");
+    if (!suggestionsBox) return;
+    
+    currentSuggestionIndex = -1;
+    
+    // Check if mobile
+    const isMobile = window.innerWidth <= 768;
+    
+    const html = suggestions.map((item, index) => {
+      const imageHtml = item.image 
+        ? `<img src="${escapeHtml(item.image)}" 
+             style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid ${item.color}; flex-shrink:0;"
+             onerror="this.style.display='none'">`
+        : `<div style="width:40px; height:40px; border-radius:50%; background:${item.color}20; 
+             border:2px solid ${item.color}; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+             <i class="fas ${item.icon}" style="color:${item.color}; font-size:1.2rem;"></i>
+           </div>`;
+      
+      return `
+        <div class="search-suggestion-item" data-index="${index}"
+          style="padding:0.75rem 1rem; cursor:pointer; transition:all 0.2s; 
+          border-bottom:1px solid rgba(0,224,255,0.1); display:flex; align-items:center; gap:1rem;
+          ${isMobile ? 'min-height:60px;' : ''}">
+          ${imageHtml}
+          <div style="flex:1; min-width:0;">
+            <div style="color:${item.color}; font-weight:600; font-size:0.95rem; margin-bottom:0.25rem;">
+              <i class="fas ${item.icon}" style="font-size:0.85rem; margin-right:0.5rem;"></i>
+              ${highlightMatch(escapeHtml(item.title), query)}
+            </div>
+            <div style="color:#aaa; font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+              ${escapeHtml(item.subtitle)}
+            </div>
+          </div>
+          ${!isMobile ? `<i class="fas fa-arrow-right" style="color:${item.color}; opacity:0.5; font-size:0.85rem;"></i>` : ''}
+        </div>
+      `;
+    }).join("");
+    
+    suggestionsBox.innerHTML = html + `
+      <div style="padding:0.75rem 1rem; text-align:center; border-top:1px solid rgba(0,224,255,0.2);">
+        <button onclick="handleSearch()" 
+          style="background:rgba(0,224,255,0.1); border:1px solid rgba(0,224,255,0.3); 
+          padding:${isMobile ? '0.6rem 1.2rem' : '0.5rem 1rem'}; border-radius:6px; color:#00e0ff; cursor:pointer; 
+          font-weight:600; font-size:0.85rem; width:${isMobile ? '100%' : 'auto'};">
+          <i class="fas fa-search"></i> See all results for "${escapeHtml(query)}"
+        </button>
+      </div>
+    `;
+    
+    // Add click handlers
+    suggestionsBox.querySelectorAll(".search-suggestion-item").forEach((item, index) => {
+      item.addEventListener("click", () => {
+        selectSuggestion(suggestions[index]);
+      });
+      
+      // Only add hover effects on non-touch devices
+      if (!isMobile) {
+        item.addEventListener("mouseenter", () => {
+          currentSuggestionIndex = index;
+          updateSuggestionHighlight(suggestionsBox.querySelectorAll(".search-suggestion-item"));
+        });
+      }
+      
+      // Add touch feedback for mobile
+      if (isMobile) {
+        item.addEventListener("touchstart", () => {
+          item.style.background = "rgba(0,224,255,0.15)";
+        });
+        item.addEventListener("touchend", () => {
+          setTimeout(() => {
+            item.style.background = "transparent";
+          }, 200);
+        });
+      }
+    });
+    
+    suggestionsBox.style.display = "block";
+    
+    // Shift search container up when showing suggestions
+    const searchContainer = document.getElementById('centered-search-container');
+    if (searchContainer) {
+      searchContainer.classList.add('showing-suggestions');
+    }
+  }
+  
+  function selectSuggestion(suggestion) {
+    const searchInput = $("global-search");
+    if (searchInput) {
+      searchInput.value = suggestion.title;
+    }
+    
+    hideSuggestions();
+    handleSearch();
+  }
+  
+  function hideSuggestions() {
+    const suggestionsBox = $("search-suggestions");
+    if (suggestionsBox) {
+      suggestionsBox.style.display = "none";
+      suggestionsBox.innerHTML = "";
+    }
+    currentSuggestionIndex = -1;
+    
+    // Remove showing-suggestions class when hiding
+    const searchContainer = document.getElementById('centered-search-container');
+    if (searchContainer) {
+      searchContainer.classList.remove('showing-suggestions');
+    }
+  }
+  
+  function highlightMatch(text, query) {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, "gi");
+    return text.replace(regex, '<span style="background:rgba(0,224,255,0.3); padding:0 2px; border-radius:2px;">$1</span>');
   }
 
-  async function renderSearchResults(query) {
+  async function renderSearchResults(query, category = "all") {
     const list = $("quick-connect-list");
     if (!list) return;
 
@@ -810,26 +1452,239 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
 
     try {
       const q = query.toLowerCase();
-      const { data: people, error } = await state.supabase
-        .from("community")
-        .select("*")
-        .or(`name.ilike.%${q}%,skills.ilike.%${q}%,bio.ilike.%${q}%`)
-        .limit(25);
+      let people = null, organizations = null, projects = null, themes = null;
 
-      if (error) throw error;
+      // Search based on category
+      if (category === "all" || category === "people") {
+        // Search people by name, bio, AND skills
+        const { data, error } = await state.supabase
+          .from("community")
+          .select("*")
+          .or(`name.ilike.%${q}%,bio.ilike.%${q}%,skills.ilike.%${q}%`)
+          .limit(25);
+        if (error) console.warn("People search error:", error);
+        else people = data;
+      }
 
-      if (!people || people.length === 0) {
+      if (category === "all" || category === "organizations") {
+        const { data, error } = await state.supabase
+          .from("organizations")
+          .select("*")
+          .or(`name.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(10);
+        if (error) console.warn("Organizations search error:", error);
+        else organizations = data;
+      }
+
+      if (category === "all" || category === "projects") {
+        const { data, error } = await state.supabase
+          .from("projects")
+          .select("*")
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(10);
+        if (error) console.warn("Projects search error:", error);
+        else {
+          projects = data;
+          // Debug: log first project to see structure
+          if (projects && projects.length > 0) {
+            console.log('Sample project data:', projects[0]);
+          }
+        }
+      }
+
+      if (category === "all" || category === "themes") {
+        const { data, error } = await state.supabase
+          .from("theme_circles")
+          .select("*")
+          .or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+          .limit(10);
+        if (error) console.warn("Themes search error:", error);
+        else themes = data;
+      }
+
+      const filteredPeople = (people || []).filter((p) => p.id !== state.communityProfile?.id);
+      const totalResults = filteredPeople.length + (organizations?.length || 0) + (projects?.length || 0) + (themes?.length || 0);
+
+      if (totalResults === 0) {
         list.innerHTML = `<div style="text-align:center; color:#aaa; padding:2rem;">
           <i class="fas fa-search" style="font-size:3rem; opacity:0.25;"></i>
-          <p style="margin-top:1rem;">No results for “${escapeHtml(query)}”</p>
+          <p style="margin-top:1rem;">No results for "${escapeHtml(query)}"</p>
         </div>`;
         return;
       }
 
-      list.innerHTML = people
-        .filter((p) => p.id !== state.communityProfile?.id)
-        .map((p) => personCard(p))
-        .join("");
+      let html = "";
+
+      // Render People section
+      if (filteredPeople.length > 0) {
+        html += `<div style="margin-bottom:2rem;">
+          <h3 style="color:#00e0ff; font-size:0.95rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-users"></i> People (${filteredPeople.length})
+          </h3>
+          ${filteredPeople.map((p) => personCard(p)).join("")}
+        </div>`;
+      }
+
+      // Render Organizations section with tabs
+      if (category === "all" || category === "organizations") {
+        // Always show the organizations section with tabs when searching organizations
+        const orgCards = organizations && organizations.length > 0 
+          ? await Promise.all(organizations.map((org) => organizationCard(org)))
+          : [];
+        
+        html += `<div style="margin-bottom:2rem;">
+          <h3 style="color:#a855f7; font-size:1.1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-building"></i> Organizations
+          </h3>
+          
+          <!-- Organization Tabs -->
+          <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid rgba(168,85,247,0.2); padding-bottom:0.5rem;">
+            <button class="org-search-tab active-org-tab" data-org-tab="search" 
+              style="padding:0.6rem 1.2rem; background:rgba(168,85,247,0.15); border:none; border-bottom:3px solid #a855f7; 
+              color:#a855f7; cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-search"></i> Search Results ${orgCards.length > 0 ? `(${orgCards.length})` : ''}
+            </button>
+            <button class="org-search-tab" data-org-tab="browse" 
+              style="padding:0.6rem 1.2rem; background:transparent; border:none; border-bottom:3px solid transparent; 
+              color:rgba(168,85,247,0.7); cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-globe"></i> Browse Orgs
+            </button>
+            <button class="org-search-tab" data-org-tab="my-orgs" 
+              style="padding:0.6rem 1.2rem; background:transparent; border:none; border-bottom:3px solid transparent; 
+              color:rgba(168,85,247,0.7); cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-user-tag"></i> My Orgs
+            </button>
+            <button class="org-search-tab" data-org-tab="create" 
+              style="padding:0.6rem 1.2rem; background:transparent; border:none; border-bottom:3px solid transparent; 
+              color:rgba(168,85,247,0.7); cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-plus"></i> Create Org
+            </button>
+          </div>
+          
+          <!-- Tab Content -->
+          <div id="org-tab-content-search">
+            ${orgCards.length > 0 
+              ? orgCards.join("") 
+              : `<div style="text-align:center; padding:2rem; color:#888;">
+                  <i class="fas fa-search" style="font-size:2rem; opacity:0.3; margin-bottom:0.5rem;"></i>
+                  <p>No organizations found matching "${escapeHtml(query)}"</p>
+                </div>`
+            }
+          </div>
+        </div>`;
+        
+        // Setup tab switching after rendering - inline to avoid scope issues
+        setTimeout(() => {
+          const tabs = document.querySelectorAll('.org-search-tab');
+          if (tabs.length) {
+            tabs.forEach(tab => {
+              tab.addEventListener('click', async () => {
+                // Update tab styles
+                tabs.forEach(t => {
+                  t.style.background = 'transparent';
+                  t.style.borderBottomColor = 'transparent';
+                  t.style.color = 'rgba(168,85,247,0.7)';
+                  t.classList.remove('active-org-tab');
+                });
+                tab.style.background = 'rgba(168,85,247,0.15)';
+                tab.style.borderBottomColor = '#a855f7';
+                tab.style.color = '#a855f7';
+                tab.classList.add('active-org-tab');
+                
+                // Load tab content
+                const tabName = tab.dataset.orgTab;
+                if (typeof loadOrgSearchTabContent === 'function') {
+                  await loadOrgSearchTabContent(tabName);
+                }
+              });
+            });
+          }
+        }, 100);
+      }
+
+      // Render Projects section
+      if (projects && projects.length > 0) {
+        const projectCards = await Promise.all(projects.map((proj) => projectCard(proj, expandedProjectId === proj.id)));
+        html += `<div style="margin-bottom:2rem;">
+          <h3 style="color:#00ff88; font-size:0.95rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-lightbulb"></i> Projects (${projects.length})
+          </h3>
+          ${projectCards.join("")}
+        </div>`;
+      }
+
+      // Render Themes section with tabs (similar to organizations)
+      if (category === "all" || category === "themes") {
+        const themeCards = themes && themes.length > 0 
+          ? themes.map((theme) => themeCard(theme))
+          : [];
+        
+        html += `<div style="margin-bottom:2rem;">
+          <h3 style="color:#ffaa00; font-size:1.1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-palette"></i> Themes
+          </h3>
+          
+          <!-- Theme Tabs -->
+          <div style="display:flex; gap:0.5rem; margin-bottom:1.5rem; border-bottom:1px solid rgba(255,170,0,0.2); padding-bottom:0.5rem;">
+            <button class="theme-search-tab active-theme-tab" data-theme-tab="search" 
+              style="padding:0.6rem 1.2rem; background:rgba(255,170,0,0.15); border:none; border-bottom:3px solid #ffaa00; 
+              color:#ffaa00; cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-search"></i> Search Results ${themeCards.length > 0 ? `(${themeCards.length})` : ''}
+            </button>
+            <button class="theme-search-tab" data-theme-tab="discover" 
+              style="padding:0.6rem 1.2rem; background:transparent; border:none; border-bottom:3px solid transparent; 
+              color:rgba(255,170,0,0.7); cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-compass"></i> Discover Themes
+            </button>
+            <button class="theme-search-tab" data-theme-tab="my-themes" 
+              style="padding:0.6rem 1.2rem; background:transparent; border:none; border-bottom:3px solid transparent; 
+              color:rgba(255,170,0,0.7); cursor:pointer; font-weight:600; font-size:0.85rem; border-radius:6px 6px 0 0; transition:all 0.2s;">
+              <i class="fas fa-user-tag"></i> My Themes
+            </button>
+          </div>
+          
+          <!-- Tab Content -->
+          <div id="theme-tab-content-search">
+            ${themeCards.length > 0 
+              ? themeCards.join("") 
+              : `<div style="text-align:center; padding:2rem; color:#888;">
+                  <i class="fas fa-search" style="font-size:2rem; opacity:0.3; margin-bottom:0.5rem;"></i>
+                  <p>No themes found matching "${escapeHtml(query)}"</p>
+                </div>`
+            }
+          </div>
+        </div>`;
+        
+        // Setup tab switching after rendering - inline to avoid scope issues
+        setTimeout(() => {
+          const tabs = document.querySelectorAll('.theme-search-tab');
+          if (tabs.length) {
+            tabs.forEach(tab => {
+              tab.addEventListener('click', async () => {
+                // Update tab styles
+                tabs.forEach(t => {
+                  t.style.background = 'transparent';
+                  t.style.borderBottomColor = 'transparent';
+                  t.style.color = 'rgba(255,170,0,0.7)';
+                  t.classList.remove('active-theme-tab');
+                });
+                tab.style.background = 'rgba(255,170,0,0.15)';
+                tab.style.borderBottomColor = '#ffaa00';
+                tab.style.color = '#ffaa00';
+                tab.classList.add('active-theme-tab');
+                
+                // Load tab content
+                const tabName = tab.dataset.themeTab;
+                if (typeof loadThemeSearchTabContent === 'function') {
+                  await loadThemeSearchTabContent(tabName);
+                }
+              });
+            });
+          }
+        }, 100);
+      }
+
+      list.innerHTML = html;
     } catch (e) {
       console.error("Search failed:", e);
       list.innerHTML = `<div style="text-align:center; color:#f66; padding:2rem;">
@@ -838,6 +1693,743 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
         <p style="opacity:0.85;">${escapeHtml(e.message || String(e))}</p>
       </div>`;
     }
+  }
+
+  // Helper function to render organization cards
+  async function organizationCard(org) {
+    const industryText = org.industry && Array.isArray(org.industry) && org.industry.length > 0 
+      ? org.industry.slice(0, 3).join(', ') 
+      : '';
+    const locationText = org.location || '';
+    const metaText = [industryText, locationText].filter(Boolean).join(' • ');
+    
+    // Check if user is already following this organization
+    let isFollowing = false;
+    if (state.communityProfile) {
+      try {
+        const { data } = await state.supabase
+          .from('organization_followers')
+          .select('id')
+          .eq('organization_id', org.id)
+          .eq('community_id', state.communityProfile.id)
+          .maybeSingle();
+        isFollowing = !!data;
+      } catch (err) {
+        console.warn('Error checking follow status:', err);
+      }
+    }
+    
+    const followButtonId = `follow-org-${org.id}`;
+    const buttonStyle = isFollowing
+      ? `background:rgba(168,85,247,0.2); border:1px solid rgba(168,85,247,0.4); color:#a855f7;`
+      : `background:linear-gradient(135deg,#a855f7,#8b3fd9); border:none; color:white;`;
+    const buttonText = isFollowing ? '<i class="fas fa-check"></i> Following' : '<i class="fas fa-plus"></i> Follow';
+    
+    return `<div class="result-card" style="padding:1.25rem; background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.25); border-radius:12px; margin-bottom:0.75rem; transition:all 0.2s;">
+      <div style="display:flex; align-items:start; gap:1rem;">
+        ${org.logo_url 
+          ? `<img src="${org.logo_url}" alt="${escapeHtml(org.name)}" style="width:56px; height:56px; border-radius:8px; object-fit:cover; background:rgba(168,85,247,0.1);" onerror="this.outerHTML='<div style=\\'width:56px; height:56px; background:rgba(168,85,247,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.75rem;\\'><i class=\\'fas fa-building\\' style=\\'color:#a855f7;\\'></i></div>'">` 
+          : `<div style="width:56px; height:56px; background:rgba(168,85,247,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.75rem;">
+              <i class="fas fa-building" style="color:#a855f7;"></i>
+            </div>`
+        }
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+            <div style="color:#fff; font-weight:700; font-size:1.05rem; cursor:pointer;" onclick="openOrganizationProfile('${org.id}')">${escapeHtml(org.name)}</div>
+            ${org.verified ? '<i class="fas fa-check-circle" style="color:#00e0ff; font-size:0.9rem;" title="Verified Organization"></i>' : ''}
+          </div>
+          <div style="color:#aaa; font-size:0.85rem; line-height:1.4; margin-bottom:0.5rem;">${escapeHtml(org.description || "No description available").slice(0, 120)}${(org.description || "").length > 120 ? "..." : ""}</div>
+          ${metaText ? `<div style="color:#a855f7; font-size:0.75rem; margin-bottom:0.75rem;"><i class="fas fa-info-circle"></i> ${escapeHtml(metaText)}</div>` : ''}
+          <div style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+            <button id="${followButtonId}" 
+              onclick="toggleOrganizationFollow('${org.id}', '${followButtonId}')" 
+              style="${buttonStyle} padding:0.5rem 1rem; border-radius:6px; cursor:pointer; font-weight:600; font-size:0.85rem; transition:all 0.2s; display:flex; align-items:center; gap:0.4rem;">
+              ${buttonText}
+            </button>
+            ${org.follower_count > 0 ? `<span style="color:#888; font-size:0.75rem;"><i class="fas fa-users"></i> ${org.follower_count} follower${org.follower_count !== 1 ? 's' : ''}</span>` : ''}
+            ${org.website ? `<a href="${org.website}" target="_blank" rel="noopener noreferrer" style="color:#a855f7; font-size:0.75rem; text-decoration:none;" onclick="event.stopPropagation();"><i class="fas fa-external-link-alt"></i> Website</a>` : ''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Setup organization search tabs
+  function setupOrgSearchTabs() {
+    const tabs = document.querySelectorAll('.org-search-tab');
+    if (!tabs.length) return;
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', async () => {
+        // Update tab styles
+        tabs.forEach(t => {
+          t.style.background = 'transparent';
+          t.style.borderBottomColor = 'transparent';
+          t.style.color = 'rgba(168,85,247,0.7)';
+          t.classList.remove('active-org-tab');
+        });
+        tab.style.background = 'rgba(168,85,247,0.15)';
+        tab.style.borderBottomColor = '#a855f7';
+        tab.style.color = '#a855f7';
+        tab.classList.add('active-org-tab');
+        
+        // Load tab content
+        const tabName = tab.dataset.orgTab;
+        await loadOrgSearchTabContent(tabName);
+      });
+    });
+  }
+
+  // Load organization tab content
+  async function loadOrgSearchTabContent(tabName) {
+    const content = $('org-tab-content-search');
+    if (!content) return;
+    
+    if (tabName === 'search') {
+      // Search results are already loaded, just show them
+      return;
+    }
+    
+    content.innerHTML = `<div style="text-align:center; padding:2rem;">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#a855f7;"></i>
+      <p style="color:#aaa; margin-top:1rem;">Loading...</p>
+    </div>`;
+    
+    try {
+      if (tabName === 'browse') {
+        const { data: organizations, error } = await state.supabase
+          .from('organizations')
+          .select('*')
+          .order('name', { ascending: true })
+          .limit(50);
+        
+        if (error) throw error;
+        
+        if (!organizations || organizations.length === 0) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-building" style="font-size:3rem; color:rgba(168,85,247,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">No organizations yet</p>
+            <p style="color:#666; font-size:0.9rem;">Be the first to create one!</p>
+          </div>`;
+          return;
+        }
+        
+        const orgCards = await Promise.all(organizations.map(org => organizationCard(org)));
+        content.innerHTML = orgCards.join('');
+        
+      } else if (tabName === 'my-orgs') {
+        if (!state.communityProfile) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-user-tag" style="font-size:3rem; color:rgba(168,85,247,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">Please log in to see your organizations</p>
+          </div>`;
+          return;
+        }
+        
+        // Get user's followed organizations
+        const { data: followers, error: followError } = await state.supabase
+          .from('organization_followers')
+          .select('organization_id')
+          .eq('community_id', state.communityProfile.id);
+        
+        if (followError) throw followError;
+        
+        if (!followers || followers.length === 0) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-user-tag" style="font-size:3rem; color:rgba(168,85,247,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">You haven't followed any organizations yet</p>
+            <p style="color:#666; font-size:0.9rem;">Browse organizations to find ones to follow!</p>
+          </div>`;
+          return;
+        }
+        
+        const orgIds = followers.map(f => f.organization_id);
+        const { data: organizations, error: orgsError } = await state.supabase
+          .from('organizations')
+          .select('*')
+          .in('id', orgIds);
+        
+        if (orgsError) throw orgsError;
+        
+        const orgCards = await Promise.all(organizations.map(org => organizationCard(org)));
+        content.innerHTML = orgCards.join('');
+        
+      } else if (tabName === 'create') {
+        content.innerHTML = `<div style="max-width:500px; margin:0 auto; padding:1rem;">
+          <h3 style="color:#a855f7; margin-bottom:1.5rem;"><i class="fas fa-plus-circle"></i> Create New Organization</h3>
+          <form id="create-org-form-search" onsubmit="createOrganizationFromSearch(event); return false;">
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; color:#aaa; margin-bottom:0.5rem; font-size:0.9rem;">Organization Name *</label>
+              <input type="text" id="org-name-search" required
+                style="width:100%; padding:0.75rem; background:rgba(168,85,247,0.05);
+                border:1px solid rgba(168,85,247,0.2); border-radius:8px; color:white; font-family:inherit;">
+            </div>
+            
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; color:#aaa; margin-bottom:0.5rem; font-size:0.9rem;">Description</label>
+              <textarea id="org-description-search" rows="3"
+                style="width:100%; padding:0.75rem; background:rgba(168,85,247,0.05);
+                border:1px solid rgba(168,85,247,0.2); border-radius:8px; color:white; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; color:#aaa; margin-bottom:0.5rem; font-size:0.9rem;">Industry (comma-separated)</label>
+              <input type="text" id="org-industry-search" placeholder="e.g., Technology, Healthcare, Education"
+                style="width:100%; padding:0.75rem; background:rgba(168,85,247,0.05);
+                border:1px solid rgba(168,85,247,0.2); border-radius:8px; color:white; font-family:inherit;">
+            </div>
+            
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; color:#aaa; margin-bottom:0.5rem; font-size:0.9rem;">Location</label>
+              <input type="text" id="org-location-search" placeholder="e.g., Charleston, SC"
+                style="width:100%; padding:0.75rem; background:rgba(168,85,247,0.05);
+                border:1px solid rgba(168,85,247,0.2); border-radius:8px; color:white; font-family:inherit;">
+            </div>
+            
+            <div style="margin-bottom:1rem;">
+              <label style="display:block; color:#aaa; margin-bottom:0.5rem; font-size:0.9rem;">Website</label>
+              <input type="url" id="org-website-search" placeholder="https://..."
+                style="width:100%; padding:0.75rem; background:rgba(168,85,247,0.05);
+                border:1px solid rgba(168,85,247,0.2); border-radius:8px; color:white; font-family:inherit;">
+            </div>
+            
+            <button type="submit" style="width:100%; padding:0.75rem; background:linear-gradient(135deg,#a855f7,#8b5cf6); 
+              border:none; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.95rem;">
+              <i class="fas fa-plus"></i> Create Organization
+            </button>
+          </form>
+        </div>`;
+      }
+      
+    } catch (error) {
+      console.error('Error loading org tab content:', error);
+      content.innerHTML = `<div style="text-align:center; padding:2rem; color:#ff6b6b;">
+        <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:0.5rem;"></i>
+        <p>Error loading content</p>
+        <p style="font-size:0.85rem; opacity:0.8;">${escapeHtml(error.message || String(error))}</p>
+      </div>`;
+    }
+  }
+
+  // Create organization from search interface
+  window.createOrganizationFromSearch = async function(event) {
+
+  // Setup theme search tabs
+  function setupThemeSearchTabs() {
+    const tabs = document.querySelectorAll('.theme-search-tab');
+    if (!tabs.length) return;
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', async () => {
+        // Update tab styles
+        tabs.forEach(t => {
+          t.style.background = 'transparent';
+          t.style.borderBottomColor = 'transparent';
+          t.style.color = 'rgba(255,170,0,0.7)';
+          t.classList.remove('active-theme-tab');
+        });
+        tab.style.background = 'rgba(255,170,0,0.15)';
+        tab.style.borderBottomColor = '#ffaa00';
+        tab.style.color = '#ffaa00';
+        tab.classList.add('active-theme-tab');
+        
+        // Load tab content
+        const tabName = tab.dataset.themeTab;
+        await loadThemeSearchTabContent(tabName);
+      });
+    });
+  }
+
+  // Load theme tab content
+  async function loadThemeSearchTabContent(tabName) {
+    const content = $('theme-tab-content-search');
+    if (!content) return;
+    
+    if (tabName === 'search') {
+      // Search results are already loaded, just show them
+      return;
+    }
+    
+    content.innerHTML = `<div style="text-align:center; padding:2rem;">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:#ffaa00;"></i>
+      <p style="color:#aaa; margin-top:1rem;">Loading...</p>
+    </div>`;
+    
+    try {
+      if (tabName === 'discover') {
+        // Load all active themes
+        const { data: themes, error } = await state.supabase
+          .from('theme_circles')
+          .select('*')
+          .eq('status', 'active')
+          .gt('expires_at', new Date().toISOString())
+          .order('activity_score', { ascending: false })
+          .limit(20);
+        
+        if (error) throw error;
+        
+        if (!themes || themes.length === 0) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-compass" style="font-size:3rem; color:rgba(255,170,0,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">No active themes available</p>
+          </div>`;
+          return;
+        }
+        
+        const themeCards = themes.map(theme => themeCard(theme));
+        content.innerHTML = themeCards.join('');
+        
+      } else if (tabName === 'my-themes') {
+        if (!state.communityProfile) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-user-tag" style="font-size:3rem; color:rgba(255,170,0,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">Please log in to see your themes</p>
+          </div>`;
+          return;
+        }
+        
+        // Get user's theme participations
+        const { data: participations, error: partError } = await state.supabase
+          .from('theme_participants')
+          .select('theme_id')
+          .eq('community_id', state.communityProfile.id);
+        
+        if (partError) throw partError;
+        
+        if (!participations || participations.length === 0) {
+          content.innerHTML = `<div style="text-align:center; padding:3rem;">
+            <i class="fas fa-user-tag" style="font-size:3rem; color:rgba(255,170,0,0.3); margin-bottom:1rem;"></i>
+            <p style="color:#888;">You haven't joined any themes yet</p>
+            <p style="color:#666; font-size:0.9rem;">Discover themes to find ones to join!</p>
+          </div>`;
+          return;
+        }
+        
+        const themeIds = participations.map(p => p.theme_id);
+        const { data: themes, error: themesError } = await state.supabase
+          .from('theme_circles')
+          .select('*')
+          .in('id', themeIds);
+        
+        if (themesError) throw themesError;
+        
+        const themeCards = themes.map(theme => themeCard(theme));
+        content.innerHTML = themeCards.join('');
+      }
+      
+    } catch (error) {
+      console.error('Error loading theme tab content:', error);
+      content.innerHTML = `<div style="text-align:center; padding:2rem; color:#ff6b6b;">
+        <i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:0.5rem;"></i>
+        <p>Error loading content</p>
+        <p style="font-size:0.85rem; opacity:0.8;">${escapeHtml(error.message || String(error))}</p>
+      </div>`;
+    }
+  }
+
+    event.preventDefault();
+    
+    if (!state.supabase || !state.communityProfile) {
+      alert('Please log in to create an organization');
+      return;
+    }
+    
+    const name = $('org-name-search')?.value?.trim();
+    const description = $('org-description-search')?.value?.trim();
+    const industryRaw = $('org-industry-search')?.value?.trim();
+    const industry = industryRaw ? industryRaw.split(',').map(s => s.trim()).filter(Boolean) : null;
+    const location = $('org-location-search')?.value?.trim();
+    const website = $('org-website-search')?.value?.trim();
+    
+    if (!name) {
+      alert('Organization name is required');
+      return;
+    }
+    
+    try {
+      // Generate slug
+      let slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      // Check if slug exists
+      const { data: existing } = await state.supabase
+        .from('organizations')
+        .select('slug')
+        .eq('slug', slug)
+        .maybeSingle();
+      
+      if (existing) {
+        slug = `${slug}-${Date.now().toString(36)}`;
+      }
+      
+      // Create organization
+      const { data: org, error } = await state.supabase
+        .from('organizations')
+        .insert([{
+          name,
+          slug,
+          description: description || null,
+          industry: industry && industry.length ? industry : null,
+          location: location || null,
+          website: website || null,
+          created_by: state.communityProfile.id
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      // Auto-follow the created organization
+      await state.supabase
+        .from('organization_followers')
+        .insert([{
+          organization_id: org.id,
+          community_id: state.communityProfile.id
+        }]);
+      
+      alert('Organization created successfully!');
+      
+      // Refresh synapse
+      if (typeof window.refreshSynapse === 'function') {
+        await window.refreshSynapse();
+      }
+      
+      // Switch to browse tab to show the new org
+      await loadOrgSearchTabContent('browse');
+      const browseTab = document.querySelector('[data-org-tab="browse"]');
+      if (browseTab) browseTab.click();
+      
+    } catch (error) {
+      console.error('Error creating organization:', error);
+      alert('Failed to create organization: ' + (error.message || 'Unknown error'));
+    }
+  };
+
+  // Store projects data for click handlers
+  let searchProjectsCache = {};
+  let expandedProjectId = null;
+
+  // Helper function to render project cards
+  async function projectCard(proj, isExpanded = false) {
+    // Debug: log project data to see what we're getting
+    if (!proj.id) {
+      console.warn('Project missing id:', proj);
+    }
+    
+    const projectId = proj.id || proj.project_id || '';
+    const projectName = proj.title || proj.name || 'Untitled Project';
+    const projectDesc = proj.description || '';
+    const projectSkills = proj.skills_needed || proj.skills || '';
+    const projectTags = proj.tags && Array.isArray(proj.tags) ? proj.tags.join(', ') : '';
+    const projectStatus = proj.status || 'active';
+    
+    // Cache the project data for the click handler
+    if (projectId) {
+      searchProjectsCache[projectId] = proj;
+    }
+    
+    // Check if user is already a member or has pending request
+    let membershipStatus = null;
+    if (state.communityProfile && projectId) {
+      try {
+        const { data } = await state.supabase
+          .from('project_members')
+          .select('role')
+          .eq('project_id', projectId)
+          .eq('user_id', state.communityProfile.id)
+          .maybeSingle();
+        membershipStatus = data?.role || null;
+      } catch (err) {
+        console.warn('Error checking membership:', err);
+      }
+    }
+    
+    if (isExpanded) {
+      let joinButtonHTML = '';
+      if (membershipStatus === 'pending') {
+        joinButtonHTML = `
+          <button disabled style="background:rgba(255,170,0,0.3); border:1px solid rgba(255,170,0,0.5); padding:0.6rem 1.2rem; border-radius:8px; color:#ffaa00; font-weight:600; cursor:not-allowed; font-size:0.9rem;">
+            <i class="fas fa-clock"></i> Request Pending
+          </button>
+          <button onclick="withdrawProjectRequest('${projectId}')" style="background:rgba(255,68,68,0.2); border:1px solid rgba(255,68,68,0.5); padding:0.6rem 1.2rem; border-radius:8px; color:#ff4444; font-weight:600; cursor:pointer; font-size:0.9rem; transition:all 0.2s;" onmouseover="this.style.background='rgba(255,68,68,0.3)'" onmouseout="this.style.background='rgba(255,68,68,0.2)'">
+            <i class="fas fa-times"></i> Withdraw Request
+          </button>
+        `;
+      } else if (membershipStatus && membershipStatus !== 'pending') {
+        joinButtonHTML = `<button disabled style="background:rgba(0,255,136,0.3); border:1px solid rgba(0,255,136,0.5); padding:0.6rem 1.2rem; border-radius:8px; color:#00ff88; font-weight:600; cursor:not-allowed; font-size:0.9rem;">
+          <i class="fas fa-check"></i> Already a Member
+        </button>`;
+      } else {
+        joinButtonHTML = `<button onclick="joinProjectFromSearch('${projectId}')" style="background:linear-gradient(135deg,#00ff88,#00cc6a); border:none; padding:0.6rem 1.2rem; border-radius:8px; color:white; font-weight:600; cursor:pointer; font-size:0.9rem;">
+          <i class="fas fa-user-plus"></i> Join Project
+        </button>`;
+      }
+      
+      return `<div class="result-card" style="padding:1.5rem; background:rgba(0,255,136,0.12); border:2px solid rgba(0,255,136,0.4); border-radius:12px; margin-bottom:0.75rem; transition:all 0.2s;">
+        <div style="display:flex; align-items:start; gap:1rem; margin-bottom:1rem;">
+          <div style="width:64px; height:64px; background:rgba(0,255,136,0.3); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:2rem;">
+            <i class="fas fa-lightbulb" style="color:#00ff88;"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.5rem;">
+              <h3 style="color:#00ff88; margin:0; font-size:1.3rem;">${escapeHtml(projectName)}</h3>
+              <button onclick="toggleProjectExpansion('${projectId}')" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.3); color:white; padding:0.4rem 0.8rem; border-radius:6px; cursor:pointer; font-size:0.85rem;">
+                <i class="fas fa-compress-alt"></i> Collapse
+              </button>
+            </div>
+            <div style="color:#aaa; font-size:0.95rem; line-height:1.6; margin-bottom:1rem;">${escapeHtml(projectDesc)}</div>
+            
+            ${projectSkills ? `<div style="margin-bottom:1rem;">
+              <div style="color:#00ff88; font-size:0.85rem; font-weight:600; margin-bottom:0.5rem;"><i class="fas fa-code"></i> Required Skills:</div>
+              <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                ${projectSkills.split(',').map(skill => `<span style="background:rgba(0,255,136,0.15); border:1px solid rgba(0,255,136,0.3); color:#00ff88; padding:0.3rem 0.7rem; border-radius:6px; font-size:0.8rem;">${escapeHtml(skill.trim())}</span>`).join('')}
+              </div>
+            </div>` : ''}
+            
+            ${projectTags ? `<div style="margin-bottom:1rem;">
+              <div style="color:#888; font-size:0.75rem;"><i class="fas fa-tags"></i> ${escapeHtml(projectTags)}</div>
+            </div>` : ''}
+            
+            <div style="display:flex; gap:0.75rem; margin-top:1rem;">
+              ${joinButtonHTML}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    return `<div class="result-card" style="padding:1rem; background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.25); border-radius:12px; margin-bottom:0.75rem; cursor:pointer; transition:all 0.2s;" onclick="toggleProjectExpansion('${projectId}')">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div style="width:48px; height:48px; background:rgba(0,255,136,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+          <i class="fas fa-lightbulb" style="color:#00ff88;"></i>
+        </div>
+        <div style="flex:1;">
+          <div style="color:#fff; font-weight:600; margin-bottom:0.25rem;">${escapeHtml(projectName)}</div>
+          <div style="color:#aaa; font-size:0.85rem; margin-bottom:0.25rem;">${escapeHtml(projectDesc).slice(0, 80)}${projectDesc.length > 80 ? "..." : ""}</div>
+          ${projectSkills ? `<div style="color:#00ff88; font-size:0.75rem;"><i class="fas fa-code"></i> ${escapeHtml(projectSkills.split(',').slice(0, 3).join(', '))}${projectSkills.split(',').length > 3 ? '...' : ''}</div>` : ""}
+        </div>
+        <i class="fas fa-chevron-right" style="color:#00ff88; font-size:1.2rem;"></i>
+      </div>
+    </div>`;
+  }
+
+  // Toggle project expansion in search results
+  window.toggleProjectExpansion = function(projectId) {
+    expandedProjectId = expandedProjectId === projectId ? null : projectId;
+    // Re-render search results with the expanded state
+    const query = $("global-search")?.value?.trim();
+    if (query) {
+      renderSearchResults(query, activeSearchCategory);
+    }
+  };
+
+  // Join project from search
+  window.joinProjectFromSearch = async function(projectId) {
+    const project = searchProjectsCache[projectId];
+    if (!project) return;
+    
+    try {
+      if (!state.supabase || !state.communityProfile) {
+        alert('Please log in to join a project');
+        return;
+      }
+
+      // Check if already a member or has pending request
+      const { data: existingMember } = await state.supabase
+        .from('project_members')
+        .select('id, role')
+        .eq('project_id', projectId)
+        .eq('user_id', state.communityProfile.id)
+        .maybeSingle();
+
+      if (existingMember) {
+        if (existingMember.role === 'pending') {
+          if (typeof showToastNotification === 'function') {
+            showToastNotification('Your join request is pending approval', 'info');
+          } else {
+            alert('Your join request is pending approval');
+          }
+        } else {
+          if (typeof showToastNotification === 'function') {
+            showToastNotification('You are already a member of this project!', 'info');
+          } else {
+            alert('You are already a member of this project!');
+          }
+        }
+        return;
+      }
+
+      // Send join request with role='pending'
+      const { error } = await state.supabase
+        .from('project_members')
+        .insert({
+          project_id: projectId,
+          user_id: state.communityProfile.id,
+          role: 'pending'
+        });
+
+      if (error) {
+        // Handle duplicate key error gracefully
+        if (error.code === '23505') {
+          if (typeof showToastNotification === 'function') {
+            showToastNotification('You already have a pending request!', 'info');
+          } else {
+            alert('You already have a pending request!');
+          }
+          return;
+        }
+        throw error;
+      }
+
+      if (typeof showToastNotification === 'function') {
+        showToastNotification('Join request sent! Awaiting approval.', 'success');
+      } else {
+        alert('Join request sent! Awaiting approval.');
+      }
+
+      // Refresh synapse view to show pending connection with dotted line
+      if (typeof window.refreshSynapse === 'function') {
+        await window.refreshSynapse();
+      }
+
+      // Award XP for joining a project
+      if (window.DailyEngagement) {
+        try {
+          await window.DailyEngagement.awardXP(window.DailyEngagement.XP_REWARDS.JOIN_PROJECT, 'Requested to join project');
+        } catch (err) {
+          console.warn('Could not award XP:', err);
+        }
+      }
+
+      // Re-render the search results to update the button state
+      expandedProjectId = projectId; // Keep it expanded
+      const query = $("global-search")?.value?.trim();
+      if (query) {
+        await renderSearchResults(query, activeSearchCategory);
+      }
+
+    } catch (error) {
+      console.error('Error sending join request:', error);
+      alert('Failed to send join request: ' + error.message);
+    }
+  };
+
+  // Withdraw project join request
+  window.withdrawProjectRequest = async function(projectId) {
+    try {
+      if (!state.supabase || !state.communityProfile) {
+        alert('Please log in');
+        return;
+      }
+
+      // Confirm withdrawal
+      if (!confirm('Are you sure you want to withdraw your join request?')) {
+        return;
+      }
+
+      // Delete the pending request
+      const { error } = await state.supabase
+        .from('project_members')
+        .delete()
+        .eq('project_id', projectId)
+        .eq('user_id', state.communityProfile.id)
+        .eq('role', 'pending');
+
+      if (error) throw error;
+
+      if (typeof showToastNotification === 'function') {
+        showToastNotification('Join request withdrawn', 'success');
+      } else {
+        alert('Join request withdrawn');
+      }
+
+      // Refresh synapse view
+      if (typeof window.refreshSynapse === 'function') {
+        await window.refreshSynapse();
+      }
+
+      // Re-render the search results to update the button state
+      expandedProjectId = projectId; // Keep it expanded
+      const query = $("global-search")?.value?.trim();
+      if (query) {
+        await renderSearchResults(query, activeSearchCategory);
+      }
+
+    } catch (error) {
+      console.error('Error withdrawing request:', error);
+      alert('Failed to withdraw request: ' + error.message);
+    }
+  };
+
+  // Helper function to open theme details from search results
+  window.openThemeDetails = async function(themeId) {
+    try {
+      // Close the search modal
+      closeModal('quick-connect-modal');
+      
+      // Switch to synapse view if not already there
+      const synapseBtn = document.querySelector('[data-view="synapse"]');
+      if (synapseBtn && !synapseBtn.classList.contains('active')) {
+        synapseBtn.click();
+        // Wait for synapse to initialize
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      
+      // Check if openThemeCard is available
+      if (typeof window.openThemeCard !== 'function') {
+        console.warn('openThemeCard not available yet, waiting for synapse initialization...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+      
+      if (typeof window.openThemeCard === 'function') {
+        // Fetch the full theme data
+        const { data: theme, error } = await state.supabase
+          .from('theme_circles')
+          .select('*')
+          .eq('id', themeId)
+          .single();
+        
+        if (error) throw error;
+        
+        // Create a theme node object that matches the synapse format
+        const themeNode = {
+          id: `theme:${theme.id}`,
+          theme_id: theme.id,
+          type: 'theme',
+          title: theme.title,
+          name: theme.title,
+          description: theme.description,
+          tags: theme.tags || [],
+          expires_at: theme.expires_at,
+          projects: [], // Will be populated by openThemeCard
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2
+        };
+        
+        // Call the synapse function
+        window.openThemeCard(themeNode);
+      } else {
+        console.error('openThemeCard function not available');
+        alert('Please wait for the synapse view to load, then try again.');
+      }
+    } catch (error) {
+      console.error('Error opening theme details:', error);
+      alert('Failed to open theme details: ' + error.message);
+    }
+  };
+
+  // Helper function to render theme cards
+  function themeCard(theme) {
+    return `<div class="result-card" style="padding:1rem; background:rgba(255,170,0,0.08); border:1px solid rgba(255,170,0,0.25); border-radius:8px; margin-bottom:0.75rem; cursor:pointer; transition:all 0.2s;" onclick="openThemeDetails('${theme.id}')">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <div style="width:48px; height:48px; background:rgba(255,170,0,0.2); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.5rem;">
+          <i class="fas fa-palette" style="color:#ffaa00;"></i>
+        </div>
+        <div style="flex:1;">
+          <div style="color:#fff; font-weight:600; margin-bottom:0.25rem;">${escapeHtml(theme.title || theme.name || "Untitled Theme")}</div>
+          <div style="color:#aaa; font-size:0.85rem;">${escapeHtml(theme.description || "").slice(0, 100)}${(theme.description || "").length > 100 ? "..." : ""}</div>
+        </div>
+      </div>
+    </div>`;
   }
 
   async function loadSuggestedConnections() {
@@ -901,28 +2493,35 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
       .filter(Boolean)
       .slice(0, 3);
 
+    // Store person data for click handler
+    const personDataJson = JSON.stringify(person).replace(/"/g, '&quot;');
+
     return `
       <div style="display:flex; align-items:center; gap:1rem; padding:1rem;
         background:rgba(0,224,255,0.05); border:1px solid rgba(0,224,255,0.2);
-        border-radius:12px; margin-bottom:0.75rem;">
+        border-radius:12px; margin-bottom:0.75rem; cursor:pointer; transition:all 0.2s;"
+        onclick="openPersonProfileFromSearch(this, '${person.id}')"
+        onmouseenter="this.style.background='rgba(0,224,255,0.1)'; this.style.borderColor='rgba(0,224,255,0.4)'"
+        onmouseleave="this.style.background='rgba(0,224,255,0.05)'; this.style.borderColor='rgba(0,224,255,0.2)'"
+        data-person='${personDataJson}'>
         ${
           person.image_url
             ? `<img src="${escapeHtml(person.image_url)}" style="width:52px; height:52px; border-radius:50%;
-                 object-fit:cover; border:2px solid #00e0ff;">`
+                 object-fit:cover; border:2px solid #00e0ff; pointer-events:none;">`
             : `<div style="width:52px; height:52px; border-radius:50%;
                  background:linear-gradient(135deg,#00e0ff,#0080ff); display:flex; align-items:center; justify-content:center;
-                 font-weight:bold; color:white; font-size:1.1rem;">${initials}</div>`
+                 font-weight:bold; color:white; font-size:1.1rem; pointer-events:none;">${initials}</div>`
         }
-        <div style="flex:1; min-width:0;">
+        <div style="flex:1; min-width:0; pointer-events:none;">
           <div style="color:white; font-weight:700; font-size:1rem;">${escapeHtml(name)}</div>
           <div style="color:#aaa; font-size:0.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
             ${skills.length ? escapeHtml(skills.join(", ")) : "No skills listed"}
           </div>
           ${showScoreHint ? `<div style="color:#666; font-size:0.75rem; margin-top:0.25rem;">Suggested match</div>` : ``}
         </div>
-        <button class="btn btn-primary" style="white-space:nowrap;" onclick="sendConnectionRequest('${person.id}')">
-          <i class="fas fa-user-plus"></i> Connect
-        </button>
+        <div style="color:#00e0ff; font-size:0.85rem; white-space:nowrap; pointer-events:none;">
+          <i class="fas fa-arrow-right"></i> View Profile
+        </div>
       </div>
     `;
   }
@@ -981,6 +2580,135 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
     } catch (e) {
       console.error("sendConnectionRequest failed:", e);
       alert(`Could not send request: ${e?.message || e}`);
+    }
+  };
+
+  // ================================================================
+  // Open Person Profile from Search Results
+  // ================================================================
+  window.openPersonProfileFromSearch = async function (element, personId) {
+    try {
+      // Close the search results modal first to prevent z-index conflicts
+      if (typeof window.closeQuickConnectModal === 'function') {
+        window.closeQuickConnectModal();
+      }
+      
+      // Get person data from the element's data attribute
+      const personData = JSON.parse(element.getAttribute('data-person'));
+      
+      // Format data for node panel (expects type property)
+      const nodeData = {
+        ...personData,
+        type: 'person'
+      };
+      
+      console.log('Opening profile for person:', nodeData);
+      
+      // Call openNodePanel if available
+      if (typeof window.openNodePanel === 'function') {
+        await window.openNodePanel(nodeData);
+      } else {
+        console.error('openNodePanel function not available');
+        // Fallback: show a simple alert
+        alert('Profile panel not available. Please refresh the page.');
+      }
+    } catch (e) {
+      console.error('Error opening person profile:', e);
+      alert(`Could not open profile: ${e?.message || e}`);
+    }
+  };
+
+  // ================================================================
+  // Organization Follow/Unfollow
+  // ================================================================
+  window.toggleOrganizationFollow = async function (organizationId, buttonId) {
+    try {
+      if (!state.supabase) throw new Error("Supabase not initialized.");
+      if (!state.communityProfile?.id) throw new Error("No profile loaded.");
+
+      const communityId = state.communityProfile.id;
+      const button = document.getElementById(buttonId);
+      
+      if (!button) return;
+      
+      // Disable button during operation
+      button.disabled = true;
+      button.style.opacity = '0.6';
+      button.style.cursor = 'wait';
+
+      // Check current follow status
+      const { data: existing } = await state.supabase
+        .from('organization_followers')
+        .select('id')
+        .eq('organization_id', organizationId)
+        .eq('community_id', communityId)
+        .maybeSingle();
+
+      if (existing) {
+        // Unfollow
+        const { error } = await state.supabase
+          .from('organization_followers')
+          .delete()
+          .eq('id', existing.id);
+
+        if (error) throw error;
+
+        // Update button
+        button.innerHTML = '<i class="fas fa-plus"></i> Follow';
+        button.style.background = 'linear-gradient(135deg,#a855f7,#8b3fd9)';
+        button.style.border = 'none';
+        button.style.color = 'white';
+        
+        if (typeof showToast === 'function') {
+          showToast('Unfollowed organization', 'info');
+        }
+      } else {
+        // Follow
+        const { error } = await state.supabase
+          .from('organization_followers')
+          .insert({
+            organization_id: organizationId,
+            community_id: communityId
+          });
+
+        if (error) throw error;
+
+        // Update button
+        button.innerHTML = '<i class="fas fa-check"></i> Following';
+        button.style.background = 'rgba(168,85,247,0.2)';
+        button.style.border = '1px solid rgba(168,85,247,0.4)';
+        button.style.color = '#a855f7';
+        
+        if (typeof showToast === 'function') {
+          showToast('Now following organization', 'success');
+        }
+      }
+
+      // Re-enable button
+      button.disabled = false;
+      button.style.opacity = '1';
+      button.style.cursor = 'pointer';
+
+      // Refresh synapse view to show new connection
+      if (typeof window.refreshSynapse === 'function') {
+        await window.refreshSynapse();
+      }
+
+    } catch (e) {
+      console.error("toggleOrganizationFollow failed:", e);
+      if (typeof showToast === 'function') {
+        showToast(`Error: ${e?.message || e}`, 'error');
+      } else {
+        alert(`Error: ${e?.message || e}`);
+      }
+      
+      // Re-enable button on error
+      const button = document.getElementById(buttonId);
+      if (button) {
+        button.disabled = false;
+        button.style.opacity = '1';
+        button.style.cursor = 'pointer';
+      }
     }
   };
 
@@ -1796,20 +3524,58 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
     }
 
     try {
-      let query;
+      let data, error;
+      
       if (type === "received") {
-        query = state.supabase
+        // Get endorsements received
+        const result = await state.supabase
           .from("endorsements")
-          .select(`*, endorser:community!endorsements_endorser_community_id_fkey(id, name, image_url, bio)`)
-          .eq("endorsed_community_id", state.communityProfile.id);
+          .select("*")
+          .eq("endorsed_community_id", state.communityProfile.id)
+          .order("created_at", { ascending: false });
+        
+        data = result.data;
+        error = result.error;
+        
+        // Fetch endorser profiles
+        if (data && data.length > 0) {
+          const endorserIds = [...new Set(data.map(e => e.endorser_community_id))];
+          const { data: profiles } = await state.supabase
+            .from("community")
+            .select("id, name, image_url, bio")
+            .in("id", endorserIds);
+          
+          // Map profiles to endorsements
+          const profileMap = {};
+          (profiles || []).forEach(p => profileMap[p.id] = p);
+          data = data.map(e => ({ ...e, endorser: profileMap[e.endorser_community_id] }));
+        }
       } else {
-        query = state.supabase
+        // Get endorsements given
+        const result = await state.supabase
           .from("endorsements")
-          .select(`*, endorsed:community!endorsements_endorsed_community_id_fkey(id, name, image_url, bio)`)
-          .eq("endorser_community_id", state.communityProfile.id);
+          .select("*")
+          .eq("endorser_community_id", state.communityProfile.id)
+          .order("created_at", { ascending: false });
+        
+        data = result.data;
+        error = result.error;
+        
+        // Fetch endorsed profiles
+        if (data && data.length > 0) {
+          const endorsedIds = [...new Set(data.map(e => e.endorsed_community_id))];
+          const { data: profiles } = await state.supabase
+            .from("community")
+            .select("id, name, image_url, bio")
+            .in("id", endorsedIds);
+          
+          // Map profiles to endorsements
+          const profileMap = {};
+          (profiles || []).forEach(p => profileMap[p.id] = p);
+          data = data.map(e => ({ ...e, endorsed: profileMap[e.endorsed_community_id] }));
+        }
       }
-
-      const { data, error } = await query.order("created_at", { ascending: false });
+      
       if (error) throw error;
 
       if (!data || data.length === 0) {
@@ -1885,6 +3651,213 @@ import { supabase as importedSupabase } from "./supabaseClient.js";
         <i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i>
         <p style="margin-top:1rem;">Endorsements unavailable</p>
       </div>`;
+    }
+  }
+
+  // -----------------------------
+  // Notification Center
+  // -----------------------------
+  async function showNotificationsTab(tab) {
+    const btnAll = $("notifications-tab-all");
+    const btnUnread = $("notifications-tab-unread");
+    const boxAll = $("notifications-all");
+    const boxUnread = $("notifications-unread");
+
+    if (!btnAll || !btnUnread || !boxAll || !boxUnread) return;
+
+    const isAll = tab === "all";
+    btnAll.style.background = isAll ? "linear-gradient(135deg,#00e0ff,#0080ff)" : "rgba(255,255,255,0.1)";
+    btnUnread.style.background = !isAll ? "linear-gradient(135deg,#00e0ff,#0080ff)" : "rgba(255,255,255,0.1)";
+
+    boxAll.style.display = isAll ? "block" : "none";
+    boxUnread.style.display = !isAll ? "block" : "none";
+
+    await loadNotifications(tab);
+  }
+
+  async function loadNotifications(type) {
+    const container = type === "all" ? $("notifications-all") : $("notifications-unread");
+    if (!container) return;
+
+    container.innerHTML = `<div style="text-align:center; color:#aaa; padding:2rem;">
+      <i class="fas fa-spinner fa-spin" style="font-size:2rem;"></i>
+      <p style="margin-top:1rem;">Loading notifications…</p>
+    </div>`;
+
+    try {
+      // Get system notifications from the notification system
+      const notifications = [];
+
+      // Add connection request notifications
+      if (state.communityProfile?.id) {
+        const { data: pendingConnections, error } = await state.supabase
+          .from("connections")
+          .select("*, from_user:community!connections_from_user_id_fkey(id, name, image_url)")
+          .eq("to_user_id", state.communityProfile.id)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false });
+
+        if (!error && pendingConnections) {
+          pendingConnections.forEach(conn => {
+            notifications.push({
+              id: `conn-${conn.id}`,
+              type: "connection_request",
+              title: "New Connection Request",
+              message: `${conn.from_user?.name || "Someone"} wants to connect with you`,
+              timestamp: conn.created_at,
+              read: false,
+              image: conn.from_user?.image_url,
+              data: conn
+            });
+          });
+        }
+
+        // Add accepted connection notifications
+        const { data: acceptedConnections, error: acceptError } = await state.supabase
+          .from("connections")
+          .select("*, to_user:community!connections_to_user_id_fkey(id, name, image_url)")
+          .eq("from_user_id", state.communityProfile.id)
+          .eq("status", "accepted")
+          .order("updated_at", { ascending: false })
+          .limit(10);
+
+        if (!acceptError && acceptedConnections) {
+          acceptedConnections.forEach(conn => {
+            notifications.push({
+              id: `conn-accepted-${conn.id}`,
+              type: "success",
+              title: "Connection Accepted",
+              message: `${conn.to_user?.name || "Someone"} accepted your connection request`,
+              timestamp: conn.updated_at,
+              read: true,
+              image: conn.to_user?.image_url,
+              data: conn
+            });
+          });
+        }
+      }
+
+      // Filter by read status if needed
+      const filteredNotifications = type === "unread"
+        ? notifications.filter(n => !n.read)
+        : notifications;
+
+      // Sort by timestamp
+      filteredNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      if (filteredNotifications.length === 0) {
+        container.innerHTML = `<div style="text-align:center; color:#aaa; padding:2rem;">
+          <i class="fas fa-bell-slash" style="font-size:3rem; opacity:0.25;"></i>
+          <p style="margin-top:1rem;">No ${type === "unread" ? "unread" : ""} notifications</p>
+        </div>`;
+        return;
+      }
+
+      container.innerHTML = filteredNotifications
+        .map((notif) => {
+          const typeColors = {
+            connection_request: "#ff6b6b",
+            success: "#00ff88",
+            info: "#00e0ff",
+            warning: "#ffa500",
+            error: "#f44336"
+          };
+
+          const typeIcons = {
+            connection_request: "fa-user-plus",
+            success: "fa-check-circle",
+            info: "fa-info-circle",
+            warning: "fa-exclamation-triangle",
+            error: "fa-times-circle"
+          };
+
+          const color = typeColors[notif.type] || "#00e0ff";
+          const icon = typeIcons[notif.type] || "fa-bell";
+          const timeAgo = formatTimeAgo(notif.timestamp);
+
+          return `
+            <div style="background:rgba(0,224,255,0.05); border-left:4px solid ${color};
+              border-radius:8px; padding:1rem; margin-bottom:0.75rem; display:flex; gap:1rem; align-items:start;
+              ${!notif.read ? "background:rgba(0,224,255,0.1);" : ""}">
+
+              ${notif.image
+                ? `<img src="${escapeHtml(notif.image)}"
+                    style="width:48px; height:48px; border-radius:50%; object-fit:cover; flex-shrink:0;
+                      border:2px solid ${color};"
+                    onerror="this.style.display='none'"
+                    alt="">`
+                : `<div style="width:48px; height:48px; border-radius:50%;
+                    background:linear-gradient(135deg, ${color}40, ${color}20);
+                    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                    border:2px solid ${color};">
+                    <i class="fas ${icon}" style="color:${color}; font-size:1.2rem;"></i>
+                  </div>`
+              }
+
+              <div style="flex:1; min-width:0;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.25rem;">
+                  <div style="color:${color}; font-weight:700; font-size:0.95rem;">
+                    ${escapeHtml(notif.title)}
+                  </div>
+                  ${!notif.read
+                    ? `<span style="background:${color}; color:white; padding:0.15rem 0.5rem;
+                        border-radius:8px; font-size:0.65rem; font-weight:700;">NEW</span>`
+                    : ""
+                  }
+                </div>
+
+                <div style="color:#ddd; font-size:0.9rem; margin-bottom:0.5rem;">
+                  ${escapeHtml(notif.message)}
+                </div>
+
+                <div style="color:#666; font-size:0.75rem; display:flex; align-items:center; gap:1rem;">
+                  <span><i class="far fa-clock"></i> ${escapeHtml(timeAgo)}</span>
+                  ${notif.type === "connection_request" && notif.data
+                    ? `<div style="display:flex; gap:0.5rem;">
+                        <button onclick="acceptConnectionRequest('${notif.data.id}')"
+                          style="background:rgba(0,255,136,0.2); color:#0f8; border:1px solid rgba(0,255,136,0.3);
+                          padding:0.25rem 0.75rem; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:600;">
+                          <i class="fas fa-check"></i> Accept
+                        </button>
+                        <button onclick="declineConnectionRequest('${notif.data.id}')"
+                          style="background:rgba(255,107,107,0.2); color:#f66; border:1px solid rgba(255,107,107,0.3);
+                          padding:0.25rem 0.75rem; border-radius:6px; cursor:pointer; font-size:0.75rem; font-weight:600;">
+                          <i class="fas fa-times"></i> Decline
+                        </button>
+                      </div>`
+                    : ""
+                  }
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+    } catch (e) {
+      console.error("loadNotifications failed:", e);
+      container.innerHTML = `<div style="text-align:center; color:#f66; padding:2rem;">
+        <i class="fas fa-exclamation-triangle" style="font-size:2rem;"></i>
+        <p style="margin-top:1rem;">Failed to load notifications</p>
+      </div>`;
+    }
+  }
+
+  async function clearAllNotifications() {
+    try {
+      // In a real implementation, this would mark notifications as read in the database
+      // For now, just reload to show the updated state
+      await loadNotifications("all");
+
+      if (typeof window.showNotification === "function") {
+        window.showNotification({
+          type: "success",
+          title: "Notifications Cleared",
+          message: "All notifications marked as read",
+          duration: 3000
+        });
+      }
+    } catch (e) {
+      console.error("clearAllNotifications failed:", e);
     }
   }
 
