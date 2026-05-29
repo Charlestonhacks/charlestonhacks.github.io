@@ -126,8 +126,12 @@
     /* Push card below the fixed nav bar */
     .main-wrapper { padding-top: 80px; }
 
+    /* Larger card on desktop */
+    .media-container { max-width: 620px; }
+
     @media (max-width: 768px) {
       .main-wrapper { padding-top: 70px; justify-content: flex-start; }
+      .media-container { max-width: 500px; }
       .ch-tagline { bottom: 105px; font-size: 0.6rem; }
     }
 
@@ -149,26 +153,22 @@
       text-transform: uppercase;
     }
 
-    /* Countdown banner - sits below the nav bar */
+    /* Countdown - inline in the nav bar */
     #event-countdown-banner {
       display: none;
-      position: fixed;
-      top: 58px;
-      left: 0;
-      right: 0;
-      z-index: 10001;
-      background: linear-gradient(90deg, rgba(0,30,40,0.96) 0%, rgba(0,12,20,0.98) 100%);
-      border-bottom: 1px solid rgba(0,224,255,0.25);
-      backdrop-filter: blur(6px);
-      padding: 6px 16px;
-      text-align: center;
+      align-items: center;
+      gap: 6px;
       font-family: 'Orbitron', monospace;
-      font-size: clamp(0.6rem, 2vw, 0.75rem);
-      letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.85);
+      font-size: 0.62rem;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.7);
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-left: auto;
+      margin-right: 8px;
+      padding: 5px 12px;
+      background: rgba(0,224,255,0.06);
+      border: 1px solid rgba(0,224,255,0.15);
+      border-radius: 20px;
     }
     #event-countdown-banner a {
       color: #00e0ff;
@@ -176,12 +176,29 @@
     }
     #event-countdown-banner a:hover { text-decoration: underline; }
     #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
-    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 6px; }
-    /* Shift content down when banner is visible */
-    body.has-countdown-banner .main-wrapper { padding-top: 110px; }
+    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 4px; }
+
+    /* When banner is visible, nav-links lose their auto margin */
+    body.has-countdown-banner .nav-links { margin-left: 0; }
+
     @media (max-width: 768px) {
-      #event-countdown-banner { top: 54px; font-size: 0.58rem; padding: 5px 10px; }
-      body.has-countdown-banner .main-wrapper { padding-top: 100px; }
+      #event-countdown-banner { font-size: 0.55rem; padding: 4px 8px; margin-left: 0; margin-right: auto; }
+      /* On mobile, move countdown below nav as a small bar */
+      body.has-countdown-banner #event-countdown-banner {
+        position: fixed;
+        top: 54px;
+        left: 0;
+        right: 0;
+        margin: 0;
+        border-radius: 0;
+        justify-content: center;
+        background: rgba(0,12,20,0.95);
+        border: none;
+        border-bottom: 1px solid rgba(0,224,255,0.2);
+        padding: 5px 10px;
+        z-index: 10001;
+      }
+      body.has-countdown-banner .main-wrapper { padding-top: 94px; }
     }
     .hub-mini-nav { display: none; }
   </style>
@@ -219,6 +236,8 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
+    <!-- Event countdown - inline in nav -->
+    <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
       <i class="fas fa-bars"></i>
     </button>
@@ -230,8 +249,7 @@
     </div>
   </nav>
 
-  <!-- Upcoming event countdown bar -->
-  <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
+  <!-- Upcoming event countdown is now inline in the nav bar above -->
 
   <canvas id="neural-bg"></canvas>
 
@@ -547,7 +565,7 @@
           `<span class="cd-time">${timeStr}</span>`;
       };
 
-      banner.style.display = "block";
+      banner.style.display = "flex";
       document.body.classList.add("has-countdown-banner");
       tick();
       setInterval(tick, 1000);
