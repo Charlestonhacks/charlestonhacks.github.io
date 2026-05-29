@@ -25,6 +25,12 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --cyan: #00e0ff;
+      --border: rgba(0,224,255,0.1);
+      --transition: 0.2s ease;
+    }
+
     html, body {
       height: 100%;
       background: #000;
@@ -32,44 +38,76 @@
       font-family: monospace;
     }
 
-    /* Nav */
-    .bbs-nav {
+    /* ===== Top Nav (same as home page) ===== */
+    .top-nav {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
-      border-bottom: 1px solid #0f03;
-      background: #000;
+      padding: 0 24px;
+      height: 58px;
+      border-bottom: 1px solid rgba(0,224,255,0.1);
       position: sticky;
       top: 0;
-      z-index: 10;
-    }
-    .bbs-nav a {
-      color: #0f0;
-      text-decoration: none;
-      font-size: 0.8rem;
-      letter-spacing: 0.08em;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-    }
-    .bbs-nav a:hover { opacity: 1; }
-    .bbs-nav .brand {
-      font-size: 0.85rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      opacity: 0.9;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      gap: 8px;
     }
 
-    /* BBS fill container */
+    .nav-logo img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
+
+    .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .nav-links a {
+      color: rgba(255,255,255,0.62);
+      text-decoration: none;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      padding: 7px 10px;
+      border-radius: 7px;
+      transition: color var(--transition), background var(--transition);
+    }
+    .nav-links a:hover { color: var(--cyan); background: rgba(0,224,255,0.06); }
+
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.72);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 6px;
+      margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+      .top-nav { padding: 0 16px; height: 54px; }
+      .nav-logo img { width: 140px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 54px;
+        left: 0;
+        right: 0;
+        background: rgba(0,0,0,0.97);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        gap: 4px;
+        backdrop-filter: blur(12px);
+      }
+      .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
+      .nav-toggle { display: block; }
+    }
+
+    /* ===== BBS Content ===== */
     #bbs-modal {
       display: flex;
       align-items: flex-start;
       justify-content: center;
       padding: 24px 16px 40px;
-      min-height: calc(100vh - 45px);
+      min-height: calc(100vh - 58px);
     }
 
-    /* Override modal sizing so it fills the page nicely */
     #bbs-modal #bbs-wrapper {
       width: min(100%, 760px) !important;
       max-height: none !important;
@@ -79,12 +117,10 @@
       height: min(480px, 55vh) !important;
     }
 
-    /* Hide the close button — navigation is via the top nav */
     #bbs-modal #bbs-close {
       display: none !important;
     }
 
-    /* Hint line */
     .bbs-hint {
       text-align: center;
       color: #0f06;
@@ -96,15 +132,50 @@
 </head>
 <body>
 
-  <nav class="bbs-nav">
-    <a href="/"><i class="fas fa-arrow-left" style="margin-right:6px;"></i>Home</a>
-    <span class="brand">⬛ CharlestonHacks BBS</span>
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
+      <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links" id="primary-nav">
+      <a href="/#events-section">Events</a>
+      <a href="/hub.html">Member Portal</a>
+      <a href="/bbs.html">Community Chat</a>
+      <a href="/about.html">About</a>
+    </div>
   </nav>
 
   <p class="bbs-hint">Type a message and press Send &nbsp;·&nbsp; Type <strong>zork</strong> to play Zork &nbsp;·&nbsp; Username stored locally</p>
 
   <!-- BBS mounts here -->
   <div id="bbs-modal"></div>
+
+  <script>
+    // Hamburger menu toggle (same as home page)
+    (function () {
+      const toggle = document.querySelector('.nav-toggle');
+      const links = document.querySelector('.nav-links');
+      if (!toggle || !links) return;
+
+      toggle.addEventListener('click', function () {
+        const open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        const icon = toggle.querySelector('i');
+        if (icon) icon.className = open ? 'fas fa-times' : 'fas fa-bars';
+      });
+
+      links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          const icon = toggle.querySelector('i');
+          if (icon) icon.className = 'fas fa-bars';
+        });
+      });
+    })();
+  </script>
 
   <script type="module">
     import { initBBS } from "/assets/js/bbs.js";
