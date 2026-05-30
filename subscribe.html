@@ -17,11 +17,64 @@
             color: #e0e0e0;
         }
 
+        .top-nav {
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            height: 58px;
+            border-bottom: 1px solid rgba(0,224,255,0.1);
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            gap: 8px;
+        }
+        .nav-logo img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
+        .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+        .nav-links a {
+            color: rgba(255,255,255,0.62);
+            text-decoration: none;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            padding: 7px 10px;
+            border-radius: 7px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .nav-links a:hover { color: #00e0ff; background: rgba(0,224,255,0.06); }
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.72);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 6px;
+            margin-left: auto;
+        }
+        @media (max-width: 768px) {
+            .top-nav { padding: 0 16px; height: 54px; }
+            .nav-links { display: none; }
+            .nav-links.open {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 54px; left: 0; right: 0;
+                background: rgba(0,0,0,0.97);
+                border-bottom: 1px solid rgba(0,224,255,0.1);
+                padding: 12px 16px;
+                gap: 4px;
+                backdrop-filter: blur(12px);
+            }
+            .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
+            .nav-toggle { display: block; }
+        }
+
         #mc_embed_shell {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            min-height: calc(100vh - 58px);
             padding: 20px;
         }
 
@@ -154,19 +207,7 @@
             margin-top: 20px;
         }
 
-        .home-icon {
-            position: absolute;
-            top: 12px;
-            left: 14px;
-            font-size: 22px;
-            color: #888;
-            cursor: pointer;
-            transition: color .2s;
-        }
-
-        .home-icon:hover {
-            color: #00e0ff;
-        }
+        .home-icon { display: none; }
 
         @media (max-width: 600px) {
             #mc_embed_signup {
@@ -269,9 +310,23 @@
   gtag('config', 'G-6NDKG07DY6');
 </script>
 <body>
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
+    <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
+      <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
+    </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links" id="primary-nav">
+      <a href="/#events-section">Events</a>
+      <a href="/hub.html">Member Portal</a>
+      <a href="/bbs.html">Community Chat</a>
+      <a href="/about.html">About</a>
+    </div>
+  </nav>
+
     <div id="mc_embed_shell">
         <div id="mc_embed_signup">
-            <i class="fas fa-home home-icon" title="Back to Home"></i>
             <form action="https://charlestonhacks.us12.list-manage.com/subscribe/post?u=79363b7a43970f760d61360fd&amp;id=3b95e0177a&amp;f_id=002f09e9f0" 
                   method="post" 
                   id="mc-embedded-subscribe-form" 
@@ -325,5 +380,24 @@
         </div>
         </div>
     </div>
+  <script>
+    (function () {
+      const toggle = document.querySelector('.nav-toggle');
+      const links = document.querySelector('.nav-links');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function () {
+        const open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.querySelector('i').className = open ? 'fas fa-times' : 'fas fa-bars';
+      });
+      links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.querySelector('i').className = 'fas fa-bars';
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
