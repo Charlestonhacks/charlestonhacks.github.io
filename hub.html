@@ -126,12 +126,12 @@
     /* Push card below the fixed nav bar */
     .main-wrapper { padding-top: 80px; }
 
-    /* Larger card on desktop — constrain height so card fits in viewport */
+    /* Larger card on desktop — card is 2:3 (w:h), so limit width via viewport height */
     .media-container { max-width: 620px; }
 
     @media (min-width: 769px) {
-      .media-container { max-height: calc(100vh - 100px); }
-      .media-container #missionImage { max-height: calc(100vh - 100px); width: auto; max-width: 100%; }
+      /* min() keeps card ≤ 620px wide AND ≤ (100vh-100px) tall (2/3 ratio) */
+      .media-container { max-width: min(620px, calc((100vh - 100px) * 2 / 3)); }
     }
 
     @media (max-width: 768px) {
