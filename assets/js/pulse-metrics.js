@@ -20,11 +20,15 @@ const SUPABASE_ANON_KEY = 'sb_publishable_hKGoZiLtCe6BxgQjG23h2Q_hbGC-At3';
 /** Animate a single .pulse-value element to a new target. */
 function animateTo(el, target) {
   if (!el || !Number.isFinite(target) || target < 0) return;
+  // Bump version to cancel any in-progress animation on this element
+  el._animVersion = (el._animVersion || 0) + 1;
+  const version = el._animVersion;
   el.dataset.counted = 'true';
   const from     = parseInt(el.textContent.replace(/,/g, ''), 10) || 0;
   const duration = 1500;
   const start    = performance.now();
   function tick(now) {
+    if (el._animVersion !== version) return; // cancelled by a newer call
     const progress = Math.min((now - start) / duration, 1);
     const eased    = 1 - Math.pow(1 - progress, 3);
     el.textContent = Math.round(from + eased * (target - from)).toLocaleString();
