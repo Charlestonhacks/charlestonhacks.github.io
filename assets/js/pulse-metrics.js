@@ -59,14 +59,33 @@ function updateCard(labelText, value, sectionInView) {
   }
 }
 
+const MAILCHIMP_WORKER_URL = 'https://mailchimp-subscriber-count.dmhamilton1.workers.dev';
+
+/** Fetch active Mailchimp subscriber count; returns 0 on any failure. */
+async function fetchMailchimpSubscribers() {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    const resp = await fetch(MAILCHIMP_WORKER_URL, { signal: controller.signal });
+    clearTimeout(timer);
+    if (!resp.ok) return 0;
+    const json = await resp.json();
+    return typeof json.subscribers === 'number' ? json.subscribers : 0;
+  } catch {
+    return 0;
+  }
+}
+
 async function loadPulseMetrics() {
   try {
     // Re-use the singleton created by hub.js / portal.js when available
     const supabase = window.supabase || createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ── Fetch DB counts via SECURITY DEFINER RPC ──────────────────────────
-    // get_pulse_metrics() bypasses RLS so anonymous visitors get real counts.
-    const { data: metrics, error: rpcError } = await supabase.rpc('get_pulse_metrics');
+    // ── Fetch DB counts + Mailchimp count in parallel ─────────────────────
+    const [{ data: metrics, error: rpcError }, mailchimpCount] = await Promise.all([
+      supabase.rpc('get_pulse_metrics'),
+      fetchMailchimpSubscribers(),
+    ]);
 
     if (rpcError) {
       // RPC not deployed yet — log and keep hardcoded fallback values
@@ -115,14 +134,19 @@ async function loadPulseMetrics() {
     // Only update a card when we have a valid (non-null) value from the DB.
     // Events fall back to the hardcoded value when the JSON has no entries
     // for the current year (eventsThisYear === 0 simply means "none found").
-    if (metrics.members         != null) updateCard('Members',          metrics.members,         inView);
+    // Members = Supabase community table + Mailchimp active subscribers
+    if (metrics.members != null) {
+      updateCard('Members', metrics.members + mailchimpCount, inView);
+    }
     if (metrics.active_projects != null) updateCard('Active Projects',  metrics.active_projects, inView);
     if (metrics.connections     != null) updateCard('Connections',      metrics.connections,     inView);
     // Always update Events — show the real count (even if 0)
     updateCard('Events This Year', eventsThisYear, inView);
 
     console.log('[pulse] Live metrics loaded:', {
-      members:        metrics.members,
+      membersDB:      metrics.members,
+      mailchimp:      mailchimpCount,
+      membersTotal:   metrics.members + mailchimpCount,
       activeProjects: metrics.active_projects,
       connections:    metrics.connections,
       eventsThisYear,
