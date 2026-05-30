@@ -126,8 +126,9 @@
     /* Push card below the fixed nav bar */
     .main-wrapper { padding-top: 80px; }
 
-    /* Larger card on desktop */
-    .media-container { max-width: 620px; }
+    /* Larger card on desktop — constrain height so card fits in viewport */
+    .media-container { max-width: 620px; max-height: calc(100vh - 100px); }
+    .media-container #missionImage { max-height: calc(100vh - 100px); width: auto; max-width: 100%; }
 
     @media (max-width: 768px) {
       .main-wrapper { padding-top: 70px; justify-content: flex-start; }
