@@ -599,6 +599,7 @@
       text-align: center;
       transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
     }
+    a.pulse-card { display: block; text-decoration: none; cursor: pointer; }
     .pulse-card:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(201,163,94,0.15); }
     .pulse-icon { font-size: 1.55rem; display: block; margin-bottom: 8px; }
     .pulse-value { font-size: 1.7rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #fff; }
@@ -788,10 +789,10 @@
       <h2 class="section-title">The network at a glance</h2>
       <p class="section-sub">Live metrics from recent community activity and collaboration across CharlestonHacks.</p>
       <div class="pulse-grid">
-        <div class="pulse-card"><span class="pulse-icon">👥</span><div class="pulse-value" data-target="500">0</div><div class="pulse-label">Members</div></div>
-        <div class="pulse-card"><span class="pulse-icon">🚀</span><div class="pulse-value" data-target="24">0</div><div class="pulse-label">Active Projects</div></div>
-        <div class="pulse-card"><span class="pulse-icon">🤝</span><div class="pulse-value" data-target="380">0</div><div class="pulse-label">Connections</div></div>
-        <div class="pulse-card"><span class="pulse-icon">📅</span><div class="pulse-value" data-target="12">0</div><div class="pulse-label">Events This Year</div></div>
+        <a href="/subscribe.html" class="pulse-card" aria-label="Join the community"><span class="pulse-icon">👥</span><div class="pulse-value" data-target="500">0</div><div class="pulse-label">Members</div></a>
+        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="pulse-card" aria-label="Explore active projects"><span class="pulse-icon">🚀</span><div class="pulse-value" data-target="24">0</div><div class="pulse-label">Active Projects</div></a>
+        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="pulse-card" aria-label="Explore connections"><span class="pulse-icon">🤝</span><div class="pulse-value" data-target="380">0</div><div class="pulse-label">Connections</div></a>
+        <a href="#events-section" class="pulse-card" aria-label="See events this year"><span class="pulse-icon">📅</span><div class="pulse-value" data-target="12">0</div><div class="pulse-label">Events This Year</div></a>
       </div>
     </section>
 
