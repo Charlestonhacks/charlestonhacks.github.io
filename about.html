@@ -41,24 +41,55 @@
     .top-nav {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 16px 24px;
-      border-bottom: 1px solid rgba(0,224,255,0.12);
+      padding: 0 24px;
+      height: 58px;
+      border-bottom: 1px solid rgba(0,224,255,0.1);
       position: sticky;
       top: 0;
       background: rgba(0,0,0,0.92);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       z-index: 100;
+      gap: 8px;
     }
-    .top-nav a {
-      color: rgba(255,255,255,0.7);
+    .top-nav .logo-link img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
+    .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+    .nav-links a {
+      color: rgba(255,255,255,0.62);
       text-decoration: none;
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       letter-spacing: 0.08em;
-      transition: color 0.2s;
+      padding: 7px 10px;
+      border-radius: 7px;
+      transition: color 0.2s, background 0.2s;
     }
-    .top-nav a:hover { color: #00e0ff; }
-    .top-nav .logo-link img { width: 140px; height: auto; display: block; }
+    .nav-links a:hover { color: #00e0ff; background: rgba(0,224,255,0.06); }
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.72);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 6px;
+      margin-left: auto;
+    }
+    @media (max-width: 768px) {
+      .top-nav { padding: 0 16px; height: 54px; }
+      .nav-links { display: none; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 54px; left: 0; right: 0;
+        background: rgba(0,0,0,0.97);
+        border-bottom: 1px solid rgba(0,224,255,0.1);
+        padding: 12px 16px;
+        gap: 4px;
+        backdrop-filter: blur(12px);
+      }
+      .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
+      .nav-toggle { display: block; }
+    }
 
     /* ── Hero ── */
     .hero {
@@ -376,10 +407,19 @@
 <body>
 
   <!-- Nav -->
-  <nav class="top-nav">
+  <nav class="top-nav" role="navigation" aria-label="Main navigation">
     <a href="/" class="logo-link" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="about-nav">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="nav-links" id="about-nav">
+      <a href="/#events-section">Events</a>
+      <a href="/hub.html">Member Portal</a>
+      <a href="/bbs.html">Community Chat</a>
+      <a href="/about.html" aria-current="page">About</a>
+    </div>
   </nav>
 
   <!-- Hero -->
@@ -413,5 +453,24 @@
     </p>
   </footer>
 
+  <script>
+    (function () {
+      const toggle = document.querySelector('.nav-toggle');
+      const links = document.querySelector('.nav-links');
+      if (!toggle || !links) return;
+      toggle.addEventListener('click', function () {
+        const open = links.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.querySelector('i').className = open ? 'fas fa-times' : 'fas fa-bars';
+      });
+      links.querySelectorAll('a').forEach(function (a) {
+        a.addEventListener('click', function () {
+          links.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.querySelector('i').className = 'fas fa-bars';
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
