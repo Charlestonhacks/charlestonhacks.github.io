@@ -153,6 +153,10 @@
     currentIndex = index;
     stopTimer();
 
+    // Clear any error left over from a previous segment
+    dom.errorBanner.classList.remove('visible');
+    dom.errorBanner.textContent = '';
+
     const seg = segments[index];
 
     dom.segTitle.textContent      = seg.title    || '—';
@@ -181,7 +185,14 @@
       dom.notesBackup.appendChild(li);
     });
 
-    Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
+    // Cue the video; if the ID is missing, surface a recoverable warning
+    // so the host can still use the question card, timer, and navigation.
+    if (!seg.youtubeId) {
+      toast(`Segment ${index + 1} has no YouTube video ID — video skipped.`, 'error');
+      setStatus('error', 'No video ID configured');
+    } else {
+      Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
+    }
 
     Clips.setOnEnd(() => {
       setStatus('ended', 'Clip ended');
@@ -235,11 +246,15 @@
   function playClip() {
     const seg = segments[currentIndex];
     if (!seg) return;
-    Clips.load(seg.youtubeId, seg.start || 0, seg.end || 0);
-    setTimeout(() => {
-      Clips.play();
-      setStatus('playing', 'Playing');
-    }, 600);
+    if (!seg.youtubeId) {
+      toast('No YouTube video ID on this segment.', 'error');
+      return;
+    }
+    // Clips.play() loads and immediately starts playback.
+    // No setTimeout needed — the player's onStateChange callback
+    // updates the status indicator when PLAYING fires.
+    Clips.play(seg.youtubeId, seg.start || 0, seg.end || 0);
+    setStatus('playing', 'Loading…');
   }
 
   function pauseClip() {
@@ -249,7 +264,7 @@
 
   function replayClip() {
     const seg = segments[currentIndex];
-    if (!seg) return;
+    if (!seg || !seg.youtubeId) return;
     Clips.replay(seg.start || 0, seg.end || 0);
     setStatus('playing', 'Replaying');
   }
@@ -459,13 +474,18 @@
   }
 
   Clips.setOnStateChange((ytState, errMsg) => {
+    // Guard: YT is always defined when this fires from the player,
+    // but be explicit in case of edge cases during API load failure.
     if (ytState === 'error') {
       setStatus('error', errMsg || 'Playback error');
       showError(errMsg || 'YouTube playback error. Check the video ID in show.json.');
-    } else if (ytState === YT.PlayerState.PLAYING)    { setStatus('playing', 'Playing');     }
-    else if   (ytState === YT.PlayerState.PAUSED)     { setStatus('paused',  'Paused');      }
-    else if   (ytState === YT.PlayerState.ENDED)      { setStatus('ended',   'Ended');       }
-    else if   (ytState === YT.PlayerState.BUFFERING)  { setStatus('playing', 'Buffering…'); }
+      return;
+    }
+    if (typeof YT === 'undefined') return;
+    if      (ytState === YT.PlayerState.PLAYING)   { setStatus('playing', 'Playing');    }
+    else if (ytState === YT.PlayerState.PAUSED)    { setStatus('paused',  'Paused');     }
+    else if (ytState === YT.PlayerState.ENDED)     { setStatus('ended',   'Ended');      }
+    else if (ytState === YT.PlayerState.BUFFERING) { setStatus('playing', 'Buffering…'); }
   });
 
   // ============================================================
@@ -561,9 +581,9 @@
   // Signal editor.js that ShowController is ready
   document.dispatchEvent(new CustomEvent('showcontroller:ready'));
 
-  // Boot toast once the YouTube IFrame player is ready
+  // Boot toast once the YouTube IFrame player's onReady has fired
   const apiCheckInterval = setInterval(() => {
-    if (Clips.isApiReady()) {
+    if (Clips.isReady()) {
       clearInterval(apiCheckInterval);
       toast('Player ready. Press Play or Space to begin.', 'success');
     }

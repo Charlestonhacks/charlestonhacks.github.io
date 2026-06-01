@@ -8,7 +8,10 @@
  * No backend. No eval. No external libraries. No network writes.
  */
 
-const Editor = (() => {
+// Assigned to window.Editor (not const) so that controller.js can access
+// window.Editor.isOpen() from its keydown listener, which executes after
+// this script runs. `const` at top level does NOT set window properties.
+window.Editor = (() => {
 
   const LS_KEY = 'charlestonhacks.hackertheater.showDraft.v1';
 

@@ -1,166 +1,215 @@
 /**
  * clips.js — YouTube IFrame Player API wrapper
  *
- * Handles all YouTube player lifecycle events and exposes
- * a clean interface to controller.js. No DOM manipulation here
- * beyond the player element itself.
+ * Key invariant: `player` is the YT.Player object, set the moment
+ * onYouTubeIframeAPIReady fires, but its methods (cueVideoById, etc.)
+ * are only safe to call after `onReady` fires. The `playerReady` flag
+ * tracks that second boundary. Any call that arrives before `playerReady`
+ * is stored as `pendingAction` and replayed in `_onPlayerReady`.
+ *
+ * All player method calls are wrapped in try/catch so a broken or
+ * non-embeddable video never throws an uncaught exception.
  */
 
 const Clips = (() => {
-  let player = null;
-  let pollInterval = null;
-  let endTime = null;
-  let onEndCallback = null;
-  let onStateChangeCallback = null;
-  let apiReady = false;
 
-  // Called by YouTube IFrame API when script loads
+  let player        = null;  // YT.Player object (set at API ready)
+  let playerReady   = false; // true only after onReady fires
+  let pendingAction = null;  // latest queued action, executed on onReady
+  let pollInterval  = null;
+  let endTime       = null;
+  let onEndCallback          = null;
+  let onStateChangeCallback  = null;
+
+  // Dev-only logging: active on localhost / file:// only
+  const DEV = (location.hostname === 'localhost' ||
+               location.hostname === '127.0.0.1' ||
+               location.protocol === 'file:');
+  const _log  = (...a) => { if (DEV) console.log('[Clips]',  ...a); };
+  const _warn = (...a) => console.warn('[Clips]', ...a);
+
+  // ---- YouTube IFrame API bootstrap ----
+
   window.onYouTubeIframeAPIReady = () => {
-    apiReady = true;
-    player = new YT.Player('yt-player', {
-      height: '100%',
-      width: '100%',
-      playerVars: {
-        autoplay: 0,
-        controls: 0,        // hide native controls; moderator uses our UI
-        rel: 0,             // no related videos at end
-        modestbranding: 1,
-        fs: 0,              // disable native fullscreen button
-        iv_load_policy: 3,  // no annotations
-        cc_load_policy: 0,
-        disablekb: 1,       // we handle keyboard ourselves
-      },
-      events: {
-        onReady: _onPlayerReady,
-        onStateChange: _onPlayerStateChange,
-        onError: _onPlayerError,
-      },
-    });
+    _log('YT API ready — creating player');
+    try {
+      player = new YT.Player('yt-player', {
+        height: '100%',
+        width:  '100%',
+        playerVars: {
+          autoplay:       0,
+          controls:       0,  // moderator uses our UI
+          rel:            0,
+          modestbranding: 1,
+          fs:             0,
+          iv_load_policy: 3,
+          cc_load_policy: 0,
+          disablekb:      1,  // we handle keyboard ourselves
+        },
+        events: {
+          onReady:       _onPlayerReady,
+          onStateChange: _onPlayerStateChange,
+          onError:       _onPlayerError,
+        },
+      });
+    } catch (e) {
+      _warn('Failed to create YT.Player:', e.message);
+    }
   };
 
   function _onPlayerReady() {
-    // Player is ready; placeholder can be hidden
+    _log('Player onReady — methods now available');
+    playerReady = true;
+
     const ph = document.getElementById('video-placeholder');
     if (ph) ph.classList.add('hidden');
+
+    // Drain any action that arrived before the player was ready
+    if (pendingAction) {
+      _log('Draining pendingAction');
+      const action  = pendingAction;
+      pendingAction = null;
+      try { action(); } catch (e) { _warn('Pending action threw:', e.message); }
+    }
   }
 
   function _onPlayerStateChange(event) {
     _clearPoll();
-
     if (event.data === YT.PlayerState.PLAYING) {
       _startEndPoll();
     }
-
     if (typeof onStateChangeCallback === 'function') {
       onStateChangeCallback(event.data);
     }
   }
 
   function _onPlayerError(event) {
-    // Error codes: https://developers.google.com/youtube/iframe_api_reference#onError
-    const messages = {
-      2:   'Invalid video ID in show.json.',
-      5:   'This video cannot play in the embedded player.',
-      100: 'Video not found or private.',
-      101: 'Video owner does not allow embedded playback.',
-      150: 'Video owner does not allow embedded playback.',
+    _clearPoll();
+    const MESSAGES = {
+      2:   'Invalid video ID.',
+      5:   'This video cannot play in an embedded player.',
+      100: 'Video not found or is private.',
+      101: 'The video owner has disabled embedded playback.',
+      150: 'The video owner has disabled embedded playback.',
     };
-    const msg = messages[event.data] || `YouTube player error (code ${event.data}).`;
+    const msg = MESSAGES[event.data] || `YouTube player error (code ${event.data}).`;
+    _warn('onError:', msg);
     if (typeof onStateChangeCallback === 'function') {
       onStateChangeCallback('error', msg);
     }
   }
 
-  // Poll every 250ms to detect when we cross the end timestamp.
-  // YouTube's onStateChange does not fire for timestamp-based stops.
+  // Poll every 250ms to detect the end timestamp.
+  // YT.onStateChange does not fire at arbitrary timestamps.
   function _startEndPoll() {
     if (endTime == null) return;
     pollInterval = setInterval(() => {
-      if (!player || typeof player.getCurrentTime !== 'function') return;
-      const current = player.getCurrentTime();
-      if (current >= endTime) {
-        _clearPoll();
-        player.pauseVideo();
-        if (typeof onEndCallback === 'function') {
-          onEndCallback();
+      if (!playerReady) return;
+      try {
+        if (player.getCurrentTime() >= endTime) {
+          _clearPoll();
+          player.pauseVideo();
+          if (typeof onEndCallback === 'function') onEndCallback();
         }
+      } catch (e) {
+        _warn('End-poll error:', e.message);
+        _clearPoll();
       }
     }, 250);
   }
 
   function _clearPoll() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-      pollInterval = null;
-    }
+    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
   }
-
-  // ---- Public API ----
 
   /**
-   * Load a video and seek to start. Does not auto-play.
-   * Call play() after load() if desired.
+   * Execute `fn` immediately if the player is ready, otherwise queue it.
+   * Only the most recent queued action is kept (old ones are stale).
    */
-  function load(videoId, startSeconds, endSeconds) {
-    if (!player) return;
-    endTime = endSeconds;
-    _clearPoll();
-    player.loadVideoById({
-      videoId,
-      startSeconds,
-    });
-    // loadVideoById auto-plays; we pause immediately after cuing
-    // so the moderator controls playback explicitly.
-    player.pauseVideo();
+  function _exec(fn) {
+    if (!player) {
+      _warn('_exec: player object not created yet — is the YT API script loaded?');
+      return;
+    }
+    if (!playerReady) {
+      _log('_exec: player not ready, queuing');
+      pendingAction = fn;
+      return;
+    }
+    try { fn(); } catch (e) { _warn('Player action threw:', e.message); }
   }
 
-  /** Cue (load without playing) and seek. */
+  // ============================================================
+  // Public API
+  // ============================================================
+
+  /**
+   * Cue a video segment without auto-playing.
+   * Safe to call before the player is ready.
+   */
   function cue(videoId, startSeconds, endSeconds) {
-    if (!player) return;
-    endTime = endSeconds;
+    if (!videoId) { _warn('cue() called with empty videoId — skipping'); return; }
+    endTime = (endSeconds != null) ? endSeconds : null;
     _clearPoll();
-    player.cueVideoById({
-      videoId,
-      startSeconds,
+    _exec(() => {
+      _log('cueVideoById', videoId, '@', startSeconds);
+      player.cueVideoById({ videoId, startSeconds: startSeconds || 0 });
     });
   }
 
-  function play() {
-    if (!player) return;
-    player.playVideo();
+  /**
+   * Load and immediately play a video segment.
+   * Safe to call before the player is ready.
+   */
+  function play(videoId, startSeconds, endSeconds) {
+    if (!videoId) { _warn('play() called with empty videoId — skipping'); return; }
+    endTime = (endSeconds != null) ? endSeconds : null;
+    _clearPoll();
+    _exec(() => {
+      _log('loadVideoById', videoId, '@', startSeconds);
+      player.loadVideoById({ videoId, startSeconds: startSeconds || 0 });
+    });
   }
 
+  /** Pause playback. */
   function pause() {
-    if (!player) return;
     _clearPoll();
-    player.pauseVideo();
+    if (!playerReady) return;
+    try { player.pauseVideo(); } catch (e) { _warn('pauseVideo threw:', e.message); }
   }
 
-  /** Seek back to segment start and resume playback. */
+  /** Resume playback on the currently loaded video (no seek). */
+  function resume() {
+    _exec(() => player.playVideo());
+  }
+
+  /**
+   * Seek to `startSeconds` on the currently loaded video and play.
+   * Updates the end-time boundary for the stop poll.
+   */
   function replay(startSeconds, endSeconds) {
-    if (!player) return;
-    endTime = endSeconds;
+    endTime = (endSeconds != null) ? endSeconds : null;
     _clearPoll();
-    player.seekTo(startSeconds, true);
-    player.playVideo();
+    _exec(() => {
+      _log('replay @', startSeconds);
+      player.seekTo(startSeconds || 0, true);
+      player.playVideo();
+    });
   }
 
+  /** True only if the player is in the PLAYING state right now. */
   function isPlaying() {
-    if (!player) return false;
-    return player.getPlayerState() === YT.PlayerState.PLAYING;
+    if (!playerReady) return false;
+    try { return player.getPlayerState() === YT.PlayerState.PLAYING; }
+    catch { return false; }
   }
 
-  function setOnEnd(cb) {
-    onEndCallback = cb;
-  }
+  /** True once the player's onReady event has fired (methods are callable). */
+  function isReady() { return playerReady; }
 
-  function setOnStateChange(cb) {
-    onStateChangeCallback = cb;
-  }
+  function setOnEnd(cb)         { onEndCallback         = cb; }
+  function setOnStateChange(cb) { onStateChangeCallback = cb; }
 
-  function isApiReady() {
-    return apiReady && player !== null;
-  }
+  return { cue, play, pause, resume, replay, isPlaying, isReady, setOnEnd, setOnStateChange };
 
-  return { load, cue, play, pause, replay, isPlaying, setOnEnd, setOnStateChange, isApiReady };
 })();
