@@ -3,12 +3,25 @@
   "eventDate": "2026-06-11",
   "segments": [
     {
-      "title": "AI Agents Are Eating Software",
-      "youtubeId": "sal78ACtGTc",
-      "start": 30,
-      "end": 210,
-      "panelist": "Jane Smith",
-      "question": "What must happen before AI agents can be trusted in production systems?",
+      "title": "Her (2013), Installing OS",
+      "youtubeId": "f9Hg1x-Ctlw",
+      "start": 0,
+      "end": 74,
+      "panelist": "Mike Astle",
+      "question": "Is this already happening?",
+      "backupQuestions": [
+        "What's missing here vs current reality?"
+      ],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "The Matrix Reloaded (2003), Scene: Neo meets the Architect",
+      "youtubeId": "cHZl2naX1Xk",
+      "start": 79,
+      "end": 100,
+      "panelist": "Mike Astle",
+      "question": "Is control happening at a level we don’t see?",
       "backupQuestions": [
         "What is most overhyped about AI agents right now?",
         "What capability is most underestimated?",
@@ -18,63 +31,56 @@
       "discussionMinutes": 5
     },
     {
-      "title": "The Open Source AI Arms Race",
-      "youtubeId": "hOfZa-E5OAY",
-      "start": 15,
-      "end": 195,
-      "panelist": "Marcus Lee",
-      "question": "Does open-sourcing frontier models make the world safer or more dangerous?",
+      "title": "The Lawnmower Man (1992), VR experiment (Jobe enters simulation)",
+      "youtubeId": "cm2FbJE2wsQ",
+      "start": 5544,
+      "end": 5573,
+      "panelist": "Ben Davis",
+      "question": "Is VR about escape or enhancement?",
       "backupQuestions": [
-        "Who actually benefits most when models go open source?",
-        "What is the strongest argument for keeping models closed?",
-        "Is the open/closed debate even the right frame?"
+        "If you could increase your intelligence through simulation, would you?",
+        "Where is the line between simulation and identity?"
       ],
       "moderatorNotes": "This one tends to split the room. Let both sides make their case before synthesizing. Panelist has a strong pro-open position — give the skeptics room first.",
       "discussionMinutes": 6
     },
     {
-      "title": "Vibe Coding: Hype or Paradigm Shift?",
-      "youtubeId": "LCEmiRjPEtQ",
-      "start": 0,
-      "end": 150,
-      "panelist": "Priya Nair",
-      "question": "Will prompt-driven development replace traditional coding skills within a decade?",
+      "title": "The Imitation Game (2014), Turing explaining the imitation game",
+      "youtubeId": "Vs7Lo5MKIws",
+      "start": 1,
+      "end": 85,
+      "panelist": "Jack Teitel",
+      "question": "What does it actually mean for a machine to ‘think’?",
       "backupQuestions": [
-        "What does a senior engineer look like in 2030?",
-        "What parts of coding are impossible to prompt your way through?",
-        "Is this exciting or terrifying — and why?"
+        "Would modern AI pass this test today?"
       ],
-      "moderatorNotes": "Audience likely has strong feelings. Let practitioners speak before theorists. Goal: distinguish hype from structural change. Panelist built a production app with 90% AI-generated code.",
+      "moderatorNotes": "",
       "discussionMinutes": 5
     },
     {
-      "title": "Hardware Hacking for the Curious",
-      "youtubeId": "w0Ft2dYVHuE",
-      "start": 60,
-      "end": 240,
-      "panelist": "Devon Carter",
-      "question": "What is the one piece of hardware knowledge every software developer should have?",
+      "title": "Sneakers (1992), Social engineering",
+      "youtubeId": "pl_D5YpDQKQ",
+      "start": 0,
+      "end": 42,
+      "panelist": "Lou Vega",
+      "question": "What’s the weakest link in security?",
       "backupQuestions": [
-        "Where do software and hardware assumptions most dangerously diverge?",
-        "What project changed how you think about computing?",
-        "What barrier is keeping more people out of hardware hacking?"
+        "Has anything actually changed?"
       ],
-      "moderatorNotes": "Lighter topic — good for post-break energy. Encourage audience members who hack hardware to share. Panelist will likely demo something live; leave space for that.",
+      "moderatorNotes": "",
       "discussionMinutes": 4
     },
     {
-      "title": "Privacy in the Age of Everything-as-a-Service",
-      "youtubeId": "n8Dd5aVXLCc",
-      "start": 45,
-      "end": 225,
-      "panelist": "Sasha Williams",
-      "question": "At what point does convenience cross into surveillance we should refuse?",
+      "title": "WarGames (1983), Shall we play a game?",
+      "youtubeId": "bh2ShAQ4lw0",
+      "start": 1,
+      "end": 48,
+      "panelist": "Lou Vega",
+      "question": "How realistic is accidental escalation today?",
       "backupQuestions": [
-        "Which SaaS tool in your daily stack makes you most uncomfortable — and why do you still use it?",
-        "What would a privacy-respecting version of [popular tool] actually look like?",
-        "Is individual action on privacy pointless without policy change?"
+        "What systems today could behave like this?"
       ],
-      "moderatorNotes": "This can get political — keep grounded in technical realities. Good to name specific tools and behaviors rather than abstractions. End on something actionable.",
+      "moderatorNotes": "",
       "discussionMinutes": 6
     }
   ]
