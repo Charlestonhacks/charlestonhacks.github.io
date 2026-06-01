@@ -1,0 +1,81 @@
+{
+  "eventName": "Hacker Theater",
+  "eventDate": "2026-06-11",
+  "segments": [
+    {
+      "title": "AI Agents Are Eating Software",
+      "youtubeId": "sal78ACtGTc",
+      "start": 30,
+      "end": 210,
+      "panelist": "Jane Smith",
+      "question": "What must happen before AI agents can be trusted in production systems?",
+      "backupQuestions": [
+        "What is most overhyped about AI agents right now?",
+        "What capability is most underestimated?",
+        "Which industries will feel this first — and why?"
+      ],
+      "moderatorNotes": "Guide discussion toward reliability and trust. If the group goes broad, bring them back to: what does a human need to hand off a task completely? Watch the time — this topic tends to run long.",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "The Open Source AI Arms Race",
+      "youtubeId": "hOfZa-E5OAY",
+      "start": 15,
+      "end": 195,
+      "panelist": "Marcus Lee",
+      "question": "Does open-sourcing frontier models make the world safer or more dangerous?",
+      "backupQuestions": [
+        "Who actually benefits most when models go open source?",
+        "What is the strongest argument for keeping models closed?",
+        "Is the open/closed debate even the right frame?"
+      ],
+      "moderatorNotes": "This one tends to split the room. Let both sides make their case before synthesizing. Panelist has a strong pro-open position — give the skeptics room first.",
+      "discussionMinutes": 6
+    },
+    {
+      "title": "Vibe Coding: Hype or Paradigm Shift?",
+      "youtubeId": "LCEmiRjPEtQ",
+      "start": 0,
+      "end": 150,
+      "panelist": "Priya Nair",
+      "question": "Will prompt-driven development replace traditional coding skills within a decade?",
+      "backupQuestions": [
+        "What does a senior engineer look like in 2030?",
+        "What parts of coding are impossible to prompt your way through?",
+        "Is this exciting or terrifying — and why?"
+      ],
+      "moderatorNotes": "Audience likely has strong feelings. Let practitioners speak before theorists. Goal: distinguish hype from structural change. Panelist built a production app with 90% AI-generated code.",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Hardware Hacking for the Curious",
+      "youtubeId": "w0Ft2dYVHuE",
+      "start": 60,
+      "end": 240,
+      "panelist": "Devon Carter",
+      "question": "What is the one piece of hardware knowledge every software developer should have?",
+      "backupQuestions": [
+        "Where do software and hardware assumptions most dangerously diverge?",
+        "What project changed how you think about computing?",
+        "What barrier is keeping more people out of hardware hacking?"
+      ],
+      "moderatorNotes": "Lighter topic — good for post-break energy. Encourage audience members who hack hardware to share. Panelist will likely demo something live; leave space for that.",
+      "discussionMinutes": 4
+    },
+    {
+      "title": "Privacy in the Age of Everything-as-a-Service",
+      "youtubeId": "n8Dd5aVXLCc",
+      "start": 45,
+      "end": 225,
+      "panelist": "Sasha Williams",
+      "question": "At what point does convenience cross into surveillance we should refuse?",
+      "backupQuestions": [
+        "Which SaaS tool in your daily stack makes you most uncomfortable — and why do you still use it?",
+        "What would a privacy-respecting version of [popular tool] actually look like?",
+        "Is individual action on privacy pointless without policy change?"
+      ],
+      "moderatorNotes": "This can get political — keep grounded in technical realities. Good to name specific tools and behaviors rather than abstractions. End on something actionable.",
+      "discussionMinutes": 6
+    }
+  ]
+}
