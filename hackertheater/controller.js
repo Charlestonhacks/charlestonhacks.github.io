@@ -3,6 +3,7 @@
  *
  * Loads show.json, manages segment state, drives the UI,
  * handles keyboard shortcuts, and coordinates the timer.
+ * Exposes window.ShowController for editor.js.
  * Depends on clips.js being loaded first.
  */
 
@@ -11,15 +12,17 @@
   // 1. LOAD SHOW DATA
   // ============================================================
 
-  let show = null;
-  let segments = [];
-  let currentIndex = 0;
+  let show          = null;
+  let publishedShow = null; // immutable reference to the fetched show.json
+  let segments      = [];
+  let currentIndex  = 0;
 
   try {
     const resp = await fetch('./show.json');
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    show = await resp.json();
-    segments = show.segments || [];
+    show          = await resp.json();
+    publishedShow = JSON.parse(JSON.stringify(show)); // deep-frozen reference
+    segments      = show.segments || [];
     if (segments.length === 0) throw new Error('show.json contains no segments.');
   } catch (err) {
     showError(`Failed to load show.json: ${err.message}`);
@@ -33,49 +36,30 @@
   const $ = id => document.getElementById(id);
 
   const dom = {
-    // Header
-    eventName:        $('event-name'),
-    eventDate:        $('event-date'),
-    segmentLabel:     $('segment-label'),
-    progressDots:     $('progress-dots'),
-
-    // Segment info
-    segTitle:         $('seg-title'),
-    segPanelist:      $('seg-panelist'),
-    segTimestamps:    $('seg-timestamps'),
-    segDuration:      $('seg-duration'),
-
-    // Question card
-    questionCard:     $('question-card'),
-    questionText:     $('question-text'),
-
-    // Timer
-    timerDisplay:     $('timer-display'),
-    timerBar:         $('timer-bar'),
-
-    // Playback status
-    statusDot:        $('status-dot'),
-    statusText:       $('status-text'),
-
-    // Queue
-    queueList:        $('queue-list'),
-
-    // Notes
-    notesPanel:       $('notes-panel'),
-    notesText:        $('notes-text'),
-    notesBackup:      $('notes-backup'),
-    notesPanelist:    $('notes-panelist'),
-
-    // Overlays
-    blackOverlay:     $('black-overlay'),
-    intermOverlay:    $('interm-overlay'),
-    intermClock:      $('interm-clock'),
-
-    // Error
-    errorBanner:      $('error-banner'),
-
-    // Video placeholder
-    placeholder:      $('video-placeholder'),
+    eventName:     $('event-name'),
+    eventDate:     $('event-date'),
+    segmentLabel:  $('segment-label'),
+    progressDots:  $('progress-dots'),
+    segTitle:      $('seg-title'),
+    segPanelist:   $('seg-panelist'),
+    segTimestamps: $('seg-timestamps'),
+    segDuration:   $('seg-duration'),
+    questionCard:  $('question-card'),
+    questionText:  $('question-text'),
+    timerDisplay:  $('timer-display'),
+    timerBar:      $('timer-bar'),
+    statusDot:     $('status-dot'),
+    statusText:    $('status-text'),
+    queueList:     $('queue-list'),
+    notesPanel:    $('notes-panel'),
+    notesText:     $('notes-text'),
+    notesBackup:   $('notes-backup'),
+    notesPanelist: $('notes-panelist'),
+    blackOverlay:  $('black-overlay'),
+    intermOverlay: $('interm-overlay'),
+    intermClock:   $('interm-clock'),
+    errorBanner:   $('error-banner'),
+    placeholder:   $('video-placeholder'),
   };
 
   // ============================================================
@@ -83,15 +67,15 @@
   // ============================================================
 
   const state = {
-    questionVisible: false,
-    notesVisible:    true,
-    timerRunning:    false,
-    timerTotal:      0,
-    timerRemaining:  0,
-    timerHandle:     null,
-    completed:       new Set(),
-    blackActive:     false,
-    intermActive:    false,
+    questionVisible:   false,
+    notesVisible:      true,
+    timerRunning:      false,
+    timerTotal:        0,
+    timerRemaining:    0,
+    timerHandle:       null,
+    completed:         new Set(),
+    blackActive:       false,
+    intermActive:      false,
     intermClockHandle: null,
   };
 
@@ -99,11 +83,15 @@
   // 4. INIT HEADER
   // ============================================================
 
-  dom.eventName.textContent = show.eventName || 'Hacker Theater';
-  dom.eventDate.textContent = formatDate(show.eventDate);
+  function _renderHeader() {
+    dom.eventName.textContent = show.eventName || 'Hacker Theater';
+    dom.eventDate.textContent = formatDate(show.eventDate);
+  }
+
+  _renderHeader();
 
   // ============================================================
-  // 5. BUILD QUEUE
+  // 5. QUEUE
   // ============================================================
 
   function buildQueue() {
@@ -127,7 +115,6 @@
       item.addEventListener('keydown', e => {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jumpTo(i); }
       });
-
       dom.queueList.appendChild(item);
     });
 
@@ -138,15 +125,13 @@
     const items = dom.queueList.querySelectorAll('.queue-item');
     items.forEach((el, i) => {
       el.classList.remove('completed', 'current');
-      if (state.completed.has(i))     el.classList.add('completed');
-      else if (i === currentIndex)    el.classList.add('current');
+      if (state.completed.has(i))  el.classList.add('completed');
+      else if (i === currentIndex) el.classList.add('current');
     });
 
-    // Scroll current item into view
     const current = dom.queueList.querySelector('.queue-item.current');
     if (current) current.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
-    // Progress dots
     dom.progressDots.innerHTML = '';
     segments.forEach((_, i) => {
       const dot = document.createElement('div');
@@ -170,41 +155,34 @@
 
     const seg = segments[index];
 
-    // Segment info
-    dom.segTitle.textContent     = seg.title    || '—';
-    dom.segPanelist.textContent  = seg.panelist ? `↳ ${seg.panelist}` : '';
+    dom.segTitle.textContent      = seg.title    || '—';
+    dom.segPanelist.textContent   = seg.panelist ? `↳ ${seg.panelist}` : '';
     dom.segTimestamps.textContent = `${fmtTime(seg.start || 0)} → ${fmtTime(seg.end || 0)}`;
     const clipLen = (seg.end || 0) - (seg.start || 0);
     dom.segDuration.textContent = `Clip length: ${fmtTime(clipLen)}`;
 
-    // Question card — hide and reset
     state.questionVisible = false;
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.remove('hidden-text');
     dom.questionText.textContent = seg.question || '(No question provided)';
-    dom.questionCard.classList.add('hidden-card');
     hideQuestionCard();
 
-    // Timer — reset to segment duration
     const mins = seg.discussionMinutes || 5;
     state.timerTotal     = mins * 60;
     state.timerRemaining = state.timerTotal;
     renderTimer(state.timerRemaining, state.timerTotal);
 
-    // Moderator notes
-    dom.notesText.textContent     = seg.moderatorNotes  || '(No notes)';
-    dom.notesPanelist.textContent = seg.panelist        || '—';
-    dom.notesBackup.innerHTML = '';
+    dom.notesText.textContent     = seg.moderatorNotes || '(No notes)';
+    dom.notesPanelist.textContent = seg.panelist       || '—';
+    dom.notesBackup.innerHTML     = '';
     (seg.backupQuestions || []).forEach(q => {
       const li = document.createElement('li');
       li.textContent = q;
       dom.notesBackup.appendChild(li);
     });
 
-    // Cue video (do not play yet)
     Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
 
-    // Set up end-of-clip handler
     Clips.setOnEnd(() => {
       setStatus('ended', 'Clip ended');
       state.completed.add(index);
@@ -217,9 +195,7 @@
     refreshQueue();
     setStatus('paused', 'Ready — press Play');
 
-    if (autoPlay) {
-      setTimeout(() => playClip(), 300);
-    }
+    if (autoPlay) setTimeout(() => playClip(), 300);
   }
 
   function jumpTo(index) {
@@ -228,14 +204,38 @@
   }
 
   // ============================================================
-  // 7. PLAYBACK CONTROLS
+  // 7. REPLACE SHOW (called by editor.js via ShowController)
+  // ============================================================
+
+  function replaceShow(newShow) {
+    if (!newShow || !Array.isArray(newShow.segments)) return;
+    if (Clips.isPlaying()) Clips.pause();
+
+    show     = JSON.parse(JSON.stringify(newShow));
+    segments = show.segments;
+
+    _renderHeader();
+    state.completed = new Set();
+
+    // If current segment index is now out of range, reset to first
+    if (currentIndex >= segments.length) currentIndex = 0;
+
+    buildQueue();
+    if (segments.length > 0) {
+      loadSegment(currentIndex);
+    } else {
+      setStatus('paused', 'No segments loaded');
+    }
+  }
+
+  // ============================================================
+  // 8. PLAYBACK CONTROLS
   // ============================================================
 
   function playClip() {
     const seg = segments[currentIndex];
     if (!seg) return;
     Clips.load(seg.youtubeId, seg.start || 0, seg.end || 0);
-    // Brief pause after load to let player initialize, then play
     setTimeout(() => {
       Clips.play();
       setStatus('playing', 'Playing');
@@ -263,7 +263,7 @@
   }
 
   // ============================================================
-  // 8. QUESTION CARD
+  // 9. QUESTION CARD
   // ============================================================
 
   function revealQuestionCard() {
@@ -271,14 +271,14 @@
     dom.questionCard.classList.remove('hidden-card');
     dom.questionCard.classList.add('revealed');
     dom.questionText.classList.remove('hidden-text');
-    document.getElementById('btn-show-q').textContent = 'Hide Question';
+    $('btn-show-q').textContent = 'Hide Question';
   }
 
   function hideQuestionCard() {
     state.questionVisible = false;
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.add('hidden-text');
-    document.getElementById('btn-show-q').textContent = 'Show Question';
+    $('btn-show-q').textContent = 'Show Question';
   }
 
   function toggleQuestion() {
@@ -287,7 +287,7 @@
   }
 
   function randomBackupQuestion() {
-    const seg = segments[currentIndex];
+    const seg     = segments[currentIndex];
     const backups = seg.backupQuestions || [];
     if (backups.length === 0) { toast('No backup questions defined.', 'info'); return; }
     const q = backups[Math.floor(Math.random() * backups.length)];
@@ -297,13 +297,13 @@
   }
 
   // ============================================================
-  // 9. DISCUSSION TIMER
+  // 10. DISCUSSION TIMER
   // ============================================================
 
   function startTimer() {
     if (state.timerRunning) return;
     state.timerRunning = true;
-    state.timerHandle = setInterval(tickTimer, 1000);
+    state.timerHandle  = setInterval(tickTimer, 1000);
   }
 
   function pauseTimer() {
@@ -336,33 +336,23 @@
   function renderTimer(remaining, total) {
     const display = dom.timerDisplay;
     const bar     = dom.timerBar;
+    const mins    = Math.floor(remaining / 60);
+    const secs    = remaining % 60;
 
-    const mins = Math.floor(remaining / 60);
-    const secs = remaining % 60;
     display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
 
-    // Warning classes
     display.classList.remove('warn-60', 'warn-30', 'warn-0');
     bar.classList.remove('warn-60', 'warn-30', 'warn-0');
 
-    if (remaining === 0) {
-      display.classList.add('warn-0');
-      bar.classList.add('warn-0');
-    } else if (remaining <= 30) {
-      display.classList.add('warn-30');
-      bar.classList.add('warn-30');
-    } else if (remaining <= 60) {
-      display.classList.add('warn-60');
-      bar.classList.add('warn-60');
-    }
+    if (remaining === 0)       { display.classList.add('warn-0');  bar.classList.add('warn-0');  }
+    else if (remaining <= 30)  { display.classList.add('warn-30'); bar.classList.add('warn-30'); }
+    else if (remaining <= 60)  { display.classList.add('warn-60'); bar.classList.add('warn-60'); }
 
-    // Progress bar
-    const pct = total > 0 ? (remaining / total) * 100 : 0;
-    bar.style.width = `${pct}%`;
+    bar.style.width = `${total > 0 ? (remaining / total) * 100 : 0}%`;
   }
 
   // ============================================================
-  // 10. BLACK SCREEN / INTERMISSION
+  // 11. BLACK SCREEN / INTERMISSION
   // ============================================================
 
   function activateBlack() {
@@ -392,15 +382,16 @@
 
   function updateIntermClock() {
     const now = new Date();
-    dom.intermClock.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    dom.intermClock.textContent = now.toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+    });
   }
 
-  // Dismiss either overlay on any key
   document.addEventListener('keydown', e => {
     if (state.blackActive || state.intermActive) {
       deactivateBlack();
       deactivateIntermission();
-      return; // swallow event; don't trigger other shortcuts
+      return;
     }
     handleShortcut(e);
   });
@@ -409,25 +400,25 @@
   dom.intermOverlay.addEventListener('click', deactivateIntermission);
 
   // ============================================================
-  // 11. MODERATOR NOTES TOGGLE
+  // 12. MODERATOR NOTES TOGGLE
   // ============================================================
 
   function toggleNotes() {
     state.notesVisible = !state.notesVisible;
-    const panel = dom.notesPanel;
-    if (state.notesVisible) panel.classList.remove('collapsed');
-    else                    panel.classList.add('collapsed');
+    if (state.notesVisible) dom.notesPanel.classList.remove('collapsed');
+    else                    dom.notesPanel.classList.add('collapsed');
   }
 
-  document.getElementById('notes-toggle-btn').addEventListener('click', toggleNotes);
+  $('notes-toggle-btn').addEventListener('click', toggleNotes);
 
   // ============================================================
-  // 12. KEYBOARD SHORTCUTS
+  // 13. KEYBOARD SHORTCUTS
   // ============================================================
 
   function handleShortcut(e) {
-    // Ignore when typing in an input/textarea
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+    // Suppress all shortcuts while the Show Editor is open
+    if (window.Editor && window.Editor.isOpen()) return;
 
     switch (e.key) {
       case ' ':
@@ -435,53 +426,35 @@
         if (Clips.isPlaying()) pauseClip();
         else                   playClip();
         break;
-      case 'ArrowRight':
-        e.preventDefault();
-        nextSegment();
-        break;
-      case 'ArrowLeft':
-        e.preventDefault();
-        prevSegment();
-        break;
-      case 'q': case 'Q':
-        toggleQuestion();
-        break;
-      case 'r': case 'R':
-        replayClip();
-        break;
-      case 'n': case 'N':
-        toggleNotes();
-        break;
-      case 'f': case 'F':
-        requestFullscreen();
-        break;
-      case 'b': case 'B':
-        activateBlack();
-        break;
-      case 'i': case 'I':
-        activateIntermission();
-        break;
+      case 'ArrowRight': e.preventDefault(); nextSegment();        break;
+      case 'ArrowLeft':  e.preventDefault(); prevSegment();        break;
+      case 'q': case 'Q': toggleQuestion();                        break;
+      case 'r': case 'R': replayClip();                            break;
+      case 'n': case 'N': toggleNotes();                           break;
+      case 'f': case 'F': requestFullscreen();                     break;
+      case 'b': case 'B': activateBlack();                         break;
+      case 'i': case 'I': activateIntermission();                  break;
     }
   }
 
   // ============================================================
-  // 13. FULLSCREEN
+  // 14. FULLSCREEN
   // ============================================================
 
   function requestFullscreen() {
     const el = document.querySelector('.video-wrapper');
     if (!el) return;
-    if (el.requestFullscreen)       el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+    if      (el.requestFullscreen)          el.requestFullscreen();
+    else if (el.webkitRequestFullscreen)    el.webkitRequestFullscreen();
+    else if (el.mozRequestFullScreen)       el.mozRequestFullScreen();
   }
 
   // ============================================================
-  // 14. PLAYBACK STATUS
+  // 15. PLAYBACK STATUS
   // ============================================================
 
-  function setStatus(state, text) {
-    dom.statusDot.className = `status-dot ${state}`;
+  function setStatus(statusClass, text) {
+    dom.statusDot.className    = `status-dot ${statusClass}`;
     dom.statusText.textContent = text;
   }
 
@@ -489,57 +462,48 @@
     if (ytState === 'error') {
       setStatus('error', errMsg || 'Playback error');
       showError(errMsg || 'YouTube playback error. Check the video ID in show.json.');
-    } else if (ytState === YT.PlayerState.PLAYING) {
-      setStatus('playing', 'Playing');
-    } else if (ytState === YT.PlayerState.PAUSED) {
-      setStatus('paused', 'Paused');
-    } else if (ytState === YT.PlayerState.ENDED) {
-      setStatus('ended', 'Ended');
-    } else if (ytState === YT.PlayerState.BUFFERING) {
-      setStatus('playing', 'Buffering…');
-    }
+    } else if (ytState === YT.PlayerState.PLAYING)    { setStatus('playing', 'Playing');     }
+    else if   (ytState === YT.PlayerState.PAUSED)     { setStatus('paused',  'Paused');      }
+    else if   (ytState === YT.PlayerState.ENDED)      { setStatus('ended',   'Ended');       }
+    else if   (ytState === YT.PlayerState.BUFFERING)  { setStatus('playing', 'Buffering…'); }
   });
 
   // ============================================================
-  // 15. WIRE CONTROL BUTTONS
+  // 16. WIRE CONTROL BUTTONS
   // ============================================================
 
   function wireBtn(id, fn) {
-    const el = document.getElementById(id);
+    const el = $(id);
     if (el) el.addEventListener('click', fn);
   }
 
-  wireBtn('btn-play',       playClip);
-  wireBtn('btn-pause',      pauseClip);
-  wireBtn('btn-replay',     replayClip);
-  wireBtn('btn-prev',       prevSegment);
-  wireBtn('btn-next',       nextSegment);
-  wireBtn('btn-show-q',     toggleQuestion);
-  wireBtn('btn-backup-q',   randomBackupQuestion);
-  wireBtn('btn-toggle-n',   toggleNotes);
-  wireBtn('btn-fullscreen', requestFullscreen);
-  wireBtn('btn-black',      activateBlack);
-  wireBtn('btn-interm',     activateIntermission);
-  wireBtn('btn-timer-start',startTimer);
-  wireBtn('btn-timer-pause',pauseTimer);
-  wireBtn('btn-timer-reset',resetTimer);
+  wireBtn('btn-play',        playClip);
+  wireBtn('btn-pause',       pauseClip);
+  wireBtn('btn-replay',      replayClip);
+  wireBtn('btn-prev',        prevSegment);
+  wireBtn('btn-next',        nextSegment);
+  wireBtn('btn-show-q',      toggleQuestion);
+  wireBtn('btn-backup-q',    randomBackupQuestion);
+  wireBtn('btn-toggle-n',    toggleNotes);
+  wireBtn('btn-fullscreen',  requestFullscreen);
+  wireBtn('btn-black',       activateBlack);
+  wireBtn('btn-interm',      activateIntermission);
+  wireBtn('btn-timer-start', startTimer);
+  wireBtn('btn-timer-pause', pauseTimer);
+  wireBtn('btn-timer-reset', resetTimer);
 
   // ============================================================
-  // 16. TOAST NOTIFICATIONS
+  // 17. TOAST / ERROR
   // ============================================================
 
   function toast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const el = document.createElement('div');
-    el.className = `toast toast--${type}`;
-    el.textContent = message;
+    const container = $('toast-container');
+    const el        = document.createElement('div');
+    el.className    = `toast toast--${type}`;
+    el.textContent  = message;
     container.appendChild(el);
     setTimeout(() => el.remove(), 3500);
   }
-
-  // ============================================================
-  // 17. ERROR DISPLAY
-  // ============================================================
 
   function showError(msg) {
     dom.errorBanner.textContent = msg;
@@ -581,7 +545,23 @@
   buildQueue();
   loadSegment(0);
 
-  // Show a boot toast once the YouTube API is ready
+  // Expose API for editor.js
+  window.ShowController = {
+    getShow:         () => JSON.parse(JSON.stringify({ ...show, segments })),
+    getPublishedShow: () => JSON.parse(JSON.stringify(publishedShow)),
+    replaceShow,
+    jumpToSegment:   jumpTo,
+    previewSegment:  (seg) => {
+      if (!seg || !seg.youtubeId) return;
+      Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
+      setStatus('paused', `Preview: ${seg.title || '—'}`);
+    },
+  };
+
+  // Signal editor.js that ShowController is ready
+  document.dispatchEvent(new CustomEvent('showcontroller:ready'));
+
+  // Boot toast once the YouTube IFrame player is ready
   const apiCheckInterval = setInterval(() => {
     if (Clips.isApiReady()) {
       clearInterval(apiCheckInterval);
