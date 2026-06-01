@@ -77,6 +77,12 @@
     blackActive:       false,
     intermActive:      false,
     intermClockHandle: null,
+    // Explicit clip lifecycle: idle → playing ↔ paused → ended
+    // 'idle'   = segment loaded but never played yet
+    // 'playing'= actively playing
+    // 'paused' = paused mid-playback (resume resumes position)
+    // 'ended'  = reached configured end timestamp (play restarts from start)
+    clipState:         'idle',
   };
 
   // ============================================================
@@ -194,7 +200,10 @@
       Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
     }
 
+    state.clipState = 'idle';
+
     Clips.setOnEnd(() => {
+      state.clipState = 'ended';
       setStatus('ended', 'Clip ended');
       state.completed.add(index);
       refreshQueue();
@@ -208,7 +217,7 @@
 
     _broadcast('loadSegment', { index, segment: seg, totalSegments: segments.length });
 
-    if (autoPlay) setTimeout(() => playClip(), 300);
+    if (autoPlay) setTimeout(() => playClipFromStart(), 300);
   }
 
   function jumpTo(index) {
@@ -328,22 +337,43 @@
   // 8. PLAYBACK CONTROLS
   // ============================================================
 
-  function playClip() {
+  // Load from segment start and play (first play, or after clip ended).
+  function playClipFromStart() {
     const seg = segments[currentIndex];
     if (!seg) return;
-    if (!seg.youtubeId) {
-      toast('No YouTube video ID on this segment.', 'error');
-      return;
-    }
-    // Clips.play() loads and immediately starts playback.
-    // No setTimeout needed — the player's onStateChange callback
-    // updates the status indicator when PLAYING fires.
+    if (!seg.youtubeId) { toast('No YouTube video ID on this segment.', 'error'); return; }
+    state.clipState = 'playing';
     Clips.play(seg.youtubeId, seg.start || 0, seg.end || 0);
     setStatus('playing', 'Loading…');
     _broadcast('play', { videoId: seg.youtubeId, start: seg.start || 0, end: seg.end || 0 });
   }
 
+  // Resume from the current paused position — no seek.
+  function resumeClip() {
+    const seg = segments[currentIndex];
+    if (!seg || !seg.youtubeId) return;
+    state.clipState = 'playing';
+    Clips.resume();
+    setStatus('playing', 'Playing');
+    _broadcast('resume');
+  }
+
+  // Play Clip button: resume if paused, restart if idle/ended, no-op if already playing.
+  function playOrResume() {
+    if (state.clipState === 'playing') return;
+    if (state.clipState === 'paused')  { resumeClip(); return; }
+    playClipFromStart(); // idle or ended → start from segment start
+  }
+
+  // Space bar: toggle between playing and paused.
+  function togglePlayPause() {
+    if (state.clipState === 'playing') { pauseClip(); return; }
+    if (state.clipState === 'paused')  { resumeClip(); return; }
+    playClipFromStart(); // idle or ended → start from segment start
+  }
+
   function pauseClip() {
+    state.clipState = 'paused';
     Clips.pause();
     setStatus('paused', 'Paused');
     _broadcast('pause');
@@ -352,6 +382,7 @@
   function replayClip() {
     const seg = segments[currentIndex];
     if (!seg || !seg.youtubeId) return;
+    state.clipState = 'playing';
     Clips.replay(seg.start || 0, seg.end || 0);
     setStatus('playing', 'Replaying');
     _broadcast('replay', { start: seg.start || 0, end: seg.end || 0 });
@@ -557,8 +588,7 @@
     switch (e.code) {
       case 'Space':
         e.preventDefault();
-        if (Clips.isPlaying()) pauseClip();
-        else                   playClip();
+        togglePlayPause();
         break;
       case 'ArrowRight': e.preventDefault(); nextSegment();    break;
       case 'ArrowLeft':  e.preventDefault(); prevSegment();    break;
@@ -603,18 +633,27 @@
   }
 
   Clips.setOnStateChange((ytState, errMsg) => {
-    // Guard: YT is always defined when this fires from the player,
-    // but be explicit in case of edge cases during API load failure.
     if (ytState === 'error') {
       setStatus('error', errMsg || 'Playback error');
       showError(errMsg || 'YouTube playback error. Check the video ID in show.json.');
       return;
     }
     if (typeof YT === 'undefined') return;
-    if      (ytState === YT.PlayerState.PLAYING)   { setStatus('playing', 'Playing');    }
-    else if (ytState === YT.PlayerState.PAUSED)    { setStatus('paused',  'Paused');     }
-    else if (ytState === YT.PlayerState.ENDED)     { setStatus('ended',   'Ended');      }
-    else if (ytState === YT.PlayerState.BUFFERING) { setStatus('playing', 'Buffering…'); }
+    if (ytState === YT.PlayerState.PLAYING) {
+      state.clipState = 'playing';
+      setStatus('playing', 'Playing');
+    } else if (ytState === YT.PlayerState.PAUSED) {
+      // Don't overwrite 'ended': the end-poll calls player.pauseVideo() which
+      // fires this PAUSED event before our onEnd callback sets clipState to
+      // 'ended'. Guard here so the state machine stays correct.
+      if (state.clipState !== 'ended') state.clipState = 'paused';
+      setStatus('paused', 'Paused');
+    } else if (ytState === YT.PlayerState.ENDED) {
+      state.clipState = 'ended';
+      setStatus('ended', 'Ended');
+    } else if (ytState === YT.PlayerState.BUFFERING) {
+      setStatus('playing', 'Buffering…');
+    }
   });
 
   // ============================================================
@@ -626,7 +665,7 @@
     if (el) el.addEventListener('click', fn);
   }
 
-  wireBtn('btn-play',        playClip);
+  wireBtn('btn-play',        playOrResume);
   wireBtn('btn-pause',       pauseClip);
   wireBtn('btn-replay',      replayClip);
   wireBtn('btn-prev',        prevSegment);
