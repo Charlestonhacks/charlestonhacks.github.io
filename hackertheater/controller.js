@@ -229,8 +229,9 @@
   // 7. PROJECTOR CHANNEL
   // ============================================================
 
-  let _lastTimerSave    = 0;
+  let _lastTimerSave     = 0;
   let _lastProjectorPing = 0;
+  let projectorConnected = false; // true while a display window is actively pinging us
 
   function _buildSnapshot() {
     const seg = segments[currentIndex] || null;
@@ -295,14 +296,25 @@
   }
 
   function _updateProjectorStatus(connected) {
+    const wasConnected = projectorConnected;
+    projectorConnected = connected;
+
+    // Mute/unmute the local player on connection-state transitions so the
+    // projector display is the sole audio source during live presentation.
+    if (connected && !wasConnected) {
+      Clips.mute();
+    } else if (!connected && wasConnected) {
+      Clips.unmute();
+    }
+
     const dot   = $('proj-dot');
     const label = $('proj-label');
     if (!dot || !label) return;
     if (connected) {
-      dot.className   = 'proj-dot proj-dot--connected';
+      dot.className     = 'proj-dot proj-dot--connected';
       label.textContent = 'Projector connected';
     } else {
-      dot.className   = 'proj-dot';
+      dot.className     = 'proj-dot';
       label.textContent = 'Projector not connected';
     }
   }

@@ -16,6 +16,7 @@ const Clips = (() => {
   let player        = null;  // YT.Player object (set at API ready)
   let playerReady   = false; // true only after onReady fires
   let pendingAction = null;  // latest queued action, executed on onReady
+  let pendingMute   = false; // if mute() is called before ready, apply it on onReady
   let pollInterval  = null;
   let endTime       = null;
   let onEndCallback          = null;
@@ -70,6 +71,12 @@ const Clips = (() => {
       const action  = pendingAction;
       pendingAction = null;
       try { action(); } catch (e) { _warn('Pending action threw:', e.message); }
+    }
+
+    // Apply a mute that was requested before the player was ready
+    if (pendingMute) {
+      pendingMute = false;
+      try { player.mute(); } catch (e) { _warn('Deferred mute threw:', e.message); }
     }
   }
 
@@ -207,9 +214,28 @@ const Clips = (() => {
   /** True once the player's onReady event has fired (methods are callable). */
   function isReady() { return playerReady; }
 
+  /** Mute the player. Safe to call before ready — applied on onReady. */
+  function mute() {
+    if (!playerReady) { pendingMute = true; return; }
+    try { player.mute(); } catch (e) { _warn('mute threw:', e.message); }
+  }
+
+  /** Unmute the player. */
+  function unmute() {
+    pendingMute = false;
+    if (!playerReady) return;
+    try { player.unMute(); } catch (e) { _warn('unMute threw:', e.message); }
+  }
+
+  /** Returns true if the player is currently muted. */
+  function isMuted() {
+    if (!playerReady) return false;
+    try { return player.isMuted(); } catch { return false; }
+  }
+
   function setOnEnd(cb)         { onEndCallback         = cb; }
   function setOnStateChange(cb) { onStateChangeCallback = cb; }
 
-  return { cue, play, pause, resume, replay, isPlaying, isReady, setOnEnd, setOnStateChange };
+  return { cue, play, pause, resume, replay, isPlaying, isReady, mute, unmute, isMuted, setOnEnd, setOnStateChange };
 
 })();
