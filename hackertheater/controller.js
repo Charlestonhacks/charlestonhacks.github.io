@@ -499,15 +499,6 @@
     });
   }
 
-  document.addEventListener('keydown', e => {
-    if (state.blackActive || state.intermActive) {
-      deactivateBlack();
-      deactivateIntermission();
-      return;
-    }
-    handleShortcut(e);
-  });
-
   dom.blackOverlay.addEventListener('click', deactivateBlack);
   dom.intermOverlay.addEventListener('click', deactivateIntermission);
 
@@ -527,26 +518,67 @@
   // 13. KEYBOARD SHORTCUTS
   // ============================================================
 
-  function handleShortcut(e) {
-    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-    // Suppress all shortcuts while the Show Editor is open
-    if (window.Editor && window.Editor.isOpen()) return;
+  // Set to true to log every handled shortcut to the console.
+  const DEBUG_SHORTCUTS = false;
 
-    switch (e.key) {
-      case ' ':
+  /**
+   * Returns true when a keydown event should NOT trigger a shortcut.
+   * Reasons: modifier key held, focus in a form field or contenteditable,
+   * or the Show Editor modal is open.
+   */
+  function shouldIgnoreShortcut(e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return true;
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (e.target.isContentEditable) return true;
+    if (window.Editor && window.Editor.isOpen()) return true;
+    return false;
+  }
+
+  /**
+   * Single global keydown handler — registered exactly once on window.
+   * Uses event.code (physical key position, layout-independent) for all
+   * shortcut matching so Shift+key variants and non-QWERTY layouts work.
+   */
+  function handleGlobalShortcut(e) {
+    // Overlay dismissal: any key collapses the overlay.
+    // Still prevent default for Space/Arrows so the page doesn't scroll.
+    if (state.blackActive || state.intermActive) {
+      if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+        e.preventDefault();
+      }
+      deactivateBlack();
+      deactivateIntermission();
+      return;
+    }
+
+    if (shouldIgnoreShortcut(e)) return;
+
+    switch (e.code) {
+      case 'Space':
         e.preventDefault();
         if (Clips.isPlaying()) pauseClip();
         else                   playClip();
         break;
-      case 'ArrowRight': e.preventDefault(); nextSegment();        break;
-      case 'ArrowLeft':  e.preventDefault(); prevSegment();        break;
-      case 'q': case 'Q': toggleQuestion();                        break;
-      case 'r': case 'R': replayClip();                            break;
-      case 'n': case 'N': toggleNotes();                           break;
-      case 'f': case 'F': requestFullscreen();                     break;
-      case 'b': case 'B': activateBlack();                         break;
-      case 'i': case 'I': activateIntermission();                  break;
+      case 'ArrowRight': e.preventDefault(); nextSegment();    break;
+      case 'ArrowLeft':  e.preventDefault(); prevSegment();    break;
+      case 'KeyQ':       toggleQuestion();                     break;
+      case 'KeyR':       replayClip();                         break;
+      case 'KeyN':       toggleNotes();                        break;
+      case 'KeyF':       requestFullscreen();                  break;
+      case 'KeyB':       activateBlack();                      break;
+      case 'KeyI':       activateIntermission();               break;
+      default: return; // unhandled key — skip DEBUG log
     }
+
+    if (DEBUG_SHORTCUTS) console.log('[Shortcuts] handled:', e.code);
+  }
+
+  // Guard: register exactly once even if this IIFE were somehow re-evaluated.
+  let _shortcutRegistered = false;
+  if (!_shortcutRegistered) {
+    _shortcutRegistered = true;
+    window.addEventListener('keydown', handleGlobalShortcut);
   }
 
   // ============================================================
