@@ -304,6 +304,12 @@
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
+  Channel.on('resume', () => {
+    _noteActivity();
+    if (!playerReady) return;
+    try { player.playVideo(); } catch (e) { console.warn('[Display] resume error:', e.message); }
+  });
+
   Channel.on('replay', (p) => {
     _noteActivity();
     if (!playerReady) return;
