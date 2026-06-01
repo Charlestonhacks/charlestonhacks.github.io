@@ -32,11 +32,57 @@
     fsBlocked:    $('fs-blocked'),
   };
 
+  // Set to true to log timing events to the console.
+  const DEBUG_TIMING = false;
+
   // ---- YouTube player ----
 
   let player      = null;
   let playerReady = false;
   let pendingVideoAction = null;   // queued until playerReady
+
+  // ---- End-time enforcement ----
+
+  let endTime       = null;  // current clip end timestamp (seconds), null = no limit
+  let _endPollHandle = null;
+
+  function _startEndPoll() {
+    _clearEndPoll(); // prevent duplicate intervals
+    if (endTime == null || !playerReady) return;
+    if (DEBUG_TIMING) console.log('[Display/Timing] poll start, endTime=', endTime);
+    _endPollHandle = setInterval(() => {
+      if (!playerReady) return;
+      try {
+        const cur = player.getCurrentTime();
+        if (DEBUG_TIMING) console.log('[Display/Timing] currentTime=', cur.toFixed(2), '/ endTime=', endTime);
+        if (cur >= endTime - 0.15) {
+          if (DEBUG_TIMING) console.log('[Display/Timing] auto-stop fired at', cur.toFixed(2));
+          _clearEndPoll();
+          player.pauseVideo();
+          _onDisplayClipEnded();
+        }
+      } catch (e) {
+        console.warn('[Display] end-poll error:', e.message);
+        _clearEndPoll();
+      }
+    }, 250);
+  }
+
+  function _clearEndPoll() {
+    if (_endPollHandle) {
+      clearInterval(_endPollHandle);
+      _endPollHandle = null;
+      if (DEBUG_TIMING) console.log('[Display/Timing] poll stopped');
+    }
+  }
+
+  // Called when the projector's end-poll determines the clip is done.
+  function _onDisplayClipEnded() {
+    // Reveal the question if it isn't already showing
+    dom.questionCard.classList.add('revealed');
+    dom.questionText.classList.remove('blurred');
+    document.body.classList.add('question-visible');
+  }
 
   window.onYouTubeIframeAPIReady = () => {
     try {
@@ -54,8 +100,9 @@
           disablekb:      1,
         },
         events: {
-          onReady: _onPlayerReady,
-          onError: _onPlayerError,
+          onReady:       _onPlayerReady,
+          onError:       _onPlayerError,
+          onStateChange: _onPlayerStateChange,
         },
       });
     } catch (e) {
@@ -75,6 +122,23 @@
 
   function _onPlayerError(ev) {
     console.warn('[Display] YT player error:', ev.data);
+    _clearEndPoll();
+  }
+
+  // Drive end-poll start/stop from actual player state so buffering pauses
+  // don't kill the interval — the poll restarts automatically when PLAYING fires.
+  function _onPlayerStateChange(event) {
+    if (typeof YT === 'undefined') return;
+    const s = event.data;
+    if (s === YT.PlayerState.PLAYING) {
+      _startEndPoll();
+    } else if (s === YT.PlayerState.PAUSED  ||
+               s === YT.PlayerState.ENDED   ||
+               s === YT.PlayerState.CUED    ||
+               s === -1 /* UNSTARTED */) {
+      _clearEndPoll();
+    }
+    // BUFFERING (3): do nothing — poll persists across rebuffer events
   }
 
   function _execVideo(fn) {
@@ -238,6 +302,8 @@
 
     // Video
     if (snap.videoId) {
+      endTime = (snap.videoEnd != null && snap.videoEnd > 0) ? snap.videoEnd : null;
+      if (DEBUG_TIMING) console.log('[Display/Timing] applyFullSync, endTime=', endTime, 'state=', snap.playbackState);
       _execVideo(() => {
         if (snap.playbackState === 'playing') {
           player.loadVideoById({ videoId: snap.videoId, startSeconds: snap.videoStart || 0 });
@@ -289,17 +355,27 @@
     timer.total = timer.remaining = 0;
     _renderTimer();
 
+    // Clear any in-progress end-poll for the previous segment
+    _clearEndPoll();
+    endTime = null;
+
     // Cue the video without playing
     if (seg.youtubeId) {
       _execVideo(() => {
         player.cueVideoById({ videoId: seg.youtubeId, startSeconds: seg.start || 0 });
       });
     }
+    if (DEBUG_TIMING) console.log('[Display/Timing] loadSegment, start=', seg.start, 'end=', seg.end);
   });
 
   Channel.on('play', (p) => {
     _noteActivity();
     if (!p.videoId) return;
+    // Store end time before loading — the state-change handler will start the poll
+    // when PLAYING fires after loadVideoById triggers buffering → playing.
+    endTime = (p.end != null && p.end > 0) ? p.end : null;
+    if (DEBUG_TIMING) console.log('[Display/Timing] play received, start=', p.start, 'end=', endTime);
+    _clearEndPoll();
     _execVideo(() => {
       player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
     });
@@ -307,18 +383,23 @@
 
   Channel.on('pause', () => {
     _noteActivity();
+    _clearEndPoll();
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
   Channel.on('resume', () => {
     _noteActivity();
     if (!playerReady) return;
+    // endTime retained from the previous play message; poll restarts via onStateChange
     try { player.playVideo(); } catch (e) { console.warn('[Display] resume error:', e.message); }
   });
 
   Channel.on('replay', (p) => {
     _noteActivity();
     if (!playerReady) return;
+    endTime = (p.end != null && p.end > 0) ? p.end : null;
+    if (DEBUG_TIMING) console.log('[Display/Timing] replay received, start=', p.start, 'end=', endTime);
+    _clearEndPoll();
     try {
       player.seekTo(p.start || 0, true);
       player.playVideo();
@@ -359,12 +440,14 @@
 
   Channel.on('blackScreen', () => {
     _noteActivity();
+    _clearEndPoll();
     _activateBlack();
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
   Channel.on('intermission', () => {
     _noteActivity();
+    _clearEndPoll();
     _activateIntermission();
     if (playerReady) try { player.pauseVideo(); } catch {}
   });

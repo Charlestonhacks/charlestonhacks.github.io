@@ -203,12 +203,16 @@
     state.clipState = 'idle';
 
     Clips.setOnEnd(() => {
+      if (DEBUG_TIMING) console.log('[Controller/Timing] onEnd fired for segment', index);
       state.clipState = 'ended';
       setStatus('ended', 'Clip ended');
       state.completed.add(index);
       refreshQueue();
-      revealQuestionCard();
-      startTimer();
+      revealQuestionCard();  // broadcasts showQuestion to projector
+      startTimer();          // broadcasts startDiscussionTimer to projector
+      // Safety-net pause: projector has its own end-poll, but broadcast anyway
+      // in case of timing skew or a disconnected-then-reconnected projector.
+      _broadcast('pause');
       toast('Clip ended — discussion question revealed.', 'info');
     });
 
@@ -349,15 +353,35 @@
   // 8. PLAYBACK CONTROLS
   // ============================================================
 
+  /**
+   * Returns true if seg has valid, usable timestamps (both numbers, end > start).
+   * Shows a toast and returns false otherwise.
+   */
+  function _validateTimestamps(seg) {
+    const start = typeof seg.start === 'number' ? seg.start : null;
+    const end   = typeof seg.end   === 'number' ? seg.end   : null;
+    if (start === null || end === null) {
+      toast('Segment is missing a start or end timestamp — cannot play.', 'error');
+      return false;
+    }
+    if (end <= start) {
+      toast(`Invalid timestamps: end (${end}s) must be greater than start (${start}s).`, 'error');
+      return false;
+    }
+    if (DEBUG_TIMING) console.log('[Controller/Timing] segment start=', start, 'end=', end);
+    return true;
+  }
+
   // Load from segment start and play (first play, or after clip ended).
   function playClipFromStart() {
     const seg = segments[currentIndex];
     if (!seg) return;
     if (!seg.youtubeId) { toast('No YouTube video ID on this segment.', 'error'); return; }
+    if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
-    Clips.play(seg.youtubeId, seg.start || 0, seg.end || 0);
+    Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
-    _broadcast('play', { videoId: seg.youtubeId, start: seg.start || 0, end: seg.end || 0 });
+    _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end });
   }
 
   // Resume from the current paused position — no seek.
@@ -394,10 +418,11 @@
   function replayClip() {
     const seg = segments[currentIndex];
     if (!seg || !seg.youtubeId) return;
+    if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
-    Clips.replay(seg.start || 0, seg.end || 0);
+    Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
-    _broadcast('replay', { start: seg.start || 0, end: seg.end || 0 });
+    _broadcast('replay', { start: seg.start, end: seg.end });
   }
 
   function prevSegment() {
@@ -560,6 +585,9 @@
   // ============================================================
   // 13. KEYBOARD SHORTCUTS
   // ============================================================
+
+  // Set to true to log timing events (segment start/end, auto-stop) to the console.
+  const DEBUG_TIMING = false;
 
   // Set to true to log every handled shortcut to the console.
   const DEBUG_SHORTCUTS = false;
