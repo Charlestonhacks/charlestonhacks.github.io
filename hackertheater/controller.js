@@ -206,6 +206,8 @@
     refreshQueue();
     setStatus('paused', 'Ready — press Play');
 
+    _broadcast('loadSegment', { index, segment: seg, totalSegments: segments.length });
+
     if (autoPlay) setTimeout(() => playClip(), 300);
   }
 
@@ -215,7 +217,89 @@
   }
 
   // ============================================================
-  // 7. REPLACE SHOW (called by editor.js via ShowController)
+  // 7. PROJECTOR CHANNEL
+  // ============================================================
+
+  let _lastTimerSave    = 0;
+  let _lastProjectorPing = 0;
+
+  function _buildSnapshot() {
+    const seg = segments[currentIndex] || null;
+    return {
+      show:            { ...show, segments },
+      segmentIndex:    currentIndex,
+      totalSegments:   segments.length,
+      segment:         seg,
+      videoId:         seg ? seg.youtubeId : null,
+      videoStart:      seg ? (seg.start || 0) : 0,
+      videoEnd:        seg ? (seg.end   || 0) : 0,
+      playbackState:   Clips.isPlaying() ? 'playing' : 'paused',
+      questionVisible: state.questionVisible,
+      questionText:    dom.questionText ? dom.questionText.textContent : null,
+      timerTotal:      state.timerTotal,
+      timerRemaining:  state.timerRemaining,
+      timerRunning:    state.timerRunning,
+      overlay:         state.blackActive ? 'black' : (state.intermActive ? 'intermission' : 'none'),
+    };
+  }
+
+  function _broadcast(type, payload) {
+    if (typeof Channel === 'undefined') return;
+    Channel.send(type, payload || {});
+    // Save state on all messages except high-frequency timer ticks
+    // (for those, throttle to once per 5 seconds)
+    if (type !== 'updateTimer') {
+      Channel.saveState(_buildSnapshot());
+    } else if (Date.now() - _lastTimerSave > 5000) {
+      _lastTimerSave = Date.now();
+      Channel.saveState(_buildSnapshot());
+    }
+  }
+
+  // Listen for messages from the projector display
+  if (typeof Channel !== 'undefined') {
+    Channel.on('requestSync', () => {
+      Channel.send('fullSync', _buildSnapshot());
+      Channel.saveState(_buildSnapshot());
+      _updateProjectorStatus(true);
+    });
+
+    Channel.on('ping', () => {
+      _lastProjectorPing = Date.now();
+      Channel.send('pong');
+      _updateProjectorStatus(true);
+    });
+
+    Channel.on('pong', () => {
+      _lastProjectorPing = Date.now();
+      _updateProjectorStatus(true);
+    });
+
+    // Send periodic heartbeat so display.js knows control room is alive
+    setInterval(() => {
+      Channel.send('heartbeat');
+      // Check whether projector has gone silent
+      if (_lastProjectorPing > 0 && Date.now() - _lastProjectorPing > 10000) {
+        _updateProjectorStatus(false);
+      }
+    }, 5000);
+  }
+
+  function _updateProjectorStatus(connected) {
+    const dot   = $('proj-dot');
+    const label = $('proj-label');
+    if (!dot || !label) return;
+    if (connected) {
+      dot.className   = 'proj-dot proj-dot--connected';
+      label.textContent = 'Projector connected';
+    } else {
+      dot.className   = 'proj-dot';
+      label.textContent = 'Projector not connected';
+    }
+  }
+
+  // ============================================================
+  // 8. REPLACE SHOW (called by editor.js via ShowController)
   // ============================================================
 
   function replaceShow(newShow) {
@@ -237,6 +321,7 @@
     } else {
       setStatus('paused', 'No segments loaded');
     }
+    _broadcast('applyShowData', { show });
   }
 
   // ============================================================
@@ -255,11 +340,13 @@
     // updates the status indicator when PLAYING fires.
     Clips.play(seg.youtubeId, seg.start || 0, seg.end || 0);
     setStatus('playing', 'Loading…');
+    _broadcast('play', { videoId: seg.youtubeId, start: seg.start || 0, end: seg.end || 0 });
   }
 
   function pauseClip() {
     Clips.pause();
     setStatus('paused', 'Paused');
+    _broadcast('pause');
   }
 
   function replayClip() {
@@ -267,6 +354,7 @@
     if (!seg || !seg.youtubeId) return;
     Clips.replay(seg.start || 0, seg.end || 0);
     setStatus('playing', 'Replaying');
+    _broadcast('replay', { start: seg.start || 0, end: seg.end || 0 });
   }
 
   function prevSegment() {
@@ -287,6 +375,7 @@
     dom.questionCard.classList.add('revealed');
     dom.questionText.classList.remove('hidden-text');
     $('btn-show-q').textContent = 'Hide Question';
+    _broadcast('showQuestion', { text: dom.questionText.textContent });
   }
 
   function hideQuestionCard() {
@@ -294,6 +383,7 @@
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.add('hidden-text');
     $('btn-show-q').textContent = 'Show Question';
+    _broadcast('hideQuestion');
   }
 
   function toggleQuestion() {
@@ -319,6 +409,7 @@
     if (state.timerRunning) return;
     state.timerRunning = true;
     state.timerHandle  = setInterval(tickTimer, 1000);
+    _broadcast('startDiscussionTimer', { total: state.timerTotal, remaining: state.timerRemaining });
   }
 
   function pauseTimer() {
@@ -342,10 +433,12 @@
     if (state.timerRemaining <= 0) {
       pauseTimer();
       renderTimer(0, state.timerTotal);
+      _broadcast('updateTimer', { total: state.timerTotal, remaining: 0, running: false });
       return;
     }
     state.timerRemaining -= 1;
     renderTimer(state.timerRemaining, state.timerTotal);
+    _broadcast('updateTimer', { total: state.timerTotal, remaining: state.timerRemaining, running: true });
   }
 
   function renderTimer(remaining, total) {
@@ -374,11 +467,13 @@
     state.blackActive = true;
     dom.blackOverlay.classList.add('active');
     if (Clips.isPlaying()) Clips.pause();
+    _broadcast('blackScreen');
   }
 
   function deactivateBlack() {
     state.blackActive = false;
     dom.blackOverlay.classList.remove('active');
+    _broadcast('clearOverlay');
   }
 
   function activateIntermission() {
@@ -387,12 +482,14 @@
     if (Clips.isPlaying()) Clips.pause();
     updateIntermClock();
     state.intermClockHandle = setInterval(updateIntermClock, 1000);
+    _broadcast('intermission');
   }
 
   function deactivateIntermission() {
     state.intermActive = false;
     dom.intermOverlay.classList.remove('active');
     clearInterval(state.intermClockHandle);
+    _broadcast('clearOverlay');
   }
 
   function updateIntermClock() {
@@ -511,6 +608,9 @@
   wireBtn('btn-timer-start', startTimer);
   wireBtn('btn-timer-pause', pauseTimer);
   wireBtn('btn-timer-reset', resetTimer);
+  wireBtn('btn-projector', () => {
+    window.open('./display.html', 'hackertheater-projector', 'noopener');
+  });
 
   // ============================================================
   // 17. TOAST / ERROR

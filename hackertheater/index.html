@@ -171,6 +171,20 @@
         </div>
       </div>
 
+      <!-- Projector Display -->
+      <div class="control-panel" role="group" aria-label="Projector display">
+        <div class="panel__header"><span class="panel__title">Projector</span></div>
+        <div class="panel__body">
+          <button id="btn-projector" class="btn btn--secondary" aria-label="Open projector display">
+            ⬛ Open Projector View
+          </button>
+          <div class="proj-status" id="proj-status">
+            <div id="proj-dot" class="proj-dot"></div>
+            <span id="proj-label">Projector not connected</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Keyboard Shortcut Legend -->
       <div class="kbd-legend" role="note" aria-label="Keyboard shortcuts">
         <div class="panel__header"><span class="panel__title">Keyboard Shortcuts</span></div>
@@ -231,6 +245,7 @@
        3. controller.js  sets up UI + window.ShowController + fires 'showcontroller:ready'
        4. editor.js  listens for 'showcontroller:ready' then inits
   ============================================================ -->
+  <script src="channel.js"></script>
   <script src="clips.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="controller.js"></script>

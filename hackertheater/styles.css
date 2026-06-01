@@ -1544,3 +1544,30 @@ button:focus-visible {
   .editor-modal__footer { gap: 6px; }
   .editor-modal__footer .btn { padding: 8px 10px; font-size: 0.78rem; }
 }
+
+/* ============================================================
+   PROJECTOR STATUS
+   ============================================================ */
+
+.proj-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 2px 0;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.proj-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.proj-dot--connected {
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
