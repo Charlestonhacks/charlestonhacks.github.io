@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hacker Theater — Projector Display · CharlestonHacks</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <style>
+    /* ---- Reset ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d0f;
+      --bg2:      #15151a;
+      --bg3:      #1c1c24;
+      --border:   #2e2e3e;
+      --accent:   #6c63ff;
+      --green:    #22c55e;
+      --yellow:   #eab308;
+      --orange:   #f97316;
+      --red:      #ef4444;
+      --text:     #f0f0f5;
+      --text2:    #9898b0;
+      --text3:    #5c5c72;
+      --mono:     'Courier New', Courier, monospace;
+      --sans:     -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ---- Overlays (black screen / intermission) ---- */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .overlay.active { display: flex; }
+
+    .overlay--black { background: #000; }
+    .overlay--intermission { background: var(--bg); }
+
+    .overlay__logo {
+      width: clamp(160px, 30vw, 340px);
+      opacity: 0.9;
+    }
+    .overlay__title {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 800;
+      letter-spacing: 0.05em;
+    }
+    .overlay__subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.8rem);
+      color: var(--text2);
+    }
+    .overlay__clock {
+      font-family: var(--mono);
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      color: var(--accent);
+      letter-spacing: 0.12em;
+    }
+
+    /* ---- Main layout ---- */
+    .display {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ---- Header strip ---- */
+    .disp-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 10px 28px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .disp-header__logo {
+      height: 32px;
+      flex-shrink: 0;
+    }
+    .disp-header__event {
+      flex: 1;
+      font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .disp-header__seg {
+      font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+      color: var(--text2);
+      font-family: var(--mono);
+      white-space: nowrap;
+    }
+
+    /* ---- Connection pill (auto-fades when connected) ---- */
+    .conn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text3);
+      padding: 3px 9px;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      flex-shrink: 0;
+      transition: opacity 0.5s;
+    }
+    .conn-pill.connected { opacity: 0; pointer-events: none; }
+    .conn-pill__dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--text3);
+      flex-shrink: 0;
+    }
+    .conn-pill.connected .conn-pill__dot { background: var(--green); }
+    .conn-pill.connecting .conn-pill__dot { background: var(--yellow); }
+    .conn-pill.disconnected .conn-pill__dot { background: var(--red); }
+
+    /* ---- Body: video + info ---- */
+    .disp-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 16px 20px 10px;
+      gap: 12px;
+    }
+
+    /* Video sized to fill available height while keeping 16:9 */
+    .video-wrap {
+      flex-shrink: 0;
+      width: 100%;
+      max-width: calc((100vh - 220px) * (16/9));
+      aspect-ratio: 16/9;
+      align-self: center;
+      position: relative;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #yt-player {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .video-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--bg3);
+      color: var(--text3);
+    }
+    .video-placeholder__icon { font-size: 2.5rem; opacity: 0.35; }
+    .video-placeholder.hidden { display: none; }
+
+    /* ---- Segment info strip ---- */
+    .seg-info {
+      flex-shrink: 0;
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      min-height: 0;
+    }
+    .seg-info__title {
+      font-size: clamp(1rem, 2.2vw, 1.55rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .seg-info__panelist {
+      font-size: clamp(0.75rem, 1.3vw, 1rem);
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ---- Question card ---- */
+    .question-card {
+      flex-shrink: 0;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.3s, opacity 0.3s;
+    }
+    .question-card.revealed { border-color: var(--accent); }
+    .question-card__label {
+      padding: 8px 16px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+    }
+    .question-card__text {
+      padding: 14px 20px;
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      transition: filter 0.3s;
+    }
+    .question-card__text.blurred {
+      filter: blur(8px);
+      user-select: none;
+    }
+
+    /* ---- Discussion timer ---- */
+    .timer-strip {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .timer-strip__label {
+      font-size: clamp(0.7rem, 1.2vw, 0.82rem);
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text2);
+      flex-shrink: 0;
+    }
+    .timer__bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .timer__bar {
+      height: 100%;
+      background: var(--green);
+      border-radius: 99px;
+      transition: width 1s linear, background 0.3s;
+      width: 100%;
+    }
+    .timer__bar.warn-60 { background: var(--yellow); }
+    .timer__bar.warn-30 { background: var(--orange); }
+    .timer__bar.warn-0  { background: var(--red); }
+    .timer__display {
+      font-family: var(--mono);
+      font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: 0.05em;
+      min-width: 80px;
+      text-align: right;
+      flex-shrink: 0;
+      transition: color 0.3s;
+    }
+    .timer__display.warn-60 { color: var(--yellow); }
+    .timer__display.warn-30 { color: var(--orange); }
+    .timer__display.warn-0  { color: var(--red); animation: pulse 0.8s infinite; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.45; }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Black screen overlay -->
+  <div id="black-overlay" class="overlay overlay--black">
+    <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="overlay__logo" onerror="this.style.display='none'" />
+  </div>
+
+  <!-- Intermission overlay -->
+  <div id="interm-overlay" class="overlay overlay--intermission">
+    <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="overlay__logo" onerror="this.style.display='none'" />
+    <div class="overlay__title">INTERMISSION</div>
+    <div class="overlay__subtitle">Returning Shortly</div>
+    <div id="interm-clock" class="overlay__clock"></div>
+  </div>
+
+  <!-- Main display -->
+  <div class="display">
+
+    <header class="disp-header">
+      <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="disp-header__logo" onerror="this.style.display='none'" />
+      <div id="event-name" class="disp-header__event">Hacker Theater</div>
+      <div id="seg-counter" class="disp-header__seg">—</div>
+      <div id="conn-pill" class="conn-pill connecting">
+        <div class="conn-pill__dot"></div>
+        <span id="conn-label">Connecting…</span>
+      </div>
+    </header>
+
+    <div class="disp-body">
+
+      <div class="video-wrap">
+        <div id="yt-player"></div>
+        <div id="video-placeholder" class="video-placeholder">
+          <div class="video-placeholder__icon">▶</div>
+        </div>
+      </div>
+
+      <div class="seg-info">
+        <div id="seg-title" class="seg-info__title">—</div>
+        <div id="seg-panelist" class="seg-info__panelist"></div>
+      </div>
+
+      <div id="question-card" class="question-card">
+        <div class="question-card__label">Discussion Question</div>
+        <div id="question-text" class="question-card__text blurred">—</div>
+      </div>
+
+      <div class="timer-strip">
+        <div class="timer-strip__label">Discussion</div>
+        <div class="timer__bar-wrap">
+          <div id="timer-bar" class="timer__bar"></div>
+        </div>
+        <div id="timer-display" class="timer__display">—:——</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts: channel first, then display logic, then YT API -->
+  <script src="channel.js"></script>
+  <script src="display.js"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+</body>
+</html>
