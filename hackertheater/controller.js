@@ -682,6 +682,7 @@
   wireBtn('btn-projector', () => {
     window.open('./display.html', 'hackertheater-projector', 'noopener');
   });
+  wireBtn('btn-enter-presentation', () => _broadcast('enterPresentationMode'));
 
   // ============================================================
   // 17. TOAST / ERROR

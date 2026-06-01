@@ -27,6 +27,9 @@
     questionText: $('question-text'),
     timerDisplay: $('timer-display'),
     timerBar:     $('timer-bar'),
+    launchPanel:  $('launch-panel'),
+    btnPresentation: $('btn-presentation'),
+    fsBlocked:    $('fs-blocked'),
   };
 
   // ---- YouTube player ----
@@ -386,6 +389,71 @@
 
   Channel.on('pong', () => {
     _noteActivity();
+  });
+
+  // ---- Presentation mode (fullscreen) ----
+
+  function _enterPresentationMode() {
+    const el  = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+
+    if (!req) {
+      // Fullscreen API unavailable — apply class anyway for scaled-up layout
+      document.body.classList.add('presentation-mode');
+      dom.fsBlocked.textContent = 'Fullscreen not supported in this browser. Press F11 for full-window mode.';
+      dom.fsBlocked.style.display = '';
+      return;
+    }
+
+    let p;
+    try { p = req.call(el); } catch { p = null; }
+
+    if (p && typeof p.then === 'function') {
+      p.then(() => {
+        document.body.classList.add('presentation-mode');
+        dom.fsBlocked.style.display = 'none';
+      }).catch(() => {
+        // Blocked — not triggered by a direct user gesture (e.g. remote command)
+        dom.fsBlocked.textContent = 'Click "Enter Presentation Mode" on this screen to enable fullscreen.';
+        dom.fsBlocked.style.display = '';
+      });
+    } else {
+      // Older WebKit — no promise returned
+      document.body.classList.add('presentation-mode');
+      dom.fsBlocked.style.display = 'none';
+    }
+  }
+
+  function _exitPresentationMode() {
+    document.body.classList.remove('presentation-mode');
+    if (dom.fsBlocked) dom.fsBlocked.style.display = 'none';
+  }
+
+  // Sync class with the actual fullscreen state so Escape exits cleanly
+  function _onFullscreenChange() {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (isFs) {
+      document.body.classList.add('presentation-mode');
+    } else {
+      _exitPresentationMode();
+    }
+  }
+  document.addEventListener('fullscreenchange',       _onFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', _onFullscreenChange);
+
+  dom.btnPresentation.addEventListener('click', _enterPresentationMode);
+
+  // P key enters presentation mode (only when not typing in a field)
+  window.addEventListener('keydown', e => {
+    if (e.code !== 'KeyP' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    _enterPresentationMode();
+  });
+
+  Channel.on('enterPresentationMode', () => {
+    _noteActivity();
+    _enterPresentationMode();
   });
 
   // ---- Boot ----

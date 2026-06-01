@@ -87,10 +87,12 @@
       background: var(--bg2);
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+      transition: padding 0.2s;
     }
     .disp-header__logo {
       height: 32px;
       flex-shrink: 0;
+      transition: height 0.2s;
     }
     .disp-header__event {
       flex: 1;
@@ -127,8 +129,8 @@
       background: var(--text3);
       flex-shrink: 0;
     }
-    .conn-pill.connected .conn-pill__dot { background: var(--green); }
-    .conn-pill.connecting .conn-pill__dot { background: var(--yellow); }
+    .conn-pill.connected    .conn-pill__dot { background: var(--green); }
+    .conn-pill.connecting   .conn-pill__dot { background: var(--yellow); }
     .conn-pill.disconnected .conn-pill__dot { background: var(--red); }
 
     /* ---- Body: video + info ---- */
@@ -137,7 +139,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      padding: 16px 20px 10px;
+      /* Extra bottom padding compensates for the fixed launch panel */
+      padding: 16px 20px 88px;
       gap: 12px;
     }
 
@@ -205,7 +208,7 @@
       border: 1px solid var(--border);
       border-radius: 10px;
       overflow: hidden;
-      transition: border-color 0.3s, opacity 0.3s;
+      transition: border-color 0.3s;
     }
     .question-card.revealed { border-color: var(--accent); }
     .question-card__label {
@@ -278,6 +281,131 @@
     .timer__display.warn-30 { color: var(--orange); }
     .timer__display.warn-0  { color: var(--red); animation: pulse 0.8s infinite; }
 
+    /* ---- Launch panel (setup hint + fullscreen button) ---- */
+    .launch-panel {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 200;
+      background: rgba(13, 13, 15, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .launch-panel__hint {
+      flex: 1;
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.5;
+      min-width: 200px;
+    }
+    .btn-presentation {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .btn-presentation:hover        { background: #8178ff; }
+    .btn-presentation:focus-visible { outline: 2px solid #8178ff; outline-offset: 2px; }
+    .launch-panel__shortcut {
+      font-size: 0.72rem;
+      color: var(--text3);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .launch-panel__shortcut kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text);
+    }
+    .fs-blocked {
+      width: 100%;
+      font-size: 0.82rem;
+      color: var(--yellow);
+      padding-top: 4px;
+    }
+
+    /* ---- Presentation mode — applied when in fullscreen ---- */
+    body.presentation-mode .launch-panel   { display: none; }
+    body.presentation-mode .conn-pill      { display: none !important; }
+    body.presentation-mode .disp-header__seg { opacity: 0.55; }
+
+    body.presentation-mode .disp-header {
+      padding: 7px 22px;
+    }
+    body.presentation-mode .disp-header__logo {
+      height: 26px;
+    }
+    body.presentation-mode .disp-body {
+      padding: 12px 18px 10px;
+      gap: 9px;
+    }
+
+    /* Video takes up more vertical space */
+    body.presentation-mode .video-wrap {
+      max-width: calc((100vh - 145px) * (16/9));
+    }
+
+    /* Segment title/panelist readable from back of room */
+    body.presentation-mode .seg-info__title {
+      font-size: clamp(1.1rem, 2.6vw, 2rem);
+      white-space: normal;
+      line-height: 1.2;
+    }
+    body.presentation-mode .seg-info__panelist {
+      font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+    }
+
+    /* Question card — large, audience-readable */
+    body.presentation-mode .question-card__label {
+      padding: 10px 22px;
+      font-size: 0.7rem;
+    }
+    body.presentation-mode .question-card__text {
+      padding: 18px 24px;
+      font-size: clamp(1.35rem, 2.8vw, 2.4rem);
+      line-height: 1.35;
+    }
+
+    /* Timer — readable from the back of the room */
+    body.presentation-mode .timer__bar-wrap {
+      height: 10px;
+      border-radius: 99px;
+    }
+    body.presentation-mode .timer__bar {
+      border-radius: 99px;
+    }
+    body.presentation-mode .timer-strip__label {
+      font-size: clamp(0.78rem, 1.3vw, 0.95rem);
+      letter-spacing: 0.1em;
+    }
+    body.presentation-mode .timer__display {
+      font-size: clamp(1.9rem, 4.2vw, 3.2rem);
+      min-width: 110px;
+    }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50%       { opacity: 0.45; }
@@ -344,6 +472,18 @@
       </div>
 
     </div>
+  </div>
+
+  <!-- Launch panel: visible before presentation mode, hidden once fullscreen starts -->
+  <div id="launch-panel" class="launch-panel">
+    <div class="launch-panel__hint">
+      Move this window to your projector display, then enter presentation mode.
+    </div>
+    <button id="btn-presentation" class="btn-presentation" aria-label="Enter fullscreen presentation mode">
+      ⛶ Enter Presentation Mode
+    </button>
+    <div class="launch-panel__shortcut">or press <kbd>P</kbd></div>
+    <div id="fs-blocked" class="fs-blocked" style="display:none"></div>
   </div>
 
   <!-- Scripts: channel first, then display logic, then YT API -->
