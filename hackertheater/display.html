@@ -365,7 +365,19 @@
 
     /* Video takes up more vertical space */
     body.presentation-mode .video-wrap {
-      max-width: calc((100vh - 145px) * (16/9));
+      max-width: calc((100vh - 245px) * (16/9));
+      max-width: calc((100dvh - 245px) * (16/9));
+    }
+
+    /* When question is visible, shrink video to share space */
+    body.presentation-mode.question-visible .video-wrap {
+      max-width: calc((68vh - 245px) * (16/9));
+      max-width: calc((68dvh - 245px) * (16/9));
+    }
+    body.presentation-mode.question-visible .question-card {
+      overflow-y: auto;
+      max-height: 30vh;
+      max-height: 30dvh;
     }
 
     /* Segment title/panelist readable from back of room */

@@ -208,9 +208,11 @@
     if (snap.questionVisible) {
       dom.questionCard.classList.add('revealed');
       dom.questionText.classList.remove('blurred');
+      document.body.classList.add('question-visible');
     } else {
       dom.questionCard.classList.remove('revealed');
       dom.questionText.classList.add('blurred');
+      document.body.classList.remove('question-visible');
     }
 
     // Timer
@@ -279,6 +281,7 @@
     // Reset question
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.add('blurred');
+    document.body.classList.remove('question-visible');
     if (seg.question) dom.questionText.textContent = seg.question;
 
     // Reset timer display
@@ -327,12 +330,14 @@
     if (p.text) dom.questionText.textContent = p.text;
     dom.questionCard.classList.add('revealed');
     dom.questionText.classList.remove('blurred');
+    document.body.classList.add('question-visible');
   });
 
   Channel.on('hideQuestion', () => {
     _noteActivity();
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.add('blurred');
+    document.body.classList.remove('question-visible');
   });
 
   Channel.on('startDiscussionTimer', (p) => {
