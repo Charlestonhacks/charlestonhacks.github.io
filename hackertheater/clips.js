@@ -22,12 +22,16 @@ const Clips = (() => {
   let onEndCallback          = null;
   let onStateChangeCallback  = null;
 
+  // Set to true to log timing events to the console.
+  const DEBUG_TIMING = false;
+
   // Dev-only logging: active on localhost / file:// only
   const DEV = (location.hostname === 'localhost' ||
                location.hostname === '127.0.0.1' ||
                location.protocol === 'file:');
   const _log  = (...a) => { if (DEV) console.log('[Clips]',  ...a); };
   const _warn = (...a) => console.warn('[Clips]', ...a);
+  const _tlog = (...a) => { if (DEBUG_TIMING) console.log('[Clips/Timing]', ...a); };
 
   // ---- YouTube IFrame API bootstrap ----
 
@@ -81,9 +85,18 @@ const Clips = (() => {
   }
 
   function _onPlayerStateChange(event) {
-    _clearPoll();
-    if (event.data === YT.PlayerState.PLAYING) {
-      _startEndPoll();
+    // Only kill the poll for states where we're no longer advancing through time.
+    // Do NOT clear on BUFFERING (3) — we're still playing, just stalled briefly.
+    const s = event.data;
+    if (typeof YT !== 'undefined') {
+      if (s === YT.PlayerState.PLAYING) {
+        _startEndPoll(); // _startEndPoll clears first, so no duplicates
+      } else if (s === YT.PlayerState.PAUSED  ||
+                 s === YT.PlayerState.ENDED   ||
+                 s === YT.PlayerState.CUED    ||
+                 s === -1 /* UNSTARTED */) {
+        _clearPoll();
+      }
     }
     if (typeof onStateChangeCallback === 'function') {
       onStateChangeCallback(event.data);
@@ -108,12 +121,18 @@ const Clips = (() => {
 
   // Poll every 250ms to detect the end timestamp.
   // YT.onStateChange does not fire at arbitrary timestamps.
+  // Tolerance of 0.15s prevents overshooting by one poll tick.
   function _startEndPoll() {
+    _clearPoll(); // prevent duplicate intervals
     if (endTime == null) return;
+    _tlog('poll start, endTime=', endTime);
     pollInterval = setInterval(() => {
       if (!playerReady) return;
       try {
-        if (player.getCurrentTime() >= endTime) {
+        const cur = player.getCurrentTime();
+        _tlog('currentTime=', cur.toFixed(2), '/ endTime=', endTime);
+        if (cur >= endTime - 0.15) {
+          _tlog('auto-stop fired at', cur.toFixed(2));
           _clearPoll();
           player.pauseVideo();
           if (typeof onEndCallback === 'function') onEndCallback();
@@ -126,7 +145,11 @@ const Clips = (() => {
   }
 
   function _clearPoll() {
-    if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
+    if (pollInterval) {
+      clearInterval(pollInterval);
+      pollInterval = null;
+      _tlog('poll stopped');
+    }
   }
 
   /**
