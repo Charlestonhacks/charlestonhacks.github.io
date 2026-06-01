@@ -13,15 +13,9 @@
 
   <!-- ============================================================
        BLACK SCREEN OVERLAY
-       Press any key or click to dismiss.
   ============================================================ -->
   <div id="black-overlay" class="overlay overlay--black" role="dialog" aria-label="Black screen mode" aria-modal="true">
-    <img
-      src="/charlestonhackslogo.svg"
-      alt="CharlestonHacks"
-      class="overlay__logo"
-      onerror="this.style.display='none'"
-    />
+    <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="overlay__logo" onerror="this.style.display='none'" />
     <p class="overlay__hint">Press any key to return</p>
   </div>
 
@@ -29,12 +23,7 @@
        INTERMISSION OVERLAY
   ============================================================ -->
   <div id="interm-overlay" class="overlay overlay--intermission" role="dialog" aria-label="Intermission screen" aria-modal="true">
-    <img
-      src="/charlestonhackslogo.svg"
-      alt="CharlestonHacks"
-      class="overlay__logo"
-      onerror="this.style.display='none'"
-    />
+    <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="overlay__logo" onerror="this.style.display='none'" />
     <div class="overlay__title">INTERMISSION</div>
     <div class="overlay__subtitle">Returning Shortly</div>
     <div id="interm-clock" class="overlay__clock"></div>
@@ -50,12 +39,7 @@
        SITE HEADER
   ============================================================ -->
   <header class="site-header" role="banner">
-    <img
-      src="/charlestonhackslogo.svg"
-      alt="CharlestonHacks"
-      class="header__logo"
-      onerror="this.style.display='none'"
-    />
+    <img src="/charlestonhackslogo.svg" alt="CharlestonHacks" class="header__logo" onerror="this.style.display='none'" />
 
     <div class="header__info">
       <div id="event-name" class="header__event-name">Hacker Theater</div>
@@ -69,6 +53,11 @@
   </header>
 
   <!-- ============================================================
+       DRAFT BANNER — injected here by editor.js
+       (editor.js inserts #draft-banner before .app at runtime)
+  ============================================================ -->
+
+  <!-- ============================================================
        MAIN APP — 3-column control room layout
   ============================================================ -->
   <main class="app" role="main">
@@ -76,12 +65,10 @@
     <!-- ==================== LEFT COLUMN ==================== -->
     <section class="col-left" aria-label="Video and content">
 
-      <!-- Error Banner -->
       <div id="error-banner" class="error-banner" role="alert"></div>
 
       <!-- Video Player -->
       <div class="video-wrapper" aria-label="YouTube video player">
-        <!-- YouTube IFrame API replaces this div -->
         <div id="yt-player"></div>
         <div id="video-placeholder" class="video-placeholder">
           <div class="video-placeholder__icon">▶</div>
@@ -92,7 +79,7 @@
       <!-- Segment Info -->
       <div class="segment-info" role="region" aria-label="Current segment">
         <div>
-          <div id="seg-title" class="segment-info__title">—</div>
+          <div id="seg-title"    class="segment-info__title">—</div>
           <div id="seg-panelist" class="segment-info__panelist"></div>
           <div id="seg-duration" class="segment-info__duration"></div>
         </div>
@@ -138,31 +125,18 @@
       <div class="control-panel" role="group" aria-label="Playback controls">
         <div class="panel__header"><span class="panel__title">Playback</span></div>
         <div class="panel__body">
-
           <button id="btn-play" class="btn btn--primary" aria-label="Play clip (Space)">
             ▶ Play Clip
           </button>
-
           <div class="btn-row">
-            <button id="btn-pause" class="btn btn--secondary" aria-label="Pause (Space)">
-              ⏸ Pause
-            </button>
-            <button id="btn-replay" class="btn btn--secondary" aria-label="Replay clip (R)">
-              ↺ Replay
-            </button>
+            <button id="btn-pause"  class="btn btn--secondary" aria-label="Pause (Space)">⏸ Pause</button>
+            <button id="btn-replay" class="btn btn--secondary" aria-label="Replay clip (R)">↺ Replay</button>
           </div>
-
           <div class="divider"></div>
-
           <div class="btn-row">
-            <button id="btn-prev" class="btn btn--ghost" aria-label="Previous segment (←)">
-              ← Prev
-            </button>
-            <button id="btn-next" class="btn btn--success" aria-label="Next segment (→)">
-              Next →
-            </button>
+            <button id="btn-prev" class="btn btn--ghost"    aria-label="Previous segment (←)">← Prev</button>
+            <button id="btn-next" class="btn btn--success"  aria-label="Next segment (→)">Next →</button>
           </div>
-
         </div>
       </div>
 
@@ -170,21 +144,10 @@
       <div class="control-panel" role="group" aria-label="Question controls">
         <div class="panel__header"><span class="panel__title">Discussion</span></div>
         <div class="panel__body">
-
-          <button id="btn-show-q" class="btn btn--secondary" aria-label="Toggle question (Q)">
-            Show Question
-          </button>
-
-          <button id="btn-backup-q" class="btn btn--ghost" aria-label="Random backup question">
-            ⚄ Random Backup Question
-          </button>
-
+          <button id="btn-show-q"    class="btn btn--secondary" aria-label="Toggle question (Q)">Show Question</button>
+          <button id="btn-backup-q"  class="btn btn--ghost"     aria-label="Random backup question">⚄ Random Backup Question</button>
           <div class="divider"></div>
-
-          <button id="btn-toggle-n" class="btn btn--ghost" aria-label="Toggle moderator notes (N)">
-            ≡ Toggle Notes
-          </button>
-
+          <button id="btn-toggle-n"  class="btn btn--ghost"     aria-label="Toggle moderator notes (N)">≡ Toggle Notes</button>
         </div>
       </div>
 
@@ -192,19 +155,19 @@
       <div class="control-panel" role="group" aria-label="Presentation controls">
         <div class="panel__header"><span class="panel__title">Presentation</span></div>
         <div class="panel__body">
+          <button id="btn-fullscreen" class="btn btn--secondary" aria-label="Fullscreen video (F)">⛶ Fullscreen Video</button>
+          <button id="btn-black"      class="btn btn--danger"    aria-label="Black screen (B)">■ Black Screen</button>
+          <button id="btn-interm"     class="btn btn--warning"   aria-label="Intermission screen (I)">☕ Intermission</button>
+        </div>
+      </div>
 
-          <button id="btn-fullscreen" class="btn btn--secondary" aria-label="Fullscreen video (F)">
-            ⛶ Fullscreen Video
+      <!-- Show Editor Launch -->
+      <div class="control-panel" role="group" aria-label="Show editor">
+        <div class="panel__header"><span class="panel__title">Show Editor</span></div>
+        <div class="panel__body">
+          <button id="btn-edit-show" class="btn btn--secondary" aria-label="Open show editor">
+            ✏ Edit Show
           </button>
-
-          <button id="btn-black" class="btn btn--danger" aria-label="Black screen (B)">
-            ■ Black Screen
-          </button>
-
-          <button id="btn-interm" class="btn btn--warning" aria-label="Intermission screen (I)">
-            ☕ Intermission
-          </button>
-
         </div>
       </div>
 
@@ -212,15 +175,15 @@
       <div class="kbd-legend" role="note" aria-label="Keyboard shortcuts">
         <div class="panel__header"><span class="panel__title">Keyboard Shortcuts</span></div>
         <div class="kbd-legend__body">
-          <div class="kbd-row"><span>Play / Pause</span>        <kbd class="kbd">Space</kbd></div>
-          <div class="kbd-row"><span>Next Segment</span>        <kbd class="kbd">→</kbd></div>
-          <div class="kbd-row"><span>Prev Segment</span>        <kbd class="kbd">←</kbd></div>
-          <div class="kbd-row"><span>Toggle Question</span>     <kbd class="kbd">Q</kbd></div>
-          <div class="kbd-row"><span>Replay Clip</span>         <kbd class="kbd">R</kbd></div>
-          <div class="kbd-row"><span>Toggle Notes</span>        <kbd class="kbd">N</kbd></div>
-          <div class="kbd-row"><span>Fullscreen</span>          <kbd class="kbd">F</kbd></div>
-          <div class="kbd-row"><span>Black Screen</span>        <kbd class="kbd">B</kbd></div>
-          <div class="kbd-row"><span>Intermission</span>        <kbd class="kbd">I</kbd></div>
+          <div class="kbd-row"><span>Play / Pause</span>    <kbd class="kbd">Space</kbd></div>
+          <div class="kbd-row"><span>Next Segment</span>    <kbd class="kbd">→</kbd></div>
+          <div class="kbd-row"><span>Prev Segment</span>    <kbd class="kbd">←</kbd></div>
+          <div class="kbd-row"><span>Toggle Question</span> <kbd class="kbd">Q</kbd></div>
+          <div class="kbd-row"><span>Replay Clip</span>     <kbd class="kbd">R</kbd></div>
+          <div class="kbd-row"><span>Toggle Notes</span>    <kbd class="kbd">N</kbd></div>
+          <div class="kbd-row"><span>Fullscreen</span>      <kbd class="kbd">F</kbd></div>
+          <div class="kbd-row"><span>Black Screen</span>    <kbd class="kbd">B</kbd></div>
+          <div class="kbd-row"><span>Intermission</span>    <kbd class="kbd">I</kbd></div>
         </div>
       </div>
 
@@ -242,22 +205,18 @@
           <span class="notes-panel__caret">▾</span>
         </button>
         <div id="notes-body" class="notes-panel__body">
-
           <div>
             <div class="notes-section__label">Panelist</div>
             <div id="notes-panelist" class="notes-section__text">—</div>
           </div>
-
           <div>
             <div class="notes-section__label">Notes</div>
             <div id="notes-text" class="notes-section__text">—</div>
           </div>
-
           <div>
             <div class="notes-section__label">Backup Questions</div>
             <ul id="notes-backup" class="notes-backup-list"></ul>
           </div>
-
         </div>
       </div>
 
@@ -266,14 +225,16 @@
   </main>
 
   <!-- ============================================================
-       SCRIPTS
-       Load clips.js first (registers onYouTubeIframeAPIReady),
-       then the YouTube IFrame API (which calls it when ready),
-       then controller.js (orchestrates everything).
+       SCRIPTS — load order matters:
+       1. clips.js   registers onYouTubeIframeAPIReady
+       2. YT API     calls onYouTubeIframeAPIReady when ready
+       3. controller.js  sets up UI + window.ShowController + fires 'showcontroller:ready'
+       4. editor.js  listens for 'showcontroller:ready' then inits
   ============================================================ -->
   <script src="clips.js"></script>
   <script src="https://www.youtube.com/iframe_api"></script>
   <script src="controller.js"></script>
+  <script src="editor.js"></script>
 
 </body>
 </html>
