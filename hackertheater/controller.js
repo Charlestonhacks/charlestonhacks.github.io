@@ -381,7 +381,7 @@
     state.clipState = 'playing';
     Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
-    _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end });
+    _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex });
   }
 
   // Resume from the current paused position — no seek.
@@ -422,7 +422,7 @@
     state.clipState = 'playing';
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
-    _broadcast('replay', { start: seg.start, end: seg.end });
+    _broadcast('replay', { start: seg.start, end: seg.end, segmentIndex: currentIndex });
   }
 
   function prevSegment() {
