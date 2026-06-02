@@ -58,6 +58,19 @@
       "discussionMinutes": 5
     },
     {
+      "title": "Ex Machina (2014) Ava's AI Brain",
+      "youtubeId": "ruOXWHbyfjo",
+      "start": 36,
+      "end": 187,
+      "panelist": "Jack Teitel",
+      "question": "How does AI need to evolve to reproduce what is being discussed in this clip?",
+      "backupQuestions": [
+        "Would we want an AI that reproduces a human to the point that it is indistinguishable for a human?"
+      ],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
       "title": "Sneakers (1992), Social engineering",
       "youtubeId": "pl_D5YpDQKQ",
       "start": 0,
@@ -101,22 +114,64 @@
       "youtubeId": "Bmz67ErIRa4",
       "start": 5,
       "end": 155,
-      "panelist": "lou Vega",
+      "panelist": "Lou Vega",
       "question": "Is anything here realistic?",
       "backupQuestions": [],
       "moderatorNotes": "",
       "discussionMinutes": 5
     },
     {
-      "title": "Ex Machina (2014) Ava's AI Brain",
-      "youtubeId": "ruOXWHbyfjo",
-      "start": 36,
-      "end": 187,
+      "title": "The Circle (2017), Transparency Speech",
+      "youtubeId": "CDj_sgTnm-U",
+      "start": 85,
+      "end": 200,
+      "panelist": "Will Horn",
+      "question": "Is this kind of access already here in some form, and what impact does it have on society?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Steve Jobs (2015), It’s not a computer,  it’s a bicycle for the mind.",
+      "youtubeId": "BZYZlzIMVw8",
+      "start": 97,
+      "end": 150,
       "panelist": "Jack Teitel",
-      "question": "How does AI need to evolve to reproduce what is being discussed in this clip?",
-      "backupQuestions": [
-        "Would we want an AI that reproduces a human to the point that it is indistinguishable for a human?"
-      ],
+      "question": "Has AI take the place of the computer as the bicycle for the mind?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Disclosure (1994), Virtual Reality Demo",
+      "youtubeId": "qk3PK3W_wvo",
+      "start": 34,
+      "end": 150,
+      "panelist": "Ben Davis",
+      "question": "Are we already here and discovered that this isn't the best use of VR?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "The Social Network (2010)",
+      "youtubeId": "6KHyMISpE18",
+      "start": 85,
+      "end": 144,
+      "panelist": "Will Horn",
+      "question": "Are tech startups really like this?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Wargames (1983), Final Simulation Realization",
+      "youtubeId": "MpmGXeAtWUw",
+      "start": 1,
+      "end": 111,
+      "panelist": "Jack Teitel",
+      "question": "Does AI look at problems in this way?",
+      "backupQuestions": [],
       "moderatorNotes": "",
       "discussionMinutes": 5
     }
