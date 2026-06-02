@@ -1219,6 +1219,8 @@ button:focus-visible {
   background: var(--bg-card);
   overflow: hidden;
   transition: border-color 0.15s;
+  flex-shrink: 0;       /* never squish rows in a scrollable flex column */
+  min-height: 68px;     /* enough for SEG label + 2-line title + meta */
 }
 
 .ed-seg-item:hover {
@@ -1233,6 +1235,7 @@ button:focus-visible {
 .ed-seg-item__reorder {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   border-right: 1px solid var(--border);
   flex-shrink: 0;
 }
@@ -1306,6 +1309,7 @@ button:focus-visible {
 .ed-seg-item__actions {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   border-left: 1px solid var(--border);
   flex-shrink: 0;
 }
