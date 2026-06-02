@@ -771,11 +771,46 @@
   }
 
   // ============================================================
-  // 19. BOOT
+  // 19. INTERACTION SHIELD
+  // ============================================================
+
+  /**
+   * Blocks direct pointer interaction with the YouTube iframe.
+   * The app's playback controls are the only intended input path.
+   *
+   * Disabled when:
+   *  - URL contains ?debugPlayer=1
+   *  - show.allowDirectPlayerInteraction === true
+   */
+  function _setupInteractionShield() {
+    const debugByUrl  = new URLSearchParams(location.search).get('debugPlayer') === '1';
+    const debugByShow = show && show.allowDirectPlayerInteraction === true;
+
+    const shield = document.getElementById('video-lock');
+    if (!shield) return;
+
+    if (debugByUrl || debugByShow) {
+      shield.classList.add('video-interaction-lock--disabled');
+      if (debugByUrl || debugByShow) _log && _log('Interaction shield disabled (debug mode)');
+      return;
+    }
+
+    const BLOCK_EVENTS = ['click', 'pointerdown', 'pointerup', 'touchstart', 'dblclick', 'contextmenu'];
+    BLOCK_EVENTS.forEach(type => {
+      shield.addEventListener(type, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false, capture: true });
+    });
+  }
+
+  // ============================================================
+  // 20. BOOT
   // ============================================================
 
   buildQueue();
   loadSegment(0);
+  _setupInteractionShield();
 
   // Expose API for editor.js
   window.ShowController = {

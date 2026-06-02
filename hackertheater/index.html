@@ -74,6 +74,8 @@
           <div class="video-placeholder__icon">▶</div>
           <div class="video-placeholder__text">Select a segment and press Play</div>
         </div>
+        <!-- Interaction shield: blocks direct iframe clicks. Disabled by ?debugPlayer=1 -->
+        <div id="video-lock" class="video-interaction-lock" aria-hidden="true"></div>
       </div>
 
       <!-- Segment Info -->
