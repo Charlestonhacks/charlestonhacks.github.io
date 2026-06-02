@@ -327,11 +327,11 @@
     if (connected) {
       dot.className     = 'proj-dot proj-dot--connected';
       label.textContent = CONTROL_AUDIO_ENABLED
-        ? 'Projector connected (audio on)'
-        : 'Projector connected · CR muted';
+        ? 'Projector view connected (audio on)'
+        : 'Projector view connected · CR muted';
     } else {
       dot.className     = 'proj-dot';
-      label.textContent = 'Projector not connected';
+      label.textContent = 'Projector view not open';
     }
   }
 

@@ -1589,3 +1589,10 @@ button:focus-visible {
   background: var(--green);
   animation: pulse 2s infinite;
 }
+
+.proj-hint {
+  margin: 6px 0 0;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
