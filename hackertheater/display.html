@@ -347,10 +347,45 @@
       padding-top: 4px;
     }
 
+    /* ---- Lower-third question overlay (inside .video-wrap) ---- */
+    .question-lt {
+      display: none; /* hidden outside presentation mode */
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 10px 28px 16px;
+      background: rgba(0, 0, 0, 0.55);
+      max-height: 15%;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .question-lt__label {
+      font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      flex-shrink: 0;
+      white-space: nowrap;
+      padding-top: 3px;
+    }
+    .question-lt__text {
+      font-size: clamp(1.1rem, 2vw, 1.9rem);
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
     /* ---- Presentation mode — applied when in fullscreen ---- */
-    body.presentation-mode .launch-panel   { display: none; }
-    body.presentation-mode .conn-pill      { display: none !important; }
-    body.presentation-mode .disp-header__seg { opacity: 0.55; }
+    body.presentation-mode .launch-panel      { display: none; }
+    body.presentation-mode .conn-pill         { display: none !important; }
+    body.presentation-mode .disp-header__seg  { opacity: 0.55; }
 
     body.presentation-mode .disp-header {
       padding: 7px 22px;
@@ -359,51 +394,73 @@
       height: 26px;
     }
     body.presentation-mode .disp-body {
-      padding: 12px 18px 10px;
-      gap: 9px;
+      padding: 10px 24px 10px;
+      gap: 8px;
     }
 
-    /* Video takes up more vertical space */
+    /*
+     * VIDEO IS THE HERO — fills ~75% of available height after the header.
+     * Header ≈ 46px. Non-video chrome below ≈ 154px (seg-info + compact question + timer + gaps).
+     * Total non-video ≈ 200px → video height ≈ 100dvh - 200px.
+     * max-width formula converts that height to 16:9 width so the aspect-ratio CSS
+     * constrains the height correctly: video fills available space without overflow.
+     */
     body.presentation-mode .video-wrap {
-      max-width: calc((100vh - 245px) * (16/9));
-      max-width: calc((100dvh - 245px) * (16/9));
+      max-width: calc((100dvh - 200px) * (16/9));
+      max-width: calc((100vh  - 200px) * (16/9)); /* fallback for no dvh */
+      border-radius: 0;
     }
 
-    /* When question is visible, shrink video to share space */
-    body.presentation-mode.question-visible .video-wrap {
-      max-width: calc((68vh - 245px) * (16/9));
-      max-width: calc((68dvh - 245px) * (16/9));
-    }
-    body.presentation-mode.question-visible .question-card {
-      overflow-y: auto;
-      max-height: 30vh;
-      max-height: 30dvh;
-    }
-
-    /* Segment title/panelist readable from back of room */
+    /* Segment title/panelist: readable from the back of the room */
     body.presentation-mode .seg-info__title {
-      font-size: clamp(1.1rem, 2.6vw, 2rem);
+      font-size: clamp(1.1rem, 2.4vw, 1.9rem);
       white-space: normal;
       line-height: 1.2;
     }
     body.presentation-mode .seg-info__panelist {
-      font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+      font-size: clamp(0.85rem, 1.4vw, 1.15rem);
     }
 
-    /* Question card — large, audience-readable */
+    /*
+     * QUESTION — compact inline band, not a tall card.
+     * Removes all card chrome; replaces with a thin top rule + small label + large centred text.
+     * Height ≈ label(16px) + text(1 line × 1.25 × 2.5rem ≈ 50px) + padding(10px) ≈ 76px.
+     * The question always occupies this same space whether hidden (blurred) or revealed,
+     * so the video never jumps on reveal.
+     */
+    body.presentation-mode .question-card {
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 5px 0 4px;
+      overflow: visible;
+    }
     body.presentation-mode .question-card__label {
-      padding: 10px 22px;
-      font-size: 0.7rem;
+      display: block;
+      padding: 0 0 3px;
+      background: transparent;
+      border: none;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      text-align: center;
+      opacity: 0.85;
     }
     body.presentation-mode .question-card__text {
-      padding: 18px 24px;
-      font-size: clamp(1.35rem, 2.8vw, 2.4rem);
-      line-height: 1.35;
+      padding: 0;
+      font-size: clamp(2rem, 2.8vw, 3rem);
+      line-height: 1.25;
+      text-align: center;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
     }
 
     /* Timer — readable from the back of the room */
     body.presentation-mode .timer__bar-wrap {
-      height: 10px;
+      height: 8px;
       border-radius: 99px;
     }
     body.presentation-mode .timer__bar {
@@ -416,6 +473,29 @@
     body.presentation-mode .timer__display {
       font-size: clamp(1.9rem, 4.2vw, 3.2rem);
       min-width: 110px;
+    }
+
+    /* ---- Lower-third mode (show.questionDisplayMode = "lower-third") ---- */
+
+    /* Video gets even more height — question is an overlay, not below */
+    body.presentation-mode.lower-third-mode .video-wrap {
+      max-width: calc((100dvh - 130px) * (16/9));
+      max-width: calc((100vh  - 130px) * (16/9));
+    }
+
+    /* Suppress the below-video question card */
+    body.presentation-mode.lower-third-mode .question-card {
+      display: none;
+    }
+
+    /* Activate and show the lower-third overlay */
+    body.presentation-mode.lower-third-mode .question-lt {
+      display: flex;
+    }
+
+    /* Fade in only when the question is revealed */
+    body.presentation-mode.lower-third-mode.question-visible .question-lt {
+      opacity: 1;
     }
 
     @keyframes pulse {
@@ -462,6 +542,11 @@
         <div id="yt-player"></div>
         <div id="video-placeholder" class="video-placeholder">
           <div class="video-placeholder__icon">▶</div>
+        </div>
+        <!-- Lower-third question overlay (only visible in lower-third mode) -->
+        <div id="question-lower-third" class="question-lt">
+          <span class="question-lt__label">QUESTION</span>
+          <span id="question-lt-text" class="question-lt__text"></span>
         </div>
       </div>
 
