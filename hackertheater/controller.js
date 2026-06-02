@@ -8,6 +8,11 @@
  */
 
 (async () => {
+  // ?controlAudio=1 keeps the control-room player unmuted during testing.
+  // Default: control room is muted whenever a projector is connected so the
+  // projector is the sole audio source for the audience.
+  const CONTROL_AUDIO_ENABLED = new URLSearchParams(location.search).get('controlAudio') === '1';
+
   // ============================================================
   // 1. LOAD SHOW DATA
   // ============================================================
@@ -303,12 +308,17 @@
     const wasConnected = projectorConnected;
     projectorConnected = connected;
 
-    // Mute/unmute the local player on connection-state transitions so the
-    // projector display is the sole audio source during live presentation.
-    if (connected && !wasConnected) {
-      Clips.mute();
-    } else if (!connected && wasConnected) {
-      Clips.unmute();
+    // Keep the control-room player muted whenever the projector is connected so
+    // the projector is the sole audio source for the audience.
+    // We re-enforce the mute on every call (not just on the transition) because
+    // loadVideoById can silently reset YouTube's mute state after each clip load.
+    // CONTROL_AUDIO_ENABLED (?controlAudio=1) bypasses this for testing.
+    if (!CONTROL_AUDIO_ENABLED) {
+      if (connected) {
+        Clips.mute();
+      } else if (wasConnected) {
+        Clips.unmute();
+      }
     }
 
     const dot   = $('proj-dot');
@@ -316,7 +326,9 @@
     if (!dot || !label) return;
     if (connected) {
       dot.className     = 'proj-dot proj-dot--connected';
-      label.textContent = 'Projector connected';
+      label.textContent = CONTROL_AUDIO_ENABLED
+        ? 'Projector connected (audio on)'
+        : 'Projector connected · CR muted';
     } else {
       dot.className     = 'proj-dot';
       label.textContent = 'Projector not connected';
