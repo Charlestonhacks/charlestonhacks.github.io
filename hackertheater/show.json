@@ -82,6 +82,43 @@
       ],
       "moderatorNotes": "",
       "discussionMinutes": 6
+    },
+    {
+      "title": "Hackers (1995), “Hack the Planet!”",
+      "youtubeId": "y60JwuVVlTk",
+      "start": 21,
+      "end": 96,
+      "panelist": "Lou Vega",
+      "question": "Is it possible now for hackers to control traffic lights like this and what other similar systems can they get into?",
+      "backupQuestions": [
+        "Does AI give hackers new abilities?"
+      ],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Hackers (1995) \"Hack the Gibson\"",
+      "youtubeId": "Bmz67ErIRa4",
+      "start": 5,
+      "end": 155,
+      "panelist": "lou Vega",
+      "question": "Is anything here realistic?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Ex Machina (2014) Ava's AI Brain",
+      "youtubeId": "ruOXWHbyfjo",
+      "start": 36,
+      "end": 187,
+      "panelist": "Jack Teitel",
+      "question": "How does AI need to evolve to reproduce what is being discussed in this clip?",
+      "backupQuestions": [
+        "Would we want an AI that reproduces a human to the point that it is indistinguishable for a human?"
+      ],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
     }
   ]
 }
