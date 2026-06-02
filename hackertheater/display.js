@@ -133,6 +133,11 @@
   function _onPlayerReady() {
     playerReady = true;
     dom.placeholder.classList.add('hidden');
+
+    // Remove the YT iframe from the tab order so keyboard focus can't reach it.
+    const iframe = document.querySelector('#yt-player iframe');
+    if (iframe) iframe.setAttribute('tabindex', '-1');
+
     if (pendingVideoAction) {
       const a = pendingVideoAction;
       pendingVideoAction = null;
@@ -274,6 +279,7 @@
     if (snap.show) {
       dom.eventName.textContent = snap.show.eventName || 'Hacker Theater';
       _applyQuestionDisplayMode(snap.show.questionDisplayMode || 'below-video');
+      _applyPlayerInteractionOverride(snap.show.allowDirectPlayerInteraction);
     }
 
     // Segment info
@@ -483,6 +489,7 @@
     if (p && p.show) {
       dom.eventName.textContent = p.show.eventName || 'Hacker Theater';
       _applyQuestionDisplayMode(p.show.questionDisplayMode || 'below-video');
+      _applyPlayerInteractionOverride(p.show.allowDirectPlayerInteraction);
     }
   });
 
@@ -565,6 +572,41 @@
     _noteActivity();
     _enterPresentationMode();
   });
+
+  // ---- Interaction shield ----
+
+  /**
+   * Blocks direct pointer interaction with the YouTube iframe on the projector.
+   * Disabled by ?debugPlayer=1 in the URL; can also be disabled at runtime
+   * via show.allowDirectPlayerInteraction = true (checked in applyFullSync /
+   * applyShowData channel handlers).
+   */
+  function _setupInteractionShield() {
+    const debugByUrl = new URLSearchParams(location.search).get('debugPlayer') === '1';
+    const shield = document.getElementById('video-lock');
+    if (!shield) return;
+
+    if (debugByUrl) {
+      shield.classList.add('video-interaction-lock--disabled');
+      return;
+    }
+
+    const BLOCK_EVENTS = ['click', 'pointerdown', 'pointerup', 'touchstart', 'dblclick', 'contextmenu'];
+    BLOCK_EVENTS.forEach(type => {
+      shield.addEventListener(type, e => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, { passive: false, capture: true });
+    });
+  }
+
+  function _applyPlayerInteractionOverride(allow) {
+    if (!allow) return;
+    const shield = document.getElementById('video-lock');
+    if (shield) shield.classList.add('video-interaction-lock--disabled');
+  }
+
+  _setupInteractionShield();
 
   // ---- Boot ----
 

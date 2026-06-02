@@ -69,6 +69,11 @@ const Clips = (() => {
     const ph = document.getElementById('video-placeholder');
     if (ph) ph.classList.add('hidden');
 
+    // Remove the YT iframe from the tab order so keyboard focus can't reach it.
+    // The interaction shield handles pointer blocking; tabindex handles keyboard.
+    const iframe = document.querySelector('#yt-player iframe');
+    if (iframe) iframe.setAttribute('tabindex', '-1');
+
     // Drain any action that arrived before the player was ready
     if (pendingAction) {
       _log('Draining pendingAction');

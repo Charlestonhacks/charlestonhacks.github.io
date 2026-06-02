@@ -264,6 +264,24 @@ button:focus-visible {
 
 .video-placeholder.hidden { display: none; }
 
+/*
+ * Interaction shield — transparent overlay that blocks direct clicks on the
+ * YouTube iframe. App controls remain the only route into the playback
+ * state machine. Set ?debugPlayer=1 or show.allowDirectPlayerInteraction=true
+ * to disable.
+ */
+.video-interaction-lock {
+  position: absolute;
+  inset: 0;
+  z-index: 2;      /* above iframe (auto) and placeholder (auto) */
+  cursor: default;
+  /* pointer-events: auto is the default; explicit for clarity */
+  pointer-events: auto;
+}
+.video-interaction-lock--disabled {
+  display: none;
+}
+
 /* ---- Segment Info ---- */
 
 .segment-info {

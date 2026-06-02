@@ -347,11 +347,22 @@
       padding-top: 4px;
     }
 
+    /* ---- Interaction shield (mirrors control-room .video-interaction-lock) ---- */
+    .video-interaction-lock {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      cursor: default;
+      pointer-events: auto;
+    }
+    .video-interaction-lock--disabled { display: none; }
+
     /* ---- Lower-third question overlay (inside .video-wrap) ---- */
     .question-lt {
       display: none; /* hidden outside presentation mode */
       position: absolute;
       bottom: 0; left: 0; right: 0;
+      z-index: 3; /* above the interaction shield (z-index: 2) */
       align-items: flex-start;
       gap: 14px;
       padding: 10px 28px 16px;
@@ -548,6 +559,8 @@
           <span class="question-lt__label">QUESTION</span>
           <span id="question-lt-text" class="question-lt__text"></span>
         </div>
+        <!-- Interaction shield: blocks direct iframe clicks. Disabled by ?debugPlayer=1 -->
+        <div id="video-lock" class="video-interaction-lock" aria-hidden="true"></div>
       </div>
 
       <div class="seg-info">
