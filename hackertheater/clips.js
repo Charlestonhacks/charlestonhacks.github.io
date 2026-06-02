@@ -16,7 +16,11 @@ const Clips = (() => {
   let player        = null;  // YT.Player object (set at API ready)
   let playerReady   = false; // true only after onReady fires
   let pendingAction = null;  // latest queued action, executed on onReady
-  let pendingMute   = false; // if mute() is called before ready, apply it on onReady
+  // Persistent mute intent — survives across loadVideoById calls.
+  // YouTube's mute state can be silently reset when a new video loads;
+  // _shouldBeMuted re-applies the mute inside every exec closure so the
+  // control-room player never leaks audio when a projector is connected.
+  let _shouldBeMuted = false;
   let pollInterval  = null;
   let endTime       = null;
   let onEndCallback          = null;
@@ -82,9 +86,8 @@ const Clips = (() => {
       try { action(); } catch (e) { _warn('Pending action threw:', e.message); }
     }
 
-    // Apply a mute that was requested before the player was ready
-    if (pendingMute) {
-      pendingMute = false;
+    // Re-apply the persistent mute intent if it was set before the player was ready.
+    if (_shouldBeMuted) {
       try { player.mute(); } catch (e) { _warn('Deferred mute threw:', e.message); }
     }
   }
@@ -189,6 +192,8 @@ const Clips = (() => {
     _exec(() => {
       _log('cueVideoById', videoId, '@', startSeconds);
       player.cueVideoById({ videoId, startSeconds: startSeconds || 0 });
+      // Re-apply mute immediately — cueVideoById can reset the player's mute state.
+      if (_shouldBeMuted) try { player.mute(); } catch {}
     });
   }
 
@@ -203,6 +208,8 @@ const Clips = (() => {
     _exec(() => {
       _log('loadVideoById', videoId, '@', startSeconds);
       player.loadVideoById({ videoId, startSeconds: startSeconds || 0 });
+      // Re-apply mute immediately — loadVideoById can reset the player's mute state.
+      if (_shouldBeMuted) try { player.mute(); } catch {}
     });
   }
 
@@ -229,6 +236,8 @@ const Clips = (() => {
       _log('replay @', startSeconds);
       player.seekTo(startSeconds || 0, true);
       player.playVideo();
+      // seekTo + playVideo don't normally reset mute, but re-apply for safety.
+      if (_shouldBeMuted) try { player.mute(); } catch {}
     });
   }
 
@@ -242,15 +251,21 @@ const Clips = (() => {
   /** True once the player's onReady event has fired (methods are callable). */
   function isReady() { return playerReady; }
 
-  /** Mute the player. Safe to call before ready — applied on onReady. */
+  /**
+   * Mute the player and set the persistent mute intent.
+   * The intent is re-applied after every loadVideoById / cueVideoById call
+   * so the player cannot accidentally leak audio when loading new clips.
+   * Safe to call before ready — applied on onReady.
+   */
   function mute() {
-    if (!playerReady) { pendingMute = true; return; }
+    _shouldBeMuted = true;
+    if (!playerReady) return; // _onPlayerReady will apply it
     try { player.mute(); } catch (e) { _warn('mute threw:', e.message); }
   }
 
-  /** Unmute the player. */
+  /** Unmute the player and clear the persistent mute intent. */
   function unmute() {
-    pendingMute = false;
+    _shouldBeMuted = false;
     if (!playerReady) return;
     try { player.unMute(); } catch (e) { _warn('unMute threw:', e.message); }
   }
