@@ -1159,6 +1159,8 @@ button:focus-visible {
   flex-direction: column;
   border-right: 1px solid var(--border);
   background: var(--bg-primary);
+  min-height: 0;
+  overflow: hidden;
 }
 
 .ed-list-header {
@@ -1287,8 +1289,9 @@ button:focus-visible {
   color: var(--text-primary);
   line-height: 1.3;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .ed-seg-item__meta {
@@ -1588,4 +1591,11 @@ button:focus-visible {
 .proj-dot--connected {
   background: var(--green);
   animation: pulse 2s infinite;
+}
+
+.proj-hint {
+  margin: 6px 0 0;
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
