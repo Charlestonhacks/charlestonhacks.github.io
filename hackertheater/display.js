@@ -59,7 +59,29 @@
 
   let player      = null;
   let playerReady = false;
-  let pendingVideoAction = null;   // queued until playerReady
+  let pendingVideoAction = null;   // queued until playerReady (before onReady)
+
+  // ---- Segment / readiness tracking ----
+  //
+  // These variables form the "readiness gate" that prevents play commands from
+  // reaching YouTube before the video is fully cued.
+  //
+  // currentSegment: the segment currently being cued or playing.
+  // segmentCued:    true after YouTube fires the CUED state for currentSegment.
+  //                 Resets to false whenever we start loading a new video.
+  // pendingPlay:    a play command that arrived before segmentCued was true;
+  //                 drained automatically once CUED fires.
+  // _hasEverPlayed: false until the first PLAYING state — used to gate the
+  //                 one-shot late-join error retry.
+  // _retryCount:    error retry counter, capped at 1 to prevent loops.
+  // _lastCommand:   last channel command received, included in error logs.
+
+  let currentSegment  = { videoId: null, start: 0, end: null, index: null };
+  let segmentCued     = false;
+  let pendingPlay     = null;
+  let _hasEverPlayed  = false;
+  let _retryCount     = 0;
+  let _lastCommand    = null;
 
   // ---- End-time enforcement ----
 
@@ -138,6 +160,8 @@
     const iframe = document.querySelector('#yt-player iframe');
     if (iframe) iframe.setAttribute('tabindex', '-1');
 
+    if (DEBUG_TIMING) console.log('[Display] playerReady — draining pendingVideoAction');
+
     if (pendingVideoAction) {
       const a = pendingVideoAction;
       pendingVideoAction = null;
@@ -146,8 +170,39 @@
   }
 
   function _onPlayerError(ev) {
-    console.warn('[Display] YT player error:', ev.data);
     _clearEndPoll();
+    const debugInfo = {
+      errorCode:    ev.data,
+      videoId:      currentSegment.videoId,
+      segmentIndex: currentSegment.index,
+      start:        currentSegment.start,
+      end:          currentSegment.end,
+      playerReady,
+      segmentCued,
+      lastCommand:  _lastCommand,
+    };
+    console.warn('[Display] YT player error:', debugInfo);
+
+    // One-shot retry during late-join startup: if we haven't successfully played
+    // anything yet and this is the first error, re-cue and replay pending command.
+    if (!_hasEverPlayed && _retryCount < 1 && currentSegment.videoId) {
+      _retryCount++;
+      console.warn('[Display] Late-join error — re-cueing in 600ms, retry', _retryCount);
+      setTimeout(() => {
+        segmentCued = false;
+        if (!pendingPlay && _lastCommand && _lastCommand.type === 'play') {
+          pendingPlay = {
+            videoId: currentSegment.videoId,
+            start:   currentSegment.start || 0,
+            end:     currentSegment.end,
+          };
+        }
+        _execVideo(() => {
+          if (DEBUG_TIMING) console.log('[Display] retry cueVideoById:', currentSegment.videoId, '@', currentSegment.start);
+          player.cueVideoById({ videoId: currentSegment.videoId, startSeconds: currentSegment.start || 0 });
+        });
+      }, 600);
+    }
   }
 
   // Drive end-poll start/stop from actual player state so buffering pauses
@@ -155,15 +210,36 @@
   function _onPlayerStateChange(event) {
     if (typeof YT === 'undefined') return;
     const s = event.data;
-    if (s === YT.PlayerState.PLAYING) {
+
+    if (s === YT.PlayerState.CUED) {
+      // cueVideoById completed — video is ready to play at the cued start time.
+      segmentCued = true;
+      _retryCount = 0; // successful cue clears the retry counter
+      if (DEBUG_TIMING) console.log('[Display] CUED — segmentCued=true, segment=', currentSegment);
+      _drainPendingPlay();
+      _clearEndPoll(); // no end-poll while just cued
+    } else if (s === YT.PlayerState.PLAYING) {
+      _hasEverPlayed = true;
       _startEndPoll();
+      if (DEBUG_TIMING) console.log('[Display] PLAYING — end poll started, endTime=', endTime);
     } else if (s === YT.PlayerState.PAUSED  ||
                s === YT.PlayerState.ENDED   ||
-               s === YT.PlayerState.CUED    ||
                s === -1 /* UNSTARTED */) {
       _clearEndPoll();
     }
     // BUFFERING (3): do nothing — poll persists across rebuffer events
+  }
+
+  // Execute a queued play command now that segmentCued is true.
+  function _drainPendingPlay() {
+    if (!pendingPlay || !segmentCued || !playerReady) return;
+    const pp = pendingPlay;
+    pendingPlay = null;
+    if (DEBUG_TIMING) console.log('[Display] draining pendingPlay — seekTo', pp.start, '+ playVideo');
+    try {
+      player.seekTo(pp.start || 0, true);
+      player.playVideo();
+    } catch (e) { console.warn('[Display] pendingPlay drain error:', e.message); }
   }
 
   function _execVideo(fn) {
@@ -327,17 +403,28 @@
       _clearOverlays();
     }
 
-    // Video
+    // Video — always cue (never auto-play) on fullSync.
+    // The projector joining late should cue and wait for the next explicit play
+    // command from the user pressing Play Clip. Auto-playing from fullSync while
+    // the YT player is still initialising causes the YouTube errors this fix targets.
     if (snap.videoId) {
       endTime = (snap.videoEnd != null && snap.videoEnd > 0) ? snap.videoEnd : null;
-      if (DEBUG_TIMING) console.log('[Display/Timing] applyFullSync, endTime=', endTime, 'state=', snap.playbackState);
-      _execVideo(() => {
-        if (snap.playbackState === 'playing') {
-          player.loadVideoById({ videoId: snap.videoId, startSeconds: snap.videoStart || 0 });
-        } else {
+      const newIndex = snap.segmentIndex != null ? snap.segmentIndex : null;
+      if (DEBUG_TIMING) console.log('[Display] applyFullSync video:', snap.videoId, 'idx=', newIndex, 'state=', snap.playbackState, 'endTime=', endTime);
+
+      // Only re-cue if the segment has actually changed, to avoid interrupting
+      // an in-progress cue from a previous fullSync for the same segment.
+      if (currentSegment.videoId !== snap.videoId || currentSegment.index !== newIndex) {
+        currentSegment = { videoId: snap.videoId, start: snap.videoStart || 0, end: snap.videoEnd, index: newIndex };
+        segmentCued    = false;
+        pendingPlay    = null;
+        _execVideo(() => {
+          if (DEBUG_TIMING) console.log('[Display] applyFullSync — cueVideoById:', snap.videoId, '@', snap.videoStart);
           player.cueVideoById({ videoId: snap.videoId, startSeconds: snap.videoStart || 0 });
-        }
-      });
+        });
+      } else {
+        if (DEBUG_TIMING) console.log('[Display] applyFullSync — same segment already tracked, skipping re-cue');
+      }
     }
   }
 
@@ -365,6 +452,7 @@
 
   Channel.on('loadSegment', (p) => {
     _noteActivity();
+    _lastCommand = { type: 'loadSegment', payload: p, ts: Date.now() };
     const seg = p.segment || {};
     dom.segTitle.textContent    = seg.title    || '—';
     dom.segPanelist.textContent = seg.panelist ? `↳ ${seg.panelist}` : '';
@@ -382,30 +470,71 @@
     timer.total = timer.remaining = 0;
     _renderTimer();
 
-    // Clear any in-progress end-poll for the previous segment
+    // Clear end-poll and readiness state for the outgoing segment
     _clearEndPoll();
-    endTime = null;
+    endTime     = null;
+    segmentCued = false;
+    pendingPlay = null;
+    currentSegment = {
+      videoId: seg.youtubeId || null,
+      start:   seg.start   || 0,
+      end:     seg.end     || null,
+      index:   p.index     != null ? p.index : null,
+    };
 
-    // Cue the video without playing
+    // Cue the new video without playing
     if (seg.youtubeId) {
       _execVideo(() => {
+        if (DEBUG_TIMING) console.log('[Display] loadSegment — cueVideoById:', seg.youtubeId, '@', seg.start);
         player.cueVideoById({ videoId: seg.youtubeId, startSeconds: seg.start || 0 });
       });
     }
-    if (DEBUG_TIMING) console.log('[Display/Timing] loadSegment, start=', seg.start, 'end=', seg.end);
+    if (DEBUG_TIMING) console.log('[Display] loadSegment idx=', p.index, 'start=', seg.start, 'end=', seg.end);
   });
 
   Channel.on('play', (p) => {
     _noteActivity();
     if (!p.videoId) return;
-    // Store end time before loading — the state-change handler will start the poll
-    // when PLAYING fires after loadVideoById triggers buffering → playing.
+    _lastCommand = { type: 'play', payload: p, ts: Date.now() };
+
     endTime = (p.end != null && p.end > 0) ? p.end : null;
-    if (DEBUG_TIMING) console.log('[Display/Timing] play received, start=', p.start, 'end=', endTime);
     _clearEndPoll();
-    _execVideo(() => {
-      player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
-    });
+
+    // Determine whether the projector already has this segment cued.
+    // Match by videoId + segmentIndex (index sent since last session's fix).
+    const sameVideo = currentSegment.videoId === p.videoId;
+    const sameIndex = p.segmentIndex == null || currentSegment.index === p.segmentIndex;
+    const alreadyCued = sameVideo && sameIndex && segmentCued;
+    const awaitingCue = sameVideo && sameIndex && !segmentCued;
+
+    if (DEBUG_TIMING) console.log('[Display] play received — sameVideo=', sameVideo, 'sameIndex=', sameIndex, 'segmentCued=', segmentCued, 'alreadyCued=', alreadyCued, 'awaitingCue=', awaitingCue, p);
+
+    if (alreadyCued) {
+      // Segment is already cued — seek to start and play immediately.
+      // This is the normal path for a late-joining projector that applyFullSync
+      // already cued while the user was navigating to the play button.
+      if (DEBUG_TIMING) console.log('[Display] play — already cued, seekTo', p.start, '+ playVideo');
+      _execVideo(() => {
+        try {
+          player.seekTo(p.start || 0, true);
+          player.playVideo();
+        } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
+      });
+    } else if (awaitingCue) {
+      // Same segment is being cued right now — queue the play.
+      // _drainPendingPlay() will fire it when the CUED state event arrives.
+      if (DEBUG_TIMING) console.log('[Display] play — same segment cueing in progress, queuing pendingPlay');
+      pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end };
+    } else {
+      // Different segment or no cue in progress — update tracking and do a full load.
+      if (DEBUG_TIMING) console.log('[Display] play — new/uncued segment, loadVideoById');
+      currentSegment = { videoId: p.videoId, start: p.start || 0, end: p.end, index: p.segmentIndex != null ? p.segmentIndex : null };
+      segmentCued    = false;
+      pendingPlay    = null;
+      _execVideo(() => {
+        player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
+      });
+    }
   });
 
   Channel.on('pause', () => {
@@ -416,6 +545,7 @@
 
   Channel.on('resume', () => {
     _noteActivity();
+    _lastCommand = { type: 'resume', payload: null, ts: Date.now() };
     if (!playerReady) return;
     // endTime retained from the previous play message; poll restarts via onStateChange
     try { player.playVideo(); } catch (e) { console.warn('[Display] resume error:', e.message); }
@@ -423,10 +553,13 @@
 
   Channel.on('replay', (p) => {
     _noteActivity();
+    _lastCommand = { type: 'replay', payload: p, ts: Date.now() };
     if (!playerReady) return;
     endTime = (p.end != null && p.end > 0) ? p.end : null;
-    if (DEBUG_TIMING) console.log('[Display/Timing] replay received, start=', p.start, 'end=', endTime);
+    if (DEBUG_TIMING) console.log('[Display] replay received, start=', p.start, 'end=', endTime);
     _clearEndPoll();
+    // Replay always seeks to start — no readiness gate needed since the video
+    // must already have been loaded to be replayable.
     try {
       player.seekTo(p.start || 0, true);
       player.playVideo();
