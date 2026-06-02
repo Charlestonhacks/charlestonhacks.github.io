@@ -25,12 +25,32 @@
     segPanelist:  $('seg-panelist'),
     questionCard: $('question-card'),
     questionText: $('question-text'),
+    questionLt:   $('question-lower-third'),  // lower-third overlay
+    questionLtText: $('question-lt-text'),    // lower-third text span
     timerDisplay: $('timer-display'),
     timerBar:     $('timer-bar'),
     launchPanel:  $('launch-panel'),
     btnPresentation: $('btn-presentation'),
     fsBlocked:    $('fs-blocked'),
   };
+
+  // Apply questionDisplayMode from show data ('below-video' | 'lower-third').
+  // Drives the lower-third-mode body class which CSS keyes off.
+  function _applyQuestionDisplayMode(mode) {
+    if (mode === 'lower-third') {
+      document.body.classList.add('lower-third-mode');
+    } else {
+      document.body.classList.remove('lower-third-mode');
+    }
+  }
+
+  // Keep the lower-third text in sync whenever question text changes.
+  function _syncQuestionText(text) {
+    if (text) {
+      dom.questionText.textContent = text;
+      if (dom.questionLtText) dom.questionLtText.textContent = text;
+    }
+  }
 
   // Set to true to log timing events to the console.
   const DEBUG_TIMING = false;
@@ -253,6 +273,7 @@
     // Event info
     if (snap.show) {
       dom.eventName.textContent = snap.show.eventName || 'Hacker Theater';
+      _applyQuestionDisplayMode(snap.show.questionDisplayMode || 'below-video');
     }
 
     // Segment info
@@ -267,7 +288,7 @@
 
     // Question
     if (snap.questionText) {
-      dom.questionText.textContent = snap.questionText;
+      _syncQuestionText(snap.questionText);
     }
     if (snap.questionVisible) {
       dom.questionCard.classList.add('revealed');
@@ -348,7 +369,7 @@
     dom.questionCard.classList.remove('revealed');
     dom.questionText.classList.add('blurred');
     document.body.classList.remove('question-visible');
-    if (seg.question) dom.questionText.textContent = seg.question;
+    if (seg.question) _syncQuestionText(seg.question);
 
     // Reset timer display
     _stopTimer();
@@ -408,7 +429,7 @@
 
   Channel.on('showQuestion', (p) => {
     _noteActivity();
-    if (p.text) dom.questionText.textContent = p.text;
+    _syncQuestionText(p.text);
     dom.questionCard.classList.add('revealed');
     dom.questionText.classList.remove('blurred');
     document.body.classList.add('question-visible');
@@ -461,6 +482,7 @@
     _noteActivity();
     if (p && p.show) {
       dom.eventName.textContent = p.show.eventName || 'Hacker Theater';
+      _applyQuestionDisplayMode(p.show.questionDisplayMode || 'below-video');
     }
   });
 
