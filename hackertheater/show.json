@@ -174,6 +174,19 @@
       "backupQuestions": [],
       "moderatorNotes": "",
       "discussionMinutes": 5
+    },
+    {
+      "title": "Hell Grind (2026) Boss Battle",
+      "youtubeId": "digHr6k38x0",
+      "start": 1023,
+      "end": 1352,
+      "panelist": "JM",
+      "question": "What is an animators role if AI generated filmmaking becomes more commonplace?",
+      "backupQuestions": [
+        "Will Synthetic actors ever replace human actors?"
+      ],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
     }
   ]
 }
