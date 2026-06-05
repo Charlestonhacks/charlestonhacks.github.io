@@ -156,6 +156,34 @@
   }
 
   // ============================================================
+  // 5b. TIMESTAMP PARSING
+  // ============================================================
+
+  /**
+   * Normalise any timestamp representation to an integer number of seconds.
+   * Accepts:  79  |  "79"  |  "1:19"  |  "00:01:19"  |  79.5  |  null/undefined
+   * Returns: integer seconds, or 0 on unrecognised input.
+   * This mirrors the parseTime() function in editor.js so show.json values edited
+   * by hand or imported as mm:ss strings always reach the player as plain numbers.
+   */
+  function _parseTs(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    if (typeof v === 'number') return Math.round(v);
+    const s = String(v).trim();
+    if (/^\d+$/.test(s)) return parseInt(s, 10);
+    if (/^\d+\.\d+$/.test(s)) return Math.round(parseFloat(s));
+    const mmss = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (mmss) return parseInt(mmss[1], 10) * 60 + parseInt(mmss[2], 10);
+    const hhmmss = s.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+    if (hhmmss)
+      return parseInt(hhmmss[1], 10) * 3600
+           + parseInt(hhmmss[2], 10) * 60
+           + parseInt(hhmmss[3], 10);
+    console.warn('[Controller] _parseTs: unrecognised timestamp format:', JSON.stringify(v), '— using 0');
+    return 0;
+  }
+
+  // ============================================================
   // 6. LOAD SEGMENT
   // ============================================================
 
@@ -170,10 +198,19 @@
 
     const seg = segments[index];
 
+    // Normalise timestamps once — guards against string values ("1:19") from
+    // hand-edited or imported show.json files reaching the player as strings.
+    seg.start = _parseTs(seg.start);
+    seg.end   = _parseTs(seg.end);
+
+    console.log('[Controller] Segment loaded — idx:', index,
+                'title:', seg.title, 'videoId:', seg.youtubeId,
+                'start:', seg.start, 'end:', seg.end);
+
     dom.segTitle.textContent      = seg.title    || '—';
     dom.segPanelist.textContent   = seg.panelist ? `↳ ${seg.panelist}` : '';
-    dom.segTimestamps.textContent = `${fmtTime(seg.start || 0)} → ${fmtTime(seg.end || 0)}`;
-    const clipLen = (seg.end || 0) - (seg.start || 0);
+    dom.segTimestamps.textContent = `${fmtTime(seg.start)} → ${fmtTime(seg.end)}`;
+    const clipLen = seg.end - seg.start;
     dom.segDuration.textContent = `Clip length: ${fmtTime(clipLen)}`;
 
     state.questionVisible = false;
@@ -203,7 +240,7 @@
       setStatus('error', 'No video ID configured');
     } else {
       ensureControllerMuted('cue');
-      Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
+      Clips.cue(seg.youtubeId, seg.start, seg.end);
     }
 
     state.clipState = 'idle';
@@ -418,10 +455,16 @@
       }
 
       if (useHardSync) {
-        console.log('[Controller] Projector hard sync requested —',
-                    cmd.payload.videoId, '@', cmd.payload.start);
+        console.log('[Controller] → hardSyncPlay | videoId:', cmd.payload.videoId,
+                    'start:', cmd.payload.start, 'end:', cmd.payload.end,
+                    'segmentIndex:', cmd.payload.segmentIndex,
+                    'targetDisplayId:', target.targetDisplayId || '(any)');
         _broadcast('hardSyncPlay', { ...cmd.payload, ...target });
       } else {
+        console.log('[Controller] → play | videoId:', cmd.payload.videoId,
+                    'start:', cmd.payload.start, 'end:', cmd.payload.end,
+                    'segmentIndex:', cmd.payload.segmentIndex,
+                    'targetDisplayId:', target.targetDisplayId || '(any)');
         _broadcast('play', { ...cmd.payload, ...target });
       }
 
@@ -431,10 +474,15 @@
       if (projectorNeedsHardSync) {
         const seg = segments[currentIndex];
         if (seg && seg.youtubeId) {
+          const start = _parseTs(seg.start);
+          const end   = _parseTs(seg.end);
           console.log('[Controller] Projector resume upgraded to hardSyncPlay (projectorNeedsHardSync) —',
-                      seg.youtubeId, '@', seg.start);
+                      seg.youtubeId, '@', start);
+          console.log('[Controller] → hardSyncPlay (from resume) | videoId:', seg.youtubeId,
+                      'start:', start, 'end:', end, 'segmentIndex:', currentIndex,
+                      'targetDisplayId:', target.targetDisplayId || '(any)');
           _broadcast('hardSyncPlay', {
-            videoId: seg.youtubeId, start: seg.start, end: seg.end,
+            videoId: seg.youtubeId, start, end,
             segmentIndex: currentIndex, ...target,
           });
         } else {
@@ -451,6 +499,7 @@
         return;
       }
       _lastResumeSentTs = now;
+      console.log('[Controller] → resume | targetDisplayId:', target.targetDisplayId || '(any)');
       _broadcast('resume', target);
     }
   }
@@ -553,26 +602,30 @@
     state.clipState = 'playing';
     ensureControllerMuted('play');
     const projState = projectorConnected ? (displayReady ? 'ready' : 'not-ready') : 'not-connected';
-    console.log('[Controller] Controller preview play:', seg.youtubeId, '@', seg.start,
-                '— projector:', projState, '— muted:', Clips.isMuted());
+    // start/end already normalised to integers by loadSegment → _parseTs
+    const start = _parseTs(seg.start);
+    const end   = _parseTs(seg.end);
+    console.log('[Controller] Play — idx:', currentIndex,
+                'title:', seg.title, 'videoId:', seg.youtubeId,
+                'start:', start, 'end:', end, '— projector:', projState, '— muted:', Clips.isMuted());
     setStatus('playing', 'Loading…');
 
-    const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
+    const payload = { videoId: seg.youtubeId, start, end, segmentIndex: currentIndex };
     if (projectorConnected && !displayReady) {
       // Block local Clips.play until the display is ready — cue only so the
       // controller preview loads the video without emitting audio.
       console.log('[Controller] Preview playback blocked — projector not ready; queued command');
-      Clips.cue(seg.youtubeId, seg.start, seg.end);
+      Clips.cue(seg.youtubeId, start, end);
       pendingProjectorCommand = {
         type:        'play',
         payload,
         clipsAction: () => {
           ensureControllerMuted('play (deferred)');
-          Clips.play(seg.youtubeId, seg.start, seg.end);
+          Clips.play(seg.youtubeId, start, end);
         },
       };
     } else {
-      Clips.play(seg.youtubeId, seg.start, seg.end);
+      Clips.play(seg.youtubeId, start, end);
       _sendProjectorCommand({ type: 'play', payload });
     }
   }
@@ -629,25 +682,29 @@
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
     ensureControllerMuted('replay');
-    console.log('[Controller] Controller preview replay @', seg.start, '— muted:', Clips.isMuted());
+    const start = _parseTs(seg.start);
+    const end   = _parseTs(seg.end);
+    console.log('[Controller] Replay — idx:', currentIndex,
+                'title:', seg.title, 'videoId:', seg.youtubeId,
+                'start:', start, 'end:', end, '— muted:', Clips.isMuted());
     setStatus('playing', 'Replaying');
 
     // replay always seeks to the segment start — always hard-sync the projector.
     projectorNeedsHardSync = true;
-    const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
+    const payload = { videoId: seg.youtubeId, start, end, segmentIndex: currentIndex };
     if (projectorConnected && !displayReady) {
       console.log('[Controller] Preview playback blocked — projector not ready; queued command');
-      Clips.cue(seg.youtubeId, seg.start, seg.end);
+      Clips.cue(seg.youtubeId, start, end);
       pendingProjectorCommand = {
         type:        'play',
         payload,
         clipsAction: () => {
           ensureControllerMuted('replay (deferred)');
-          Clips.replay(seg.start, seg.end);
+          Clips.replay(start, end);
         },
       };
     } else {
-      Clips.replay(seg.start, seg.end);
+      Clips.replay(start, end);
       _sendProjectorCommand({ type: 'play', payload });
     }
   }

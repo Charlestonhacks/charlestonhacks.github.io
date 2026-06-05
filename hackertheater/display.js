@@ -590,6 +590,17 @@
       return;
     }
 
+    // Log full payload so controller and display logs can be compared side-by-side.
+    console.log('[Display] ← play | videoId:', p.videoId,
+                'start:', p.start, 'end:', p.end, 'segmentIndex:', p.segmentIndex);
+
+    // Warn if the received segment differs from what the display currently has cued.
+    if (currentSegment.videoId && currentSegment.videoId !== p.videoId) {
+      console.warn('[Display] play videoId mismatch — currentSegment:', currentSegment.videoId,
+                   '(idx', currentSegment.index, ') received:', p.videoId,
+                   '(idx', p.segmentIndex, ')');
+    }
+
     _lastCommand = { type: 'play', payload: p, ts: Date.now() };
 
     // Deduplicate: ignore the same play command arriving within PROJECTOR_DEDUP_MS.
@@ -659,6 +670,21 @@
     if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
       console.log('[Display] hardSyncPlay ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
       return;
+    }
+
+    // Log full payload so controller and display logs can be compared side-by-side.
+    console.log('[Display] ← hardSyncPlay | videoId:', p.videoId,
+                'start:', p.start, 'end:', p.end, 'segmentIndex:', p.segmentIndex);
+
+    // Warn if the received segment differs from what the display currently has cued.
+    if (currentSegment.videoId && currentSegment.videoId !== p.videoId) {
+      console.warn('[Display] hardSyncPlay videoId mismatch — currentSegment:', currentSegment.videoId,
+                   '(idx', currentSegment.index, ') received:', p.videoId,
+                   '(idx', p.segmentIndex, ')');
+    } else if (currentSegment.videoId === p.videoId &&
+               Math.abs((currentSegment.start || 0) - (p.start || 0)) > 1) {
+      console.warn('[Display] hardSyncPlay start mismatch — currentSegment.start:', currentSegment.start,
+                   'received start:', p.start);
     }
 
     _lastCommand = { type: 'hardSyncPlay', payload: p, ts: Date.now() };
