@@ -187,6 +187,17 @@
       ],
       "moderatorNotes": "",
       "discussionMinutes": 5
+    },
+    {
+      "title": "2001, A Space Odyssey (1968), \"Open The Pod Bay Doors\"",
+      "youtubeId": "ARJ8cAGm6JE",
+      "start": 58,
+      "end": 100,
+      "panelist": "Jack Teitel",
+      "question": "If an AI is connected to vital systems and is given conflicting information, is judgement helpful or dangerous?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
     }
   ]
 }
