@@ -55,6 +55,12 @@
   // Set to true to log timing events to the console.
   const DEBUG_TIMING = false;
 
+  // Unique identifier for this display instance — used by the controller to
+  // target commands at the active window and prevent stale windows from
+  // responding to play/resume/replay messages.
+  const displayInstanceId = Math.random().toString(36).slice(2, 10);
+  console.log('[Display] Instance ID:', displayInstanceId);
+
   // ---- YouTube player ----
 
   let player      = null;
@@ -177,11 +183,25 @@
 
     if (DEBUG_TIMING) console.log('[Display] playerReady — draining pendingVideoAction');
 
+    // Recovery cue: if a segment was received via loadSegment/fullSync while the
+    // YT player was still null (API script not yet loaded), _execVideo silently
+    // dropped the cueVideoById call.  Re-cue now so pendingPlay can drain via CUED.
+    if (!pendingVideoAction && currentSegment.videoId && !segmentCued) {
+      console.log('[Display] onReady recovery cue:', currentSegment.videoId, '@', currentSegment.start);
+      try {
+        player.cueVideoById({ videoId: currentSegment.videoId, startSeconds: currentSegment.start || 0 });
+      } catch (e) { console.warn('[Display] recovery cue error:', e.message); }
+    }
+
     if (pendingVideoAction) {
       const a = pendingVideoAction;
       pendingVideoAction = null;
       try { a(); } catch (e) { console.warn('[Display] pending action threw:', e.message); }
     }
+
+    // Announce readiness to the controller so it can flush any queued play command.
+    console.log('[Display] Player ready — sending displayReady (instanceId:', displayInstanceId, ')');
+    Channel.send('displayReady', { displayInstanceId });
   }
 
   function _onPlayerError(ev) {
@@ -254,6 +274,7 @@
     try {
       player.seekTo(pp.start || 0, true);
       player.playVideo();
+      Channel.send('displayPlayingAck', { displayInstanceId, videoId: pp.videoId, start: pp.start, action: 'pendingPlay' });
     } catch (e) { console.warn('[Display] pendingPlay drain error:', e.message); }
   }
 
@@ -510,6 +531,13 @@
   Channel.on('play', (p) => {
     _noteActivity();
     if (!p.videoId) return;
+
+    // Ignore play commands targeted at a different display instance.
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] play ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
+
     _lastCommand = { type: 'play', payload: p, ts: Date.now() };
 
     // Deduplicate: ignore the same play command arriving within PROJECTOR_DEDUP_MS.
@@ -540,6 +568,7 @@
         try {
           player.seekTo(p.start || 0, true);
           player.playVideo();
+          Channel.send('displayPlayingAck', { displayInstanceId, videoId: p.videoId, start: p.start, action: 'play-cued' });
         } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
       });
     } else if (awaitingCue) {
@@ -564,6 +593,7 @@
       pendingPlay    = null;
       _execVideo(() => {
         player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
+        Channel.send('displayPlayingAck', { displayInstanceId, videoId: p.videoId, start: p.start, action: 'loadVideoById' });
       });
     }
   });
@@ -574,8 +604,12 @@
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
-  Channel.on('resume', () => {
+  Channel.on('resume', (p) => {
     _noteActivity();
+    if (p && p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] resume ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
     _lastCommand = { type: 'resume', payload: null, ts: Date.now() };
     if (!playerReady) return;
     if (_isDuplicateCommand('resume')) {
@@ -589,6 +623,10 @@
 
   Channel.on('replay', (p) => {
     _noteActivity();
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] replay ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
     _lastCommand = { type: 'replay', payload: p, ts: Date.now() };
     if (!playerReady) return;
     const cmdKey = `replay:${p.start}`;

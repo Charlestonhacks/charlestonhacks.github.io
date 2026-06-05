@@ -242,6 +242,12 @@
   let _lastTimerSave     = 0;
   let _lastProjectorPing = 0;
   let projectorConnected = false; // true while a display window is actively pinging us
+  // Handshake state: displayReady is set only after the display's YT player onReady
+  // fires and it sends 'displayReady'.  Until then play/resume/replay commands are
+  // held in pendingProjectorCommand so the first clip always reaches the display.
+  let displayReady            = false;
+  let activeDisplayId         = null;  // displayInstanceId of the last display that sent displayReady
+  let pendingProjectorCommand = null;  // { type, payload } queued while displayReady=false
 
   function _buildSnapshot() {
     const seg = segments[currentIndex] || null;
@@ -295,6 +301,32 @@
       _updateProjectorStatus(true);
     });
 
+    // Display signals its YT player is ready — safe to send play commands now.
+    Channel.on('displayReady', (p) => {
+      _lastProjectorPing = Date.now();
+      const newId = p && p.displayInstanceId ? p.displayInstanceId : null;
+      if (newId && newId !== activeDisplayId) {
+        console.log('[Controller] New display instance registered:', newId,
+                    activeDisplayId ? '(replacing ' + activeDisplayId + ')' : '(first)');
+      }
+      if (newId) activeDisplayId = newId;
+      displayReady = true;
+      _updateProjectorStatus(true);
+      console.log('[Controller] Projector ready (instanceId:', activeDisplayId, ')');
+      if (pendingProjectorCommand) {
+        const cmd = pendingProjectorCommand;
+        pendingProjectorCommand = null;
+        console.log('[Controller] Projector ready; flushing queued', cmd.type);
+        _sendProjectorCommand(cmd);
+      }
+    });
+
+    // Display acknowledges it has started playing.
+    Channel.on('displayPlayingAck', (p) => {
+      console.log('[Controller] Projector accepted playback — instanceId:', p.displayInstanceId,
+                  'videoId:', p.videoId, 'start:', p.start, 'action:', p.action);
+    });
+
     // Send periodic heartbeat so display.js knows control room is alive
     setInterval(() => {
       Channel.send('heartbeat');
@@ -316,6 +348,21 @@
     Clips.mute(); // sets _shouldBeMuted + calls player.mute() + setVolume(0)
     console.log('[Controller] Controller preview muted before', reason,
                 '(projector owns audio, muted:', Clips.isMuted(), ')');
+  }
+
+  /**
+   * Send a queued play/resume/replay command to the active display instance.
+   * Always includes targetDisplayId so stale windows ignore it.
+   */
+  function _sendProjectorCommand(cmd) {
+    const target = activeDisplayId ? { targetDisplayId: activeDisplayId } : {};
+    if (cmd.type === 'play') {
+      _broadcast('play', { ...cmd.payload, ...target });
+    } else if (cmd.type === 'resume') {
+      _broadcast('resume', target);
+    } else if (cmd.type === 'replay') {
+      _broadcast('replay', { ...cmd.payload, ...target });
+    }
   }
 
   function _updateProjectorStatus(connected) {
@@ -347,10 +394,11 @@
     const label = $('proj-label');
     if (!dot || !label) return;
     if (connected) {
-      dot.className     = 'proj-dot proj-dot--connected';
+      dot.className = 'proj-dot proj-dot--connected';
+      const readyLabel = displayReady ? '' : ' · awaiting player';
       label.textContent = CONTROL_AUDIO_ENABLED
-        ? 'Projector view connected (audio on)'
-        : 'Projector view connected · CR muted';
+        ? `Projector view connected (audio on)${readyLabel}`
+        : `Projector view connected · CR muted${readyLabel}`;
     } else {
       dot.className     = 'proj-dot';
       label.textContent = 'Projector view not open';
@@ -414,12 +462,19 @@
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
     ensureControllerMuted('play');
+    const projState = projectorConnected ? (displayReady ? 'ready' : 'not-ready') : 'not-connected';
     console.log('[Controller] Controller preview play:', seg.youtubeId, '@', seg.start,
-                '— projector:', projectorConnected ? 'owns audio' : 'not connected',
-                '— muted:', Clips.isMuted());
+                '— projector:', projState, '— muted:', Clips.isMuted());
     Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
-    _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex });
+
+    const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
+    if (projectorConnected && !displayReady) {
+      console.log('[Controller] Projector not ready; queued play for', seg.youtubeId, '@', seg.start);
+      pendingProjectorCommand = { type: 'play', payload };
+    } else {
+      _sendProjectorCommand({ type: 'play', payload });
+    }
   }
 
   // Resume from the current paused position — no seek.
@@ -431,7 +486,13 @@
     console.log('[Controller] Controller preview resume — muted:', Clips.isMuted());
     Clips.resume();
     setStatus('playing', 'Playing');
-    _broadcast('resume');
+
+    if (projectorConnected && !displayReady) {
+      console.log('[Controller] Projector not ready; queued resume');
+      pendingProjectorCommand = { type: 'resume', payload: {} };
+    } else {
+      _sendProjectorCommand({ type: 'resume', payload: {} });
+    }
   }
 
   // Play Clip button: resume if paused, restart if idle/ended, no-op if already playing.
@@ -461,10 +522,17 @@
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
     ensureControllerMuted('replay');
-    console.log('[Controller] Controller preview replay @ ', seg.start, '— muted:', Clips.isMuted());
+    console.log('[Controller] Controller preview replay @', seg.start, '— muted:', Clips.isMuted());
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
-    _broadcast('replay', { start: seg.start, end: seg.end, segmentIndex: currentIndex });
+
+    const payload = { start: seg.start, end: seg.end, segmentIndex: currentIndex };
+    if (projectorConnected && !displayReady) {
+      console.log('[Controller] Projector not ready; queued replay @', seg.start);
+      pendingProjectorCommand = { type: 'replay', payload };
+    } else {
+      _sendProjectorCommand({ type: 'replay', payload });
+    }
   }
 
   function prevSegment() {
