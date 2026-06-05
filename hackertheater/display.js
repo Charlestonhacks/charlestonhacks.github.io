@@ -83,6 +83,21 @@
   let _retryCount     = 0;
   let _lastCommand    = null;
 
+  // Deduplication: ignore repeated projector commands with the same key within 400ms.
+  let _lastProjectorCommandKey = null;
+  let _lastProjectorCommandTs  = 0;
+  const PROJECTOR_DEDUP_MS = 400;
+
+  function _isDuplicateCommand(key) {
+    const now = Date.now();
+    if (key === _lastProjectorCommandKey && (now - _lastProjectorCommandTs) < PROJECTOR_DEDUP_MS) {
+      return true;
+    }
+    _lastProjectorCommandKey = key;
+    _lastProjectorCommandTs  = now;
+    return false;
+  }
+
   // ---- End-time enforcement ----
 
   let endTime       = null;  // current clip end timestamp (seconds), null = no limit
@@ -497,6 +512,13 @@
     if (!p.videoId) return;
     _lastCommand = { type: 'play', payload: p, ts: Date.now() };
 
+    // Deduplicate: ignore the same play command arriving within PROJECTOR_DEDUP_MS.
+    const cmdKey = `play:${p.videoId}:${p.start}:${p.segmentIndex}`;
+    if (_isDuplicateCommand(cmdKey)) {
+      console.log('[Display] Projector duplicate play ignored:', cmdKey);
+      return;
+    }
+
     endTime = (p.end != null && p.end > 0) ? p.end : null;
     _clearEndPoll();
 
@@ -521,10 +543,18 @@
         } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
       });
     } else if (awaitingCue) {
-      // Same segment is being cued right now — queue the play.
-      // _drainPendingPlay() will fire it when the CUED state event arrives.
-      console.log('[Display] Projector player: play queued — same segment cueing in progress, start=', p.start);
-      pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end };
+      // Same segment is being cued right now — store at most one pending play.
+      // If an identical pendingPlay is already queued, skip to avoid duplicates.
+      if (pendingPlay && pendingPlay.videoId === p.videoId && pendingPlay.start === (p.start || 0)) {
+        console.log('[Display] Projector duplicate pendingPlay ignored — same segment already queued, start=', p.start);
+      } else {
+        if (pendingPlay) {
+          console.log('[Display] pendingPlay replaced instead of appended — old start=', pendingPlay.start, 'new start=', p.start);
+        } else {
+          console.log('[Display] Projector player: play queued — same segment cueing in progress, start=', p.start);
+        }
+        pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end };
+      }
     } else {
       // Different segment or no cue in progress — update tracking and do a full load.
       // loadVideoById auto-plays, so this is an implicit playVideo call.
@@ -548,6 +578,10 @@
     _noteActivity();
     _lastCommand = { type: 'resume', payload: null, ts: Date.now() };
     if (!playerReady) return;
+    if (_isDuplicateCommand('resume')) {
+      console.log('[Display] Projector duplicate resume ignored');
+      return;
+    }
     console.log('[Display] Projector player: playVideo() (resume)');
     // endTime retained from the previous play message; poll restarts via onStateChange
     try { player.playVideo(); } catch (e) { console.warn('[Display] resume error:', e.message); }
@@ -557,6 +591,11 @@
     _noteActivity();
     _lastCommand = { type: 'replay', payload: p, ts: Date.now() };
     if (!playerReady) return;
+    const cmdKey = `replay:${p.start}`;
+    if (_isDuplicateCommand(cmdKey)) {
+      console.log('[Display] Projector duplicate replay ignored:', cmdKey);
+      return;
+    }
     endTime = (p.end != null && p.end > 0) ? p.end : null;
     if (DEBUG_TIMING) console.log('[Display] replay received, start=', p.start, 'end=', endTime);
     _clearEndPoll();

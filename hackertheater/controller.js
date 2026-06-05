@@ -202,6 +202,7 @@
       toast(`Segment ${index + 1} has no YouTube video ID — video skipped.`, 'error');
       setStatus('error', 'No video ID configured');
     } else {
+      ensureControllerMuted('cue');
       Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
     }
 
@@ -304,6 +305,19 @@
     }, 5000);
   }
 
+  /**
+   * Enforce mute on the controller preview player before any load/play/seek call.
+   * Guards against YouTube silently resetting the mute state across video loads.
+   * No-op when CONTROL_AUDIO_ENABLED or when no projector is connected.
+   */
+  function ensureControllerMuted(reason) {
+    if (CONTROL_AUDIO_ENABLED) return;
+    if (!projectorConnected) return;
+    Clips.mute(); // sets _shouldBeMuted + calls player.mute() + setVolume(0)
+    console.log('[Controller] Controller preview muted before', reason,
+                '(projector owns audio, muted:', Clips.isMuted(), ')');
+  }
+
   function _updateProjectorStatus(connected) {
     const wasConnected = projectorConnected;
     projectorConnected = connected;
@@ -399,7 +413,10 @@
     if (!seg.youtubeId) { toast('No YouTube video ID on this segment.', 'error'); return; }
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
-    console.log('[Controller] Non-projector player: play()', seg.youtubeId, '@', seg.start, '— muted:', Clips.isMuted());
+    ensureControllerMuted('play');
+    console.log('[Controller] Controller preview play:', seg.youtubeId, '@', seg.start,
+                '— projector:', projectorConnected ? 'owns audio' : 'not connected',
+                '— muted:', Clips.isMuted());
     Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
     _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex });
@@ -410,7 +427,8 @@
     const seg = segments[currentIndex];
     if (!seg || !seg.youtubeId) return;
     state.clipState = 'playing';
-    console.log('[Controller] Non-projector player: playVideo() (resume) — muted:', Clips.isMuted());
+    ensureControllerMuted('resume');
+    console.log('[Controller] Controller preview resume — muted:', Clips.isMuted());
     Clips.resume();
     setStatus('playing', 'Playing');
     _broadcast('resume');
@@ -442,7 +460,8 @@
     if (!seg || !seg.youtubeId) return;
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
-    console.log('[Controller] Non-projector player: replay() @', seg.start, '— muted:', Clips.isMuted());
+    ensureControllerMuted('replay');
+    console.log('[Controller] Controller preview replay @ ', seg.start, '— muted:', Clips.isMuted());
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
     _broadcast('replay', { start: seg.start, end: seg.end, segmentIndex: currentIndex });
