@@ -117,18 +117,25 @@
 
   function _startEndPoll() {
     _clearEndPoll(); // prevent duplicate intervals
-    if (endTime == null || !playerReady) {
-      console.log('[Display] End poll NOT started — endTime:', endTime, 'playerReady:', playerReady);
+
+    // YouTube reports currentTime relative to startSeconds (elapsed from load point),
+    // not as an absolute video timestamp. Enforce against clip duration instead.
+    const duration = (currentSegment.end != null && currentSegment.start != null)
+                   ? currentSegment.end - currentSegment.start
+                   : null;
+
+    if (duration == null || duration <= 0 || !playerReady) {
+      console.log('[Display] End poll NOT started — duration:', duration, 'endTime:', endTime, 'playerReady:', playerReady);
       return;
     }
-    console.log('[Display] End poll started, endTime=' + endTime);
+    console.log('[Display] End poll started, duration=' + duration + ' (start=' + currentSegment.start + ' end=' + currentSegment.end + ')');
     _endPollHandle = setInterval(() => {
       if (!playerReady) return;
       try {
         const cur = player.getCurrentTime();
-        console.log('[Display] End poll tick, currentTime=' + cur.toFixed(2) + ' endTime=' + endTime);
-        if (cur >= endTime - 0.15) {
-          console.log('[Display] End reached, pausing projector at ' + cur.toFixed(2));
+        console.log('[Display] End poll tick, currentTime=' + cur.toFixed(2) + ' duration=' + duration);
+        if (cur >= duration - 0.15) {
+          console.log('[Display] End reached, pausing projector at currentTime=' + cur.toFixed(2) + ' (duration=' + duration + ')');
           _clearEndPoll();
           player.pauseVideo();
           _onDisplayClipEnded();
