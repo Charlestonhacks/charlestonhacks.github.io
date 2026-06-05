@@ -743,7 +743,13 @@
   wireBtn('btn-timer-pause', pauseTimer);
   wireBtn('btn-timer-reset', resetTimer);
   wireBtn('btn-projector', () => {
-    window.open('./display.html', 'hackertheater-projector', 'noopener');
+    // Do NOT pass 'noopener' here: the HTML spec forces the window name to the
+    // empty string when noopener is set, which makes the named-target
+    // deduplication ('hackertheater-projector') completely ineffective — every
+    // button click opens a new window. Multiple windows each receive every
+    // BroadcastChannel play/resume command, causing duplicate audio.
+    // Both pages are same-origin so the opener reference carries no new risk.
+    window.open('./display.html', 'hackertheater-projector');
   });
   wireBtn('btn-enter-presentation', () => _broadcast('enterPresentationMode'));
 
