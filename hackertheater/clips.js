@@ -135,12 +135,8 @@ const Clips = (() => {
   // YT.onStateChange does not fire at arbitrary timestamps.
   // Tolerance of 0.15s prevents overshooting by one poll tick.
   //
-  // YouTube getCurrentTime() may return time relative to startSeconds
-  // (elapsed from the load point) rather than absolute video position.
-  // To handle both cases, we stop when EITHER:
-  //   - cur >= endTime - 0.15  (absolute timestamps)
-  //   - cur >= duration - 0.15 (relative/elapsed timestamps)
-  // where duration = endTime - startTime.
+  // YouTube getCurrentTime() is inconsistent — sometimes absolute, sometimes
+  // relative to startSeconds. Normalize to elapsed time before comparing.
   let _clipStart = 0; // set by play()/cue()/replay() to track the segment start
 
   function _startEndPoll() {
@@ -152,11 +148,11 @@ const Clips = (() => {
       if (!playerReady) return;
       try {
         const cur = player.getCurrentTime();
-        _tlog('currentTime=', cur.toFixed(2), '/ endTime=', endTime, '/ duration=', duration);
-        // Stop if current time exceeds EITHER the absolute end OR the elapsed duration.
-        // This covers both YouTube behaviors (absolute vs relative getCurrentTime).
-        if (cur >= endTime - 0.15 || cur >= duration - 0.15) {
-          _tlog('auto-stop fired at', cur.toFixed(2), '(endTime=', endTime, 'duration=', duration, ')');
+        // Detect absolute vs relative mode and normalize to elapsed
+        const elapsed = (cur >= _clipStart - 1) ? cur - _clipStart : cur;
+        _tlog('currentTime=', cur.toFixed(2), 'elapsed=', elapsed.toFixed(2), '/ duration=', duration);
+        if (elapsed >= duration - 0.15) {
+          _tlog('auto-stop fired at elapsed=', elapsed.toFixed(2), '(duration=', duration, ')');
           _clearPoll();
           player.pauseVideo();
           if (typeof onEndCallback === 'function') onEndCallback();
