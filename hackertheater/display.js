@@ -55,6 +55,12 @@
   // Set to true to log timing events to the console.
   const DEBUG_TIMING = false;
 
+  // Unique identifier for this display instance — used by the controller to
+  // target commands at the active window and prevent stale windows from
+  // responding to play/resume/replay messages.
+  const displayInstanceId = Math.random().toString(36).slice(2, 10);
+  console.log('[Display] Instance ID:', displayInstanceId);
+
   // ---- YouTube player ----
 
   let player      = null;
@@ -177,11 +183,25 @@
 
     if (DEBUG_TIMING) console.log('[Display] playerReady — draining pendingVideoAction');
 
+    // Recovery cue: if a segment was received via loadSegment/fullSync while the
+    // YT player was still null (API script not yet loaded), _execVideo silently
+    // dropped the cueVideoById call.  Re-cue now so pendingPlay can drain via CUED.
+    if (!pendingVideoAction && currentSegment.videoId && !segmentCued) {
+      console.log('[Display] onReady recovery cue:', currentSegment.videoId, '@', currentSegment.start);
+      try {
+        player.cueVideoById({ videoId: currentSegment.videoId, startSeconds: currentSegment.start || 0 });
+      } catch (e) { console.warn('[Display] recovery cue error:', e.message); }
+    }
+
     if (pendingVideoAction) {
       const a = pendingVideoAction;
       pendingVideoAction = null;
       try { a(); } catch (e) { console.warn('[Display] pending action threw:', e.message); }
     }
+
+    // Announce readiness to the controller so it can flush any queued play command.
+    console.log('[Display] Player ready — sending displayReady (instanceId:', displayInstanceId, ')');
+    Channel.send('displayReady', { displayInstanceId });
   }
 
   function _onPlayerError(ev) {
@@ -250,10 +270,22 @@
     if (!pendingPlay || !segmentCued || !playerReady) return;
     const pp = pendingPlay;
     pendingPlay = null;
-    console.log('[Display] Projector player: playVideo() — seekTo', pp.start, '(drained pendingPlay)');
+    const isHardSync = pp.isHardSync === true;
+    if (isHardSync) {
+      console.log('[Display] Hard sync: seekTo', pp.start);
+    }
+    console.log('[Display] Projector player: playVideo() — seekTo', pp.start,
+                isHardSync ? '(hardSync)' : '(drained pendingPlay)');
     try {
       player.seekTo(pp.start || 0, true);
+      if (isHardSync) console.log('[Display] Hard sync: playVideo');
       player.playVideo();
+      Channel.send('displayPlayingAck', {
+        displayInstanceId,
+        videoId: pp.videoId,
+        start:   pp.start,
+        action:  isHardSync ? 'hardSync' : 'pendingPlay',
+      });
     } catch (e) { console.warn('[Display] pendingPlay drain error:', e.message); }
   }
 
@@ -510,6 +542,13 @@
   Channel.on('play', (p) => {
     _noteActivity();
     if (!p.videoId) return;
+
+    // Ignore play commands targeted at a different display instance.
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] play ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
+
     _lastCommand = { type: 'play', payload: p, ts: Date.now() };
 
     // Deduplicate: ignore the same play command arriving within PROJECTOR_DEDUP_MS.
@@ -540,6 +579,7 @@
         try {
           player.seekTo(p.start || 0, true);
           player.playVideo();
+          Channel.send('displayPlayingAck', { displayInstanceId, videoId: p.videoId, start: p.start, action: 'play-cued' });
         } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
       });
     } else if (awaitingCue) {
@@ -564,8 +604,59 @@
       pendingPlay    = null;
       _execVideo(() => {
         player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
+        Channel.send('displayPlayingAck', { displayInstanceId, videoId: p.videoId, start: p.start, action: 'loadVideoById' });
       });
     }
+  });
+
+  // hardSyncPlay: unconditional stop → cueVideoById → wait for CUED → seekTo → playVideo.
+  // Used for first play after display connects, after segment changes, and for replay.
+  Channel.on('hardSyncPlay', (p) => {
+    _noteActivity();
+    if (!p.videoId) return;
+
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] hardSyncPlay ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
+
+    _lastCommand = { type: 'hardSyncPlay', payload: p, ts: Date.now() };
+
+    const cmdKey = `hardSyncPlay:${p.videoId}:${p.start}:${p.segmentIndex}`;
+    if (_isDuplicateCommand(cmdKey)) {
+      console.log('[Display] Hard sync duplicate ignored:', cmdKey);
+      return;
+    }
+
+    endTime = (p.end != null && p.end > 0) ? p.end : null;
+    _clearEndPoll();
+
+    console.log('[Display] Hard sync: cue/load video', p.videoId, '@', p.start);
+
+    // Stop whatever is currently playing so we start from a clean state.
+    if (playerReady) {
+      try { player.stopVideo(); } catch (e) { console.warn('[Display] hardSync stopVideo error:', e.message); }
+    }
+
+    // Reset all segment tracking.
+    currentSegment = {
+      videoId: p.videoId,
+      start:   p.start || 0,
+      end:     p.end   || null,
+      index:   p.segmentIndex != null ? p.segmentIndex : null,
+    };
+    segmentCued = false;
+    // Mark this pendingPlay as a hard sync so _drainPendingPlay logs and ACKs correctly.
+    pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end, isHardSync: true };
+
+    // Cue the video.  When the CUED state event fires, _drainPendingPlay will
+    // seekTo(start) + playVideo() with the hard-sync log and ACK.
+    _execVideo(() => {
+      console.log('[Display] Hard sync: cueVideoById', p.videoId, '@', p.start);
+      try {
+        player.cueVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
+      } catch (e) { console.warn('[Display] hardSync cueVideoById error:', e.message); }
+    });
   });
 
   Channel.on('pause', () => {
@@ -574,8 +665,12 @@
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
-  Channel.on('resume', () => {
+  Channel.on('resume', (p) => {
     _noteActivity();
+    if (p && p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] resume ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
     _lastCommand = { type: 'resume', payload: null, ts: Date.now() };
     if (!playerReady) return;
     if (_isDuplicateCommand('resume')) {
@@ -589,6 +684,10 @@
 
   Channel.on('replay', (p) => {
     _noteActivity();
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] replay ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
     _lastCommand = { type: 'replay', payload: p, ts: Date.now() };
     if (!playerReady) return;
     const cmdKey = `replay:${p.start}`;
