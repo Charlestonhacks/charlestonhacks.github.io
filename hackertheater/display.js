@@ -235,7 +235,7 @@
     if (!pendingPlay || !segmentCued || !playerReady) return;
     const pp = pendingPlay;
     pendingPlay = null;
-    if (DEBUG_TIMING) console.log('[Display] draining pendingPlay — seekTo', pp.start, '+ playVideo');
+    console.log('[Display] Projector player: playVideo() — seekTo', pp.start, '(drained pendingPlay)');
     try {
       player.seekTo(pp.start || 0, true);
       player.playVideo();
@@ -513,7 +513,7 @@
       // Segment is already cued — seek to start and play immediately.
       // This is the normal path for a late-joining projector that applyFullSync
       // already cued while the user was navigating to the play button.
-      if (DEBUG_TIMING) console.log('[Display] play — already cued, seekTo', p.start, '+ playVideo');
+      console.log('[Display] Projector player: playVideo() — already cued, seekTo', p.start);
       _execVideo(() => {
         try {
           player.seekTo(p.start || 0, true);
@@ -523,11 +523,12 @@
     } else if (awaitingCue) {
       // Same segment is being cued right now — queue the play.
       // _drainPendingPlay() will fire it when the CUED state event arrives.
-      if (DEBUG_TIMING) console.log('[Display] play — same segment cueing in progress, queuing pendingPlay');
+      console.log('[Display] Projector player: play queued — same segment cueing in progress, start=', p.start);
       pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end };
     } else {
       // Different segment or no cue in progress — update tracking and do a full load.
-      if (DEBUG_TIMING) console.log('[Display] play — new/uncued segment, loadVideoById');
+      // loadVideoById auto-plays, so this is an implicit playVideo call.
+      console.log('[Display] Projector player: loadVideoById (auto-play) —', p.videoId, '@', p.start);
       currentSegment = { videoId: p.videoId, start: p.start || 0, end: p.end, index: p.segmentIndex != null ? p.segmentIndex : null };
       segmentCued    = false;
       pendingPlay    = null;
@@ -547,6 +548,7 @@
     _noteActivity();
     _lastCommand = { type: 'resume', payload: null, ts: Date.now() };
     if (!playerReady) return;
+    console.log('[Display] Projector player: playVideo() (resume)');
     // endTime retained from the previous play message; poll restarts via onStateChange
     try { player.playVideo(); } catch (e) { console.warn('[Display] resume error:', e.message); }
   });
@@ -560,6 +562,7 @@
     _clearEndPoll();
     // Replay always seeks to start — no readiness gate needed since the video
     // must already have been loaded to be replayable.
+    console.log('[Display] Projector player: playVideo() (replay) — seekTo', p.start || 0);
     try {
       player.seekTo(p.start || 0, true);
       player.playVideo();

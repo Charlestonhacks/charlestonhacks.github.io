@@ -98,6 +98,9 @@ const Clips = (() => {
     const s = event.data;
     if (typeof YT !== 'undefined') {
       if (s === YT.PlayerState.PLAYING) {
+        // Re-apply the persistent mute intent: YouTube can reset mute state
+        // during video load (loadVideoById starts autoplay, mute may arrive late).
+        if (_shouldBeMuted) try { player.mute(); } catch {}
         _startEndPoll(); // _startEndPoll clears first, so no duplicates
       } else if (s === YT.PlayerState.PAUSED  ||
                  s === YT.PlayerState.ENDED   ||
