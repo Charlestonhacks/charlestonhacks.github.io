@@ -255,6 +255,12 @@ const Clips = (() => {
   /** True once the player's onReady event has fired (methods are callable). */
   function isReady() { return playerReady; }
 
+  /** Current playback position in seconds, or null if not available. */
+  function getCurrentTime() {
+    if (!playerReady) return null;
+    try { return player.getCurrentTime(); } catch { return null; }
+  }
+
   /**
    * Mute the player and set the persistent mute intent.
    * The intent is re-applied after every loadVideoById / cueVideoById call
@@ -287,6 +293,6 @@ const Clips = (() => {
   function setOnEnd(cb)         { onEndCallback         = cb; }
   function setOnStateChange(cb) { onStateChangeCallback = cb; }
 
-  return { cue, play, pause, resume, replay, isPlaying, isReady, mute, unmute, isMuted, setOnEnd, setOnStateChange };
+  return { cue, play, pause, resume, replay, isPlaying, isReady, getCurrentTime, mute, unmute, isMuted, setOnEnd, setOnStateChange };
 
 })();

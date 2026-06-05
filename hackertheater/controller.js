@@ -227,6 +227,10 @@
 
     _broadcast('loadSegment', { index, segment: seg, totalSegments: segments.length });
 
+    // Segment changed — the next play command to the projector needs to seek to
+    // the new start position, so arm hard sync regardless of current flag state.
+    projectorNeedsHardSync = true;
+
     if (autoPlay) setTimeout(() => playClipFromStart(), 300);
   }
 
@@ -248,6 +252,11 @@
   let displayReady            = false;
   let activeDisplayId         = null;  // displayInstanceId of the last display that sent displayReady
   let pendingProjectorCommand = null;  // { type, payload } queued while displayReady=false
+  // Hard-sync flag: when true the next play command sent to the projector is
+  // upgraded to 'hardSyncPlay' so the display always starts from an exact position.
+  // Set on display connect, segment change, and replay; cleared when the projector
+  // acknowledges a hard-sync play.
+  let projectorNeedsHardSync  = true;
 
   function _buildSnapshot() {
     const seg = segments[currentIndex] || null;
@@ -310,9 +319,10 @@
                     activeDisplayId ? '(replacing ' + activeDisplayId + ')' : '(first)');
       }
       if (newId) activeDisplayId = newId;
-      displayReady = true;
+      displayReady           = true;
+      projectorNeedsHardSync = true; // first play after connect must hard-sync
       _updateProjectorStatus(true);
-      console.log('[Controller] Projector ready (instanceId:', activeDisplayId, ')');
+      console.log('[Controller] Projector ready (instanceId:', activeDisplayId, ') — hard sync armed');
       if (pendingProjectorCommand) {
         const cmd = pendingProjectorCommand;
         pendingProjectorCommand = null;
@@ -325,6 +335,10 @@
     Channel.on('displayPlayingAck', (p) => {
       console.log('[Controller] Projector accepted playback — instanceId:', p.displayInstanceId,
                   'videoId:', p.videoId, 'start:', p.start, 'action:', p.action);
+      if (p.action === 'hardSync') {
+        projectorNeedsHardSync = false;
+        console.log('[Controller] Projector hard sync acknowledged — projectorNeedsHardSync cleared');
+      }
     });
 
     // Send periodic heartbeat so display.js knows control room is alive
@@ -351,17 +365,43 @@
   }
 
   /**
-   * Send a queued play/resume/replay command to the active display instance.
+   * Send a play/resume command to the active display instance.
    * Always includes targetDisplayId so stale windows ignore it.
+   *
+   * For 'play' commands the function decides between regular 'play' and
+   * 'hardSyncPlay':
+   *   - projectorNeedsHardSync=true  → always hardSyncPlay
+   *   - drift > HARD_SYNC_DRIFT_S    → upgrade to hardSyncPlay
+   *   - otherwise                    → regular play
    */
+  const HARD_SYNC_DRIFT_S = 0.75;
+
   function _sendProjectorCommand(cmd) {
     const target = activeDisplayId ? { targetDisplayId: activeDisplayId } : {};
     if (cmd.type === 'play') {
-      _broadcast('play', { ...cmd.payload, ...target });
+      let useHardSync = projectorNeedsHardSync;
+
+      // Drift guard: if the controller's player is already well past the
+      // expected segment start, the display would land out-of-sync on a
+      // regular play — upgrade to hardSyncPlay.
+      if (!useHardSync && cmd.payload.start != null) {
+        const ct = Clips.getCurrentTime();
+        if (ct !== null && Math.abs(ct - cmd.payload.start) > HARD_SYNC_DRIFT_S) {
+          console.log('[Controller] Projector drift detected (ctrlTime=', ct.toFixed(2),
+                      'expectedStart=', cmd.payload.start, ') — upgrading to hardSyncPlay');
+          useHardSync = true;
+        }
+      }
+
+      if (useHardSync) {
+        console.log('[Controller] Projector hard sync requested —',
+                    cmd.payload.videoId, '@', cmd.payload.start);
+        _broadcast('hardSyncPlay', { ...cmd.payload, ...target });
+      } else {
+        _broadcast('play', { ...cmd.payload, ...target });
+      }
     } else if (cmd.type === 'resume') {
       _broadcast('resume', target);
-    } else if (cmd.type === 'replay') {
-      _broadcast('replay', { ...cmd.payload, ...target });
     }
   }
 
@@ -526,12 +566,14 @@
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
 
-    const payload = { start: seg.start, end: seg.end, segmentIndex: currentIndex };
+    // replay always seeks to the segment start — always hard-sync the projector.
+    projectorNeedsHardSync = true;
+    const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
     if (projectorConnected && !displayReady) {
       console.log('[Controller] Projector not ready; queued replay @', seg.start);
-      pendingProjectorCommand = { type: 'replay', payload };
+      pendingProjectorCommand = { type: 'play', payload };
     } else {
-      _sendProjectorCommand({ type: 'replay', payload });
+      _sendProjectorCommand({ type: 'play', payload });
     }
   }
 

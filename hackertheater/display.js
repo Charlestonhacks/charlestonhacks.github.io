@@ -270,11 +270,22 @@
     if (!pendingPlay || !segmentCued || !playerReady) return;
     const pp = pendingPlay;
     pendingPlay = null;
-    console.log('[Display] Projector player: playVideo() — seekTo', pp.start, '(drained pendingPlay)');
+    const isHardSync = pp.isHardSync === true;
+    if (isHardSync) {
+      console.log('[Display] Hard sync: seekTo', pp.start);
+    }
+    console.log('[Display] Projector player: playVideo() — seekTo', pp.start,
+                isHardSync ? '(hardSync)' : '(drained pendingPlay)');
     try {
       player.seekTo(pp.start || 0, true);
+      if (isHardSync) console.log('[Display] Hard sync: playVideo');
       player.playVideo();
-      Channel.send('displayPlayingAck', { displayInstanceId, videoId: pp.videoId, start: pp.start, action: 'pendingPlay' });
+      Channel.send('displayPlayingAck', {
+        displayInstanceId,
+        videoId: pp.videoId,
+        start:   pp.start,
+        action:  isHardSync ? 'hardSync' : 'pendingPlay',
+      });
     } catch (e) { console.warn('[Display] pendingPlay drain error:', e.message); }
   }
 
@@ -596,6 +607,56 @@
         Channel.send('displayPlayingAck', { displayInstanceId, videoId: p.videoId, start: p.start, action: 'loadVideoById' });
       });
     }
+  });
+
+  // hardSyncPlay: unconditional stop → cueVideoById → wait for CUED → seekTo → playVideo.
+  // Used for first play after display connects, after segment changes, and for replay.
+  Channel.on('hardSyncPlay', (p) => {
+    _noteActivity();
+    if (!p.videoId) return;
+
+    if (p.targetDisplayId && p.targetDisplayId !== displayInstanceId) {
+      console.log('[Display] hardSyncPlay ignored: targetDisplayId mismatch (target:', p.targetDisplayId, 'this:', displayInstanceId, ')');
+      return;
+    }
+
+    _lastCommand = { type: 'hardSyncPlay', payload: p, ts: Date.now() };
+
+    const cmdKey = `hardSyncPlay:${p.videoId}:${p.start}:${p.segmentIndex}`;
+    if (_isDuplicateCommand(cmdKey)) {
+      console.log('[Display] Hard sync duplicate ignored:', cmdKey);
+      return;
+    }
+
+    endTime = (p.end != null && p.end > 0) ? p.end : null;
+    _clearEndPoll();
+
+    console.log('[Display] Hard sync: cue/load video', p.videoId, '@', p.start);
+
+    // Stop whatever is currently playing so we start from a clean state.
+    if (playerReady) {
+      try { player.stopVideo(); } catch (e) { console.warn('[Display] hardSync stopVideo error:', e.message); }
+    }
+
+    // Reset all segment tracking.
+    currentSegment = {
+      videoId: p.videoId,
+      start:   p.start || 0,
+      end:     p.end   || null,
+      index:   p.segmentIndex != null ? p.segmentIndex : null,
+    };
+    segmentCued = false;
+    // Mark this pendingPlay as a hard sync so _drainPendingPlay logs and ACKs correctly.
+    pendingPlay = { videoId: p.videoId, start: p.start || 0, end: p.end, isHardSync: true };
+
+    // Cue the video.  When the CUED state event fires, _drainPendingPlay will
+    // seekTo(start) + playVideo() with the hard-sync log and ACK.
+    _execVideo(() => {
+      console.log('[Display] Hard sync: cueVideoById', p.videoId, '@', p.start);
+      try {
+        player.cueVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
+      } catch (e) { console.warn('[Display] hardSync cueVideoById error:', e.message); }
+    });
   });
 
   Channel.on('pause', () => {
