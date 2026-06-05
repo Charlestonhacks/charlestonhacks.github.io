@@ -246,16 +246,24 @@
     state.clipState = 'idle';
 
     Clips.setOnEnd(() => {
-      if (DEBUG_TIMING) console.log('[Controller/Timing] onEnd fired for segment', index);
+      console.log('[Controller] onEnd fired for segment', index, '— projectorConnected:', projectorConnected);
       state.clipState = 'ended';
       setStatus('ended', 'Clip ended');
       state.completed.add(index);
       refreshQueue();
       revealQuestionCard();  // broadcasts showQuestion to projector
       startTimer();          // broadcasts startDiscussionTimer to projector
-      // Safety-net pause: projector has its own end-poll, but broadcast anyway
-      // in case of timing skew or a disconnected-then-reconnected projector.
-      _broadcast('pause');
+      // Only broadcast pause when NO projector is connected.
+      // When a projector IS connected, the display's own end-poll is authoritative
+      // and will pause itself at the correct elapsed duration. Broadcasting pause
+      // from the controller's muted preview kills the projector's poll too early
+      // because the preview player may report different timing.
+      if (!projectorConnected) {
+        console.log('[Controller] Broadcasting pause — reason: controller onEnd (no projector)');
+        _broadcast('pause');
+      } else {
+        console.log('[Controller] Skipping pause broadcast — projector is authoritative for segment end');
+      }
       toast('Clip ended — discussion question revealed.', 'info');
     });
 
@@ -398,6 +406,24 @@
       if (p.action === 'hardSync') {
         projectorNeedsHardSync = false;
         console.log('[Controller] Projector hard sync acknowledged — projectorNeedsHardSync cleared');
+      }
+    });
+
+    // Display signals it reached the segment end boundary and paused itself.
+    // This is the authoritative end signal when a projector is connected.
+    Channel.on('displaySegmentEnded', (p) => {
+      _lastProjectorPing = Date.now();
+      console.log('[Controller] Projector segment ended — segmentIndex:', p.segmentIndex);
+      // If the controller hasn't already ended this clip, trigger the end flow.
+      if (state.clipState === 'playing' || state.clipState === 'paused') {
+        state.clipState = 'ended';
+        setStatus('ended', 'Clip ended');
+        state.completed.add(currentIndex);
+        refreshQueue();
+        revealQuestionCard();
+        startTimer();
+        Clips.pause();
+        toast('Clip ended — discussion question revealed.', 'info');
       }
     });
 

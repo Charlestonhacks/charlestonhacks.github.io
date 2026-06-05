@@ -157,6 +157,13 @@
 
   // Called when the projector's end-poll determines the clip is done.
   function _onDisplayClipEnded() {
+    console.log('[Display] Clip ended — notifying controller, segment:', currentSegment.index);
+    // Notify the controller that the projector has reached the segment end.
+    Channel.send('displaySegmentEnded', {
+      displayInstanceId,
+      segmentIndex: currentSegment.index,
+      videoId:      currentSegment.videoId,
+    });
     // Reveal the question if it isn't already showing
     dom.questionCard.classList.add('revealed');
     dom.questionText.classList.remove('blurred');

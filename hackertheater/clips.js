@@ -134,17 +134,29 @@ const Clips = (() => {
   // Poll every 250ms to detect the end timestamp.
   // YT.onStateChange does not fire at arbitrary timestamps.
   // Tolerance of 0.15s prevents overshooting by one poll tick.
+  //
+  // YouTube getCurrentTime() may return time relative to startSeconds
+  // (elapsed from the load point) rather than absolute video position.
+  // To handle both cases, we stop when EITHER:
+  //   - cur >= endTime - 0.15  (absolute timestamps)
+  //   - cur >= duration - 0.15 (relative/elapsed timestamps)
+  // where duration = endTime - startTime.
+  let _clipStart = 0; // set by play()/cue()/replay() to track the segment start
+
   function _startEndPoll() {
     _clearPoll(); // prevent duplicate intervals
     if (endTime == null) return;
-    _tlog('poll start, endTime=', endTime);
+    const duration = endTime - _clipStart;
+    _tlog('poll start, endTime=', endTime, 'clipStart=', _clipStart, 'duration=', duration);
     pollInterval = setInterval(() => {
       if (!playerReady) return;
       try {
         const cur = player.getCurrentTime();
-        _tlog('currentTime=', cur.toFixed(2), '/ endTime=', endTime);
-        if (cur >= endTime - 0.15) {
-          _tlog('auto-stop fired at', cur.toFixed(2));
+        _tlog('currentTime=', cur.toFixed(2), '/ endTime=', endTime, '/ duration=', duration);
+        // Stop if current time exceeds EITHER the absolute end OR the elapsed duration.
+        // This covers both YouTube behaviors (absolute vs relative getCurrentTime).
+        if (cur >= endTime - 0.15 || cur >= duration - 0.15) {
+          _tlog('auto-stop fired at', cur.toFixed(2), '(endTime=', endTime, 'duration=', duration, ')');
           _clearPoll();
           player.pauseVideo();
           if (typeof onEndCallback === 'function') onEndCallback();
@@ -192,6 +204,7 @@ const Clips = (() => {
   function cue(videoId, startSeconds, endSeconds) {
     if (!videoId) { _warn('cue() called with empty videoId — skipping'); return; }
     endTime = (endSeconds != null) ? endSeconds : null;
+    _clipStart = startSeconds || 0;
     _clearPoll();
     _exec(() => {
       _log('cueVideoById', videoId, '@', startSeconds);
@@ -208,6 +221,7 @@ const Clips = (() => {
   function play(videoId, startSeconds, endSeconds) {
     if (!videoId) { _warn('play() called with empty videoId — skipping'); return; }
     endTime = (endSeconds != null) ? endSeconds : null;
+    _clipStart = startSeconds || 0;
     _clearPoll();
     _exec(() => {
       _log('loadVideoById', videoId, '@', startSeconds);
@@ -235,6 +249,7 @@ const Clips = (() => {
    */
   function replay(startSeconds, endSeconds) {
     endTime = (endSeconds != null) ? endSeconds : null;
+    _clipStart = startSeconds || 0;
     _clearPoll();
     _exec(() => {
       _log('replay @', startSeconds);
