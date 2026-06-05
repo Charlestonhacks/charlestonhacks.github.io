@@ -322,11 +322,16 @@
       displayReady           = true;
       projectorNeedsHardSync = true; // first play after connect must hard-sync
       _updateProjectorStatus(true);
-      console.log('[Controller] Projector ready (instanceId:', activeDisplayId, ') — hard sync armed');
+      console.log('[Controller] Display ready received — instanceId:', activeDisplayId,
+                  '— hard sync armed');
       if (pendingProjectorCommand) {
         const cmd = pendingProjectorCommand;
         pendingProjectorCommand = null;
         console.log('[Controller] Projector ready; flushing queued', cmd.type);
+        // Execute the deferred local Clips action before sending to projector.
+        if (typeof cmd.clipsAction === 'function') {
+          try { cmd.clipsAction(); } catch (e) { console.warn('[Controller] clipsAction threw:', e.message); }
+        }
         _sendProjectorCommand(cmd);
       }
     });
@@ -505,14 +510,24 @@
     const projState = projectorConnected ? (displayReady ? 'ready' : 'not-ready') : 'not-connected';
     console.log('[Controller] Controller preview play:', seg.youtubeId, '@', seg.start,
                 '— projector:', projState, '— muted:', Clips.isMuted());
-    Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
 
     const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
     if (projectorConnected && !displayReady) {
-      console.log('[Controller] Projector not ready; queued play for', seg.youtubeId, '@', seg.start);
-      pendingProjectorCommand = { type: 'play', payload };
+      // Block local Clips.play until the display is ready — cue only so the
+      // controller preview loads the video without emitting audio.
+      console.log('[Controller] Preview playback blocked — projector not ready; queued command');
+      Clips.cue(seg.youtubeId, seg.start, seg.end);
+      pendingProjectorCommand = {
+        type:        'play',
+        payload,
+        clipsAction: () => {
+          ensureControllerMuted('play (deferred)');
+          Clips.play(seg.youtubeId, seg.start, seg.end);
+        },
+      };
     } else {
+      Clips.play(seg.youtubeId, seg.start, seg.end);
       _sendProjectorCommand({ type: 'play', payload });
     }
   }
@@ -524,13 +539,20 @@
     state.clipState = 'playing';
     ensureControllerMuted('resume');
     console.log('[Controller] Controller preview resume — muted:', Clips.isMuted());
-    Clips.resume();
     setStatus('playing', 'Playing');
 
     if (projectorConnected && !displayReady) {
-      console.log('[Controller] Projector not ready; queued resume');
-      pendingProjectorCommand = { type: 'resume', payload: {} };
+      console.log('[Controller] Preview playback blocked — projector not ready; queued command');
+      pendingProjectorCommand = {
+        type:        'resume',
+        payload:     {},
+        clipsAction: () => {
+          ensureControllerMuted('resume (deferred)');
+          Clips.resume();
+        },
+      };
     } else {
+      Clips.resume();
       _sendProjectorCommand({ type: 'resume', payload: {} });
     }
   }
@@ -563,16 +585,24 @@
     state.clipState = 'playing';
     ensureControllerMuted('replay');
     console.log('[Controller] Controller preview replay @', seg.start, '— muted:', Clips.isMuted());
-    Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
 
     // replay always seeks to the segment start — always hard-sync the projector.
     projectorNeedsHardSync = true;
     const payload = { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex };
     if (projectorConnected && !displayReady) {
-      console.log('[Controller] Projector not ready; queued replay @', seg.start);
-      pendingProjectorCommand = { type: 'play', payload };
+      console.log('[Controller] Preview playback blocked — projector not ready; queued command');
+      Clips.cue(seg.youtubeId, seg.start, seg.end);
+      pendingProjectorCommand = {
+        type:        'play',
+        payload,
+        clipsAction: () => {
+          ensureControllerMuted('replay (deferred)');
+          Clips.replay(seg.start, seg.end);
+        },
+      };
     } else {
+      Clips.replay(seg.start, seg.end);
       _sendProjectorCommand({ type: 'play', payload });
     }
   }
@@ -879,6 +909,13 @@
     // BroadcastChannel play/resume command, causing duplicate audio.
     // Both pages are same-origin so the opener reference carries no new risk.
     window.open('./display.html', 'hackertheater-projector');
+    // Warn if the display hasn't sent displayReady within 2 s — helps diagnose
+    // hangs where the BroadcastChannel message was missed.
+    setTimeout(() => {
+      if (!displayReady) {
+        console.log('[Controller] Waiting for displayReady from projector — player may still be loading');
+      }
+    }, 2000);
   });
   wireBtn('btn-enter-presentation', () => _broadcast('enterPresentationMode'));
 

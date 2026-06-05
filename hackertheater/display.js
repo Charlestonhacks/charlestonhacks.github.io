@@ -818,6 +818,12 @@
     _noteActivity();
     // Reply so the control room knows the projector is alive
     Channel.send('ping');
+    // Re-announce player readiness on every heartbeat so a controller that
+    // refreshed after the display's player was already initialised still picks
+    // up displayReady and can flush its queued play command.
+    if (playerReady) {
+      Channel.send('displayReady', { displayInstanceId });
+    }
   });
 
   Channel.on('pong', () => {
