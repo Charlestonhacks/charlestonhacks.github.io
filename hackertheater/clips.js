@@ -88,7 +88,8 @@ const Clips = (() => {
 
     // Re-apply the persistent mute intent if it was set before the player was ready.
     if (_shouldBeMuted) {
-      try { player.mute(); } catch (e) { _warn('Deferred mute threw:', e.message); }
+      try { player.mute();        } catch (e) { _warn('Deferred mute threw:', e.message); }
+      try { player.setVolume(0);  } catch (e) { _warn('Deferred setVolume(0) threw:', e.message); }
     }
   }
 
@@ -100,7 +101,7 @@ const Clips = (() => {
       if (s === YT.PlayerState.PLAYING) {
         // Re-apply the persistent mute intent: YouTube can reset mute state
         // during video load (loadVideoById starts autoplay, mute may arrive late).
-        if (_shouldBeMuted) try { player.mute(); } catch {}
+        if (_shouldBeMuted) { try { player.mute(); } catch {} try { player.setVolume(0); } catch {} }
         _startEndPoll(); // _startEndPoll clears first, so no duplicates
       } else if (s === YT.PlayerState.PAUSED  ||
                  s === YT.PlayerState.ENDED   ||
@@ -196,7 +197,7 @@ const Clips = (() => {
       _log('cueVideoById', videoId, '@', startSeconds);
       player.cueVideoById({ videoId, startSeconds: startSeconds || 0 });
       // Re-apply mute immediately — cueVideoById can reset the player's mute state.
-      if (_shouldBeMuted) try { player.mute(); } catch {}
+      if (_shouldBeMuted) { try { player.mute(); } catch {} try { player.setVolume(0); } catch {} }
     });
   }
 
@@ -212,7 +213,7 @@ const Clips = (() => {
       _log('loadVideoById', videoId, '@', startSeconds);
       player.loadVideoById({ videoId, startSeconds: startSeconds || 0 });
       // Re-apply mute immediately — loadVideoById can reset the player's mute state.
-      if (_shouldBeMuted) try { player.mute(); } catch {}
+      if (_shouldBeMuted) { try { player.mute(); } catch {} try { player.setVolume(0); } catch {} }
     });
   }
 
@@ -240,7 +241,7 @@ const Clips = (() => {
       player.seekTo(startSeconds || 0, true);
       player.playVideo();
       // seekTo + playVideo don't normally reset mute, but re-apply for safety.
-      if (_shouldBeMuted) try { player.mute(); } catch {}
+      if (_shouldBeMuted) { try { player.mute(); } catch {} try { player.setVolume(0); } catch {} }
     });
   }
 
@@ -263,7 +264,8 @@ const Clips = (() => {
   function mute() {
     _shouldBeMuted = true;
     if (!playerReady) return; // _onPlayerReady will apply it
-    try { player.mute(); } catch (e) { _warn('mute threw:', e.message); }
+    try { player.mute();       } catch (e) { _warn('mute threw:', e.message); }
+    try { player.setVolume(0); } catch (e) { _warn('setVolume(0) threw:', e.message); }
   }
 
   /** Unmute the player and clear the persistent mute intent. */
@@ -273,10 +275,13 @@ const Clips = (() => {
     try { player.unMute(); } catch (e) { _warn('unMute threw:', e.message); }
   }
 
-  /** Returns true if the player is currently muted. */
+  /** Returns true if the player is currently muted. Falls back to _shouldBeMuted so the return is never undefined. */
   function isMuted() {
-    if (!playerReady) return false;
-    try { return player.isMuted(); } catch { return false; }
+    if (!playerReady) return _shouldBeMuted;
+    try {
+      const result = player.isMuted();
+      return result !== undefined ? result : _shouldBeMuted;
+    } catch { return _shouldBeMuted; }
   }
 
   function setOnEnd(cb)         { onEndCallback         = cb; }
