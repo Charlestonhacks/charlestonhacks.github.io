@@ -251,12 +251,15 @@
   // held in pendingProjectorCommand so the first clip always reaches the display.
   let displayReady            = false;
   let activeDisplayId         = null;  // displayInstanceId of the last display that sent displayReady
-  let pendingProjectorCommand = null;  // { type, payload } queued while displayReady=false
+  let pendingProjectorCommand = null;  // { type, payload, clipsAction? } queued while displayReady=false
   // Hard-sync flag: when true the next play command sent to the projector is
   // upgraded to 'hardSyncPlay' so the display always starts from an exact position.
   // Set on display connect, segment change, and replay; cleared when the projector
   // acknowledges a hard-sync play.
   let projectorNeedsHardSync  = true;
+  // Dedup: suppress identical resume commands sent within 500 ms.
+  let _lastResumeSentTs = 0;
+  const RESUME_DEDUP_MS = 500;
 
   function _buildSnapshot() {
     const seg = segments[currentIndex] || null;
@@ -311,29 +314,44 @@
     });
 
     // Display signals its YT player is ready — safe to send play commands now.
+    // This message arrives once on initial player load AND on every subsequent
+    // heartbeat (display re-announces while playerReady).  Only the transition
+    // from not-ready → ready (or a new display instance) should arm hard-sync
+    // and flush the pending command.  Repeat heartbeat-driven messages update
+    // the ping timestamp and connection status only — they must NOT re-arm
+    // projectorNeedsHardSync or re-flush pendingProjectorCommand, since that
+    // would re-trigger commands already sent and cause duplicate play/resume.
     Channel.on('displayReady', (p) => {
       _lastProjectorPing = Date.now();
-      const newId = p && p.displayInstanceId ? p.displayInstanceId : null;
-      if (newId && newId !== activeDisplayId) {
-        console.log('[Controller] New display instance registered:', newId,
-                    activeDisplayId ? '(replacing ' + activeDisplayId + ')' : '(first)');
-      }
+      const newId         = p && p.displayInstanceId ? p.displayInstanceId : null;
+      const isNewInstance = newId && newId !== activeDisplayId;
+      const wasReady      = displayReady;
+
       if (newId) activeDisplayId = newId;
-      displayReady           = true;
-      projectorNeedsHardSync = true; // first play after connect must hard-sync
+      displayReady = true;
       _updateProjectorStatus(true);
-      console.log('[Controller] Display ready received — instanceId:', activeDisplayId,
-                  '— hard sync armed');
-      if (pendingProjectorCommand) {
-        const cmd = pendingProjectorCommand;
-        pendingProjectorCommand = null;
-        console.log('[Controller] Projector ready; flushing queued', cmd.type);
-        // Execute the deferred local Clips action before sending to projector.
-        if (typeof cmd.clipsAction === 'function') {
-          try { cmd.clipsAction(); } catch (e) { console.warn('[Controller] clipsAction threw:', e.message); }
+
+      if (isNewInstance || !wasReady) {
+        // Genuine transition: new display window or first ready from this instance.
+        if (isNewInstance) {
+          console.log('[Controller] New display instance registered:', newId,
+                      activeDisplayId ? '(replacing previous)' : '(first)');
         }
-        _sendProjectorCommand(cmd);
+        projectorNeedsHardSync = true; // first play after connect must hard-sync
+        console.log('[Controller] Display ready received — instanceId:', activeDisplayId,
+                    '— hard sync armed');
+        if (pendingProjectorCommand) {
+          const cmd = pendingProjectorCommand;
+          pendingProjectorCommand = null; // cleared before call — no re-flush on next displayReady
+          console.log('[Controller] Projector ready; flushing queued', cmd.type);
+          // Execute the deferred local Clips action before sending to projector.
+          if (typeof cmd.clipsAction === 'function') {
+            try { cmd.clipsAction(); } catch (e) { console.warn('[Controller] clipsAction threw:', e.message); }
+          }
+          _sendProjectorCommand(cmd);
+        }
       }
+      // else: repeated heartbeat-ready from same instance — ping timestamp updated, nothing else to do.
     });
 
     // Display acknowledges it has started playing.
@@ -383,6 +401,7 @@
 
   function _sendProjectorCommand(cmd) {
     const target = activeDisplayId ? { targetDisplayId: activeDisplayId } : {};
+
     if (cmd.type === 'play') {
       let useHardSync = projectorNeedsHardSync;
 
@@ -405,7 +424,33 @@
       } else {
         _broadcast('play', { ...cmd.payload, ...target });
       }
+
     } else if (cmd.type === 'resume') {
+      // If the display hasn't confirmed a hard-sync play yet, a bare resume would
+      // land on a blank player.  Upgrade to hardSyncPlay using the current segment.
+      if (projectorNeedsHardSync) {
+        const seg = segments[currentIndex];
+        if (seg && seg.youtubeId) {
+          console.log('[Controller] Projector resume upgraded to hardSyncPlay (projectorNeedsHardSync) —',
+                      seg.youtubeId, '@', seg.start);
+          _broadcast('hardSyncPlay', {
+            videoId: seg.youtubeId, start: seg.start, end: seg.end,
+            segmentIndex: currentIndex, ...target,
+          });
+        } else {
+          console.log('[Controller] Projector resume skipped — projectorNeedsHardSync but no segment');
+        }
+        return;
+      }
+
+      // Dedup: ignore repeated resume commands within 500 ms (can arrive when
+      // displayReady fires multiple times in quick succession).
+      const now = Date.now();
+      if (now - _lastResumeSentTs < RESUME_DEDUP_MS) {
+        console.log('[Controller] Projector resume dedup — skipped (last sent', now - _lastResumeSentTs, 'ms ago)');
+        return;
+      }
+      _lastResumeSentTs = now;
       _broadcast('resume', target);
     }
   }
