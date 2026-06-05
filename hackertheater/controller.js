@@ -313,12 +313,20 @@
     // We re-enforce the mute on every call (not just on the transition) because
     // loadVideoById can silently reset YouTube's mute state after each clip load.
     // CONTROL_AUDIO_ENABLED (?controlAudio=1) bypasses this for testing.
+    //
+    // We do NOT unmute on heartbeat timeout: Chrome throttles setInterval in
+    // background tabs to ~60 s, so the projector's 4 s ping becomes a 60 s ping,
+    // falsely triggering the 10 s disconnect threshold and unmuting mid-show.
+    // Once a projector has connected, the control room stays muted for the session.
     if (!CONTROL_AUDIO_ENABLED) {
       if (connected) {
+        if (!wasConnected) {
+          console.log('[Controller] Projector mode started — muting control-room player');
+        }
         Clips.mute();
-      } else if (wasConnected) {
-        Clips.unmute();
+        console.log('[Controller] Control-room preview muted (projector connected, muted:', Clips.isMuted(), ')');
       }
+      // Intentionally no Clips.unmute() here — see note above.
     }
 
     const dot   = $('proj-dot');
@@ -391,6 +399,7 @@
     if (!seg.youtubeId) { toast('No YouTube video ID on this segment.', 'error'); return; }
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
+    console.log('[Controller] Non-projector player: play()', seg.youtubeId, '@', seg.start, '— muted:', Clips.isMuted());
     Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
     _broadcast('play', { videoId: seg.youtubeId, start: seg.start, end: seg.end, segmentIndex: currentIndex });
@@ -401,6 +410,7 @@
     const seg = segments[currentIndex];
     if (!seg || !seg.youtubeId) return;
     state.clipState = 'playing';
+    console.log('[Controller] Non-projector player: playVideo() (resume) — muted:', Clips.isMuted());
     Clips.resume();
     setStatus('playing', 'Playing');
     _broadcast('resume');
@@ -432,6 +442,7 @@
     if (!seg || !seg.youtubeId) return;
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
+    console.log('[Controller] Non-projector player: replay() @', seg.start, '— muted:', Clips.isMuted());
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
     _broadcast('replay', { start: seg.start, end: seg.end, segmentIndex: currentIndex });
