@@ -116,7 +116,7 @@
   let _endPollHandle = null;
 
   function _startEndPoll() {
-    _clearEndPoll(); // prevent duplicate intervals
+    _clearEndPoll('restart'); // prevent duplicate intervals
 
     // YouTube reports currentTime relative to startSeconds (elapsed from load point),
     // not as an absolute video timestamp. Enforce against clip duration instead.
@@ -136,22 +136,22 @@
         console.log('[Display] End poll tick, currentTime=' + cur.toFixed(2) + ' duration=' + duration);
         if (cur >= duration - 0.15) {
           console.log('[Display] End reached, pausing projector at currentTime=' + cur.toFixed(2) + ' (duration=' + duration + ')');
-          _clearEndPoll();
+          _clearEndPoll('end reached');
           player.pauseVideo();
           _onDisplayClipEnded();
         }
       } catch (e) {
         console.warn('[Display] end-poll error:', e.message);
-        _clearEndPoll();
+        _clearEndPoll('player error');
       }
     }, 250);
   }
 
-  function _clearEndPoll() {
+  function _clearEndPoll(reason) {
     if (_endPollHandle) {
       clearInterval(_endPollHandle);
       _endPollHandle = null;
-      console.log('[Display] End poll stopped');
+      console.log('[Display] End poll stopped — reason: ' + (reason || 'unknown'));
     }
   }
 
@@ -221,7 +221,7 @@
   }
 
   function _onPlayerError(ev) {
-    _clearEndPoll();
+    _clearEndPoll('player error');
     const debugInfo = {
       errorCode:    ev.data,
       videoId:      currentSegment.videoId,
@@ -268,7 +268,7 @@
       _retryCount = 0; // successful cue clears the retry counter
       if (DEBUG_TIMING) console.log('[Display] CUED — segmentCued=true, segment=', currentSegment);
       _drainPendingPlay();
-      _clearEndPoll(); // no end-poll while just cued
+      _clearEndPoll('CUED'); // no end-poll while just cued
 
     } else if (s === YT.PlayerState.BUFFERING) {
       // Hard-sync: on the first BUFFERING event after loadVideoById, issue a
@@ -319,7 +319,8 @@
     } else if (s === YT.PlayerState.PAUSED  ||
                s === YT.PlayerState.ENDED   ||
                s === -1 /* UNSTARTED */) {
-      _clearEndPoll();
+      const reason = s === YT.PlayerState.PAUSED ? 'PAUSED' : s === YT.PlayerState.ENDED ? 'ENDED' : 'UNSTARTED';
+      _clearEndPoll(reason);
     }
   }
 
@@ -555,6 +556,11 @@
 
   // ---- Channel message handlers ----
 
+  // Log every incoming channel message for debugging
+  Channel.on('*', (type, payload) => {
+    console.log('[Display] Channel message:', type);
+  });
+
   Channel.on('loadSegment', (p) => {
     _noteActivity();
     _lastCommand = { type: 'loadSegment', payload: p, ts: Date.now() };
@@ -576,7 +582,7 @@
     _renderTimer();
 
     // Clear end-poll and readiness state for the outgoing segment
-    _clearEndPoll();
+    _clearEndPoll('loadSegment');
     endTime     = null;
     segmentCued = false;
     pendingPlay = null;
@@ -628,7 +634,7 @@
     }
 
     endTime = (p.end != null && p.end > 0) ? p.end : null;
-    _clearEndPoll();
+    _clearEndPoll('channel play');
 
     // Determine whether the projector already has this segment cued.
     // Match by videoId + segmentIndex (index sent since last session's fix).
@@ -713,7 +719,7 @@
     }
 
     endTime = (p.end != null && p.end > 0) ? p.end : null;
-    _clearEndPoll();
+    _clearEndPoll('hardSyncPlay reset');
     console.log('[Display] hardSyncPlay — endTime set to', endTime, '(p.end was', p.end, ')');
 
     // Stop current playback — clean slate.
@@ -747,7 +753,7 @@
 
   Channel.on('pause', () => {
     _noteActivity();
-    _clearEndPoll();
+    _clearEndPoll('channel pause');
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
@@ -783,7 +789,7 @@
     }
     endTime = (p.end != null && p.end > 0) ? p.end : null;
     if (DEBUG_TIMING) console.log('[Display] replay received, start=', p.start, 'end=', endTime);
-    _clearEndPoll();
+    _clearEndPoll('replay');
     // Replay always seeks to start — no readiness gate needed since the video
     // must already have been loaded to be replayable.
     console.log('[Display] Projector player: playVideo() (replay) — seekTo', p.start || 0);
@@ -827,14 +833,14 @@
 
   Channel.on('blackScreen', () => {
     _noteActivity();
-    _clearEndPoll();
+    _clearEndPoll('blackScreen');
     _activateBlack();
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
   Channel.on('intermission', () => {
     _noteActivity();
-    _clearEndPoll();
+    _clearEndPoll('intermission');
     _activateIntermission();
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
