@@ -53,7 +53,7 @@
   }
 
   // Set to true to log timing events to the console.
-  const DEBUG_TIMING = false;
+  const DEBUG_TIMING = true;
 
   // Unique identifier for this display instance — used by the controller to
   // target commands at the active window and prevent stale windows from
@@ -117,15 +117,18 @@
 
   function _startEndPoll() {
     _clearEndPoll(); // prevent duplicate intervals
-    if (endTime == null || !playerReady) return;
-    if (DEBUG_TIMING) console.log('[Display/Timing] poll start, endTime=', endTime);
+    if (endTime == null || !playerReady) {
+      console.log('[Display] End poll NOT started — endTime:', endTime, 'playerReady:', playerReady);
+      return;
+    }
+    console.log('[Display] End poll started, endTime=' + endTime);
     _endPollHandle = setInterval(() => {
       if (!playerReady) return;
       try {
         const cur = player.getCurrentTime();
-        if (DEBUG_TIMING) console.log('[Display/Timing] currentTime=', cur.toFixed(2), '/ endTime=', endTime);
+        console.log('[Display] End poll tick, currentTime=' + cur.toFixed(2) + ' endTime=' + endTime);
         if (cur >= endTime - 0.15) {
-          if (DEBUG_TIMING) console.log('[Display/Timing] auto-stop fired at', cur.toFixed(2));
+          console.log('[Display] End reached, pausing projector at ' + cur.toFixed(2));
           _clearEndPoll();
           player.pauseVideo();
           _onDisplayClipEnded();
@@ -141,7 +144,7 @@
     if (_endPollHandle) {
       clearInterval(_endPollHandle);
       _endPollHandle = null;
-      if (DEBUG_TIMING) console.log('[Display/Timing] poll stopped');
+      console.log('[Display] End poll stopped');
     }
   }
 
@@ -276,8 +279,8 @@
 
     } else if (s === YT.PlayerState.PLAYING) {
       _hasEverPlayed = true;
+      console.log('[Display] PLAYING state — calling _startEndPoll, endTime=' + endTime);
       _startEndPoll();
-      if (DEBUG_TIMING) console.log('[Display] PLAYING — end poll started, endTime=', endTime);
 
       // Hard-sync: confirm the projector is playing — send ACK to controller.
       // If the video went straight to PLAYING without a BUFFERING event (cached/fast
@@ -297,6 +300,13 @@
           start:   ack.start,
           action:  'hardSync',
         });
+
+        // Belt-and-suspenders: if endTime is set but the poll didn't start
+        // (e.g. seekTo above caused a state reset), force-start it now.
+        if (endTime != null && !_endPollHandle) {
+          console.log('[Display] End poll not running after ACK — force-starting, endTime=' + endTime);
+          _startEndPoll();
+        }
       }
 
     } else if (s === YT.PlayerState.PAUSED  ||
@@ -697,6 +707,7 @@
 
     endTime = (p.end != null && p.end > 0) ? p.end : null;
     _clearEndPoll();
+    console.log('[Display] hardSyncPlay — endTime set to', endTime, '(p.end was', p.end, ')');
 
     // Stop current playback — clean slate.
     if (playerReady) {
