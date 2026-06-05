@@ -187,8 +187,19 @@
     // anything yet and this is the first error, re-cue and replay pending command.
     if (!_hasEverPlayed && _retryCount < 1 && currentSegment.videoId) {
       _retryCount++;
+      const _retryVideoId  = currentSegment.videoId;
+      const _retrySegIndex = currentSegment.index;
       console.warn('[Display] Late-join error — re-cueing in 600ms, retry', _retryCount);
       setTimeout(() => {
+        // Abort if playback already succeeded or the segment changed during the window.
+        // Without these guards the retry resets segmentCued, calls cueVideoById, and
+        // re-sets pendingPlay from _lastCommand — causing extra CUED events and extra
+        // _drainPendingPlay / playVideo() calls even after a successful play.
+        if (_hasEverPlayed) return;
+        if (segmentCued)    return;
+        if (currentSegment.videoId !== _retryVideoId ||
+            currentSegment.index   !== _retrySegIndex) return;
+
         segmentCued = false;
         if (!pendingPlay && _lastCommand && _lastCommand.type === 'play') {
           pendingPlay = {
@@ -513,13 +524,32 @@
       // Segment is already cued — seek to start and play immediately.
       // This is the normal path for a late-joining projector that applyFullSync
       // already cued while the user was navigating to the play button.
-      console.log('[Display] Projector player: playVideo() — already cued, seekTo', p.start);
-      _execVideo(() => {
+      //
+      // Guard: if the player is already playing this segment at (or very near)
+      // the intended start, the command is a duplicate — e.g. the controller
+      // sent play multiple times because the user pressed the button after the
+      // clip ended and then again. Seeking + playing would restart the video
+      // mid-playback and produce a doubled-sound glitch.
+      let _skipPlay = false;
+      if (playerReady) {
         try {
-          player.seekTo(p.start || 0, true);
-          player.playVideo();
-        } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
-      });
+          const _yt = player.getPlayerState();
+          const _pos = player.getCurrentTime();
+          if (_yt === YT.PlayerState.PLAYING && Math.abs(_pos - (p.start || 0)) < 5) {
+            _skipPlay = true;
+            console.log('[Display] Projector: already playing near start (' + _pos.toFixed(1) + 's) — ignoring duplicate play command');
+          }
+        } catch {}
+      }
+      if (!_skipPlay) {
+        console.log('[Display] Projector player: playVideo() — already cued, seekTo', p.start);
+        _execVideo(() => {
+          try {
+            player.seekTo(p.start || 0, true);
+            player.playVideo();
+          } catch (e) { console.warn('[Display] play (cued) error:', e.message); }
+        });
+      }
     } else if (awaitingCue) {
       // Same segment is being cued right now — queue the play.
       // _drainPendingPlay() will fire it when the CUED state event arrives.

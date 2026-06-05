@@ -88,7 +88,8 @@ const Clips = (() => {
 
     // Re-apply the persistent mute intent if it was set before the player was ready.
     if (_shouldBeMuted) {
-      try { player.mute(); } catch (e) { _warn('Deferred mute threw:', e.message); }
+      try { player.mute();      } catch (e) { _warn('Deferred mute threw:', e.message); }
+      try { player.setVolume(0); } catch {}  // belt-and-suspenders: isMuted() can be undefined during transitions
     }
   }
 
@@ -100,7 +101,8 @@ const Clips = (() => {
       if (s === YT.PlayerState.PLAYING) {
         // Re-apply the persistent mute intent: YouTube can reset mute state
         // during video load (loadVideoById starts autoplay, mute may arrive late).
-        if (_shouldBeMuted) try { player.mute(); } catch {}
+        // setVolume(0) covers the window where isMuted() returns undefined.
+        if (_shouldBeMuted) { try { player.mute(); } catch {} try { player.setVolume(0); } catch {} }
         _startEndPoll(); // _startEndPoll clears first, so no duplicates
       } else if (s === YT.PlayerState.PAUSED  ||
                  s === YT.PlayerState.ENDED   ||
@@ -263,7 +265,8 @@ const Clips = (() => {
   function mute() {
     _shouldBeMuted = true;
     if (!playerReady) return; // _onPlayerReady will apply it
-    try { player.mute(); } catch (e) { _warn('mute threw:', e.message); }
+    try { player.mute();       } catch (e) { _warn('mute threw:', e.message); }
+    try { player.setVolume(0); } catch {}   // covers isMuted() === undefined transition window
   }
 
   /** Unmute the player and clear the persistent mute intent. */

@@ -202,6 +202,7 @@
       toast(`Segment ${index + 1} has no YouTube video ID — video skipped.`, 'error');
       setStatus('error', 'No video ID configured');
     } else {
+      _ensureControlMuted('before cue()');
       Clips.cue(seg.youtubeId, seg.start || 0, seg.end || 0);
     }
 
@@ -344,6 +345,25 @@
   }
 
   // ============================================================
+  // 8. ENSURE CONTROL-ROOM MUTED (called before every local playback op)
+  // ============================================================
+
+  /**
+   * Unconditionally mute the control-room player whenever a projector is active.
+   * Centralises the mute call so no code path can accidentally send audio when
+   * the projector owns the audio output.
+   *
+   * Clips.mute() sets _shouldBeMuted=true AND calls player.mute() + setVolume(0),
+   * so it covers the window where isMuted() returns undefined during transitions.
+   */
+  function _ensureControlMuted(reason) {
+    if (CONTROL_AUDIO_ENABLED) return;
+    if (!projectorConnected) return;
+    Clips.mute();
+    console.log('[Controller] ensureControlMuted:', reason, '— isMuted:', Clips.isMuted());
+  }
+
+  // ============================================================
   // 8. REPLACE SHOW (called by editor.js via ShowController)
   // ============================================================
 
@@ -399,6 +419,7 @@
     if (!seg.youtubeId) { toast('No YouTube video ID on this segment.', 'error'); return; }
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
+    _ensureControlMuted('before play()');
     console.log('[Controller] Non-projector player: play()', seg.youtubeId, '@', seg.start, '— muted:', Clips.isMuted());
     Clips.play(seg.youtubeId, seg.start, seg.end);
     setStatus('playing', 'Loading…');
@@ -410,6 +431,7 @@
     const seg = segments[currentIndex];
     if (!seg || !seg.youtubeId) return;
     state.clipState = 'playing';
+    _ensureControlMuted('before resume()');
     console.log('[Controller] Non-projector player: playVideo() (resume) — muted:', Clips.isMuted());
     Clips.resume();
     setStatus('playing', 'Playing');
@@ -442,6 +464,7 @@
     if (!seg || !seg.youtubeId) return;
     if (!_validateTimestamps(seg)) return;
     state.clipState = 'playing';
+    _ensureControlMuted('before replay()');
     console.log('[Controller] Non-projector player: replay() @', seg.start, '— muted:', Clips.isMuted());
     Clips.replay(seg.start, seg.end);
     setStatus('playing', 'Replaying');
