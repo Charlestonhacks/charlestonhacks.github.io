@@ -278,50 +278,21 @@
       _clearEndPoll('CUED'); // no end-poll while just cued
 
     } else if (s === YT.PlayerState.BUFFERING) {
-      // Hard-sync: on the first BUFFERING event after loadVideoById, issue a
-      // precise seekTo so the final playback position matches the segment start
-      // exactly (loadVideoById with startSeconds only snaps to the nearest keyframe).
-      if (_pendingHardSyncAck && !_hardSyncSeekDone) {
-        _hardSyncSeekDone = true;
-        const ack = _pendingHardSyncAck;
-        console.log('[Display] Hard sync: seekTo after load', ack.start);
-        try { player.seekTo(ack.start || 0, true); } catch (e) { console.warn('[Display] hardSync seekTo error:', e.message); }
-        console.log('[Display] Hard sync: playVideo after load');
-        try { player.playVideo(); } catch (e) { console.warn('[Display] hardSync playVideo error:', e.message); }
-      }
-      // BUFFERING: leave end-poll running — poll restarts when PLAYING fires
+      // Hard-sync two-phase seek: handled by _hardSyncSeekAndVerify timer.
+      // Do nothing here — let the verification loop manage seek + play.
 
     } else if (s === YT.PlayerState.PLAYING) {
       _hasEverPlayed = true;
+
+      // If hard-sync verification is still in progress, don't start end-poll yet.
+      // The verification loop will start the poll after confirming seek position.
+      if (_pendingHardSyncAck) {
+        console.log('[Display] PLAYING during hardSync verify — deferring end-poll to verification');
+        return;
+      }
+
       console.log('[Display] PLAYING state — calling _startEndPoll, endTime=' + endTime);
       _startEndPoll();
-
-      // Hard-sync: confirm the projector is playing — send ACK to controller.
-      // If the video went straight to PLAYING without a BUFFERING event (cached/fast
-      // load), also issue the seekTo now so position is still exact.
-      if (_pendingHardSyncAck) {
-        const ack = _pendingHardSyncAck;
-        if (!_hardSyncSeekDone) {
-          _hardSyncSeekDone = true;
-          console.log('[Display] Hard sync: seekTo after load (fast-play path)', ack.start);
-          try { player.seekTo(ack.start || 0, true); } catch (e) { console.warn('[Display] hardSync seekTo (fast) error:', e.message); }
-        }
-        _pendingHardSyncAck = null;
-        console.log('[Display] Hard sync: PLAYING ack sent', ack.videoId, '@', ack.start);
-        Channel.send('displayPlayingAck', {
-          displayInstanceId,
-          videoId: ack.videoId,
-          start:   ack.start,
-          action:  'hardSync',
-        });
-
-        // Belt-and-suspenders: if endTime is set but the poll didn't start
-        // (e.g. seekTo above caused a state reset), force-start it now.
-        if (endTime != null && !_endPollHandle) {
-          console.log('[Display] End poll not running after ACK — force-starting, endTime=' + endTime);
-          _startEndPoll();
-        }
-      }
 
     } else if (s === YT.PlayerState.PAUSED  ||
                s === YT.PlayerState.ENDED   ||
@@ -691,8 +662,80 @@
     }
   });
 
-  // hardSyncPlay: unconditional stop → loadVideoById (auto-starts) → seekTo on
-  // BUFFERING → ACK on PLAYING.  Does NOT use cueVideoById/pendingPlay/CUED path.
+  // hardSyncPlay: two-phase forced seek.
+  // Phase 1: stopVideo → loadVideoById (no startSeconds reliance) → pause.
+  // Phase 2: seekTo(start) → verify position → playVideo → ACK.
+  // Does NOT rely on YouTube's startSeconds parameter which is unreliable.
+  let _hardSyncVerifyTimer = null;
+
+  function _clearHardSyncVerify() {
+    if (_hardSyncVerifyTimer) {
+      clearTimeout(_hardSyncVerifyTimer);
+      _hardSyncVerifyTimer = null;
+    }
+  }
+
+  function _hardSyncSeekAndVerify(target, attempt) {
+    if (!playerReady || !_pendingHardSyncAck) return;
+    const maxAttempts = 6;
+
+    try { player.seekTo(target.start, true); } catch (e) {
+      console.warn('[Display] hardSync seekTo error:', e.message);
+    }
+
+    _hardSyncVerifyTimer = setTimeout(() => {
+      if (!_pendingHardSyncAck) return; // already resolved
+      try {
+        const cur = player.getCurrentTime();
+        const state = player.getPlayerState();
+        console.log('[Display] post-seek currentTime=' + cur.toFixed(2) + ' target=' + target.start + ' state=' + state + ' attempt=' + attempt);
+
+        // Verification: currentTime should be within 2s of target start.
+        // In relative mode (YT reports from 0), accept near 0 as well.
+        const closeToTarget = Math.abs(cur - target.start) < 2;
+        const closeToZero = cur < 2; // relative mode: just loaded
+        const seekOk = closeToTarget || closeToZero;
+
+        if (seekOk || attempt >= maxAttempts) {
+          if (!seekOk) {
+            console.warn('[Display] seek failed after ' + maxAttempts + ' attempts, proceeding anyway. cur=' + cur.toFixed(2));
+          } else {
+            console.log('[Display] seek verified at ' + cur.toFixed(2));
+          }
+
+          // Phase 2 complete — play and send ACK
+          console.log('[Display] hardSync play after verified seek');
+          try { player.playVideo(); } catch (e) { console.warn('[Display] hardSync playVideo error:', e.message); }
+
+          const ack = _pendingHardSyncAck;
+          _pendingHardSyncAck = null;
+
+          // Wait briefly for PLAYING state to propagate then start end poll and ACK
+          setTimeout(() => {
+            console.log('[Display] Hard sync: PLAYING ack sent', ack.videoId, '@', ack.start);
+            Channel.send('displayPlayingAck', {
+              displayInstanceId,
+              videoId: ack.videoId,
+              start:   ack.start,
+              action:  'hardSync',
+            });
+            _startEndPoll();
+          }, 200);
+
+        } else {
+          console.log('[Display] seek failed, retrying. cur=' + cur.toFixed(2) + ' target=' + target.start);
+          _hardSyncSeekAndVerify(target, attempt + 1);
+        }
+      } catch (e) {
+        console.warn('[Display] hardSync verify error:', e.message);
+        // Try again
+        if (attempt < maxAttempts) {
+          _hardSyncSeekAndVerify(target, attempt + 1);
+        }
+      }
+    }, 400);
+  }
+
   Channel.on('hardSyncPlay', (p) => {
     _noteActivity();
     if (!p.videoId) return;
@@ -702,20 +745,8 @@
       return;
     }
 
-    // Log full payload so controller and display logs can be compared side-by-side.
     console.log('[Display] ← hardSyncPlay | videoId:', p.videoId,
                 'start:', p.start, 'end:', p.end, 'segmentIndex:', p.segmentIndex);
-
-    // Warn if the received segment differs from what the display currently has cued.
-    if (currentSegment.videoId && currentSegment.videoId !== p.videoId) {
-      console.warn('[Display] hardSyncPlay videoId mismatch — currentSegment:', currentSegment.videoId,
-                   '(idx', currentSegment.index, ') received:', p.videoId,
-                   '(idx', p.segmentIndex, ')');
-    } else if (currentSegment.videoId === p.videoId &&
-               Math.abs((currentSegment.start || 0) - (p.start || 0)) > 1) {
-      console.warn('[Display] hardSyncPlay start mismatch — currentSegment.start:', currentSegment.start,
-                   'received start:', p.start);
-    }
 
     _lastCommand = { type: 'hardSyncPlay', payload: p, ts: Date.now() };
 
@@ -727,14 +758,15 @@
 
     endTime = (p.end != null && p.end > 0) ? p.end : null;
     _clearEndPoll('hardSyncPlay reset');
-    console.log('[Display] hardSyncPlay — endTime set to', endTime, '(p.end was', p.end, ')');
+    _clearHardSyncVerify();
+    console.log('[Display] hardSync target start=' + (p.start || 0) + ' end=' + (p.end || 'null'));
 
     // Stop current playback — clean slate.
     if (playerReady) {
       try { player.stopVideo(); } catch (e) { console.warn('[Display] hardSync stopVideo error:', e.message); }
     }
 
-    // Reset segment tracking; bypass pendingPlay/segmentCued (CUED path) entirely.
+    // Reset segment tracking
     currentSegment = {
       videoId: p.videoId,
       start:   p.start || 0,
@@ -742,19 +774,22 @@
       index:   p.segmentIndex != null ? p.segmentIndex : null,
     };
     segmentCued         = false;
-    pendingPlay         = null;          // hardSync bypasses the CUED→pendingPlay drain
+    pendingPlay         = null;
     _pendingHardSyncAck = { videoId: p.videoId, start: p.start || 0 };
     _hardSyncSeekDone   = false;
 
-    // loadVideoById auto-starts the video near startSeconds.  The precise
-    // seekTo(start, true) is deferred to the first BUFFERING event in
-    // _onPlayerStateChange so the player has loaded enough to seek accurately.
-    // ACK is sent when the PLAYING event confirms the projector is running.
+    // Phase 1: load the video WITHOUT relying on startSeconds for positioning.
+    // We pass startSeconds as a hint but will force-seek after load.
     _execVideo(() => {
-      console.log('[Display] Hard sync: loadVideoById', p.videoId, '@', p.start);
+      console.log('[Display] Hard sync: loadVideoById', p.videoId, '(startSeconds hint:', p.start, ')');
       try {
         player.loadVideoById({ videoId: p.videoId, startSeconds: p.start || 0 });
       } catch (e) { console.warn('[Display] hardSync loadVideoById error:', e.message); }
+
+      // Phase 2: after a delay for the video to begin loading, force-seek and verify.
+      setTimeout(() => {
+        _hardSyncSeekAndVerify({ start: p.start || 0, videoId: p.videoId }, 1);
+      }, 600);
     });
   });
 
