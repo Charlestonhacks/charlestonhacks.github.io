@@ -165,6 +165,24 @@
       border-radius: 8px;
     }
 
+    .nav-gameplan {
+      background: linear-gradient(135deg, rgba(0, 224, 255, 0.12), rgba(123, 92, 255, 0.12)) !important;
+      border: 1px solid rgba(0, 224, 255, 0.3) !important;
+      color: var(--cyan) !important;
+      font-weight: 700;
+      padding: 7px 14px !important;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      transition: all var(--transition);
+    }
+    .nav-gameplan:hover {
+      background: linear-gradient(135deg, rgba(0, 224, 255, 0.2), rgba(123, 92, 255, 0.2)) !important;
+      border-color: var(--cyan) !important;
+      box-shadow: 0 0 12px rgba(0, 224, 255, 0.25);
+    }
+    .nav-gameplan i { margin-right: 4px; }
+
     .nav-toggle {
       display: none;
       background: none;
@@ -693,6 +711,7 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="nav-links" id="primary-nav">
+      <a href="https://ctwgameplan.com/" target="_blank" rel="noopener" class="nav-gameplan"><i class="fas fa-gamepad"></i> CTW Game Plan</a>
       <a href="#events-section">Events</a>
       <a href="/hub.html">Member Portal</a>
       <a href="/bbs.html">Community Chat</a>
