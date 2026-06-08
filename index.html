@@ -336,10 +336,27 @@
       margin-top: 32px;
       display: flex;
       justify-content: center;
+      align-items: center;
       gap: 14px;
       flex-wrap: wrap;
       position: relative;
       z-index: 1;
+    }
+
+    .hero-meetup-link {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.6);
+      text-decoration: none;
+      padding: 10px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      letter-spacing: 0.04em;
+      transition: color var(--transition), border-color var(--transition), background var(--transition);
+    }
+    .hero-meetup-link:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      background: rgba(0, 224, 255, 0.06);
     }
 
     .hero-secondary {
@@ -1075,9 +1092,24 @@
           if (ev.nearifyJoinUrl) {
             heroRsvp.href = safeText(ev.nearifyJoinUrl);
             heroRsvp.textContent = 'Join Live Network';
+          } else if (meetupUrl) {
+            heroRsvp.href = link;
+            heroRsvp.textContent = 'RSVP on Meetup';
           } else {
             heroRsvp.href = '#events-section';
             heroRsvp.textContent = 'See Events';
+          }
+          // Add a secondary Meetup link when nearify is the primary CTA
+          var existingMeetupLink = heroCta.querySelector('.hero-meetup-link');
+          if (existingMeetupLink) existingMeetupLink.remove();
+          if (ev.nearifyJoinUrl && meetupUrl) {
+            var meetupLink = document.createElement('a');
+            meetupLink.href = link;
+            meetupLink.target = '_blank';
+            meetupLink.rel = 'noopener noreferrer';
+            meetupLink.className = 'hero-meetup-link';
+            meetupLink.textContent = 'View on Meetup';
+            heroCta.appendChild(meetupLink);
           }
           heroCta.style.display = 'flex';
         }
