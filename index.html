@@ -129,71 +129,39 @@
       opacity: 0.35;
     }
 
-    .announcement-banner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(0, 224, 255, 0.1), rgba(123, 92, 255, 0.1));
-      border-bottom: 1px solid rgba(0, 224, 255, 0.2);
-      padding: 10px 16px;
-      position: relative;
-      z-index: 101;
-      gap: 8px;
+    .ctw-callout {
+      background: linear-gradient(135deg, rgba(0, 224, 255, 0.08), rgba(123, 92, 255, 0.08));
+      border: 1px solid rgba(0, 224, 255, 0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      text-align: center;
     }
-    .announcement-inner {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .announcement-text {
+    .ctw-callout-text {
       font-family: var(--font-body);
-      font-size: 0.82rem;
-      color: rgba(255, 255, 255, 0.88);
-      letter-spacing: 0.02em;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.82);
+      margin-bottom: 12px;
+      line-height: 1.5;
     }
-    .announcement-text strong {
+    .ctw-callout-text strong {
       color: var(--cyan);
     }
-    .announcement-cta {
+    .ctw-callout-btn {
       display: inline-block;
       background: linear-gradient(135deg, var(--cyan), #0099cc);
       color: #000;
       font-weight: 800;
-      font-size: 0.74rem;
-      padding: 6px 14px;
-      border-radius: 6px;
+      font-size: 0.78rem;
+      padding: 9px 18px;
+      border-radius: 8px;
       text-decoration: none;
       letter-spacing: 0.04em;
       transition: transform var(--transition), box-shadow var(--transition);
-      white-space: nowrap;
     }
-    .announcement-cta:hover {
+    .ctw-callout-btn:hover {
       transform: scale(1.03);
-      box-shadow: 0 0 14px rgba(0, 224, 255, 0.35);
-    }
-    .announcement-close {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.45);
-      font-size: 0.9rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      transition: color var(--transition);
-    }
-    .announcement-close:hover {
-      color: var(--cyan);
-    }
-
-    @media (max-width: 768px) {
-      .announcement-banner { padding: 8px 40px 8px 12px; }
-      .announcement-inner { gap: 8px; }
-      .announcement-text { font-size: 0.75rem; }
+      box-shadow: 0 0 16px rgba(0, 224, 255, 0.35);
     }
 
     .top-nav {
@@ -787,19 +755,6 @@
 <body>
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
 
-  <div class="announcement-banner" id="ctw-banner">
-    <div class="announcement-inner">
-      <span class="announcement-text">
-        <strong>Ready for Charleston Tech Week?</strong> Discover the sessions, speakers, and events that fit you best.
-      </span>
-      <a href="https://ctwgameplan.com/" target="_blank" rel="noopener" class="announcement-cta">Get My Personalized Game Plan</a>
-    </div>
-    <button class="announcement-close" aria-label="Dismiss banner" onclick="document.getElementById('ctw-banner').style.display='none';try{sessionStorage.setItem('ctw-banner-dismissed','1')}catch(e){}">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-  <script>try{if(sessionStorage.getItem('ctw-banner-dismissed')==='1')document.getElementById('ctw-banner').style.display='none'}catch(e){}</script>
-
   <nav class="top-nav" role="navigation" aria-label="Main navigation">
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
@@ -808,7 +763,7 @@
       <i class="fas fa-bars"></i>
     </button>
     <div class="nav-links" id="primary-nav">
-      <a href="https://ctwgameplan.com/" target="_blank" rel="noopener" class="nav-gameplan"><i class="fas fa-gamepad"></i> CTW Gameplan</a>
+      <a href="https://ctwgameplan.com/" target="_blank" rel="noopener" class="nav-gameplan"><i class="fas fa-gamepad"></i> Charleston Tech Week</a>
       <a href="#events-section">Events</a>
       <a href="/bbs.html">Community Chat</a>
       <a href="/about.html">About</a>
@@ -818,6 +773,10 @@
   <main>
     <section class="hero" id="events">
       <div class="hero-inner">
+        <div class="ctw-callout" id="ctw-banner">
+          <p class="ctw-callout-text"><strong>Ready for Charleston Tech Week?</strong> Discover the sessions, speakers, and events that fit you best.</p>
+          <a href="https://ctwgameplan.com/" target="_blank" rel="noopener" class="ctw-callout-btn">Get My Personalized Game Plan →</a>
+        </div>
         <p class="hero-eyebrow" id="hero-eyebrow">CharlestonHacks presents</p>
         <div id="hero-event">
           <p class="events-label">Next event — loading…</p>
