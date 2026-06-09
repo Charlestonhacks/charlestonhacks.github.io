@@ -16,20 +16,6 @@
       "discussionMinutes": 5
     },
     {
-      "title": "The Lawnmower Man (1992), VR experiment (Jobe enters simulation)",
-      "youtubeId": "cm2FbJE2wsQ",
-      "start": 5546,
-      "end": 5573,
-      "panelist": "Jm Khayat",
-      "question": "Is VR about escape or enhancement?",
-      "backupQuestions": [
-        "If you could increase your intelligence through simulation, would you?",
-        "Where is the line between simulation and identity?"
-      ],
-      "moderatorNotes": "This one tends to split the room. Let both sides make their case before synthesizing. Panelist has a strong pro-open position — give the skeptics room first.",
-      "discussionMinutes": 6
-    },
-    {
       "title": "The Matrix Reloaded (2003), Scene: Neo meets the Architect",
       "youtubeId": "cHZl2naX1Xk",
       "start": 79,
@@ -147,7 +133,7 @@
       "youtubeId": "qk3PK3W_wvo",
       "start": 49,
       "end": 150,
-      "panelist": "Jm Khayat",
+      "panelist": "Open",
       "question": "Are there any applications of VR that aren't stupid, other than games?",
       "backupQuestions": [],
       "moderatorNotes": "",
@@ -169,7 +155,7 @@
       "youtubeId": "digHr6k38x0",
       "start": 1023,
       "end": 1120,
-      "panelist": "Jm Khayat",
+      "panelist": "Open",
       "question": "In AI filmmaking what roles go away and what roles emerge?",
       "backupQuestions": [
         "Will Synthetic actors ever replace human actors?"
@@ -215,7 +201,7 @@
       "youtubeId": "1SGg3QxYvS0",
       "start": 42,
       "end": 107,
-      "panelist": "Open",
+      "panelist": "Will",
       "question": "What happens when a company becomes wildly successful?",
       "backupQuestions": [],
       "moderatorNotes": "",
