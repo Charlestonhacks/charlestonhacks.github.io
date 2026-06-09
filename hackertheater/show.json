@@ -20,7 +20,7 @@
       "youtubeId": "cm2FbJE2wsQ",
       "start": 5546,
       "end": 5573,
-      "panelist": "JM",
+      "panelist": "Jm Khayat",
       "question": "Is VR about escape or enhancement?",
       "backupQuestions": [
         "If you could increase your intelligence through simulation, would you?",
@@ -47,7 +47,7 @@
     {
       "title": "The Imitation Game (2014), Turing explaining the imitation game",
       "youtubeId": "Vs7Lo5MKIws",
-      "start": 1,
+      "start": 4,
       "end": 85,
       "panelist": "Jack Teitel",
       "question": "What does it mean for a machine to ‘think’?",
@@ -145,9 +145,9 @@
     {
       "title": "Disclosure (1994), Virtual Reality Demo",
       "youtubeId": "qk3PK3W_wvo",
-      "start": 34,
+      "start": 49,
       "end": 150,
-      "panelist": "JM",
+      "panelist": "Jm Khayat",
       "question": "Are there any applications of VR that aren't stupid, other than games?",
       "backupQuestions": [],
       "moderatorNotes": "",
@@ -169,7 +169,7 @@
       "youtubeId": "digHr6k38x0",
       "start": 1023,
       "end": 1120,
-      "panelist": "JM",
+      "panelist": "Jm Khayat",
       "question": "In AI filmmaking what roles go away and what roles emerge?",
       "backupQuestions": [
         "Will Synthetic actors ever replace human actors?"
@@ -189,12 +189,45 @@
       "discussionMinutes": 5
     },
     {
+      "title": "Interstellar(2014), Tars and Case",
+      "youtubeId": "wVEfFHzUby0",
+      "start": 169,
+      "end": 197,
+      "panelist": "Tori Reed",
+      "question": "Is the setting of AI's personality fully under the control of human beings?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
       "title": "2001, A Space Odyssey (1968), \"Open The Pod Bay Doors\"",
       "youtubeId": "ARJ8cAGm6JE",
       "start": 58,
       "end": 100,
       "panelist": "Jack Teitel",
       "question": "If an AI is connected to vital systems is judgement helpful or dangerous?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "The Social Network (2010), Mark Gets Rid of His People",
+      "youtubeId": "1SGg3QxYvS0",
+      "start": 42,
+      "end": 107,
+      "panelist": "Open",
+      "question": "What happens when a company becomes wildly successful?",
+      "backupQuestions": [],
+      "moderatorNotes": "",
+      "discussionMinutes": 5
+    },
+    {
+      "title": "Ex Machina, (2015),  Are You Attracted to Me?",
+      "youtubeId": "8cQVspzP0Ms",
+      "start": 43,
+      "end": 70,
+      "panelist": "Open",
+      "question": "Is AI able to understand people humans to the point that they can manipulate them?",
       "backupQuestions": [],
       "moderatorNotes": "",
       "discussionMinutes": 5
