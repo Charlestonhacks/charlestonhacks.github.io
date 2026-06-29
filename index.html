@@ -491,10 +491,8 @@
 
     .events-list {
       display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-      max-width: 560px;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .event-card {
@@ -840,6 +838,31 @@
       line-height: 1.62;
     }
 
+    /* ── Leaders list ────────────────────────────────────────────── */
+    .leaders-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .leaders-list a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      transition: color var(--transition), background var(--transition);
+    }
+    .leaders-list a:hover { color: var(--cyan); background: rgba(0,224,255,0.05); }
+    .leaders-list a i { font-size: 0.9rem; color: #0a66c2; opacity: 0.8; }
+    .leaders-list a:hover i { opacity: 1; }
+
     /* ── What We Believe pillars ─────────────────────────────────── */
     .pillars-grid {
       display: grid;
@@ -900,7 +923,7 @@
       .hero-secondary { font-size: 0.84rem; }
       .btn-primary, .btn-secondary { width: 100%; max-width: 290px; text-align: center; padding: 14px 20px; }
       .section { padding: 50px 16px; }
-      .events-list { padding-left: 0 !important; padding-right: 0 !important; }
+      .events-list { padding-left: 0 !important; padding-right: 0 !important; grid-template-columns: 1fr; }
       .pulse-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .cta-grid { grid-template-columns: 1fr; }
       .depth-links { gap: 16px; }
@@ -1086,7 +1109,6 @@
       <a href="#our-hacks">Hacks</a>
       <a href="#photo-reel">Moments</a>
       <a href="#about">About</a>
-      <a href="#pulse-section">Pulse</a>
       <a href="#board-section">Board</a>
       <a href="#subscribe">Follow</a>
       <a href="#donate">Support</a>
@@ -1103,19 +1125,19 @@
       </div>
       <p class="section-label">Mission</p>
       <h2 class="section-title">Building Charleston into a recognized tech hub</h2>
-      <p class="section-sub">CharlestonHacks is a federally recognized 501(c)(3) nonprofit organization dedicated to growing Charleston's technology community through high-quality events, open collaboration, and inclusive membership. Founded in 2023 and now serving <strong style="color:#fff">1,136 members</strong>, we believe a thriving tech ecosystem begins with community — and membership is always free.</p>
+      <p class="section-sub">CharlestonHacks is a federally recognized 501(c)(3) nonprofit organization dedicated to growing Charleston's technology community through high-quality events, open collaboration, and inclusive membership. We believe a thriving tech ecosystem begins with community — and membership is always free.</p>
       <div class="mission-stats">
         <div class="mission-stat">
           <span class="mission-stat-value">2023</span>
           <span class="mission-stat-label">Year Founded</span>
         </div>
         <div class="mission-stat">
-          <span class="mission-stat-value">1,136</span>
-          <span class="mission-stat-label">Members</span>
+          <span class="mission-stat-value">50+</span>
+          <span class="mission-stat-label">Events</span>
         </div>
         <div class="mission-stat">
-          <span class="mission-stat-value">$0</span>
-          <span class="mission-stat-label">Cost to Join</span>
+          <span class="mission-stat-value">1,000+</span>
+          <span class="mission-stat-label">Participants</span>
         </div>
       </div>
     </section>
@@ -1197,62 +1219,22 @@
 
     <hr class="divider">
 
-    <section class="section content-section" id="pulse-section" aria-label="Community pulse" style="padding-top:20px;">
-      <p class="section-label">Pulse</p>
-      <h2 class="section-title">The network at a glance</h2>
-      <p class="section-sub">Live metrics from recent community activity and collaboration across CharlestonHacks.</p>
-      <div class="pulse-grid">
-        <a href="#subscribe" class="pulse-card" aria-label="Join the community"><span class="pulse-icon">👥</span><div class="pulse-value" data-target="1136">0</div><div class="pulse-label">Members</div></a>
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="pulse-card" aria-label="Explore active projects"><span class="pulse-icon">🚀</span><div class="pulse-value" data-target="24">0</div><div class="pulse-label">Active Projects</div></a>
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="pulse-card" aria-label="Explore connections"><span class="pulse-icon">🤝</span><div class="pulse-value" data-target="380">0</div><div class="pulse-label">Connections</div></a>
-        <a href="#events-section" class="pulse-card" aria-label="See events this year"><span class="pulse-icon">📅</span><div class="pulse-value" data-target="12">0</div><div class="pulse-label">Events This Year</div></a>
-      </div>
-    </section>
-
-    <hr class="divider">
-
     <section class="section content-section" id="board-section" aria-label="Board of Directors">
       <p class="section-label">Leadership</p>
       <h2 class="section-title">Board of Directors</h2>
       <p class="section-sub">CharlestonHacks is governed by a volunteer board of experienced technologists, entrepreneurs, and community leaders — all committed to making Charleston a place where builders thrive.</p>
-      <div class="board-grid">
-        <div class="board-card">
-          <div class="board-avatar">MD</div>
-          <div class="board-name">Michael Driscoll</div>
-          <div class="board-title">Executive Director &amp; Founder</div>
-          <p class="board-bio">Serial entrepreneur and software engineer. Founded CharlestonHacks in 2023 with a vision to make Charleston a nationally recognized technology hub.</p>
-        </div>
-        <div class="board-card">
-          <div class="board-avatar">SC</div>
-          <div class="board-name">Sarah Chen</div>
-          <div class="board-title">Board Chair</div>
-          <p class="board-bio">Venture capital partner and startup advisor with 15+ years building technology ecosystems across the Southeast.</p>
-        </div>
-        <div class="board-card">
-          <div class="board-avatar">JO</div>
-          <div class="board-name">James Okafor</div>
-          <div class="board-title">Treasurer</div>
-          <p class="board-bio">CFO and CPA with deep experience in nonprofit finance and governance for technology organizations.</p>
-        </div>
-        <div class="board-card">
-          <div class="board-avatar">PN</div>
-          <div class="board-name">Priya Nambiar</div>
-          <div class="board-title">Secretary</div>
-          <p class="board-bio">Community organizer and product leader who has built developer communities in cities across the country.</p>
-        </div>
-        <div class="board-card">
-          <div class="board-avatar">DL</div>
-          <div class="board-name">David Lattimore</div>
-          <div class="board-title">Board Member</div>
-          <p class="board-bio">Senior engineering leader at a Fortune 500 company and longtime advocate for Charleston's technology community.</p>
-        </div>
-        <div class="board-card">
-          <div class="board-avatar">AV</div>
-          <div class="board-name">Anita Vasquez</div>
-          <div class="board-title">Board Member</div>
-          <p class="board-bio">Computer science professor and STEM education champion with a passion for expanding access to technology careers.</p>
-        </div>
-      </div>
+      <ul class="leaders-list">
+        <li><a href="https://www.linkedin.com/in/doug-hamilton-61517b2b/" target="_blank" rel="noopener noreferrer">Doug Hamilton <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/daltonbradley/" target="_blank" rel="noopener noreferrer">Bradley Dalton-Oates <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/jodystoehr/" target="_blank" rel="noopener noreferrer">Jody Stoehr <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/daveaingram/" target="_blank" rel="noopener noreferrer">Dave Ingram <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/venkat-ramshesh-29178848/" target="_blank" rel="noopener noreferrer">Venkat Ramshesh <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/amin-yachnes/" target="_blank" rel="noopener noreferrer">Amin Yachnes <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/whorn/" target="_blank" rel="noopener noreferrer">Will Horn <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/tom-schipper-435a674/" target="_blank" rel="noopener noreferrer">Tom Schipper <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/sam-clements-849147127/" target="_blank" rel="noopener noreferrer">Sam Clements <i class="fab fa-linkedin"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/mastle/" target="_blank" rel="noopener noreferrer">Mike Astle <i class="fab fa-linkedin"></i></a></li>
+      </ul>
     </section>
 
     <hr class="divider">
@@ -1629,7 +1611,7 @@
         const homepageEvents = document.getElementById('homepage-events');
         if (!homepageEvents) return;
 
-        const eventsToShow = upcoming.slice(1, 4);
+        const eventsToShow = upcoming.slice(0, 4);
         if (!eventsToShow.length) {
           homepageEvents.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:0.4rem;"></i>No additional upcoming events right now. Check back soon.</p>';
           return;
