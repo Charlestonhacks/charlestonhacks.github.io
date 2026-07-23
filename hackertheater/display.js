@@ -422,16 +422,26 @@
 
   // ---- Intermission clock ----
 
+  const INTERMISSION_DURATION_MS = 10 * 60 * 1000;
   let _intermHandle = null;
-  function _startIntermClock() {
+  let _intermEndsAt = null;
+  function _startIntermClock(endsAt) {
+    _stopIntermClock();
+    _intermEndsAt = endsAt || (Date.now() + INTERMISSION_DURATION_MS);
     _updateIntermClock();
     _intermHandle = setInterval(_updateIntermClock, 1000);
   }
-  function _stopIntermClock() { clearInterval(_intermHandle); }
+  function _stopIntermClock() {
+    clearInterval(_intermHandle);
+    _intermHandle = null;
+    _intermEndsAt = null;
+  }
   function _updateIntermClock() {
-    dom.intermClock.textContent = new Date().toLocaleTimeString([], {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-    });
+    const remainingMs = Math.max(0, (_intermEndsAt || Date.now()) - Date.now());
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    dom.intermClock.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
   // ---- Apply full snapshot (from localStorage or fullSync message) ----
@@ -486,7 +496,7 @@
     if (snap.overlay === 'black') {
       _activateBlack();
     } else if (snap.overlay === 'intermission') {
-      _activateIntermission();
+      _activateIntermission(snap.intermissionEndsAt);
     } else {
       _clearOverlays();
     }
@@ -524,10 +534,10 @@
     _stopIntermClock();
   }
 
-  function _activateIntermission() {
+  function _activateIntermission(endsAt) {
     dom.intermOverlay.classList.add('active');
     dom.blackOverlay.classList.remove('active');
-    _startIntermClock();
+    _startIntermClock(endsAt);
   }
 
   function _clearOverlays() {
@@ -884,10 +894,10 @@
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
-  Channel.on('intermission', () => {
+  Channel.on('intermission', (payload = {}) => {
     _noteActivity();
     _clearEndPoll('intermission');
-    _activateIntermission();
+    _activateIntermission(payload.endsAt);
     if (playerReady) try { player.pauseVideo(); } catch {}
   });
 
