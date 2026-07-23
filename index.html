@@ -1084,6 +1084,33 @@
     }
     .donate-info li:last-child { border-bottom: none; }
     .donate-info li::before { content: "▸ "; color: var(--gold); font-weight: 700; margin-right: 6px; }
+
+    .harborhack-entry {
+      margin-top: 26px;
+      background: linear-gradient(135deg, rgba(0,224,255,0.08), rgba(201,163,94,0.08));
+      border: 1px solid rgba(0,224,255,0.22);
+      border-radius: 18px;
+      padding: 22px;
+      display: grid;
+      gap: 14px;
+    }
+    .harborhack-entry h3 {
+      font-family: var(--font-display);
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      color: var(--text);
+      margin: 0;
+    }
+    .harborhack-entry p { font-family: var(--font-body); color: var(--text-muted); line-height: 1.6; margin: 0; }
+    .harborhack-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .harborhack-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      min-height:42px; padding:10px 16px; border-radius:10px;
+      text-decoration:none; font-family:var(--font-body); font-weight:800;
+      border:1px solid rgba(255,255,255,0.12); color:#fff;
+    }
+    .harborhack-btn.primary { background:linear-gradient(135deg,var(--cyan),#72f0ff); color:#001015; }
+    .harborhack-btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
+
     @media (max-width: 768px) {
       .donate-cards { grid-template-columns: 1fr; }
       .donate-info-grid { grid-template-columns: 1fr; }
@@ -1152,6 +1179,16 @@
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
       </div>
+      <div class="harborhack-entry" aria-label="HarborHack 2026 featured event">
+        <p class="section-label">Featured 2026 Hackathon</p>
+        <h3>HarborHack 2026 · Agent In The Loop</h3>
+        <p>A hackathon where your AI collaborator isn’t a tool—it’s a teammate. Every team works with ROOK, a persistent synthetic engineering teammate, while humans remain responsible for direction, judgment, review, safety, and final decisions.</p>
+        <div class="harborhack-actions">
+          <a class="harborhack-btn primary" href="/harborhack-2026">Explore HarborHack 2026</a>
+          <a class="harborhack-btn" href="/harborhack-2026#overview" id="harborhack-home-register">Register</a>
+        </div>
+      </div>
+
     </section>
 
     <hr class="divider">
