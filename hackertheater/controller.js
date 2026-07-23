@@ -12,6 +12,8 @@
   // Default: control room is muted whenever a projector is connected so the
   // projector is the sole audio source for the audience.
   const CONTROL_AUDIO_ENABLED = new URLSearchParams(location.search).get('controlAudio') === '1';
+  const INTERMISSION_DURATION_MS = 10 * 60 * 1000;
+
 
   // ============================================================
   // 1. LOAD SHOW DATA
@@ -82,6 +84,7 @@
     blackActive:       false,
     intermActive:      false,
     intermClockHandle: null,
+    intermEndsAt:      null,
     // Explicit clip lifecycle: idle → playing ↔ paused → ended
     // 'idle'   = segment loaded but never played yet
     // 'playing'= actively playing
@@ -323,6 +326,7 @@
       timerRemaining:  state.timerRemaining,
       timerRunning:    state.timerRunning,
       overlay:         state.blackActive ? 'black' : (state.intermActive ? 'intermission' : 'none'),
+      intermissionEndsAt: state.intermEndsAt,
     };
   }
 
@@ -856,25 +860,30 @@
 
   function activateIntermission() {
     state.intermActive = true;
+    state.intermEndsAt = Date.now() + INTERMISSION_DURATION_MS;
     dom.intermOverlay.classList.add('active');
     if (Clips.isPlaying()) Clips.pause();
+    clearInterval(state.intermClockHandle);
     updateIntermClock();
     state.intermClockHandle = setInterval(updateIntermClock, 1000);
-    _broadcast('intermission');
+    _broadcast('intermission', { endsAt: state.intermEndsAt });
   }
 
   function deactivateIntermission() {
     state.intermActive = false;
+    state.intermEndsAt = null;
     dom.intermOverlay.classList.remove('active');
     clearInterval(state.intermClockHandle);
+    state.intermClockHandle = null;
     _broadcast('clearOverlay');
   }
 
   function updateIntermClock() {
-    const now = new Date();
-    dom.intermClock.textContent = now.toLocaleTimeString([], {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-    });
+    const remainingMs = Math.max(0, (state.intermEndsAt || Date.now()) - Date.now());
+    const totalSeconds = Math.ceil(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    dom.intermClock.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
   }
 
   dom.blackOverlay.addEventListener('click', deactivateBlack);
