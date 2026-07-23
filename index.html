@@ -1109,6 +1109,7 @@
       border:1px solid rgba(255,255,255,0.12); color:#fff;
     }
     .harborhack-btn.primary { background:linear-gradient(135deg,var(--cyan),#72f0ff); color:#001015; }
+    .harborhack-btn.info { background: rgba(255,255,255,0.06); color: var(--text-muted); border-color: rgba(201,163,94,0.32); }
     .harborhack-btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
 
     @media (max-width: 768px) {
@@ -1182,10 +1183,10 @@
       <div class="harborhack-entry" aria-label="HarborHack 2026 featured event">
         <p class="section-label">Featured 2026 Hackathon</p>
         <h3>HarborHack 2026 · Agent In The Loop</h3>
-        <p>A hackathon where your AI collaborator isn’t a tool—it’s a teammate. Every team works with ROOK, a persistent synthetic engineering teammate, while humans remain responsible for direction, judgment, review, safety, and final decisions.</p>
+        <p>HarborHack asks teams to build beside a persistent synthetic engineering teammate and learn the harder skill: leading the system. The point is not more generated code; it is shared direction, technical judgment, and a new collaboration pattern for humans, ROOK, and specialist AI tools.</p>
         <div class="harborhack-actions">
           <a class="harborhack-btn primary" href="/harborhack-2026">Explore HarborHack 2026</a>
-          <a class="harborhack-btn" href="/harborhack-2026#overview" id="harborhack-home-register">Register</a>
+          <a class="harborhack-btn info" href="/harborhack-2026#overview" id="harborhack-home-register">Registration Opens Soon</a>
         </div>
       </div>
 
@@ -1761,6 +1762,21 @@
         counterObserver.observe(pulseSection);
       } else {
         animateCounters();
+      }
+    })();
+  </script>
+
+
+  <script src="/assets/js/harborhack/config.js"></script>
+  <script>
+    (function () {
+      var config = window.HARBORHACK_2026_CONFIG || {};
+      var registerLink = document.getElementById('harborhack-home-register');
+      if (!registerLink) return;
+      if (config.registrationUrl) {
+        registerLink.textContent = 'Register';
+        registerLink.href = config.registrationUrl;
+        registerLink.classList.remove('info');
       }
     })();
   </script>
