@@ -1,6 +1,6 @@
 window.HARBORHACK_2026_CONFIG = {
   eventName: 'HarborHack 2026', year: 2026, theme: 'Agent In The Loop',
-  tagline: 'A hackathon where your AI collaborator isn’t a tool—it’s a teammate.',
+  tagline: 'The software development team has changed.',
   eventStatus: 'confirmed', timezone: 'America/New_York',
   eventStartDate: '2026-10-23T17:30:00-04:00', eventEndDate: '2026-10-25T21:00:00-04:00', registrationOpeningDate: '', registrationClosingDate: '', submissionDeadline: '2026-10-25T17:00:00-04:00',
   displayDates: 'October 23–25, 2026', kickoffDisplay: 'Friday • 5:30 PM EDT',
