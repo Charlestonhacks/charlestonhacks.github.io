@@ -10,12 +10,11 @@ Required organizer review before publication:
 
 - Dates: `eventStartDate`, `eventEndDate`, `registrationOpeningDate`, `registrationClosingDate`, `submissionDeadline` using ISO date strings.
 - Venue: `venueName`, `venueAddress`, `venueNotes`.
-- Links: `registrationUrl`, `devpostUrl`, `participantDiscordUrl`, `githubResourceUrl`, `mentorHelpUrl`, `rookInstallationUrl`, `rookDocumentationUrl`.
+- Links: `registrationUrl`, `devpostUrl`, `participantDiscordUrl`, `githubResourceUrl`, `mentorHelpUrl`.
 - Contacts: `codeOfConductReportingContact`. Do not publish rules or reporting language until organizers and appropriate legal counsel approve it.
 - Logistics: `teamSizeMin`, `teamSizeMax`, `presentationDurationMinutes`, `judgeQAMinutes`, `eventStatus`, `timezone`.
 - Schedule: add objects to `schedule` with `date`, `startTime`, `endTime`, `title`, `location`, `category`, `description`, `url`, and `recommendedFor`.
 - Resources: add only confirmed URLs to `resources` with `title`, `description`, `category`, `url`, `skillLevel`, `operatingSystem`, `status`, and optional `sponsorAttribution`.
-- ROOK commands: add only confirmed commands to `rookCommands` and set `featureFlags.showRookCommands` when ready.
 - Sponsors: add sponsor names only after they are confirmed.
 
 ## Placeholders

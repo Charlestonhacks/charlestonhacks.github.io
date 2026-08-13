@@ -8,7 +8,7 @@ window.HARBORHACK_2026_CONFIG = {
   teamSizeMin: 1, teamSizeMax: 4, presentationDurationMinutes: 5, judgeQAMinutes: 3,
   registrationUrl: '', devpostUrl: '', participantDiscordUrl: '', githubResourceUrl: 'https://github.com/charlestonhacks',
   mentorHelpUrl: '', mentorHelpInstructions: 'Mentor support instructions coming soon',
-  rookInstallationUrl: '', rookDocumentationUrl: '', codeOfConductReportingContact: '',
+  codeOfConductReportingContact: '',
   schedule: [
     { day: 'Friday', date: 'October 23', start: '2026-10-23T17:30:00-04:00', startTime: '5:30 PM', title: 'Kickoff', description: 'Team formation, challenge introduction, and the start of HarborHack.', category: 'Main Stage', location: 'Harbor Walk West · Room 211' },
     { day: 'Saturday', date: 'October 24', start: '2026-10-24T09:00:00-04:00', startTime: 'All Day', title: 'Hacking', description: 'Hacking, mentoring, and space for future workshops.', category: 'Mentoring', location: 'Harbor Walk West · Room 211' },
@@ -20,6 +20,6 @@ window.HARBORHACK_2026_CONFIG = {
     { title: 'CharlestonHacks GitHub', description: 'Community GitHub organization and public resources.', category: 'Git and GitHub', url: 'https://github.com/charlestonhacks', skillLevel: 'All levels', operatingSystem: 'Any', status: 'Optional' }
   ],
   announcements: [{ title: 'Event details confirmed', message: 'HarborHack 2026 begins Friday, October 23 at 5:30 PM EDT in Harbor Walk West Room 211 at the College of Charleston.' }],
-  sponsors: [], rookCommands: [], sampleExerciseUrl: '',
-  featureFlags: { showCountdown: true, showRegisterButton: true, showRookCommands: false }
+  sponsors: [], sampleExerciseUrl: '',
+  featureFlags: { showCountdown: true, showRegisterButton: true }
 };
