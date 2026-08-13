@@ -1187,7 +1187,6 @@
         <p>HarborHack asks teams to build beside a persistent synthetic engineering teammate and learn the harder skill: leading the system. The point is not more generated code; it is shared direction, technical judgment, and a new collaboration pattern for humans, ROOK, and specialist AI tools.</p>
         <div class="harborhack-actions">
           <a class="harborhack-btn primary" href="/harborhack-2026">Explore HarborHack 2026</a>
-          <a class="harborhack-btn info" href="/harborhack-2026#overview" id="harborhack-home-register">Registration Opens Soon</a>
         </div>
       </div>
 
@@ -1768,20 +1767,6 @@
     })();
   </script>
 
-
-  <script src="/assets/js/harborhack/config.js"></script>
-  <script>
-    (function () {
-      var config = window.HARBORHACK_2026_CONFIG || {};
-      var registerLink = document.getElementById('harborhack-home-register');
-      if (!registerLink) return;
-      if (config.registrationUrl) {
-        registerLink.textContent = 'Register';
-        registerLink.href = config.registrationUrl;
-        registerLink.classList.remove('info');
-      }
-    })();
-  </script>
 
   <!-- Live metrics for the "Network at a Glance" pulse section -->
   <script type="module" src="/assets/js/pulse-metrics.js"></script>
