@@ -1,24 +1,9 @@
-# CharlestonHacks Innovation Engine
-
-**Making Invisible Networks Visible**
+# CharlestonHacks 
 
 A sophisticated web-based innovation platform for hackathons and collaborative innovation, featuring real-time networking, project management, and community engagement.
 
 ![CharlestonHacks](images/charlestonhackslogo.svg)
 
----
-
-## 🚀 Features
-
-- **Synapse Network Visualization** - Interactive D3.js-based network graph showing connections and relationships
-- **Theme Circles** - Temporary collaboration spaces for emerging ideas
-- **Real-time Messaging** - Direct messaging between community members
-- **Project Management** - Create and manage collaborative projects
-- **Connection System** - Send and accept connection requests
-- **Endorsements** - Skill endorsement system
-- **Leaderboards** - XP, streak, and connection rankings
-- **Team Builder** - Automated team matching based on skills
-- **Admin Analytics** - Dashboard for community management
 
 ---
 
