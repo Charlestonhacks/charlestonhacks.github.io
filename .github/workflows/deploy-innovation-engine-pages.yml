@@ -1,0 +1,68 @@
+name: Deploy Innovation Engine to Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full 40-character commit SHA from deckerd451/innovation-engine
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Validate release SHA
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        run: |
+          if [[ ! "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "release_sha must be a full lowercase 40-character commit SHA" >&2
+            exit 1
+          fi
+
+      - name: Check out the canonical Innovation Engine release
+        uses: actions/checkout@v4
+        with:
+          repository: deckerd451/innovation-engine
+          ref: ${{ inputs.release_sha }}
+          path: innovation-engine
+          persist-credentials: false
+
+      - name: Verify the checked-out release and production files
+        working-directory: innovation-engine
+        env:
+          RELEASE_SHA: ${{ inputs.release_sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          test -f index.html
+          test -f CNAME
+          test -f sw.js
+          test -f assets/js/node-panel.js
+          grep -Fq 'pd-remove-member-btn' assets/js/node-panel.js
+          grep -Fq 'removeProjectMember' assets/js/node-panel.js
+          grep -Fq 'isProjectCreator' assets/js/node-panel.js
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Innovation Engine Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: innovation-engine
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
