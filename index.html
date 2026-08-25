@@ -495,6 +495,10 @@
       gap: 16px;
     }
 
+    .harborhack-entry + .events-list {
+      margin-top: 16px;
+    }
+
     .events-secondary-link {
       display: inline-block;
       margin-top: 16px;
@@ -1307,10 +1311,6 @@
       <p class="section-label">Upcoming</p>
       <h2 class="section-title">Events</h2>
       <p class="section-sub">Browse upcoming events and plan what's next.</p>
-      <div class="events-list" id="homepage-events" aria-live="polite">
-        <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
-        <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
-      </div>
       <div class="harborhack-entry" aria-label="HarborHack 2026 featured event">
         <p class="section-label">Featured 2026 Hackathon</p>
         <h3>HarborHack 2026 · Agent In The Loop</h3>
@@ -1319,6 +1319,10 @@
         <div class="harborhack-actions">
           <a class="harborhack-btn primary" href="/harborhack-2026">Explore HarborHack 2026</a>
         </div>
+      </div>
+      <div class="events-list" id="homepage-events" aria-live="polite">
+        <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
+        <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
       </div>
       <a class="events-secondary-link" href="https://nearify.org/" target="_blank" rel="noopener noreferrer">Discover more on Nearify →</a>
 
@@ -1772,7 +1776,10 @@
         const homepageEvents = document.getElementById('homepage-events');
         if (!homepageEvents) return;
 
-        const eventsToShow = upcoming.slice(0, 4);
+        const eventsToShow = upcoming
+          .filter(isCharlestonHacksEvent)
+          .concat(upcoming.filter(function (ev) { return !isCharlestonHacksEvent(ev); }))
+          .slice(0, 4);
         if (!eventsToShow.length) {
           homepageEvents.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:0.4rem;"></i>No additional upcoming events right now. Check back soon.</p>';
           return;
