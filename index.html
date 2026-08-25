@@ -495,6 +495,18 @@
       gap: 16px;
     }
 
+    .events-secondary-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: var(--cyan);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .events-secondary-link:hover { color: #fff; }
+
     .event-card {
       border: 1px solid rgba(255,255,255,0.12);
       padding: 18px;
@@ -697,8 +709,7 @@
 
     .hacks-grid {
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
-      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1fr);
       gap: 14px;
       margin-top: 24px;
     }
@@ -717,7 +728,6 @@
       box-shadow: 0 12px 35px rgba(0,224,255,0.09);
     }
     .buildspace-feature {
-      grid-row: 1 / 3;
       min-height: 254px;
       padding: 30px;
       display: flex;
@@ -1254,7 +1264,8 @@
     <div class="nav-links" id="primary-nav">
       <a href="#mission-section">Mission</a>
       <a href="#events-section">Events</a>
-      <a href="#our-hacks">Hacks</a>
+      <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer">BUILDSPACE</a>
+      <a href="/bbs.html">Chat</a>
       <a href="#photo-reel">Moments</a>
       <a href="#about">About</a>
       <a href="#board-section">Board</a>
@@ -1300,6 +1311,7 @@
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
       </div>
+      <a class="events-secondary-link" href="https://nearify.org/" target="_blank" rel="noopener noreferrer">Discover more on Nearify →</a>
       <div class="harborhack-entry" aria-label="HarborHack 2026 featured event">
         <p class="section-label">Featured 2026 Hackathon</p>
         <h3>HarborHack 2026 · Agent In The Loop</h3>
@@ -1314,28 +1326,14 @@
 
     <hr class="divider">
 
-    <section class="section content-section" id="our-hacks" aria-label="Our Hacks">
-      <p class="section-label">Hacks</p>
-      <h2 class="section-title">Built for builders</h2>
+    <section class="section content-section" id="our-hacks" aria-label="BUILDSPACE">
       <div class="hacks-grid">
         <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="hack-link buildspace-feature">
           <span class="buildspace-kicker">CharlestonHacks network</span>
           <h3>BUILDSPACE</h3>
-          <p class="buildspace-lead">See what Charleston is building.</p>
-          <p class="buildspace-copy">Discover people, projects, skills, opportunities, and connections across the CharlestonHacks community.</p>
+          <p class="buildspace-lead">Find your place in Charleston’s innovation community.</p>
+          <p class="buildspace-copy">Discover people, projects, skills, opportunities, and connections across Charleston.</p>
           <span class="hack-cta">Explore BUILDSPACE&nbsp; →</span>
-        </a>
-        <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" class="hack-link hack-support">
-          <span class="cta-icon" aria-hidden="true"><i class="far fa-calendar"></i></span>
-          <h3>Events</h3>
-          <p>See where the community is gathering.</p>
-          <span class="hack-cta">View events&nbsp; →</span>
-        </a>
-        <a href="/bbs.html" class="hack-link hack-support">
-          <span class="cta-icon" aria-hidden="true"><i class="far fa-comment"></i></span>
-          <h3>Community Chat</h3>
-          <p>Join the conversation.</p>
-          <span class="hack-cta">Open chat&nbsp; →</span>
         </a>
       </div>
     </section>
