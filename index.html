@@ -695,6 +695,119 @@
     .cta-card h3 { font-size: 0.98rem; color: #fff; margin-bottom: 8px; }
     .cta-card p { font-family: var(--font-body); font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; }
 
+    .hacks-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .hack-link {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      text-decoration: none;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .hack-link:hover {
+      border-color: rgba(154, 239, 255, 0.72);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(0,224,255,0.09);
+    }
+    .buildspace-feature {
+      grid-row: 1 / 3;
+      min-height: 254px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(0,224,255,0.13), transparent 34%),
+        linear-gradient(135deg, rgba(0,224,255,0.075), rgba(123,92,255,0.035) 58%, rgba(255,255,255,0.02));
+      border-color: rgba(0,224,255,0.3);
+    }
+    .buildspace-feature::after {
+      content: '';
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      right: -62px;
+      top: -72px;
+      border: 1px solid rgba(0,224,255,0.13);
+      border-radius: 50%;
+      box-shadow: 0 0 0 30px rgba(0,224,255,0.025), 0 0 0 64px rgba(0,224,255,0.018);
+      pointer-events: none;
+    }
+    .buildspace-kicker {
+      font-family: var(--font-body);
+      color: var(--cyan);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .buildspace-feature h3 {
+      color: #fff;
+      font-size: clamp(1.75rem, 4vw, 2.7rem);
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .buildspace-lead {
+      color: #fff;
+      font-family: var(--font-body);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .buildspace-copy {
+      max-width: 600px;
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.86rem;
+      line-height: 1.6;
+    }
+    .hack-cta {
+      display: inline-flex;
+      align-items: center;
+      color: var(--cyan);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-top: 20px;
+    }
+    .hack-support {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      column-gap: 14px;
+      padding: 18px;
+      background: rgba(255,255,255,0.025);
+    }
+    .hack-support .cta-icon {
+      grid-row: 1 / 4;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      border: 1px solid rgba(0,224,255,0.18);
+      border-radius: 50%;
+      color: var(--cyan);
+      font-size: 0.88rem;
+      background: rgba(0,224,255,0.055);
+    }
+    .hack-support h3 { font-size: 0.88rem; margin-bottom: 4px; }
+    .hack-support p {
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+    .hack-support .hack-cta { font-size: 0.72rem; margin-top: 7px; }
+
     footer {
       text-align: center;
       padding: 32px 20px 48px;
@@ -926,6 +1039,13 @@
       .events-list { padding-left: 0 !important; padding-right: 0 !important; grid-template-columns: 1fr; }
       .pulse-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .cta-grid { grid-template-columns: 1fr; }
+      .hacks-grid { grid-template-columns: 1fr; grid-template-rows: auto; gap: 10px; }
+      .buildspace-feature { grid-row: auto; min-height: 0; padding: 24px 20px; }
+      .buildspace-feature h3 { font-size: clamp(1.65rem, 9vw, 2.2rem); }
+      .buildspace-lead { font-size: 0.96rem; }
+      .buildspace-copy { font-size: 0.82rem; }
+      .buildspace-feature .hack-cta { margin-top: 16px; }
+      .hack-support { padding: 15px 16px; }
       .depth-links { gap: 16px; }
       footer { padding: 24px 16px 40px; }
       .mission-stats { grid-template-columns: 1fr; }
@@ -1196,22 +1316,26 @@
 
     <section class="section content-section" id="our-hacks" aria-label="Our Hacks">
       <p class="section-label">Hacks</p>
-      <h2 class="section-title">Things we've built</h2>
-      <div class="cta-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr));">
-        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="cta-card">
-          <span class="cta-icon">🌐</span>
-          <h3>See who's building</h3>
-          <p>Find people, projects, skills, and where overlap exists. Explore the network to find collaborators.</p>
+      <h2 class="section-title">Built for builders</h2>
+      <div class="hacks-grid">
+        <a href="https://deckerd451.github.io/innovation-engine/" target="_blank" rel="noopener noreferrer" class="hack-link buildspace-feature">
+          <span class="buildspace-kicker">CharlestonHacks network</span>
+          <h3>BUILDSPACE</h3>
+          <p class="buildspace-lead">See what Charleston is building.</p>
+          <p class="buildspace-copy">Discover people, projects, skills, opportunities, and connections across the CharlestonHacks community.</p>
+          <span class="hack-cta">Explore BUILDSPACE&nbsp; →</span>
         </a>
-        <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" class="cta-card">
-          <span class="cta-icon">📅</span>
-          <h3>Show up where they'll be</h3>
-          <p>Connections compound when they repeat. Find events nearby and make them count.</p>
+        <a href="https://nearify.org/" target="_blank" rel="noopener noreferrer" class="hack-link hack-support">
+          <span class="cta-icon" aria-hidden="true"><i class="far fa-calendar"></i></span>
+          <h3>Events</h3>
+          <p>See where the community is gathering.</p>
+          <span class="hack-cta">View events&nbsp; →</span>
         </a>
-        <a href="/bbs.html" class="cta-card">
-          <span class="cta-icon">💬</span>
+        <a href="/bbs.html" class="hack-link hack-support">
+          <span class="cta-icon" aria-hidden="true"><i class="far fa-comment"></i></span>
           <h3>Community Chat</h3>
-          <p>Join the conversation with builders, hackers, and makers in Charleston.</p>
+          <p>Join the conversation.</p>
+          <span class="hack-cta">Open chat&nbsp; →</span>
         </a>
       </div>
     </section>
