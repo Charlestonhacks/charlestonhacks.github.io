@@ -552,11 +552,16 @@ async function loadAllConnections() {
 // ========================
 window.sendRequest = async function(userId) {
   try {
-    await sendConnectionRequest(userId);
-    
+    const result = await sendConnectionRequest(userId);
+
+    if (!result || !result.success) {
+      // Failure already surfaced via toast notification from connections.js
+      return;
+    }
+
     // Reload suggested connections to remove the one we just sent
     await loadSuggestedConnections();
-    
+
   } catch (err) {
     // Error already shown via toast notification from connections.js
     console.error('Error sending request:', err);
