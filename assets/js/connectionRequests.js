@@ -196,7 +196,12 @@ async function loadReceivedRequests() {
       btn.addEventListener('click', async () => {
         try {
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-          await declineConnectionRequest(btn.dataset.id);
+          const result = await declineConnectionRequest(btn.dataset.id);
+          if (!result || !result.success) {
+            // Failure already surfaced via toast notification from connections.js
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            return;
+          }
           showPanelNotification('Request declined.', 'info');
           await loadAllSections();
           await refreshPendingCount();
