@@ -566,7 +566,11 @@ function attachCardListeners(card, member) {
       e.stopPropagation();
       try {
         const { acceptConnectionRequest } = await import('./connections.js');
-        await acceptConnectionRequest(acceptBtn.dataset.id);
+        const result = await acceptConnectionRequest(acceptBtn.dataset.id);
+        if (!result || !result.success) {
+          // Failure already surfaced via toast notification from connections.js
+          return;
+        }
         showSearchNotification('Connection accepted!', 'success');
         
         // Refresh card

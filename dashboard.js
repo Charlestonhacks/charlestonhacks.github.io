@@ -570,14 +570,19 @@ window.sendRequest = async function(userId) {
 
 window.acceptRequest = async function(requestId) {
   try {
-    await acceptConnectionRequest(requestId);
-    
+    const result = await acceptConnectionRequest(requestId);
+
+    if (!result || !result.success) {
+      // Failure already surfaced via toast notification from connections.js
+      return;
+    }
+
     // Reload both pending requests and recent connections
     await Promise.all([
       loadPendingRequests(),
       loadRecentConnections()
     ]);
-    
+
   } catch (err) {
     // Error already shown via toast notification from connections.js
     console.error('Error accepting request:', err);

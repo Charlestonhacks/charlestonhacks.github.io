@@ -177,7 +177,12 @@ async function loadReceivedRequests() {
       btn.addEventListener('click', async () => {
         try {
           btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-          await acceptConnectionRequest(btn.dataset.id);
+          const result = await acceptConnectionRequest(btn.dataset.id);
+          if (!result || !result.success) {
+            // Failure already surfaced via toast notification from connections.js
+            btn.innerHTML = '<i class="fas fa-check"></i>';
+            return;
+          }
           showPanelNotification('Connection accepted!', 'success');
           await loadAllSections();
           await refreshPendingCount();
