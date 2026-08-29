@@ -537,10 +537,17 @@ function attachCardListeners(card, member) {
         connectBtn.disabled = true;
         connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         
-        await sendConnectionRequest(member.id);
-        
+        const result = await sendConnectionRequest(member.id);
+
+        if (!result || !result.success) {
+          // Failure already surfaced via toast from connections.js
+          connectBtn.disabled = false;
+          connectBtn.innerHTML = '<i class="fas fa-user-plus"></i> Connect';
+          return;
+        }
+
         showSearchNotification('Connection request sent!', 'success');
-        
+
         // Update button
         connectBtn.innerHTML = '<i class="fas fa-clock"></i> Pending';
         connectBtn.className = 'pending-btn action-btn';
