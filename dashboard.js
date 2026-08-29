@@ -591,11 +591,16 @@ window.acceptRequest = async function(requestId) {
 
 window.declineRequest = async function(requestId) {
   try {
-    await declineConnectionRequest(requestId);
-    
+    const result = await declineConnectionRequest(requestId);
+
+    if (!result || !result.success) {
+      // Failure already surfaced via toast notification from connections.js
+      return;
+    }
+
     // Reload pending requests to remove the declined one
     await loadPendingRequests();
-    
+
   } catch (err) {
     // Error already shown via toast notification from connections.js
     console.error('Error declining request:', err);
