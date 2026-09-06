@@ -8,18 +8,16 @@ Edit `assets/js/harborhack/config.js`. Frequently changing values must be change
 
 Required organizer review before publication:
 
-- Dates: `eventStartDate`, `eventEndDate`, `registrationOpeningDate`, `registrationClosingDate`, `submissionDeadline` using ISO date strings.
-- Venue: `venueName`, `venueAddress`, `venueNotes`.
-- Links: `registrationUrl`, `devpostUrl`, `participantDiscordUrl`, `githubResourceUrl`, `mentorHelpUrl`.
+- Dates: `eventStartDate`, `eventEndDate`, and `submissionDeadline` using ISO date strings.
+- Venue: `venueName`, `venueBuilding`, `venueRoom`, `venueAddress`, and `venueMapUrl`.
 - Contacts: `codeOfConductReportingContact`. Do not publish rules or reporting language until organizers and appropriate legal counsel approve it.
-- Logistics: `teamSizeMin`, `teamSizeMax`, `presentationDurationMinutes`, `judgeQAMinutes`, `eventStatus`, `timezone`.
+- Logistics: `teamSizeMin`, `teamSizeMax`, `presentationDurationMinutes`, and `judgeQAMinutes`.
 - Schedule: add objects to `schedule` with `date`, `startTime`, `endTime`, `title`, `location`, `category`, `description`, `url`, and `recommendedFor`.
 - Resources: add only confirmed URLs to `resources` with `title`, `description`, `category`, `url`, `skillLevel`, `operatingSystem`, `status`, and optional `sponsorAttribution`.
-- Sponsors: add sponsor names only after they are confirmed.
 
 ## Placeholders
 
-Leave unknown information blank or use explicit placeholders such as `Registration link coming soon`, `Schedule to be announced`, and `Venue details coming soon`. The interface is designed to show polished empty states.
+Add only confirmed information. Keep unavailable actions out of the page rather than displaying disabled controls or placeholder destinations.
 
 ## Local preview
 
