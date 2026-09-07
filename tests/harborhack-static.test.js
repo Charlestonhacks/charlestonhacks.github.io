@@ -14,10 +14,12 @@ assert(page.includes('Every HarborHack team works alongside a persistent AI agen
 assert(!page.includes('ROOK'),'no ROOK branding remains');
 assert(!page.includes('fake AI chat'),'no fake agent UI');
 assert((page.match(/rel="noopener noreferrer"/g)||[]).length>=0,'safe attrs supported by JS');
-assert(fs.readFileSync('assets/js/harborhack/app.js','utf8').includes('localStorage'),'local worksheet state');
+assert(!page.includes('mission-workbook'),'mission workbook removed');
+assert(!page.includes('Create a mission brief'),'mission brief action removed');
+assert(!page.includes('signature-visual'),'shared progress graphic removed');
 const app=fs.readFileSync('assets/js/harborhack/app.js','utf8');
-assert(!app.includes('fetch('),'mission worksheet is not transmitted via fetch');
-assert(!app.includes('XMLHttpRequest'),'mission worksheet is not transmitted via XHR');
+assert(!app.includes('initWorksheet'),'mission worksheet behavior removed');
+assert(!app.includes('hh26-mission'),'mission worksheet storage removed');
 let sandbox={window:{},document:{addEventListener(){},querySelector(){return null},querySelectorAll(){return[]}}};
 vm.runInNewContext(fs.readFileSync('assets/js/harborhack/config.js','utf8'),sandbox);
 vm.runInNewContext(fs.readFileSync('assets/js/harborhack/app.js','utf8'),sandbox);
