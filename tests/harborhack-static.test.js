@@ -6,7 +6,7 @@ assert(page.includes('HarborHack 2026'),'route renders event name');
 assert(fs.existsSync('harborhack-2026/index.html'),'direct route file exists');
 assert(home.includes('/harborhack-2026'),'homepage links to HarborHack');
 assert(home.includes('Building Charleston into a recognized tech hub'),'existing homepage content remains');
-assert(page.includes('Registration Opens Soon'),'missing registration fallback');
+assert(page.includes('https://harborhack-2026.devpost.com/'),'registration destination');
 assert(page.includes('October 23–25, 2026'),'confirmed event dates');
 assert(page.includes('College of Charleston'),'confirmed venue');
 assert(page.includes('No prerecorded project video is required'),'video requirement copy');
@@ -14,7 +14,7 @@ assert(page.includes('Every HarborHack team works alongside a persistent AI agen
 assert(!page.includes('ROOK'),'no ROOK branding remains');
 assert(!page.includes('fake AI chat'),'no fake agent UI');
 assert((page.match(/rel="noopener noreferrer"/g)||[]).length>=0,'safe attrs supported by JS');
-assert(fs.readFileSync('assets/js/harborhack/app.js','utf8').includes('localStorage'),'local checklist/worksheet state');
+assert(fs.readFileSync('assets/js/harborhack/app.js','utf8').includes('localStorage'),'local worksheet state');
 const app=fs.readFileSync('assets/js/harborhack/app.js','utf8');
 assert(!app.includes('fetch('),'mission worksheet is not transmitted via fetch');
 assert(!app.includes('XMLHttpRequest'),'mission worksheet is not transmitted via XHR');
@@ -22,9 +22,4 @@ let sandbox={window:{},document:{addEventListener(){},querySelector(){return nul
 vm.runInNewContext(fs.readFileSync('assets/js/harborhack/config.js','utf8'),sandbox);
 vm.runInNewContext(fs.readFileSync('assets/js/harborhack/app.js','utf8'),sandbox);
 assert(sandbox.window.HARBORHACK_2026_CONFIG.eventName==='HarborHack 2026','config value appears');
-const r=sandbox.window.harborhackNextAction.recommend;
-assert(r({},new Date('2026-01-01'),{...sandbox.window.HARBORHACK_2026_CONFIG,eventStartDate:'2026-07-01',eventEndDate:'2026-07-03',registrationUrl:'https://example.com'})[0].includes('Register'),'pre-event next action');
-assert(r({done:{registered:true,community:true,conduct:true,localModel:true}},new Date('2026-07-02'),{...sandbox.window.HARBORHACK_2026_CONFIG,eventStartDate:'2026-07-01',eventEndDate:'2026-07-03',submissionDeadline:'2026-07-02T23:00:00'})[0].includes('Start building with your team'),'event next action');
-assert(r({done:{registered:true,community:true,conduct:true,localModel:true}},new Date('2026-07-03T01:00:00'),{...sandbox.window.HARBORHACK_2026_CONFIG,eventStartDate:'2026-07-01',eventEndDate:'2026-07-04',submissionDeadline:'2026-07-02T23:00:00'})[0].includes('Prepare the live presentation'),'submission/presentation next action');
-assert(r({done:{registered:true,community:true,conduct:true,localModel:true}},new Date('2026-07-05'),{...sandbox.window.HARBORHACK_2026_CONFIG,eventStartDate:'2026-07-01',eventEndDate:'2026-07-04'})[0].includes('Continue'),'post-event next action');
 console.log('HarborHack static tests passed');
