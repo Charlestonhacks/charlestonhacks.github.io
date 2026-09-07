@@ -5,9 +5,8 @@ const app=fs.readFileSync('assets/js/harborhack/app.js','utf8');
 
 // Extract the $/$$ helper definition line in isolation. These helpers must accept
 // an optional scope/context argument and query against it instead of always
-// falling back to `document` -- otherwise callers like initChecklist('#a',...) and
-// initChecklist('#b',...) leak elements across containers (see harborhack-2026
-// checklist/worksheet null textContent crash).
+// falling back to `document`; otherwise component queries can leak elements
+// across containers.
 const helperMatch=app.match(/const \$=\([^;]*\), \$\$=\([^;]*\);/);
 assert(helperMatch,'$/$$ helper definition found in app.js');
 const helperSrc=helperMatch[0];
