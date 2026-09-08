@@ -1,20 +1,45 @@
-(function(){
-const cfg=window.HARBORHACK_2026_CONFIG; const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
-const has=s=>!!(s&&String(s).trim()); const ext=u=>/^https?:/i.test(u||''); const safeLink=(el,u)=>{if(has(u)){el.href=u;if(ext(u)){el.target='_blank';el.rel='noopener noreferrer';}}else{el.href='#';el.setAttribute('aria-disabled','true');el.classList.add('disabled');}};
-function phase(now=new Date(), c=cfg){let s=Date.parse(c.eventStartDate), e=Date.parse(c.eventEndDate), d=Date.parse(c.submissionDeadline); if(!s||!e)return 'planning'; if(now<s)return 'pre-event'; if(d&&now>d&&now<=e)return 'presentation'; if(now>=s&&now<=e)return 'event'; return 'post-event'}
-function initLinks(){ $$('[data-config-link]').forEach(a=>safeLink(a,cfg[a.dataset.configLink])); $$('[data-if-url]').forEach(e=>{if(!has(cfg[e.dataset.ifUrl]))e.hidden=true}); $$('[data-fill]').forEach(e=>{e.textContent=cfg[e.dataset.fill]||e.dataset.fallback||''}); }
-function initSchedule(){const cats=['All',...new Set((cfg.schedule||[]).map(i=>i.category).filter(has))], root=$('#schedule-list'), filters=$('#schedule-filters'); if(!root)return; cats.forEach(c=>{let b=document.createElement('button');b.textContent=c;b.type='button';b.onclick=()=>render(c);filters.append(b)}); function render(cat='All'){root.innerHTML=''; let items=(cfg.schedule||[]).filter(i=>cat==='All'||i.category===cat); if(!items.length){root.innerHTML='<div class="empty">Schedule details are still being finalized.</div>';return} let byDay={}; items.forEach(i=>{let k=(i.day||'Event')+'|'+(i.date||''); (byDay[k] ||= []).push(i)}); Object.keys(byDay).forEach(k=>{let [day,date]=k.split('|'), group=document.createElement('div'); group.className='schedule-day'; group.innerHTML=`<h3>${day}<span>${date}</span></h3>`; byDay[k].forEach(i=>{let d=document.createElement('article'); d.className='hh-card'; d.innerHTML=`<p class="eyebrow">${i.category||'Event'} · ${i.startTime||''}${i.endTime?'–'+i.endTime:''}</p><h4>${i.title}</h4><p>${i.description||''}</p><p>${i.location||''}</p>`; group.append(d)}); root.append(group)})} render();}
-
-function fmtDuration(ms){if(ms<=0)return 'now'; let m=Math.floor(ms/60000), d=Math.floor(m/1440), h=Math.floor((m%1440)/60), min=m%60; return [d&&d+' days',h&&h+' hours',min&&min+' minutes'].filter(Boolean).slice(0,2).join(', ')}
-function initCountdown(){const root=$('#countdown'); if(!root||!cfg.featureFlags?.showCountdown)return; const tick=()=>{let diff=Date.parse(cfg.eventStartDate)-Date.now(); if(diff<=0){root.querySelector('p').textContent='HarborHack has begun.'; diff=0} root.querySelector('[data-countdown-days]').textContent=Math.floor(diff/86400000); root.querySelector('[data-countdown-hours]').textContent=Math.floor(diff%86400000/3600000); root.querySelector('[data-countdown-minutes]').textContent=Math.floor(diff%3600000/60000)}; tick(); setInterval(tick,60000)}
-function pad(n){return String(n).padStart(2,'0')} function icsDate(v){let d=new Date(v); return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z'}
-function eventDescription(){return [cfg.eventName,'','Theme:',cfg.theme,'','A hackathon where every team collaborates with a persistent AI agent as part of the team.','','Website:','https://charlestonhacks.com/harborhack-2026'].join('\n')}
-function calendarData(){return {title:cfg.eventName, location:[cfg.venueName,cfg.venueBuilding,cfg.venueRoom,cfg.venueAddress].filter(has).join('\n'), description:eventDescription(), start:cfg.eventStartDate, end:cfg.eventEndDate}}
-function ics(){let e=calendarData(), esc=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n'); return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//CharlestonHacks//HarborHack 2026//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:harborhack-2026@charlestonhacks.com','DTSTAMP:'+icsDate(new Date().toISOString()),'DTSTART:'+icsDate(e.start),'DTEND:'+icsDate(e.end),'SUMMARY:'+esc(e.title),'LOCATION:'+esc(e.location),'DESCRIPTION:'+esc(e.description),'END:VEVENT','END:VCALENDAR'].join('\\r\\n')}
-function initCalendar(){let g=$('#calendar-google'); if(!g)return; let e=calendarData(), q=new URLSearchParams({action:'TEMPLATE',text:e.title,dates:icsDate(e.start)+'/'+icsDate(e.end),details:e.description,location:e.location}); g.href='https://calendar.google.com/calendar/render?'+q.toString(); const download=()=>{let a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([ics()],{type:'text/calendar'})); a.download='harborhack-2026.ics'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000)}; ['#calendar-ics','#calendar-apple','#calendar-outlook'].forEach(id=>{$(id)?.addEventListener('click',download)})}
-function initEventDay(){let cur=$('#event-current-phase'), next=$('#event-next-phase'); if(!cur||!next)return; let p=phase(); cur.textContent={planning:'Planning', 'pre-event':'Pre-event preparation', event:'HarborHack is underway', presentation:'Submissions are in; presentations and awards are next', 'post-event':'HarborHack has concluded'}[p]||p; let upcoming=(cfg.schedule||[]).map(i=>({...i,t:Date.parse(i.start)})).filter(i=>i.t>Date.now()).sort((a,b)=>a.t-b.t)[0]; next.textContent=upcoming?`${upcoming.title} — ${upcoming.day}, ${upcoming.date} at ${upcoming.startTime}. ${fmtDuration(upcoming.t-Date.now())} away.`:'No future configured milestones remain.'}
-
-function initResources(){const root=$('#resources-list'), filter=$('#resource-filter'); if(!root)return; const cats=['All',...new Set((cfg.resources||[]).map(r=>r.category).filter(has))]; if(cats.length<3)$('#resource-filter-label').hidden=true; cats.forEach(c=>filter.add(new Option(c,c))); function render(){root.innerHTML=''; let items=(cfg.resources||[]).filter(r=>filter.value==='All'||r.category===filter.value); if(!items.length){root.innerHTML='<div class="empty">No confirmed resources in this category yet.</div>';return} items.forEach(r=>{let a=document.createElement('a'); a.className='hh-card'; safeLink(a,r.url); a.innerHTML=`<p class="eyebrow">${r.category} · ${r.status||'Optional'}</p><h3>${r.title}</h3><p>${r.description}</p><small>${r.skillLevel||''} ${r.operatingSystem? '· '+r.operatingSystem:''}</small>`; root.append(a)})} filter.onchange=render; render();}
-function initTimer(){let left=cfg.presentationDurationMinutes*60, id; const out=$('#timer-output'); if(!out)return; const show=()=>{out.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0')}; $('#timer-start').onclick=()=>{clearInterval(id); id=setInterval(()=>{if(left>0){left--;show()}},1000)}; $('#timer-pause').onclick=()=>clearInterval(id); $('#timer-reset').onclick=()=>{clearInterval(id);left=cfg.presentationDurationMinutes*60;show()}; show();}
-document.addEventListener('DOMContentLoaded',()=>{initLinks();initCountdown();initCalendar();initSchedule();initResources();initTimer();initEventDay();});
+(function () {
+  const cfg = window.HARBORHACK_2026_CONFIG;
+  const $=(s,c=document)=>c.querySelector(s), $$=(s,c=document)=>Array.from(c.querySelectorAll(s));
+  const has = value => value !== undefined && value !== null && String(value).trim() !== '';
+  function safeLink(element, url) { if (!has(url)) { element.hidden = true; return; } element.href = url; if (/^https?:/i.test(url)) { element.target = '_blank'; element.rel = 'noopener noreferrer'; } }
+  function initContent() {
+    $$('[data-fill]').forEach(element => { const value = cfg[element.dataset.fill]; if (has(value)) element.textContent = value; else element.closest('.hh-card, details')?.setAttribute('hidden', ''); });
+    $$('[data-config-link]').forEach(element => safeLink(element, cfg[element.dataset.configLink]));
+    $$('[data-registration-link]').forEach(element => safeLink(element, cfg.registrationUrl));
+  }
+  function pad(number) { return String(number).padStart(2, '0'); }
+  function icsDate(value) { const date = new Date(value); return date.getUTCFullYear() + pad(date.getUTCMonth() + 1) + pad(date.getUTCDate()) + 'T' + pad(date.getUTCHours()) + pad(date.getUTCMinutes()) + pad(date.getUTCSeconds()) + 'Z'; }
+  function eventDescription() { return [cfg.eventName, '', 'Theme:', cfg.theme, '', 'A weekend hackathon where every team builds a project with an AI agent as a teammate.', '', 'Website:', 'https://charlestonhacks.com/harborhack-2026'].join('\n'); }
+  function calendarData() { return { title: cfg.eventName, location: cfg.calendarLocation, description: eventDescription(), start: cfg.eventStartDate, end: cfg.eventEndDate }; }
+  function ics() { const event = calendarData(), escape = value => String(value).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//CharlestonHacks//HarborHack 2026//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', 'UID:harborhack-2026@charlestonhacks.com', 'DTSTAMP:' + icsDate(new Date().toISOString()), 'DTSTART:' + icsDate(event.start), 'DTEND:' + icsDate(event.end), 'SUMMARY:' + escape(event.title), 'LOCATION:' + escape(event.location), 'DESCRIPTION:' + escape(event.description), 'END:VEVENT', 'END:VCALENDAR'].join('\r\n'); }
+  function initCalendar() {
+    const google = $('#calendar-google'); if (!google) return;
+    const event = calendarData(), query = new URLSearchParams({ action: 'TEMPLATE', text: event.title, dates: icsDate(event.start) + '/' + icsDate(event.end), details: event.description, location: event.location });
+    safeLink(google, 'https://calendar.google.com/calendar/render?' + query.toString());
+    const download = () => { const anchor = document.createElement('a'); anchor.href = URL.createObjectURL(new Blob([ics()], { type: 'text/calendar' })); anchor.download = 'harborhack-2026.ics'; anchor.click(); setTimeout(() => URL.revokeObjectURL(anchor.href), 1000); };
+    ['#calendar-ics', '#calendar-apple', '#calendar-outlook'].forEach(id => $(id)?.addEventListener('click', download));
+  }
+  function initSchedule() {
+    const root = $('#schedule-list'), filters = $('#schedule-filters'); if (!root || !filters) return;
+    const schedule = Array.isArray(cfg.schedule) ? cfg.schedule.filter(item => has(item.title)) : [];
+    if (!schedule.length) { root.innerHTML = '<div class="empty">Schedule details are still being finalized.</div>'; filters.hidden = true; return; }
+    const categories = ['All', ...new Set(schedule.map(item => item.category).filter(has))]; if (categories.length < 3) filters.hidden = true;
+    function render(category = 'All') {
+      root.innerHTML = ''; const items = schedule.filter(item => category === 'All' || item.category === category), byDay = {};
+      items.forEach(item => { const key = `${item.day || 'Event'}|${item.date || ''}`; (byDay[key] ||= []).push(item); });
+      Object.entries(byDay).forEach(([key, dayItems]) => {
+        const [day, date] = key.split('|'), group = document.createElement('div'), heading = document.createElement('h3'); group.className = 'schedule-day'; heading.textContent = day;
+        if (has(date)) { const dateLabel = document.createElement('span'); dateLabel.textContent = date; heading.append(dateLabel); } group.append(heading);
+        dayItems.forEach(item => {
+          const card = document.createElement('article'); card.className = 'hh-card';
+          if (has(item.category) || has(item.startTime)) { const meta = document.createElement('p'); meta.className = 'eyebrow'; meta.textContent = [item.category, item.startTime].filter(has).join(' · '); card.append(meta); }
+          const title = document.createElement('h4'); title.textContent = item.title; card.append(title);
+          [item.description, item.location].filter(has).forEach(value => { const paragraph = document.createElement('p'); paragraph.textContent = value; card.append(paragraph); }); group.append(card);
+        }); root.append(group);
+      });
+    }
+    categories.forEach(category => { const button = document.createElement('button'); button.type = 'button'; button.textContent = category; button.addEventListener('click', () => render(category)); filters.append(button); }); render();
+  }
+  document.addEventListener('DOMContentLoaded', () => { initContent(); initCalendar(); initSchedule(); });
 })();
