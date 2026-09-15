@@ -1780,6 +1780,13 @@
           .filter(isCharlestonHacksEvent)
           .concat(upcoming.filter(function (ev) { return !isCharlestonHacksEvent(ev); }))
           .slice(0, 4);
+        const afterDark = upcoming.find(function (ev) {
+          return (ev.link || ev.url || '').includes('/events/316558816/');
+        });
+        if (afterDark && !eventsToShow.includes(afterDark)) {
+          eventsToShow.push(afterDark);
+        }
+
         if (!eventsToShow.length) {
           homepageEvents.innerHTML = '<p class="events-empty"><i class="fas fa-calendar-xmark" style="margin-right:0.4rem;"></i>No additional upcoming events right now. Check back soon.</p>';
           return;
