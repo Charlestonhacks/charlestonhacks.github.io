@@ -299,3 +299,24 @@ h1 {
     text-align: center;
   }
 }
+
+/* Countdown within each homepage event card */
+.event-date-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+.event-countdown[hidden] { display: none; }
+.event-countdown {
+  border: 1px solid rgba(0,224,255,.35);
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: #65dcef;
+  font-size: .78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ch-link-nearify {
+  color: #a78bfa;
+  font-size: .8rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ch-link-nearify:hover { color: #c4b5fd; }

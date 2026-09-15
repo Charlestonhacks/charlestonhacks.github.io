@@ -1798,6 +1798,7 @@
           const location = safeText(ev.location || ev.venue || '');
           const description = safeText(String(ev.description || ev.desc || '').replace(/<[^>]*>/g, '').slice(0, 130));
           const date = safeText(formatDate(getStart(ev)));
+          const startDate = safeText(getStart(ev));
           const isCH = isCharlestonHacksEvent(ev);
           const sourceLabel = getSourceLabel(ev);
           const displayTitle = isCH ? cleanTitle(ev.title || ev.name) : safeText(ev.title || ev.name || 'Event');
@@ -1812,9 +1813,8 @@
           if (nearifyJoinUrl) {
             ctaHtml =
               '<div class="ch-event-cta">' +
-              '<span class="ch-nearify-badge">Live Nearify Experience Available</span>' +
-              '<a href="' + nearifyJoinUrl + '" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">Join Live Network</a>' +
-              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">View on Meetup</a>' +
+              '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">View Event</a>' +
+              '<a href="' + nearifyJoinUrl + '" target="_blank" rel="noopener noreferrer" class="ch-link-nearify">Join Live Network</a>' +
               '</div>';
           } else {
             ctaHtml =
@@ -1827,13 +1827,30 @@
 
           return '<div class="event-card">' +
             sourceBadge +
-            '<div class="event-date">' + date + '</div>' +
+            '<div class="event-date-row"><div class="event-date">' + date + '</div>' +
+            '<span class="event-countdown" data-start="' + startDate + '"></span></div>' +
             '<h3><a href="' + (nearifyJoinUrl || link) + '" target="_blank" rel="noopener noreferrer">' + displayTitle + '</a></h3>' +
             (location ? '<p class="event-location">📍 ' + location + '</p>' : '') +
             (description ? '<p class="event-desc">' + description + (description.length >= 130 ? '…' : '') + '</p>' : '') +
             ctaHtml +
             '</div>';
         }).join('');
+      }
+
+      function updateEventCountdowns() {
+        document.querySelectorAll('#homepage-events .event-countdown').forEach(function (badge) {
+          const remaining = Date.parse(badge.dataset.start) - Date.now();
+          if (!Number.isFinite(remaining) || remaining <= 0) {
+            badge.hidden = true;
+            return;
+          }
+          const minutes = Math.ceil(remaining / 60000);
+          const days = Math.floor(minutes / 1440);
+          const hours = Math.floor((minutes % 1440) / 60);
+          badge.textContent = 'In ' + (days
+            ? days + 'd ' + hours + 'h'
+            : hours ? hours + 'h ' + (minutes % 60) + 'm' : minutes + 'm');
+        });
       }
 
       async function loadEvents() {
@@ -1849,6 +1866,8 @@
         console.log('[Events] Loaded', upcoming.length, 'upcoming events');
         renderHero(upcoming);
         renderMoreEvents(upcoming);
+        updateEventCountdowns();
+        setInterval(updateEventCountdowns, 60000);
       }
 
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadEvents);
