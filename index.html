@@ -489,14 +489,18 @@
       max-width: 650px;
     }
 
+    .events-list-title {
+      margin: 32px 0 12px;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 2vw, 1.3rem);
+      font-weight: 700;
+    }
+
     .events-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 16px;
-    }
-
-    .harborhack-entry + .events-list {
-      margin-top: 16px;
     }
 
     .events-secondary-link {
@@ -1308,7 +1312,6 @@
     <hr class="divider">
 
     <section class="section content-section" id="events-section" aria-label="Events">
-      <p class="section-label">Events</p>
       <h2 class="section-title">Events</h2>
       <p class="section-sub">Find upcoming events and revisit past CharlestonHacks gatherings.</p>
       <div class="harborhack-entry" aria-label="HarborHack 2026 recent event">
@@ -1320,6 +1323,7 @@
           <a class="harborhack-btn primary" href="/harborhack-2026/">View the HarborHack 2026 archive</a>
         </div>
       </div>
+      <h3 class="events-list-title">Upcoming Events</h3>
       <div class="events-list" id="homepage-events" aria-live="polite">
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
