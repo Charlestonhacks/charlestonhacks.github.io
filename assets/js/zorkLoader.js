@@ -1,139 +1,207 @@
-// zorkLoader.js – real Z-machine using zmachine@0.3.0
+// Zork I browser adapter for the CharlestonHacks BBS.
+const ZM_ESM = "https://cdn.jsdelivr.net/npm/zmachine@0.3.0/dist/zmachine.esm.min.js";
+const STORY_PATH = "/assets/zork/zork1.z3";
 
-const ZM_ESM = 'https://cdn.jsdelivr.net/npm/zmachine@0.3.0/dist/zmachine.esm.min.js';
-const STORY_PATH = '/assets/zork/zork1.z3';
-
-let zm = null;
-let lineResolve = null;
-let charResolve = null;
+let activeSession = null;
 
 class BbsIOAdapter {
-  constructor(writeFn) {
-    this._write = writeFn;
-    this._buf = '';
+  constructor(write, username, onEnd) {
+    this._write = write;
+    this._username = username;
+    this._onEnd = onEnd;
+    this._buffer = "";
+    this._lineResolver = null;
+    this._charResolver = null;
+    this._version = 0;
+    this._stopRequested = false;
+    this._stopQuitSent = false;
+    this._ended = false;
   }
+
+  initialize(version) { this._version = version; }
 
   _flush() {
-    if (!this._buf) return;
-    this._write(this._buf);
-    this._buf = '';
+    if (!this._buffer) return;
+    this._write(this._buffer);
+    this._buffer = "";
   }
 
-  initialize() {}
-
   print(text) {
-    this._buf += text;
-    if (this._buf.includes('\n')) this._flush();
+    this._buffer += text;
+    if (this._buffer.includes("\n")) this._flush();
   }
 
   printLine(text) {
-    this._buf += (text || '') + '\n';
+    this._buffer += (text || "") + "\n";
     this._flush();
   }
 
   newLine() {
-    this._buf += '\n';
+    this._buffer += "\n";
     this._flush();
   }
 
   readLine(maxLength = 78) {
     this._flush();
-    return new Promise(resolve => { lineResolve = resolve; });
+    if (this._stopRequested && !this._stopQuitSent) {
+      this._stopQuitSent = true;
+      return Promise.resolve({ text: "quit", terminator: 13 });
+    }
+    if (this._stopRequested && this._stopQuitSent) {
+      this._stopRequested = false;
+      return Promise.resolve({ text: "yes", terminator: 13 });
+    }
+    return new Promise(resolve => {
+      this._lineResolver = text => resolve({ text: text.slice(0, maxLength), terminator: 13 });
+    });
   }
 
   readChar() {
     this._flush();
-    return new Promise(resolve => { charResolve = resolve; });
+    return new Promise(resolve => { this._charResolver = resolve; });
+  }
+
+  acceptCommand(command) {
+    if (this._ended) return false;
+    if (this._lineResolver) {
+      const resolve = this._lineResolver;
+      this._lineResolver = null;
+      resolve(command);
+      return true;
+    }
+    if (this._charResolver) {
+      const resolve = this._charResolver;
+      this._charResolver = null;
+      resolve(command.charCodeAt(0) || 13);
+      return true;
+    }
+    return false;
+  }
+
+  async save(data) {
+    try {
+      const { saveZorkState } = await import("./zork-supabase.js");
+      await saveZorkState(this._username, data);
+      this._write("\n[Game saved for this guest name.]\n");
+      return true;
+    } catch (error) {
+      console.error("[ZORK] Save failed:", error);
+      this._write("\n[Could not save the game. Please try again later.]\n");
+      return false;
+    }
+  }
+
+  async restore() {
+    try {
+      const { loadZorkState } = await import("./zork-supabase.js");
+      const data = await loadZorkState(this._username);
+      if (!data) this._write("\n[No saved game was found for this guest name.]\n");
+      return data;
+    } catch (error) {
+      console.error("[ZORK] Restore failed:", error);
+      this._write("\n[Could not restore the game. Please try again later.]\n");
+      return null;
+    }
+  }
+
+  showStatusLine(left, right, isTime = false) {
+    const status = isTime ? `Time: ${left}  ${right}` : `${left}  Score: ${right}`;
+    this._write(`\n[${status}]\n`);
+  }
+
+  stop() {
+    if (this._ended) return;
+    this._stopRequested = true;
+    if (this._lineResolver) {
+      const resolve = this._lineResolver;
+      this._lineResolver = null;
+      this._stopQuitSent = true;
+      resolve("quit");
+    } else if (this._charResolver) {
+      const resolve = this._charResolver;
+      this._charResolver = null;
+      this._stopQuitSent = true;
+      resolve("q".charCodeAt(0));
+    }
   }
 
   quit() {
     this._flush();
-    this._write('\n[ZORK ended — type zork to start over]\n');
-    zm = null;
-    lineResolve = null;
-    charResolve = null;
+    if (this._ended) return;
+    this._ended = true;
+    this._lineResolver = null;
+    this._charResolver = null;
+    if (activeSession?.io === this) activeSession = null;
+    this._write("\n[ZORK ended — type zork to start over]\n");
+    this._onEnd?.();
   }
 
   restart() {
     this._flush();
-    this._write('\n[ZORK restarted]\n');
+    this._write("\n[ZORK restarted]\n");
   }
 
-  // Optional stubs to satisfy the interface
   setWindow() {}
   splitWindow() {}
   eraseWindow() {}
-  showStatusLine() {}
   setTextStyle() {}
   setBufferMode() {}
   getBufferMode() { return true; }
   verify() { return true; }
 }
 
-export async function startZork(write) {
-  if (zm) {
-    write('[ZORK already running — type /exit to leave]\n');
-    return;
+export async function startZork(write, { username = "Guest", onEnd } = {}) {
+  if (activeSession) {
+    write("[ZORK is already running — type /exit to return to chat.]\n");
+    return false;
   }
 
-  write('Loading ZORK I…\n');
-
+  write("Loading ZORK I…\n");
   let ZMachine;
   try {
     ({ ZMachine } = await import(ZM_ESM));
-  } catch (err) {
-    write(`[Failed to load Z-machine engine: ${err.message}]\n`);
-    return;
+  } catch (error) {
+    write(`[Failed to load Z-machine engine: ${error.message}]\n`);
+    return false;
   }
 
   let storyBuffer;
   try {
-    storyBuffer = await fetch(STORY_PATH).then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return r.arrayBuffer();
-    });
-  } catch (err) {
-    write(`[Failed to fetch story file: ${err.message}]\n`);
-    return;
+    const response = await fetch(STORY_PATH);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    storyBuffer = await response.arrayBuffer();
+  } catch (error) {
+    write(`[Failed to fetch story file: ${error.message}]\n`);
+    return false;
   }
 
-  const io = new BbsIOAdapter(write);
-
+  const io = new BbsIOAdapter(write, username, onEnd);
+  let machine;
   try {
-    zm = ZMachine.load(storyBuffer, io);
-  } catch (err) {
-    write(`[Failed to initialize Z-machine: ${err.message}]\n`);
-    zm = null;
-    return;
+    machine = ZMachine.load(storyBuffer, io);
+    io.initialize(machine.version);
+  } catch (error) {
+    write(`[Failed to initialize Z-machine: ${error.message}]\n`);
+    return false;
   }
 
-  zm.run().catch(err => {
-    write(`[ZORK error: ${err.message}]\n`);
-    zm = null;
-    lineResolve = null;
-    charResolve = null;
-  });
-}
-
-export function sendZorkCommand(cmd, write) {
-  if (!zm) {
-    write('[No ZORK session active]\n');
-    return;
-  }
-  if (lineResolve) {
-    const resolve = lineResolve;
-    lineResolve = null;
-    resolve({ text: cmd, terminator: 13 });
-  } else if (charResolve) {
-    const resolve = charResolve;
-    charResolve = null;
-    resolve(cmd.charCodeAt(0) || 13);
+  activeSession = { machine, io };
+  try {
+    await machine.run();
+    if (!io._ended) io.quit();
+    return true;
+  } catch (error) {
+    console.error("[ZORK] Interpreter error:", error);
+    write(`[ZORK error: ${error.message}]\n`);
+    io.quit();
+    return false;
   }
 }
 
-// Save/restore stubs — kept for API compatibility with bbs.js
-export function getZorkState() {
-  return null;
+export function sendZorkCommand(command) {
+  return activeSession?.io.acceptCommand(command) ?? false;
 }
 
-export function setZorkState() {}
+export function stopZork() {
+  activeSession?.io.stop();
+}
