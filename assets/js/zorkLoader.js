@@ -3,6 +3,7 @@ const ZM_ESM = "https://cdn.jsdelivr.net/npm/zmachine@0.3.0/dist/zmachine.esm.mi
 const STORY_PATH = "/assets/zork/zork1.z3";
 
 let activeSession = null;
+let pendingStart = null;
 
 class BbsIOAdapter {
   constructor(write, username, onEnd) {
@@ -151,27 +152,40 @@ class BbsIOAdapter {
 }
 
 export async function startZork(write, { username = "Guest", onEnd } = {}) {
-  if (activeSession) {
+  if (activeSession || pendingStart) {
     write("[ZORK is already running — type /exit to return to chat.]\n");
     return false;
   }
 
+  const request = { cancelled: false };
+  pendingStart = request;
   write("Loading ZORK I…\n");
+
   let ZMachine;
   try {
     ({ ZMachine } = await import(ZM_ESM));
   } catch (error) {
-    write(`[Failed to load Z-machine engine: ${error.message}]\n`);
+    if (pendingStart === request) pendingStart = null;
+    write("[Failed to load Z-machine engine: " + error.message + "]\n");
+    return false;
+  }
+  if (request.cancelled) {
+    if (pendingStart === request) pendingStart = null;
     return false;
   }
 
   let storyBuffer;
   try {
     const response = await fetch(STORY_PATH);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) throw new Error("HTTP " + response.status);
     storyBuffer = await response.arrayBuffer();
   } catch (error) {
-    write(`[Failed to fetch story file: ${error.message}]\n`);
+    if (pendingStart === request) pendingStart = null;
+    write("[Failed to fetch story file: " + error.message + "]\n");
+    return false;
+  }
+  if (request.cancelled) {
+    if (pendingStart === request) pendingStart = null;
     return false;
   }
 
@@ -181,23 +195,29 @@ export async function startZork(write, { username = "Guest", onEnd } = {}) {
     machine = ZMachine.load(storyBuffer, io);
     io.initialize(machine.version);
   } catch (error) {
-    write(`[Failed to initialize Z-machine: ${error.message}]\n`);
+    if (pendingStart === request) pendingStart = null;
+    write("[Failed to initialize Z-machine: " + error.message + "]\n");
     return false;
   }
 
+  if (request.cancelled) {
+    if (pendingStart === request) pendingStart = null;
+    return false;
+  }
   activeSession = { machine, io };
+  if (pendingStart === request) pendingStart = null;
   machine.run().catch(error => {
     console.error("[ZORK] Interpreter error:", error);
-    write(`[ZORK error: ${error.message}]\n`);
+    write("[ZORK error: " + error.message + "]\n");
     io.quit();
   });
   return true;
 }
-
 export function sendZorkCommand(command) {
   return activeSession?.io.acceptCommand(command) ?? false;
 }
 
 export function stopZork() {
+  if (pendingStart) pendingStart.cancelled = true;
   activeSession?.io.stop();
 }
