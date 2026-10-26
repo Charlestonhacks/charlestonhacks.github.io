@@ -2,9 +2,8 @@
 // CharlestonHacks BBS – FINAL 2025 BUILD (Option B + Close Button)
 // ======================================================================
 
-import { startZork, sendZorkCommand, getZorkState, setZorkState } from "./zorkLoader.js";
+import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js";
 import { supabase } from "./supabaseClient.js";
-import { saveZorkState, loadZorkState } from "./zork-supabase.js";
 
 let initialized = false;
 let currentScreenRef = null;
@@ -36,8 +35,10 @@ export async function initBBS() {
   // Close button handler
   closeBtn.addEventListener("click", () => {
     if (currentMode === "zork") {
+      stopZork();
       write(screen, "Exited ZORK mode.\n");
       currentMode = "chat";
+      setBbsInputMode(input, false);
     }
     modal.style.display = "none";
   });
@@ -67,8 +68,6 @@ export async function initBBS() {
   loadOnlineUsers(onlineDiv);
   setInterval(() => loadOnlineUsers(onlineDiv), 7000);
 
-  let mode = "chat";
-
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -76,33 +75,44 @@ export async function initBBS() {
     input.value = "";
     if (!text) return;
 
-    if (mode === "zork") {
+    if (currentMode === "zork") {
       if (text === "/exit") {
+        stopZork();
         write(screen, "Exited ZORK mode.\n");
-        mode = "chat";
         currentMode = "chat";
+        setBbsInputMode(input, false);
         return;
       }
 
-      if (text === "save") {
-        await saveGame(username);
+      if (text.toLowerCase() === "/chs") {
+        write(screen, "The phosphor flickers cyan: above you, builders gather by the harbor; below, the Great Underground Empire waits.\n");
         return;
       }
 
-      if (text === "restore") {
-        await restoreGame(username);
-        return;
-      }
-
-      sendZorkCommand(text, (txt) => write(screen, txt));
+      sendZorkCommand(text);
       return;
     }
 
     if (text === "zork" || text === "play zork" || text === "/zork") {
-      write(screen, "Initializing ZORK… Type /exit to leave.\n");
-      mode = "zork";
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat. Type /chs for a CharlestonHacks signal.\n");
       currentMode = "zork";
-      startZork((txt) => write(screen, txt));
+      setBbsInputMode(input, true);
+      input.disabled = true;
+      const started = await startZork(
+        (txt) => write(screen, txt),
+        {
+          username,
+          onEnd: () => {
+            currentMode = "chat";
+            setBbsInputMode(input, false);
+          }
+        }
+      );
+      input.disabled = false;
+      if (!started) {
+        currentMode = "chat";
+        setBbsInputMode(input, false);
+      }
       return;
     }
 
@@ -178,6 +188,13 @@ const BBS_HTML = `
 // ================================================================
 // HELPERS
 // ================================================================
+function setBbsInputMode(input, isZork) {
+  input.placeholder = isZork ? "Zork command (or /exit)..." : "type message...";
+  input.setAttribute("aria-label", isZork ? "Enter a Zork command" : "Type a public message");
+  input.maxLength = isZork ? "78" : "500";
+  input.focus();
+}
+
 function writeChatMessage(screen, username, text, createdAt) {
   const row = document.createElement("div");
   row.className = "bbs-chat-message";
@@ -257,27 +274,3 @@ function loadOrGenerateUsername() {
   return g;
 }
 
-// ================================================================
-// SAVE / RESTORE
-// ================================================================
-async function saveGame(username) {
-  const state = getZorkState();
-  if (!state) {
-    write(currentScreenRef, "No game is active to save.\n");
-    return;
-  }
-  const encoded = new TextEncoder().encode(JSON.stringify(state));
-  await saveZorkState(username, encoded);
-  write(currentScreenRef, "Game saved.\n");
-}
-
-async function restoreGame(username) {
-  const data = await loadZorkState(username);
-  if (!data) {
-    write(currentScreenRef, "No saved game found.\n");
-    return;
-  }
-  const json = JSON.parse(new TextDecoder().decode(data));
-  setZorkState(json);
-  write(currentScreenRef, "Game restored.\n");
-}

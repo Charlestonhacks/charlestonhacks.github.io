@@ -1,35 +1,44 @@
-// ======================================================
-//   Supabase Save / Restore Handler for Zork
-// ======================================================
-
-// Import the Supabase client.  In the original version this pointed at
-// `../js/supabaseClient.js`, but our project structure does not include a
-// `js` folder.  We assume a `supabaseClient.js` module lives alongside
-// the BBS modules (e.g. in the project root), mirroring how `bbs.js`
-// imports its client.  Adjust the path here to match that location.
-// Import the Supabase client.  Use a relative import from the project root
-// so that zork-supabase.js can find the same client used by bbs.js.
+// Supabase persistence for Z-machine Quetzal save files.
 import { supabase } from "./supabaseClient.js";
 
+function toBase64(bytes) {
+  const array = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let offset = 0; offset < array.length; offset += chunkSize) {
+    binary += String.fromCharCode(...array.subarray(offset, offset + chunkSize));
+  }
+  return btoa(binary);
+}
+
+function fromBase64(encoded) {
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
 export async function saveZorkState(username, saveData) {
-  await supabase
+  if (!username) throw new Error("A guest name is required to save the game.");
+  const bytes = saveData instanceof Uint8Array ? saveData : new Uint8Array(saveData);
+  const { error } = await supabase
     .from("zork_saves")
     .upsert({
       username,
-      save_data: btoa(String.fromCharCode(...saveData)),
+      save_data: toBase64(bytes),
       updated_at: new Date().toISOString()
     });
+  if (error) throw error;
 }
 
 export async function loadZorkState(username) {
-  const { data } = await supabase
+  if (!username) throw new Error("A guest name is required to restore the game.");
+  const { data, error } = await supabase
     .from("zork_saves")
     .select("save_data")
     .eq("username", username)
     .maybeSingle();
-
-  if (!data) return null;
-
-  const raw = atob(data.save_data);
-  return new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+  if (error) throw error;
+  if (!data?.save_data) return null;
+  return fromBase64(data.save_data);
 }
