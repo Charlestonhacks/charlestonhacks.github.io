@@ -186,16 +186,12 @@ export async function startZork(write, { username = "Guest", onEnd } = {}) {
   }
 
   activeSession = { machine, io };
-  try {
-    await machine.run();
-    if (!io._ended) io.quit();
-    return true;
-  } catch (error) {
+  machine.run().catch(error => {
     console.error("[ZORK] Interpreter error:", error);
-    write(`[ZORK error: ${error.message}]\n`);
+    write(`[ZORK error: ${error.message}]\\n`);
     io.quit();
-    return false;
-  }
+  });
+  return true;
 }
 
 export function sendZorkCommand(command) {
