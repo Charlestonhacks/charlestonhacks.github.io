@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CharlestonHacks Events — Charleston Tech Hackathons & Meetups</title>
-  <meta name="description" content="Explore CharlestonHacks events — hackathons, meetups, and tech gatherings in Charleston, SC. View past event posters and register for upcoming events.">
-  <meta property="og:title" content="CharlestonHacks Events — Charleston Tech Hackathons & Meetups">
-  <meta property="og:description" content="Hackathons, meetups, and tech gatherings in Charleston, SC.">
+  <title>Past CharlestonHacks Events — Charleston Tech Hackathons & Meetups</title>
+  <meta name="description" content="Browse CharlestonHacks hackathons, meetups, posters, and recaps from past years.">
+  <meta property="og:title" content="Past CharlestonHacks Events — Charleston Tech Hackathons & Meetups">
+  <meta property="og:description" content="Browse CharlestonHacks hackathons, meetups, posters, and recaps from past years.">
   <meta property="og:image" content="https://charlestonhacks.com/images/header events.webp">
   <meta property="og:url" content="https://charlestonhacks.com/Poster.html">
   <meta property="og:type" content="website">
@@ -109,6 +109,30 @@
       display: block;
     }
 
+    .archive-card {
+      min-height: 190px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      text-align: left;
+      background: linear-gradient(135deg, rgba(0, 224, 255, 0.16), rgba(123, 92, 255, 0.16)), #101018;
+      border: 1px solid rgba(0, 224, 255, 0.35);
+    }
+    .archive-card:hover { border-color: #00e0ff; box-shadow: 0 0 25px rgba(0, 224, 255, 0.25); }
+    .archive-card .archive-kicker {
+      color: #00e0ff;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .archive-card strong { font-size: 1.2rem; line-height: 1.25; }
+    .archive-card span:last-child { color: rgba(255,255,255,0.72); font-size: 0.9rem; }
+
     /* External link overlay */
     .external-icon {
       position: absolute;
@@ -183,14 +207,18 @@
       <img src="images/header events.webp" alt="CharlestonHacks Events" class="events-header-img" />
     </a>
     <a href="index.html" style="text-decoration: none;">
-      <h1 class="page-title">CharlestonHacks Events</h1>
+      <h1 class="page-title">Past CharlestonHacks Events</h1>
     </a>
   </div>
 
   <!-- Gallery -->
   <main class="gallery-container">
     <div id="gallery" class="gallery">
-       </a>
+      <a href="/harborhack-2026/" class="gallery-item archive-card" aria-label="HarborHack 2026: Agent in the Loop event archive">
+        <span class="archive-kicker">Recent event · 2026</span>
+        <strong>HarborHack: Agent in the Loop</strong>
+        <span>October 23–25 · College of Charleston</span>
+      </a>
         <a href="showandtell2.html" class="gallery-item">
         <img loading="lazy" src="images/st2poster.jpg" alt="Show and Tell2" />
       </a>
