@@ -27,6 +27,7 @@ export async function initBBS() {
   const form = modal.querySelector("#bbs-form");
   const input = modal.querySelector("#bbs-input");
   const onlineDiv = modal.querySelector("#bbs-online");
+  const feedbackDiv = modal.querySelector("#bbs-feedback");
   const closeBtn = modal.querySelector("#bbs-close");
 
   currentScreenRef = screen;
@@ -44,7 +45,7 @@ export async function initBBS() {
   const username = loadOrGenerateUsername();
   window.bbsUsername = username;
 
-  await loadMessages(screen);
+  await loadMessages(screen, feedbackDiv);
 
   supabase
     .channel("bbs_messages_channel")
@@ -54,7 +55,7 @@ export async function initBBS() {
       (payload) => {
         const msg = payload.new;
         if (msg.username !== username) {
-          write(screen, `[${msg.username}] ${msg.text}`);
+          writeChatMessage(screen, msg.username, msg.text, msg.created_at);
         }
       }
     )
@@ -105,14 +106,19 @@ export async function initBBS() {
       return;
     }
 
-    write(screen, `[${username}] ${text}`);
+    feedbackDiv.textContent = "";
+    const createdAt = new Date().toISOString();
+    writeChatMessage(screen, username, text, createdAt);
 
     const { error } = await supabase.from("bbs_messages").insert({
       username,
       text
     });
 
-    if (error) console.error("[BBS] Insert error:", error);
+    if (error) {
+      console.error("[BBS] Insert error:", error);
+      feedbackDiv.textContent = "Message not sent. Please try again.";
+    }
   });
 }
 
@@ -140,7 +146,7 @@ const BBS_HTML = `
       CharlestonHacks BBS
     </h2>
 
-    <div id="bbs-screen"
+    <div id="bbs-screen" role="region" aria-label="Public chat messages" tabindex="0"
          style="background:#000; color:#0f0;
                 height:min(300px, 40vh); overflow-y:auto;
                 padding:10px; border:2px solid #0f0; margin-bottom:10px;
@@ -148,21 +154,23 @@ const BBS_HTML = `
                 line-height:1.4;"></div>
 
     <form id="bbs-form" style="display:flex; gap:10px; flex-wrap:wrap;">
-      <input id="bbs-input"
-             placeholder="type message..."
+      <input id="bbs-input" type="text" maxlength="500" autocomplete="off"
+             aria-label="Type a public message" placeholder="type message..."
              style="flex:1; min-width:200px; background:black; color:#0f0;
                     border:2px solid #0f0; padding:8px;
                     font-family:monospace; font-size:0.95rem;" />
-      <button style="padding:8px 16px; background:#0f0;
+      <button type="submit" style="padding:8px 16px; background:#0f0;
                      color:black; border:none; font-family:monospace;
                      font-weight:bold; cursor:pointer;">
         Send
       </button>
     </form>
 
+    <div id="bbs-feedback" role="status" aria-live="polite"
+         style="min-height:1.3em; margin-top:8px; color:#ffd166; font:0.85rem monospace;"></div>
     <div style="margin-top:12px; color:#0f0; font-family:monospace;
                 font-size:0.9rem;">
-      Online: <span id="bbs-online">loading…</span>
+      People online: <span id="bbs-online" aria-live="polite">Checking…</span>
     </div>
   </div>
 `;
@@ -170,6 +178,28 @@ const BBS_HTML = `
 // ================================================================
 // HELPERS
 // ================================================================
+function writeChatMessage(screen, username, text, createdAt) {
+  const row = document.createElement("div");
+  row.className = "bbs-chat-message";
+
+  const date = createdAt ? new Date(createdAt) : null;
+  if (date && !Number.isNaN(date.getTime())) {
+    const time = document.createElement("time");
+    time.dateTime = date.toISOString();
+    time.textContent = `[${date.toLocaleString([], { dateStyle: "short", timeStyle: "short" })}] `;
+    time.style.color = "rgba(0, 255, 0, 0.68)";
+    row.appendChild(time);
+  }
+
+  const message = document.createElement("span");
+  message.textContent = `[${username || "Guest"}] ${text || ""}`;
+  row.appendChild(message);
+
+  const wasNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 32;
+  screen.appendChild(row);
+  if (wasNearBottom) screen.scrollTop = screen.scrollHeight;
+}
+
 function write(screen, text) {
   text.split("\n").forEach((line) => {
     const div = document.createElement("div");
@@ -179,20 +209,35 @@ function write(screen, text) {
   screen.scrollTop = screen.scrollHeight;
 }
 
-async function loadMessages(screen) {
-  const { data } = await supabase
+async function loadMessages(screen, feedbackDiv) {
+  const { data, error } = await supabase
     .from("bbs_messages")
     .select("*")
     .order("created_at", { ascending: true });
 
-  screen.innerHTML = "";
-  data?.forEach((msg) => write(screen, `[${msg.username}] ${msg.text}`));
+  screen.replaceChildren();
+  if (error) {
+    console.error("[BBS] History load error:", error);
+    feedbackDiv.textContent = "Chat history could not be loaded. You can still try sending a message.";
+    return;
+  }
+
+  data?.forEach((msg) => writeChatMessage(screen, msg.username, msg.text, msg.created_at));
+  if (!data?.length) write(screen, "Welcome! Start the conversation or type zork to play.");
+  screen.scrollTop = screen.scrollHeight;
 }
 
 async function loadOnlineUsers(div) {
-  const { data } = await supabase.from("bbs_online_active").select("*");
-  const names = data?.map((u) => u.username) || [];
-  div.textContent = names.length ? names.join(", ") : "none";
+  const { data, error } = await supabase.from("bbs_online_active").select("*");
+  if (error) {
+    console.error("[BBS] Presence load error:", error);
+    div.textContent = "unavailable";
+    return;
+  }
+  const names = data?.map((u) => u.username).filter(Boolean) || [];
+  div.textContent = names.length
+    ? `${names.length} online: ${names.join(", ")}`
+    : "0 people online right now";
 }
 
 async function heartbeat(username) {

@@ -122,12 +122,16 @@
     }
 
     .bbs-hint {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 12px 20px 8px;
+      color: #9cff9c;
       text-align: center;
-      color: #0f06;
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      padding: 6px 16px 0;
+      font-size: clamp(0.82rem, 1.8vw, 0.95rem);
+      line-height: 1.6;
+      letter-spacing: 0.02em;
     }
+    .bbs-hint strong, .bbs-hint code { color: #caffca; }
   </style>
 </head>
 <body>
@@ -147,7 +151,11 @@
     </div>
   </nav>
 
-  <p class="bbs-hint">Type a message and press Send &nbsp;·&nbsp; Type <strong>zork</strong> to play Zork &nbsp;·&nbsp; Username stored locally</p>
+  <p class="bbs-hint" id="bbs-intro">
+    <strong>Public community chat.</strong> Messages are visible to everyone who visits and saved in the shared history.
+    Your guest name is stored in this browser. Please don’t post private information.
+    Type <code>zork</code> to play; type <code>/exit</code> to return to chat.
+  </p>
 
   <!-- BBS mounts here -->
   <div id="bbs-modal"></div>
