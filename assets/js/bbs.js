@@ -97,6 +97,7 @@ export async function initBBS() {
       write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat. Type /chs for a CharlestonHacks signal.\n");
       currentMode = "zork";
       setBbsInputMode(input, true);
+      input.disabled = true;
       const started = await startZork(
         (txt) => write(screen, txt),
         {
@@ -107,6 +108,7 @@ export async function initBBS() {
           }
         }
       );
+      input.disabled = false;
       if (!started) {
         currentMode = "chat";
         setBbsInputMode(input, false);
