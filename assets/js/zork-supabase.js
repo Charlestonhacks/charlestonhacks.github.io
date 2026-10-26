@@ -27,7 +27,7 @@ export async function saveZorkState(username, saveData) {
       username,
       save_data: toBase64(bytes),
       updated_at: new Date().toISOString()
-    }, { onConflict: "username" });
+    });
   if (error) throw error;
 }
 
