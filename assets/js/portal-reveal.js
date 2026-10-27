@@ -27,8 +27,8 @@ function showPortalGuide() {
   if (!guide || !portalButtons.length) return;
 
   guide.textContent = window.matchMedia("(any-pointer: fine)").matches
-    ? "Drag the card to open Events, Chat, Buildspace or News · tap icons for more"
-    : "Swipe the card to open Events, Chat, Buildspace or News · tap icons for more";
+    ? "Drag the card to open Events, Sandbox, News or Chat · tap icons for more"
+    : "Swipe the card to open Events, Sandbox, News or Chat · tap icons for more";
   guide.hidden = false;
   requestAnimationFrame(() => guide.classList.add("is-visible"));
 
