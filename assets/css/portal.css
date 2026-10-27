@@ -1233,3 +1233,19 @@ button:focus {
   max-height: 5.5em;
   overflow: auto;
 }
+
+
+/* Keep desktop mouse drags available to the card gesture instead of starting
+   Chrome's native image drag or text selection. */
+.card-stage {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.card-stage.is-dragging { cursor: grabbing; }
+.card-stage img,
+.card-stage video {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
