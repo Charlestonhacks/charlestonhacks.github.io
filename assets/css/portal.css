@@ -280,13 +280,6 @@ body {
   100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
 }
 
-.media-container {
-  position: relative;
-  perspective: 1500px;
-  transform-style: preserve-3d;
-  animation: cardEntrance 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
 /* One-time cinematic reveal; the portal card itself stays in place beneath it. */
 .portal-card-reveal {
   position: absolute;
@@ -434,8 +427,6 @@ body {
     transition: none !important;
   }
 }
-
-@keyframes cardEntrance
 
 /* Breathing animation for card */
 @keyframes breathe {
