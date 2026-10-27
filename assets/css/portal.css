@@ -1157,7 +1157,7 @@ button:focus {
     height: min(78dvh, 820px);
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
     transform-origin: center;
-    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+    transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.75, 0.25, 1);
   }
   .portal-view-panel[data-origin]:not(.is-open) {
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
@@ -1176,7 +1176,7 @@ button:focus {
     height: min(76vh, 680px);
     height: min(76dvh, 680px);
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
-    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+    transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.75, 0.25, 1);
   }
   .portal-view-panel[data-origin]:not(.is-open) {
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
@@ -1195,7 +1195,7 @@ button:focus {
     height: min(70vh, calc(100vh - 120px), 420px);
     height: min(70dvh, calc(100dvh - 120px), 420px);
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
-    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+    transition: opacity 280ms ease, transform 360ms cubic-bezier(0.2, 0.75, 0.25, 1);
   }
   .portal-view-panel[data-origin]:not(.is-open) {
     transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
