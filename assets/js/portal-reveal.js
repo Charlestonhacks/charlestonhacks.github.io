@@ -26,9 +26,9 @@ function wait(ms) {
 function showPortalGuide() {
   if (!guide || !portalButtons.length) return;
 
-  guide.textContent = window.matchMedia("(any-hover: hover)").matches
-    ? "Tap an icon to explore · hover or focus to preview"
-    : "Tap an icon to explore";
+  guide.textContent = window.matchMedia("(any-pointer: fine)").matches
+    ? "Drag the card to open Events, Chat, Buildspace or News · tap icons for more"
+    : "Swipe the card to open Events, Chat, Buildspace or News · tap icons for more";
   guide.hidden = false;
   requestAnimationFrame(() => guide.classList.add("is-visible"));
 
