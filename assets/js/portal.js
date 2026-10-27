@@ -453,6 +453,7 @@ if (portalId === "btc") {
     };
 
     let gesture = null;
+    let suppressClickTarget = null;
     let suppressClickUntil = 0;
     let resetGuideTimer = null;
 
@@ -514,6 +515,7 @@ if (portalId === "btc") {
         startY: event.clientY,
         direction: null,
         moved: false,
+        clickTarget: event.target.closest?.(".clickable-area") || null,
       };
     });
 
@@ -552,7 +554,10 @@ if (portalId === "btc") {
         return;
       }
 
-      suppressClickUntil = Date.now() + 500;
+      if (current.clickTarget) {
+        suppressClickTarget = current.clickTarget;
+        suppressClickUntil = Date.now() + 600;
+      }
       stage.classList.remove("is-dragging");
       clearDrag();
       stage.classList.add(`is-committing-${direction}`);
@@ -569,9 +574,15 @@ if (portalId === "btc") {
     stage.addEventListener("lostpointercapture", cancelGesture);
 
     stage.addEventListener("click", (event) => {
-      if (event.detail > 0 && Date.now() < suppressClickUntil) {
+      if (
+        suppressClickTarget &&
+        (event.target === suppressClickTarget || suppressClickTarget.contains(event.target)) &&
+        event.detail > 0 &&
+        Date.now() < suppressClickUntil
+      ) {
         event.preventDefault();
         event.stopImmediatePropagation();
+        suppressClickTarget = null;
         suppressClickUntil = 0;
       }
     }, true);
