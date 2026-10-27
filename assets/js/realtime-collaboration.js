@@ -62,9 +62,7 @@ async function sendDirectMessage(userId, message) {
         .from('conversations')
         .insert([{
           participant_1_id: currentUserProfile.id,
-          participant_2_id: userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          participant_2_id: userId
         }])
         .select()
         .single();
@@ -81,7 +79,7 @@ async function sendDirectMessage(userId, message) {
           conversation_id: conversationId,
           sender_id: currentUserProfile.id, // Use community ID
           content: message.trim(),
-          message_type: MESSAGE_TYPES.TEXT
+          read: false
         });
 
       if (messageError) throw messageError;
@@ -89,7 +87,11 @@ async function sendDirectMessage(userId, message) {
       // Update conversation timestamp
       await supabase
         .from('conversations')
-        .update({ updated_at: new Date().toISOString() })
+        .update({
+          updated_at: new Date().toISOString(),
+          last_message_at: new Date().toISOString(),
+          last_message_preview: message.trim().slice(0, 120)
+        })
         .eq('id', conversationId);
     }
 
@@ -920,7 +922,7 @@ window.sendMessage = async function() {
         conversation_id: activeConversationId,
         sender_id: currentUserProfile.id, // Use community ID
         content: content,
-        message_type: MESSAGE_TYPES.TEXT
+        read: false
       });
 
     if (error) throw error;
@@ -931,7 +933,11 @@ window.sendMessage = async function() {
     // Update conversation timestamp
     await supabase
       .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
+      .update({
+        updated_at: new Date().toISOString(),
+        last_message_at: new Date().toISOString(),
+        last_message_preview: content.slice(0, 120)
+      })
       .eq('id', activeConversationId);
 
     console.log('✅ Message sent successfully');
@@ -1034,10 +1040,10 @@ window.markMessagesAsRead = async function(conversationId) {
   try {
     await supabase
       .from('messages')
-      .update({ read_at: new Date().toISOString() })
+      .update({ read: true })
       .eq('conversation_id', conversationId)
       .neq('sender_id', currentUserProfile.id)
-      .is('read_at', null);
+      .eq('read', false);
     
     unreadCounts.set(conversationId, 0);
   } catch (error) {
