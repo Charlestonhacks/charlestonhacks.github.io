@@ -87,6 +87,7 @@ async function runReveal({ automatic = false } = {}) {
 
   reveal.classList.remove("is-active");
   await wait(220);
+  const shouldRestoreFocus = returnFocus || document.activeElement === skipButton;
   reveal.hidden = true;
   reveal.setAttribute("aria-hidden", "true");
   cardStage.inert = false;
@@ -98,7 +99,7 @@ async function runReveal({ automatic = false } = {}) {
   localStorage.setItem(REVEAL_SEEN_KEY, "true");
   isPlaying = false;
 
-  if (returnFocus) replayButton.focus({ preventScroll: true });
+  if (shouldRestoreFocus) replayButton.focus({ preventScroll: true });
 }
 
 document.addEventListener("chs:portal-ready", () => {
