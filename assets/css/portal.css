@@ -418,6 +418,12 @@ body {
   box-shadow: 0 0 20px var(--gold-glow);
 }
 .replay-portal-reveal i { color: var(--gold); }
+
+/* Keep controls hidden until the tutorial is dismissed and while the reveal runs. */
+.portal-card-reveal[hidden],
+.replay-portal-reveal[hidden] {
+  display: none !important;
+}
 @media (max-width: 600px) {
   .replay-portal-reveal { left: 10px; bottom: 10px; padding: 0.55rem 0.7rem; font-size: 0.6rem; }
   .portal-reveal-copy { padding: 1rem; }
