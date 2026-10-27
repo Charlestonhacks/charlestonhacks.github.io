@@ -36,7 +36,7 @@ This is a GitHub Pages site. Merging to `main` triggers an automatic deployment 
 - Include proper meta tags: `og:title`, `og:description`, `og:image`, `og:url`, `twitter:card`
 - Use absolute URLs for meta tags (og, canonical, twitter) and relative paths for in-page links
 - Use semantic HTML and ARIA labels for accessibility
-- Follow the existing nav structure (Home, About, Member Portal, Next Event)
+- Follow the navigation pattern used on the page being edited; keep links limited to active destinations
 
 ### CSS
 
@@ -57,7 +57,6 @@ This is a GitHub Pages site. Merging to `main` triggers an automatic deployment 
 ├── index.html              # Landing page (public-facing, SEO-optimized)
 ├── hub.html                # Member Portal (interactive card-based UI)
 ├── dashboard.html          # Innovation Engine (network visualization app)
-├── about.html              # About page
 ├── community.html          # Community page with actions/channels
 ├── subscribe.html          # Newsletter signup
 ├── donations.html          # Support/donate page
