@@ -385,13 +385,17 @@
     areas.forEach((area) => {
       const portalId = area.dataset.portal;
 
-      area.addEventListener("mouseenter", () => {
+      const showPortalInfo = () => {
         if (!DOM.infoLine || !DOM.infoText) return;
         DOM.infoText.textContent = area.dataset.info || "";
         DOM.infoLine.classList.add("visible");
-      });
+      };
+      const hidePortalInfo = () => DOM.infoLine?.classList.remove("visible");
 
-      area.addEventListener("mouseleave", () => DOM.infoLine?.classList.remove("visible"));
+      area.addEventListener("mouseenter", showPortalInfo);
+      area.addEventListener("mouseleave", hidePortalInfo);
+      area.addEventListener("focus", showPortalInfo);
+      area.addEventListener("blur", hidePortalInfo);
 
       area.addEventListener("click", (e) => {
         e.preventDefault();
