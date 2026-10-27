@@ -301,7 +301,7 @@
       <div class="media-container">
 
         <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
-        <div class="card-stage" role="group" aria-label="Interactive portal card. Drag in a direction to open Events, Community Chat, Buildspace, or News. Portal buttons open other features.">
+        <div class="card-stage" role="group" aria-label="Interactive portal card. Drag in a direction to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace; other portal buttons open more features.">
           <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
@@ -407,6 +407,9 @@
             </section>
             <div class="portal-view-content" data-view="buildspace" hidden>
               <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="sandbox" hidden>
+              <iframe id="portal-sandbox-frame" title="CharlestonHacks Experimental Sandbox" loading="lazy"></iframe>
             </div>
             <div class="portal-view-content" data-view="news" hidden>
               <iframe id="portal-news-frame" title="CharlestonHacks News" loading="lazy"></iframe>
