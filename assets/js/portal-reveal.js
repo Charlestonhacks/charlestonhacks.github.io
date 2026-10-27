@@ -31,6 +31,7 @@ function playClip(src) {
 
     try {
       await video.play();
+      video.classList.remove("is-changing");
       await new Promise((done) => {
         const timer = window.setTimeout(done, 1350);
         skipClipWait = () => {
@@ -68,9 +69,10 @@ async function runReveal({ automatic = false } = {}) {
   requestAnimationFrame(() => reveal.classList.add("is-active"));
   await wait(40);
 
-  if (!prefersReducedMotion.matches) {
+  const shouldFlip = !automatic || !prefersReducedMotion.matches;
+  if (shouldFlip) {
     cardInner.classList.add("is-flipped");
-    await wait(760);
+    if (!prefersReducedMotion.matches) await wait(760);
   }
 
   for (const clip of CLIPS) {
@@ -78,9 +80,9 @@ async function runReveal({ automatic = false } = {}) {
     await playClip(clip);
   }
 
-  if (!prefersReducedMotion.matches && !document.hidden) {
+  if (shouldFlip && !document.hidden) {
     cardInner.classList.remove("is-flipped");
-    await wait(760);
+    if (!prefersReducedMotion.matches) await wait(760);
   } else {
     cardInner.classList.remove("is-flipped");
   }
