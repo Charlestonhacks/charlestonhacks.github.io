@@ -661,6 +661,8 @@ if (portalId === "btc") {
       openCardDestination(destination.view, direction, document.activeElement);
     };
 
+    stage.addEventListener("dragstart", (event) => event.preventDefault());
+
     stage.addEventListener("pointerdown", (event) => {
       if (!event.isPrimary || event.button !== 0 || stage.inert) return;
       gesture = {
