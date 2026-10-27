@@ -338,6 +338,9 @@ body {
   opacity: 0.72;
   transition: opacity 180ms ease;
 }
+
+/* Override the positioning transform applied to portal card videos globally. */
+#portal-reveal-video { transform: none; }
 .portal-reveal-back video.is-changing { opacity: 0; }
 .portal-reveal-scrim {
   background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.72));
