@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BBS — CharlestonHacks</title>
+  <script>if (window.self !== window.top) document.documentElement.classList.add("is-embedded");</script>
   <meta name="description" content="CharlestonHacks Community BBS — real-time chat and Zork for Charleston's builders, hackers, and makers.">
   <link rel="canonical" href="https://charlestonhacks.com/bbs.html">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -165,6 +166,12 @@
       letter-spacing: 0.02em;
     }
     .bbs-hint strong, .bbs-hint code { color: #caffca; }
+    html.is-embedded .top-nav { display: none !important; }
+    html.is-embedded #bbs-modal {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: 16px;
+    }
   </style>
 </head>
 <body>
