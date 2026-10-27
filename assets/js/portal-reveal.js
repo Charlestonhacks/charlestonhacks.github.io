@@ -44,7 +44,7 @@ function playClip(src) {
 
     skipClipWait = null;
     video.pause();
-    video.currentTime = 0;
+    try { video.currentTime = 0; } catch {}
     video.classList.remove("is-changing");
     await wait(120);
     resolve();
