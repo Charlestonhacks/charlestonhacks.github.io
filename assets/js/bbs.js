@@ -163,15 +163,15 @@ const BBS_HTML = `
                 font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem);
                 line-height:1.4;"></div>
 
-    <form id="bbs-form" style="display:flex; gap:10px; flex-wrap:wrap;">
+    <form id="bbs-form" style="display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:stretch; width:100%; min-width:0; gap:10px;">
       <input id="bbs-input" type="text" maxlength="500" autocomplete="off"
              aria-label="Type a public message" placeholder="type message..."
-             style="flex:1; min-width:200px; background:black; color:#0f0;
+             style="width:100%; min-width:0; background:black; color:#0f0;
                     border:2px solid #0f0; padding:8px;
-                    font-family:monospace; font-size:0.95rem;" />
+                    font-family:monospace; font-size:16px; line-height:1.4;" />
       <button type="submit" style="padding:8px 16px; background:#0f0;
                      color:black; border:none; font-family:monospace;
-                     font-weight:bold; cursor:pointer;">
+                     font-weight:bold; cursor:pointer; white-space:nowrap;">
         Send
       </button>
     </form>
