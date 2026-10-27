@@ -113,6 +113,7 @@
   function setIdleSoon() {
     setTimeout(() => {
       DOM.mediaContainer?.classList.add("idle");
+      document.dispatchEvent(new Event("chs:portal-ready"));
     }, 500);
   }
 
