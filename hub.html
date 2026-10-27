@@ -413,6 +413,24 @@
         </div>
         <!-- /card-stage -->
 
+        <!-- Cinematic Member Portal card reveal -->
+        <div class="portal-card-reveal" id="portal-card-reveal" hidden aria-hidden="true">
+          <div class="portal-card-reveal-inner" id="portal-card-reveal-inner">
+            <div class="portal-reveal-face portal-reveal-front">
+              <img src="icons/card.png" alt="" aria-hidden="true">
+            </div>
+            <div class="portal-reveal-face portal-reveal-back">
+              <video id="portal-reveal-video" muted playsinline preload="none" aria-hidden="true"></video>
+              <div class="portal-reveal-scrim"></div>
+              <div class="portal-reveal-copy">
+                <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
+                <p>Where Charleston's builders, hackers &amp; makers connect.</p>
+              </div>
+              <button type="button" id="skip-portal-reveal" class="skip-portal-reveal">Skip intro</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -606,5 +624,10 @@
       initCountdown();
     }
   </script>
+  <button type="button" id="replay-portal-reveal" class="replay-portal-reveal" aria-label="Replay the CharlestonHacks video reveal">
+    <i class="fas fa-play" aria-hidden="true"></i>
+    <span>Replay reveal</span>
+  </button>
+  <script type="module" src="/assets/js/portal-reveal.js"></script>
 </body>
 </html>
