@@ -139,117 +139,6 @@ body {
 }
 
 /* ============================
-   FIRST VISIT TUTORIAL
-============================ */
-#tutorial-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(8px);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1800;
-  animation: fadeIn 0.4s ease;
-}
-
-#tutorial-overlay.active { display: flex; }
-
-.tutorial-content {
-  text-align: center;
-  max-width: 600px;
-  padding: 2rem;
-  animation: slideUp 0.5s ease-out;
-}
-
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.tutorial-content h2 {
-  font-size: clamp(1.8rem, 3.2vw, 2.5rem);
-  margin-bottom: 1rem;
-  color: var(--cyan);
-  letter-spacing: 0.5px;
-  text-shadow:
-    0 0 10px rgba(0, 224, 255, 0.35),
-    0 0 22px rgba(0, 224, 255, 0.25);
-}
-
-.tutorial-content p {
-  font-size: 1.05rem;
-  line-height: 1.65;
-  color: rgba(255, 255, 255, 0.78);
-  margin-bottom: 1.75rem;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
-}
-
-.tutorial-step {
-  background: rgba(0, 0, 0, 0.68);
-  border: 1px solid rgba(0, 224, 255, 0.75);
-  border-radius: var(--border-radius);
-  padding: 1.25rem 1.5rem;
-  margin: 1rem 0;
-  transition: var(--transition-smooth);
-  color: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(0, 224, 255, 0.12);
-}
-
-.tutorial-step:hover {
-  background: rgba(0, 0, 0, 0.82);
-  transform: translateX(5px);
-  box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.55),
-    0 0 26px rgba(0, 224, 255, 0.18);
-}
-
-.tutorial-step i {
-  font-size: 2rem;
-  color: var(--cyan);
-  margin-bottom: 0.5rem;
-  display: block;
-  text-shadow: 0 0 14px rgba(0, 224, 255, 0.35);
-}
-
-.tutorial-step strong { color: var(--cyan); }
-
-#skip-tutorial {
-  background: rgba(0, 0, 0, 0.35);
-  border: 2px solid rgba(0, 224, 255, 0.9);
-  color: var(--cyan);
-  padding: 0.85rem 2rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: var(--transition-smooth);
-  font-family: "Orbitron", sans-serif;
-  margin-top: 1rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(0, 224, 255, 0.12);
-}
-
-#skip-tutorial:hover {
-  background: var(--cyan);
-  color: #000;
-  box-shadow:
-    0 0 22px rgba(0, 224, 255, 0.35),
-    0 0 38px rgba(0, 224, 255, 0.22);
-  transform: translateY(-1px);
-}
-
-#skip-tutorial:focus-visible {
-  outline: 3px solid rgba(0, 224, 255, 0.5);
-  outline-offset: 3px;
-}
-
-/* ============================
    MAIN CARD ENHANCEMENTS
 ============================ */
 
@@ -281,7 +170,7 @@ body {
   100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
 }
 
-/* One-time cinematic reveal; the portal card itself stays in place beneath it. */
+/* One-time cinematic reveal, followed by lightweight portal guidance. */
 .portal-card-reveal {
   position: absolute;
   inset: 0;
@@ -339,8 +228,6 @@ body {
   opacity: 0.72;
   transition: opacity 180ms ease;
 }
-
-/* Override the positioning transform applied to portal card videos globally. */
 #portal-reveal-video { transform: none; }
 .portal-reveal-back video.is-changing { opacity: 0; }
 .portal-reveal-scrim {
@@ -400,42 +287,45 @@ body {
   border-color: var(--gold);
   box-shadow: 0 0 16px var(--gold-glow);
 }
-.replay-portal-reveal {
-  position: fixed;
-  z-index: 10010;
-  left: 18px;
-  bottom: 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid rgba(201,163,94,0.56);
-  border-radius: 999px;
-  color: rgba(255,255,255,0.86);
-  background: rgba(0,0,0,0.82);
-  box-shadow: 0 4px 18px rgba(0,0,0,0.35);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-}
-.replay-portal-reveal:hover,
-.replay-portal-reveal:focus-visible {
-  color: var(--gold);
-  border-color: var(--gold);
-  box-shadow: 0 0 20px var(--gold-glow);
-}
-.replay-portal-reveal i { color: var(--gold); }
+.portal-card-reveal[hidden] { display: none !important; }
 
-/* Keep controls hidden until the tutorial is dismissed and while the reveal runs. */
-.portal-card-reveal[hidden],
-.replay-portal-reveal[hidden] {
-  display: none !important;
+/* A short hint follows the reveal; it never blocks portal buttons. */
+.portal-discovery-guide {
+  position: fixed;
+  z-index: 10003;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 0.55rem 0.9rem;
+  border: 1px solid rgba(201,163,94,0.78);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0,0,0,0.9);
+  box-shadow: 0 0 20px rgba(201,163,94,0.2);
+  font-size: clamp(0.68rem, 2.5vw, 0.82rem);
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+.portal-discovery-guide.is-visible { opacity: 1; }
+.portal-discovery-guide[hidden] { display: none !important; }
+.clickable-area.is-guided {
+  filter: brightness(1.65) drop-shadow(0 0 13px var(--gold));
+  animation: portalGuideGlow 700ms ease-in-out infinite alternate;
+}
+@keyframes portalGuideGlow {
+  from { filter: brightness(1.25) drop-shadow(0 0 5px var(--gold)); }
+  to { filter: brightness(1.8) drop-shadow(0 0 16px var(--gold)); }
+}
+@media (max-width: 768px) {
+  .portal-discovery-guide { top: 62px; }
+  body.has-countdown-banner .portal-discovery-guide { top: 104px; }
 }
 @media (max-width: 600px) {
-  .replay-portal-reveal { left: 10px; bottom: 10px; padding: 0.55rem 0.7rem; font-size: 0.6rem; }
   .portal-reveal-copy {
     bottom: clamp(76px, 10%, 88px);
     gap: 0.55rem;
@@ -448,10 +338,8 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .portal-card-reveal,
-  .portal-card-reveal-inner,
-  .replay-portal-reveal {
-    transition: none !important;
-  }
+  .portal-card-reveal-inner { transition: none !important; }
+  .clickable-area.is-guided { animation: none; }
 }
 
 /* Breathing animation for card */
@@ -1039,7 +927,6 @@ body {
    RESPONSIVE / ACCESSIBILITY
 ============================ */
 @media (max-width: 768px) {
-  .tutorial-content h2 { font-size: 1.8rem; }
   .icons-container { gap: 0.5rem; padding: 1rem 1.5rem; }
   .icons-container a { width: 40px; height: 40px; font-size: 1.2rem; }
 

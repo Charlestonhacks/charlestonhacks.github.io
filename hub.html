@@ -123,21 +123,50 @@
 
     .ch-top-logo { display: none; }
 
-    /* Push card below the fixed nav bar */
-    .main-wrapper { padding-top: 80px; }
-
-    /* Larger card on desktop — card is 2:3 (w:h), so limit width via viewport height */
-    .media-container { max-width: 620px; }
-
-    @media (min-width: 769px) {
-      /* Reserve room for the fixed nav and tagline so the card clears both. */
-      .media-container { max-width: min(620px, calc((100vh - 220px) * 2 / 3)); }
+    /* Keep the portrait card centered in the space between fixed navigation and controls. */
+    .main-wrapper {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 78px 16px 88px;
+      justify-content: center;
+      align-items: center;
     }
+    .media-container {
+      width: min(100%, 620px, calc((100vh - 166px) * 2 / 3));
+      width: min(100%, 620px, calc((100dvh - 166px) * 2 / 3));
+      max-width: 620px;
+      margin: 0 auto;
+      flex: 0 1 auto;
+    }
+    .card-stage { width: 100%; }
+    #missionImage { width: 100%; height: auto; }
 
     @media (max-width: 768px) {
-      .main-wrapper { padding-top: 70px; justify-content: flex-start; }
-      .media-container { max-width: 500px; }
-      .ch-tagline { bottom: 105px; font-size: 0.6rem; }
+      .main-wrapper {
+        padding: 66px 12px calc(92px + env(safe-area-inset-bottom));
+        justify-content: center;
+      }
+      .media-container {
+        width: min(100%, 500px, calc((100vh - 178px - env(safe-area-inset-bottom)) * 2 / 3));
+        width: min(100%, 500px, calc((100dvh - 178px - env(safe-area-inset-bottom)) * 2 / 3));
+        max-width: 500px;
+      }
+      body.has-countdown-banner .main-wrapper {
+        padding-top: 106px;
+      }
+      body.has-countdown-banner .media-container {
+        width: min(100%, 500px, calc((100vh - 218px - env(safe-area-inset-bottom)) * 2 / 3));
+        width: min(100%, 500px, calc((100dvh - 218px - env(safe-area-inset-bottom)) * 2 / 3));
+      }
+      .ch-tagline { bottom: calc(105px + env(safe-area-inset-bottom)); font-size: 0.6rem; }
+    }
+    @media (max-height: 520px) {
+      .main-wrapper { padding-top: 64px; padding-bottom: 64px; }
+       .media-container { width: min(52vw, calc((100vh - 130px) * 2 / 3)); width: min(52vw, calc((100dvh - 130px) * 2 / 3)); }
     }
 
     .ch-tagline {
@@ -260,31 +289,6 @@
   <!-- Tagline -->
   <p class="ch-tagline">Charleston's community for builders, hackers &amp; makers</p>
 
-  <!-- First Visit Tutorial -->
-  <div id="tutorial-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
-    <div class="tutorial-content">
-      <h2 id="tutorial-title">Discover 9 Portals</h2>
-      <p>Each icon on the card opens a different dimension of CharlestonHacks.</p>
-
-      <div class="tutorial-step">
-        <i class="fas fa-mouse-pointer"></i>
-        <strong>Hover</strong> over the card icons to preview each portal
-      </div>
-
-      <div class="tutorial-step">
-        <i class="fas fa-hand-pointer"></i>
-        <strong>Click</strong> to enter and discover new features
-      </div>
-
-      <div class="tutorial-step">
-        <i class="fas fa-brain"></i>
-        Dive into the <strong>Buildspace</strong>
-      </div>
-
-      <button id="skip-tutorial">Start Exploring</button>
-    </div>
-  </div>
-
   <!-- Sounds (lazy) -->
   <audio id="cardflipSound" src="assets/atmospherel.m4a" preload="none"></audio>
   <audio id="chimeSound" src="assets/chime.mp3" preload="none"></audio>
@@ -378,6 +382,9 @@
           <!-- Tooltip -->
           <div id="infoLine" class="info-line" role="tooltip">
             <span id="infoParticle"></span><span id="infoText"></span>
+          </div>
+          <div id="portal-discovery-guide" class="portal-discovery-guide" role="status" aria-live="polite" hidden>
+            Tap an icon to explore
           </div>
         </div>
         <!-- /card-stage -->
@@ -593,10 +600,6 @@
       initCountdown();
     }
   </script>
-  <button type="button" id="replay-portal-reveal" class="replay-portal-reveal" aria-label="Replay the CharlestonHacks video reveal" hidden>
-    <i class="fas fa-play" aria-hidden="true"></i>
-    <span>Replay reveal</span>
-  </button>
   <script type="module" src="/assets/js/portal-reveal.js"></script>
 </body>
 </html>

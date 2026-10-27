@@ -17,10 +17,6 @@
 
   // Cache DOM once (performance + consistency)
   const DOM = {
-    // first-visit portal tutorial
-    tutorial: $("#tutorial-overlay"),
-    skipTutorial: $("#skip-tutorial"),
-
     // portal UI
     mediaContainer: $(".media-container"),
     infoLine: $("#infoLine"),
@@ -96,43 +92,12 @@
     } catch (_) {}
   }
 
-  // ------------------------------------------------
-  // First-visit portal tutorial
-  // ------------------------------------------------
-  const TUTORIAL_KEY = "chs_tutorial_completed";
-
+  // Announce portal readiness after the card has entered the page.
   function setIdleSoon() {
     setTimeout(() => {
       DOM.mediaContainer?.classList.add("idle");
       document.dispatchEvent(new Event("chs:portal-ready"));
     }, 500);
-  }
-
-  function initTutorial() {
-    if (!DOM.tutorial) {
-      setIdleSoon();
-      return;
-    }
-
-    function closeTutorial() {
-      DOM.tutorial.classList.remove("active");
-      localStorage.setItem(TUTORIAL_KEY, "true");
-      setIdleSoon();
-    }
-
-    DOM.skipTutorial?.addEventListener("click", closeTutorial);
-
-    if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
-      setTimeout(() => DOM.tutorial.classList.add("active"), 300);
-    } else {
-      setIdleSoon();
-    }
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && DOM.tutorial.classList.contains("active")) {
-        closeTutorial();
-      }
-    });
   }
 
   // ------------------------------------------------
@@ -420,13 +385,17 @@
     areas.forEach((area) => {
       const portalId = area.dataset.portal;
 
-      area.addEventListener("mouseenter", () => {
+      const showPortalInfo = () => {
         if (!DOM.infoLine || !DOM.infoText) return;
         DOM.infoText.textContent = area.dataset.info || "";
         DOM.infoLine.classList.add("visible");
-      });
+      };
+      const hidePortalInfo = () => DOM.infoLine?.classList.remove("visible");
 
-      area.addEventListener("mouseleave", () => DOM.infoLine?.classList.remove("visible"));
+      area.addEventListener("mouseenter", showPortalInfo);
+      area.addEventListener("mouseleave", hidePortalInfo);
+      area.addEventListener("focus", showPortalInfo);
+      area.addEventListener("blur", hidePortalInfo);
 
       area.addEventListener("click", (e) => {
         e.preventDefault();
@@ -513,8 +482,8 @@ if (portalId === "btc") {
   // Boot
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
-    initTutorial();
     initPortals();
+    setIdleSoon();
     initEventsModal();
     initBTCModalControls();
 
