@@ -9,16 +9,43 @@ const reveal = document.getElementById("portal-card-reveal");
 const cardInner = document.getElementById("portal-card-reveal-inner");
 const cardStage = document.querySelector(".card-stage");
 const video = document.getElementById("portal-reveal-video");
-const replayButton = document.getElementById("replay-portal-reveal");
 const skipButton = document.getElementById("skip-portal-reveal");
+const guide = document.getElementById("portal-discovery-guide");
+const portalButtons = [...document.querySelectorAll(".clickable-area")];
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let isPlaying = false;
 let skipRequested = false;
 let skipClipWait = null;
+let guideTimer = null;
 
 function wait(ms) {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+function showPortalGuide() {
+  if (!guide || !portalButtons.length) return;
+
+  guide.textContent = window.matchMedia("(any-hover: hover)").matches
+    ? "Tap an icon to explore · hover or focus to preview"
+    : "Tap an icon to explore";
+  guide.hidden = false;
+  requestAnimationFrame(() => guide.classList.add("is-visible"));
+
+  let index = 0;
+  const pulseNext = () => {
+    portalButtons.forEach((button) => button.classList.remove("is-guided"));
+    if (index >= portalButtons.length) return;
+    portalButtons[index++].classList.add("is-guided");
+    guideTimer = window.setTimeout(pulseNext, 420);
+  };
+  pulseNext();
+
+  guideTimer = window.setTimeout(() => {
+    portalButtons.forEach((button) => button.classList.remove("is-guided"));
+    guide.classList.remove("is-visible");
+    window.setTimeout(() => { guide.hidden = true; }, 240);
+  }, 420 * (portalButtons.length + 1));
 }
 
 function playClip(src) {
@@ -54,14 +81,17 @@ function playClip(src) {
 
 async function runReveal({ automatic = false } = {}) {
   if (isPlaying || !reveal || !cardInner || !cardStage || !video) return;
-  if (automatic && (prefersReducedMotion.matches || document.hidden)) return;
-  if (automatic && localStorage.getItem(REVEAL_SEEN_KEY) === "true") return;
+  if (automatic && (document.hidden || localStorage.getItem(REVEAL_SEEN_KEY) === "true")) return;
 
-  const returnFocus = document.activeElement === skipButton || document.activeElement === replayButton;
+  if (automatic && prefersReducedMotion.matches) {
+    localStorage.setItem(REVEAL_SEEN_KEY, "true");
+    showPortalGuide();
+    return;
+  }
+
+  const restoreFocus = document.activeElement === skipButton;
   isPlaying = true;
   skipRequested = false;
-  replayButton.disabled = true;
-  replayButton.hidden = true;
   cardStage.inert = true;
   reveal.hidden = false;
   reveal.setAttribute("aria-hidden", "false");
@@ -69,47 +99,37 @@ async function runReveal({ automatic = false } = {}) {
   requestAnimationFrame(() => reveal.classList.add("is-active"));
   await wait(40);
 
-  const shouldFlip = !automatic || !prefersReducedMotion.matches;
-  if (shouldFlip) {
-    cardInner.classList.add("is-flipped");
-    if (!prefersReducedMotion.matches) await wait(760);
-  }
+  cardInner.classList.add("is-flipped");
+  await wait(760);
 
   for (const clip of CLIPS) {
     if (skipRequested || document.hidden) break;
     await playClip(clip);
   }
 
-  if (shouldFlip && !document.hidden) {
+  if (!document.hidden) {
     cardInner.classList.remove("is-flipped");
-    if (!prefersReducedMotion.matches) await wait(760);
+    await wait(760);
   } else {
     cardInner.classList.remove("is-flipped");
   }
 
   reveal.classList.remove("is-active");
   await wait(220);
-  const shouldRestoreFocus = returnFocus || document.activeElement === skipButton;
   reveal.hidden = true;
   reveal.setAttribute("aria-hidden", "true");
   cardStage.inert = false;
-  replayButton.disabled = false;
-  replayButton.hidden = false;
   video.pause();
   video.removeAttribute("src");
   video.load();
   localStorage.setItem(REVEAL_SEEN_KEY, "true");
   isPlaying = false;
 
-  if (shouldRestoreFocus) replayButton.focus({ preventScroll: true });
+  if (restoreFocus) cardStage.querySelector(".clickable-area")?.focus({ preventScroll: true });
+  if (automatic || skipRequested) showPortalGuide();
 }
 
-document.addEventListener("chs:portal-ready", () => {
-  replayButton.hidden = false;
-  runReveal({ automatic: true });
-});
-
-replayButton?.addEventListener("click", () => runReveal());
+document.addEventListener("chs:portal-ready", () => runReveal({ automatic: true }));
 
 skipButton?.addEventListener("click", () => {
   skipRequested = true;
