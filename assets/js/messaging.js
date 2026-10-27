@@ -588,6 +588,7 @@ const MessagingModule = (function () {
       await window.supabase
         .from("conversations")
         .update({
+          updated_at: new Date().toISOString(),
           last_message_at: new Date().toISOString(),
           last_message_preview: messageText.slice(0, 120)
         })
