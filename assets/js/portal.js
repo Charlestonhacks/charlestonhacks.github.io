@@ -494,7 +494,13 @@ if (portalId === "btc") {
         }
 
         const url = area.dataset.url;
-        if (url && url !== "#") setTimeout(() => { window.location.href = url; }, 200);
+        if (url && url !== "#") {
+          const destination = new URL(url, window.location.href);
+          if (destination.origin === window.location.origin) {
+            destination.searchParams.set("returnTo", "hub");
+          }
+          setTimeout(() => { window.location.href = destination.href; }, 200);
+        }
       });
 
       area.addEventListener("keydown", (e) => {
