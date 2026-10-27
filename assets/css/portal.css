@@ -270,6 +270,7 @@ body {
 
 .media-container {
   position: relative;
+  z-index: 2; /* Keep the portal card and reveal above the animated background canvas. */
   perspective: 1500px;
   transform-style: preserve-3d;
   animation: cardEntrance 1.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -346,29 +347,38 @@ body {
   background: linear-gradient(180deg, rgba(0,0,0,0.18), rgba(0,0,0,0.72));
 }
 .portal-reveal-copy {
-  position: relative;
+  position: absolute;
   z-index: 1;
-  width: min(82%, 440px);
-  text-align: center;
-  padding: 1.4rem;
-  border: 1px solid rgba(201,163,94,0.65);
-  border-radius: 18px;
-  background: rgba(0,0,0,0.55);
+  left: 50%;
+  bottom: clamp(76px, 10%, 96px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  width: min(78%, 390px);
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(201,163,94,0.72);
+  border-radius: 14px;
+  text-align: left;
+  background: rgba(0,0,0,0.84);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 .portal-reveal-copy img {
-  width: min(78%, 300px);
-  max-height: 90px;
+  flex: 0 0 34%;
+  width: 34%;
+  max-height: 46px;
   object-fit: contain;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 .portal-reveal-copy p {
+  flex: 1;
   margin: 0;
   color: #fff;
-  font-size: clamp(0.78rem, 2vw, 1.1rem);
-  letter-spacing: 0.06em;
-  line-height: 1.55;
+  font-size: clamp(0.66rem, 1.15vw, 0.86rem);
+  letter-spacing: 0.025em;
+  line-height: 1.35;
 }
 .skip-portal-reveal {
   position: absolute;
@@ -426,7 +436,14 @@ body {
 }
 @media (max-width: 600px) {
   .replay-portal-reveal { left: 10px; bottom: 10px; padding: 0.55rem 0.7rem; font-size: 0.6rem; }
-  .portal-reveal-copy { padding: 1rem; }
+  .portal-reveal-copy {
+    bottom: clamp(76px, 10%, 88px);
+    gap: 0.55rem;
+    width: min(84%, 390px);
+    padding: 0.6rem 0.7rem;
+  }
+  .portal-reveal-copy img { flex-basis: 32%; width: 32%; max-height: 38px; }
+  .portal-reveal-copy p { font-size: clamp(0.6rem, 2.65vw, 0.72rem); }
   .skip-portal-reveal { right: 9px; bottom: 9px; }
 }
 @media (prefers-reduced-motion: reduce) {
