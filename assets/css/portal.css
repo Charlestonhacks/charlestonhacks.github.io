@@ -268,10 +268,16 @@ body {
   min-width: 0;
   min-height: 0;
 }
+.portal-view-content:not(.portal-events-view) {
+  display: flex;
+  flex-direction: column;
+}
 .portal-view-content iframe {
   display: block;
+  flex: 1 1 auto;
   width: 100%;
-  height: 100%;
+  height: auto;
+  min-height: 0;
   border: 0;
   background: #05080f;
 }
