@@ -1145,3 +1145,91 @@ button:focus {
   white-space: nowrap;
   border-width: 0;
 }
+
+
+/* Responsive in-card destinations: keep the portal platform behind the view,
+   while giving content a useful reading area at each viewport size. */
+@media (min-width: 900px) and (min-height: 561px) and (orientation: landscape) {
+  .portal-view-panel {
+    inset: 50% auto auto 50%;
+    width: min(84vw, calc(100vw - 220px), 1280px);
+    height: min(78vh, 820px);
+    height: min(78dvh, 820px);
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+    transform-origin: center;
+    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) rotateY(0deg) scale(1);
+  }
+}
+
+/* Landscape tablets get the same readable layout while leaving some platform
+   visible around the card. */
+@media (min-width: 700px) and (max-width: 899px) and (min-height: 561px) and (orientation: landscape) {
+  .portal-view-panel {
+    inset: 50% auto auto 50%;
+    width: min(92vw, 860px);
+    height: min(76vh, 680px);
+    height: min(76dvh, 680px);
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) rotateY(0deg) scale(1);
+  }
+}
+
+/* Short landscape viewports, including phones, use the width available between
+   the fixed navigation and lower controls. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .portal-view-panel {
+    inset: 50% auto auto 50%;
+    width: min(94vw, 1100px);
+    height: min(70vh, calc(100vh - 120px), 420px);
+    height: min(70dvh, calc(100dvh - 120px), 420px);
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+    transition: opacity 280ms ease, transform 620ms cubic-bezier(0.2, 0.75, 0.25, 1);
+  }
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) rotateY(88deg) scale(0.96);
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) rotateY(0deg) scale(1);
+  }
+}
+
+/* Portrait phones and compact tablets keep the card upright and centered, with
+   a tall, scroll-safe content area that respects browser and device insets. */
+@media (max-width: 899px) and (orientation: portrait) {
+  .portal-view-panel {
+    inset: 50% auto auto 50%;
+    width: min(calc(100vw - 24px), 620px);
+    height: min(calc(100vh - 158px - env(safe-area-inset-bottom)), 900px);
+    height: min(calc(100dvh - 158px - env(safe-area-inset-bottom)), 900px);
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Keep long content usable when device text settings enlarge fonts. */
+.portal-view-header,
+.portal-view-body,
+.portal-view-content {
+  min-width: 0;
+}
+.portal-view-intro {
+  max-height: 5.5em;
+  overflow: auto;
+}
