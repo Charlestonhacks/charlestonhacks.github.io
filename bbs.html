@@ -126,17 +126,28 @@
       display: flex;
       align-items: flex-start;
       justify-content: center;
+      width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
       padding: 24px 16px 40px;
       min-height: calc(100vh - 58px);
     }
 
     #bbs-modal #bbs-wrapper {
       width: min(100%, 760px) !important;
+      max-width: 100%;
+      min-width: 0 !important;
       max-height: none !important;
     }
 
     #bbs-modal #bbs-screen {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
       height: min(480px, 55vh) !important;
+      overflow-x: hidden;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
     #bbs-modal #bbs-close {
