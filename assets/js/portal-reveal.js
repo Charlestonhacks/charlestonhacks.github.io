@@ -60,6 +60,7 @@ async function runReveal({ automatic = false } = {}) {
   isPlaying = true;
   skipRequested = false;
   replayButton.disabled = true;
+  replayButton.hidden = true;
   cardStage.inert = true;
   reveal.hidden = false;
   reveal.setAttribute("aria-hidden", "false");
@@ -90,6 +91,7 @@ async function runReveal({ automatic = false } = {}) {
   reveal.setAttribute("aria-hidden", "true");
   cardStage.inert = false;
   replayButton.disabled = false;
+  replayButton.hidden = false;
   video.pause();
   video.removeAttribute("src");
   video.load();
@@ -100,6 +102,7 @@ async function runReveal({ automatic = false } = {}) {
 }
 
 document.addEventListener("chs:portal-ready", () => {
+  replayButton.hidden = false;
   runReveal({ automatic: true });
 });
 
