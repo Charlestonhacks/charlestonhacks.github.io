@@ -17,16 +17,8 @@
 
   // Cache DOM once (performance + consistency)
   const DOM = {
-    body: document.body,
-
-    // overlays
-    splash: $("#splash-overlay"),
+    // first-visit portal tutorial
     tutorial: $("#tutorial-overlay"),
-
-    // splash buttons
-    communityBtn: $("#community-site-btn"),
-    publicBtn: $("#public-site-btn"),
-    dontShowAgain: $("#dont-show-again"),
     skipTutorial: $("#skip-tutorial"),
 
     // portal UI
@@ -105,9 +97,8 @@
   }
 
   // ------------------------------------------------
-  // Splash + Tutorial
+  // First-visit portal tutorial
   // ------------------------------------------------
-  const SPLASH_KEY = "chs_splash_seen_once";
   const TUTORIAL_KEY = "chs_tutorial_completed";
 
   function setIdleSoon() {
@@ -117,67 +108,30 @@
     }, 500);
   }
 
-  function checkTutorial() {
-    if (!DOM.tutorial) return;
-
-    if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
-      setTimeout(() => DOM.tutorial.classList.add("active"), 300);
-    } else {
+  function initTutorial() {
+    if (!DOM.tutorial) {
       setIdleSoon();
-    }
-  }
-
-  function hideSplash(immediate = false) {
-    if (!DOM.splash) return;
-
-    DOM.splash.classList.add("fade-out");
-    DOM.body.classList.remove("splash-active");
-
-    setTimeout(() => {
-      if (DOM.splash) DOM.splash.style.display = "none";
-      checkTutorial();
-    }, immediate ? 0 : 600);
-  }
-
-  function initSplashTutorial() {
-    const splashSeen = localStorage.getItem(SPLASH_KEY) === "true";
-
-    function dismissSplash() {
-      if (DOM.dontShowAgain?.checked) localStorage.setItem(SPLASH_KEY, "true");
-      hideSplash(false);
+      return;
     }
 
     function closeTutorial() {
-      DOM.tutorial?.classList.remove("active");
+      DOM.tutorial.classList.remove("active");
       localStorage.setItem(TUTORIAL_KEY, "true");
       setIdleSoon();
     }
 
     DOM.skipTutorial?.addEventListener("click", closeTutorial);
 
-    if (splashSeen) {
-      hideSplash(true);
+    if (localStorage.getItem(TUTORIAL_KEY) !== "true") {
+      setTimeout(() => DOM.tutorial.classList.add("active"), 300);
     } else {
-      if (DOM.splash) {
-        DOM.splash.style.display = "flex";
-        DOM.body.classList.add("splash-active");
-      }
-      DOM.communityBtn &&
-        (DOM.communityBtn.onclick = (e) => {
-          e.preventDefault();
-          dismissSplash();
-          window.location.href = "community.html";
-        });
-      DOM.publicBtn &&
-        (DOM.publicBtn.onclick = (e) => {
-          e.preventDefault();
-          dismissSplash();
-          window.location.href = "news.html";
-        });
+      setIdleSoon();
     }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && DOM.tutorial?.classList.contains("active")) closeTutorial();
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && DOM.tutorial.classList.contains("active")) {
+        closeTutorial();
+      }
     });
   }
 
@@ -559,16 +513,10 @@ if (portalId === "btc") {
   // Boot
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
-    initSplashTutorial();
+    initTutorial();
     initPortals();
     initEventsModal();
     initBTCModalControls();
-
-    // Keep previous behavior: idle state once overlays are done
-    // (If splash/tutorial are skipped via localStorage, this ensures UI still settles.)
-    if (localStorage.getItem(SPLASH_KEY) === "true" && localStorage.getItem(TUTORIAL_KEY) === "true") {
-      setIdleSoon();
-    }
 
     // Ensure BTC overlay is safely inert/hidden when not active (in case HTML changed)
     if (DOM.btcOverlay && !DOM.btcOverlay.classList.contains("active")) {
