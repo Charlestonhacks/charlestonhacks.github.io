@@ -437,6 +437,146 @@ if (portalId === "btc") {
   }
 
   // ------------------------------------------------
+  // Directional card gestures
+  // ------------------------------------------------
+  function initCardGestures() {
+    const stage = document.querySelector(".card-stage");
+    const guide = document.getElementById("portal-discovery-guide");
+    if (!stage || !guide) return;
+
+    const portal = (id) => stage.querySelector(`.clickable-area[data-portal="${id}"]`);
+    const destinations = {
+      up: { label: "Events calendar", action: "calendar" },
+      right: { label: "Buildspace", action: "portal", portal: "innovation" },
+      down: { label: "News", action: "portal", portal: "news" },
+      left: { label: "Community Chat", action: "navigate", url: "/bbs.html" },
+    };
+
+    let gesture = null;
+    let suppressClickUntil = 0;
+    let resetGuideTimer = null;
+
+    const hideGuide = () => {
+      guide.classList.remove("is-visible");
+      resetGuideTimer = window.setTimeout(() => { guide.hidden = true; }, 240);
+    };
+    const showPreview = (direction) => {
+      const destination = destinations[direction];
+      if (!destination) return;
+      window.clearTimeout(resetGuideTimer);
+      const arrow = { up: "↑", right: "→", down: "↓", left: "←" }[direction];
+      guide.textContent = `${arrow} ${destination.label} — release to open`;
+      guide.hidden = false;
+      requestAnimationFrame(() => guide.classList.add("is-visible"));
+    };
+    const clearDrag = () => {
+      stage.classList.remove("is-dragging");
+      stage.style.removeProperty("--swipe-rotate-x");
+      stage.style.removeProperty("--swipe-rotate-y");
+    };
+    const setTilt = (dx, dy) => {
+      const rect = stage.getBoundingClientRect();
+      const rotateY = Math.max(-14, Math.min(14, dx / Math.max(rect.width * 0.45, 1) * 14));
+      const rotateX = Math.max(-14, Math.min(14, -dy / Math.max(rect.height * 0.45, 1) * 14));
+      stage.style.setProperty("--swipe-rotate-x", `${rotateX}deg`);
+      stage.style.setProperty("--swipe-rotate-y", `${rotateY}deg`);
+    };
+    const getDirection = (dx, dy) => {
+      if (Math.max(Math.abs(dx), Math.abs(dy)) < 12) return null;
+      if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? "right" : "left";
+      return dy > 0 ? "down" : "up";
+    };
+    const resetToHome = () => {
+      stage.classList.remove("is-committing-up", "is-committing-right", "is-committing-down", "is-committing-left");
+      clearDrag();
+    };
+    const openDestination = (direction) => {
+      const destination = destinations[direction];
+      if (!destination) return;
+      if (destination.action === "calendar") {
+        resetToHome();
+        window.setTimeout(() => DOM.openCalendarBtn?.click(), 140);
+      } else if (destination.action === "portal") {
+        portal(destination.portal)?.click();
+      } else {
+        if (typeof gtag === "function") {
+          gtag("event", "portal_swipe_open", { direction, destination: destination.label });
+        }
+        window.location.href = new URL(destination.url, window.location.href).href;
+      }
+    };
+
+    stage.addEventListener("pointerdown", (event) => {
+      if (!event.isPrimary || event.button !== 0 || stage.inert) return;
+      gesture = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        direction: null,
+        moved: false,
+      };
+      try { stage.setPointerCapture(event.pointerId); } catch {}
+    });
+
+    stage.addEventListener("pointermove", (event) => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      const dx = event.clientX - gesture.startX;
+      const dy = event.clientY - gesture.startY;
+      const direction = getDirection(dx, dy);
+      if (!direction) return;
+
+      gesture.moved = true;
+      gesture.direction = direction;
+      stage.classList.add("is-dragging");
+      setTilt(dx, dy);
+      showPreview(direction);
+    });
+
+    stage.addEventListener("pointerup", (event) => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      const current = gesture;
+      gesture = null;
+      const deltaX = event.clientX - current.startX;
+      const deltaY = event.clientY - current.startY;
+      const direction = getDirection(deltaX, deltaY);
+      const extent = direction === "left" || direction === "right"
+        ? stage.getBoundingClientRect().width
+        : stage.getBoundingClientRect().height;
+      const distance = direction === "left" || direction === "right" ? Math.abs(deltaX) : Math.abs(deltaY);
+      const threshold = Math.max(48, Math.min(92, extent * 0.16));
+
+      if (!direction || distance < threshold) {
+        clearDrag();
+        hideGuide();
+        return;
+      }
+
+      suppressClickUntil = Date.now() + 500;
+      stage.classList.remove("is-dragging");
+      clearDrag();
+      stage.classList.add(`is-committing-${direction}`);
+      window.setTimeout(() => openDestination(direction), 360);
+    });
+
+    const cancelGesture = (event) => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      gesture = null;
+      clearDrag();
+      hideGuide();
+    };
+    stage.addEventListener("pointercancel", cancelGesture);
+    stage.addEventListener("lostpointercapture", cancelGesture);
+
+    stage.addEventListener("click", (event) => {
+      if (event.detail > 0 && Date.now() < suppressClickUntil) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        suppressClickUntil = 0;
+      }
+    }, true);
+  }
+
+  // ------------------------------------------------
   // Events modal controls
   // ------------------------------------------------
   function initEventsModal() {
@@ -483,6 +623,7 @@ if (portalId === "btc") {
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
     initPortals();
+    initCardGestures();
     setIdleSoon();
     initEventsModal();
     initBTCModalControls();
