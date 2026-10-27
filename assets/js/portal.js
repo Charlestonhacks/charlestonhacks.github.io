@@ -417,6 +417,15 @@ if (portalId === "btc") {
           if (soundKey) playSoundById(soundKey + "Sound");
         }
 
+        if (portalId === "innovation") {
+          openCardDestination("buildspace", "right", area);
+          return;
+        }
+        if (portalId === "news") {
+          openCardDestination("news", "down", area);
+          return;
+        }
+
         const url = area.dataset.url;
         if (url && url !== "#") {
           const destination = new URL(url, window.location.href);
@@ -437,6 +446,137 @@ if (portalId === "btc") {
   }
 
   // ------------------------------------------------
+  // Card destination panel
+  // ------------------------------------------------
+  let openCardDestination = () => false;
+
+  function initCardDestinationPanel() {
+    const stage = document.querySelector(".card-stage");
+    const panel = document.getElementById("portal-view-panel");
+    const title = document.getElementById("portal-view-title");
+    const homeButton = document.getElementById("portal-view-home");
+    const externalLink = document.getElementById("portal-view-external");
+    const views = [...(panel?.querySelectorAll("[data-view]") || [])];
+    const viewConfig = {
+      events: { title: "Events" },
+      buildspace: {
+        title: "Buildspace",
+        frame: document.getElementById("portal-buildspace-frame"),
+        src: "https://deckerd451.github.io/innovation-engine/",
+        external: "https://deckerd451.github.io/innovation-engine/",
+      },
+      news: {
+        title: "News",
+        frame: document.getElementById("portal-news-frame"),
+        src: "/news.html",
+      },
+      chat: {
+        title: "Community Chat",
+        frame: document.getElementById("portal-chat-frame"),
+        src: "/bbs.html",
+      },
+    };
+    if (!stage || !panel || !title || !homeButton) return () => false;
+
+    let returnFocus = null;
+    let activeView = null;
+    let eventsLoaded = false;
+
+    function resetStage() {
+      stage.classList.remove(
+        "is-committing-up",
+        "is-committing-right",
+        "is-committing-down",
+        "is-committing-left"
+      );
+      stage.style.removeProperty("--swipe-rotate-x");
+      stage.style.removeProperty("--swipe-rotate-y");
+      stage.style.removeProperty("--swipe-translate-x");
+      stage.style.removeProperty("--swipe-translate-y");
+      stage.style.removeProperty("--swipe-scale");
+      stage.inert = false;
+    }
+
+    async function loadEventsIntoPanel() {
+      if (eventsLoaded) return;
+      eventsLoaded = true;
+      const list = document.getElementById("portal-events-list");
+      if (list) list.textContent = "Loading events…";
+      try {
+        const loadEvents = await loadEventsFeedModule();
+        if (typeof loadEvents === "function") {
+          await loadEvents({
+            listId: "portal-events-list",
+            limit: 10,
+            emptyText: "No upcoming events found. Check back later!",
+            errorText: "The event list could not load. Please try again later.",
+          });
+        }
+      } catch {
+        if (list) list.textContent = "The event list could not load. Please try again later.";
+      }
+    }
+
+    function show(viewName, direction, trigger = document.activeElement) {
+      const config = viewConfig[viewName];
+      const content = panel.querySelector(`[data-view="${viewName}"]`);
+      if (!config || !content) return false;
+
+      returnFocus = trigger instanceof HTMLElement ? trigger : null;
+      activeView = viewName;
+      title.textContent = config.title;
+      externalLink.hidden = !config.external;
+      if (config.external) {
+        externalLink.href = config.external;
+        externalLink.setAttribute("aria-label", "Open Buildspace separately");
+      } else {
+        externalLink.removeAttribute("href");
+      }
+
+      views.forEach((view) => { view.hidden = view !== content; });
+      panel.dataset.origin = direction || "right";
+      panel.classList.remove("is-open");
+      panel.hidden = false;
+      panel.inert = false;
+      panel.setAttribute("aria-hidden", "false");
+      stage.inert = true;
+      stage.classList.add(`is-committing-${direction || "right"}`);
+
+      requestAnimationFrame(() => panel.classList.add("is-open"));
+      window.setTimeout(() => homeButton.focus({ preventScroll: true }), 360);
+
+      if (config.frame && !config.frame.hasAttribute("src")) {
+        config.frame.src = config.src;
+      }
+      if (viewName === "events") loadEventsIntoPanel();
+      return true;
+    }
+
+    function close() {
+      if (panel.hidden) return;
+      panel.classList.remove("is-open");
+      panel.inert = true;
+      panel.setAttribute("aria-hidden", "true");
+      resetStage();
+      window.setTimeout(() => {
+        panel.hidden = true;
+        panel.removeAttribute("data-origin");
+        if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+        else stage.querySelector(".clickable-area")?.focus({ preventScroll: true });
+        returnFocus = null;
+        activeView = null;
+      }, 360);
+    }
+
+    homeButton.addEventListener("click", close);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !panel.hidden) close();
+    });
+
+    return (viewName, direction, trigger) => show(viewName, direction, trigger);
+  }
+
+  // ------------------------------------------------
   // Directional card gestures
   // ------------------------------------------------
   function initCardGestures() {
@@ -446,10 +586,10 @@ if (portalId === "btc") {
 
     const portal = (id) => stage.querySelector(`.clickable-area[data-portal="${id}"]`);
     const destinations = {
-      up: { label: "Events calendar", action: "calendar" },
-      right: { label: "Buildspace", action: "portal", portal: "innovation" },
-      down: { label: "News", action: "portal", portal: "news" },
-      left: { label: "Community Chat", action: "navigate", url: "/bbs.html" },
+      up: { label: "Events", view: "events" },
+      right: { label: "Buildspace", view: "buildspace" },
+      down: { label: "News", view: "news" },
+      left: { label: "Community Chat", view: "chat" },
     };
 
     let gesture = null;
@@ -509,17 +649,10 @@ if (portalId === "btc") {
     const openDestination = (direction) => {
       const destination = destinations[direction];
       if (!destination) return;
-      if (destination.action === "calendar") {
-        resetToHome();
-        window.setTimeout(() => DOM.openCalendarBtn?.click(), 140);
-      } else if (destination.action === "portal") {
-        portal(destination.portal)?.click();
-      } else {
-        if (typeof gtag === "function") {
-          gtag("event", "portal_swipe_open", { direction, destination: destination.label });
-        }
-        window.location.href = new URL(destination.url, window.location.href).href;
+      if (typeof gtag === "function") {
+        gtag("event", "portal_swipe_open", { direction, destination: destination.label });
       }
+      openCardDestination(destination.view, direction, document.activeElement);
     };
 
     stage.addEventListener("pointerdown", (event) => {
@@ -669,6 +802,7 @@ if (portalId === "btc") {
   // Boot
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
+    openCardDestination = initCardDestinationPanel();
     initPortals();
     initCardGestures();
     setIdleSoon();
