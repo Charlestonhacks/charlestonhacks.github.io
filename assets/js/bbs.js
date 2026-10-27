@@ -85,7 +85,7 @@ export async function initBBS() {
       }
 
       if (text.toLowerCase() === "/chs") {
-        write(screen, "The phosphor flickers cyan: above you, builders gather by the harbor; below, the Great Underground Empire waits.\n");
+        write(screen, "A signal resolves: CHARLESTONHACKS, CHARLESTON, SC.\nBy the harbor, builders, designers, and curious minds gather for hackathons—to form teams, share skills, and make things together.\nThe next challenge is aboveground; yours waits below.\n");
         return;
       }
 
