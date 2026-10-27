@@ -483,8 +483,6 @@ if (portalId === "btc") {
         title: "Community Chat",
         frame: document.getElementById("portal-chat-frame"),
         src: "/bbs.html",
-        external: "/bbs.html",
-        externalLabel: "Open Community Chat separately",
       },
     };
     if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
