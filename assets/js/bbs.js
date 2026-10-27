@@ -94,7 +94,7 @@ export async function initBBS() {
     }
 
     if (text === "zork" || text === "play zork" || text === "/zork") {
-      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat. Type /chs for a CharlestonHacks signal.\n");
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat; /chs for a CharlestonHacks signal.\nSave with save; later, start Zork and type restore.\nYour save is tied to this browser guest name; each new save replaces the last.\n");
       currentMode = "zork";
       setBbsInputMode(input, true);
       input.disabled = true;
