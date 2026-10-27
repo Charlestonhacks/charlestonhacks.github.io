@@ -479,7 +479,6 @@ if (portalId === "btc") {
     if (!stage || !panel || !title || !homeButton) return () => false;
 
     let returnFocus = null;
-    let activeView = null;
     let eventsLoaded = false;
 
     function resetStage() {
@@ -523,7 +522,6 @@ if (portalId === "btc") {
       if (!config || !content) return false;
 
       returnFocus = trigger instanceof HTMLElement ? trigger : null;
-      activeView = viewName;
       title.textContent = config.title;
       externalLink.hidden = !config.external;
       if (config.external) {
@@ -564,7 +562,6 @@ if (portalId === "btc") {
         if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
         else stage.querySelector(".clickable-area")?.focus({ preventScroll: true });
         returnFocus = null;
-        activeView = null;
       }, 360);
     }
 
@@ -584,7 +581,6 @@ if (portalId === "btc") {
     const guide = document.getElementById("portal-discovery-guide");
     if (!stage || !guide) return;
 
-    const portal = (id) => stage.querySelector(`.clickable-area[data-portal="${id}"]`);
     const destinations = {
       up: { label: "Events", view: "events" },
       right: { label: "Buildspace", view: "buildspace" },
@@ -641,10 +637,6 @@ if (portalId === "btc") {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 12) return null;
       if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? "right" : "left";
       return dy > 0 ? "down" : "up";
-    };
-    const resetToHome = () => {
-      stage.classList.remove("is-committing-up", "is-committing-right", "is-committing-down", "is-committing-left");
-      clearDrag();
     };
     const openDestination = (direction) => {
       const destination = destinations[direction];
