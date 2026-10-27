@@ -425,6 +425,10 @@ if (portalId === "btc") {
           openCardDestination("news", "down", area);
           return;
         }
+        if (portalId === "sandbox") {
+          openCardDestination("sandbox", "right", area);
+          return;
+        }
 
         const url = area.dataset.url;
         if (url && url !== "#") {
@@ -464,6 +468,11 @@ if (portalId === "btc") {
         frame: document.getElementById("portal-buildspace-frame"),
         src: "https://deckerd451.github.io/innovation-engine/",
         external: "https://deckerd451.github.io/innovation-engine/",
+      },
+      sandbox: {
+        title: "Sandbox",
+        frame: document.getElementById("portal-sandbox-frame"),
+        src: "/experimental.html",
       },
       news: {
         title: "News",
@@ -590,7 +599,7 @@ if (portalId === "btc") {
 
     const destinations = {
       up: { label: "Events", view: "events" },
-      right: { label: "Buildspace", view: "buildspace" },
+      right: { label: "Sandbox", view: "sandbox" },
       down: { label: "News", view: "news" },
       left: { label: "Community Chat", view: "chat" },
     };
