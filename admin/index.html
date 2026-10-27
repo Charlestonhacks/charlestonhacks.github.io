@@ -198,8 +198,8 @@
 
     <!-- Auth gate: shown when not signed in -->
     <div id="auth-gate" class="auth-gate">
-      <h2>Sign in required</h2>
-      <p>You need to be signed in to access admin tools.</p>
+      <h2 id="auth-gate-title">Sign in required</h2>
+      <p id="auth-gate-message">Sign in with your CharlestonHacks account to continue.</p>
       <button class="btn-sm btn-login" id="loginBtn">
         <i class="fab fa-github" style="margin-right:0.4rem;"></i>Sign in with GitHub
       </button>
@@ -260,6 +260,19 @@
     const userDisplay = document.getElementById('userDisplay');
     const loginBtn = document.getElementById('loginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const gateTitle = document.getElementById('auth-gate-title');
+    const gateMessage = document.getElementById('auth-gate-message');
+    let accessCheckId = 0;
+
+    function showGate({ signedIn = false, title, message } = {}) {
+      authGate.hidden = false;
+      adminContent.hidden = true;
+      gateTitle.textContent = title || (signedIn ? 'Admin access required' : 'Sign in required');
+      gateMessage.textContent = message || (signedIn
+        ? 'This account does not have CharlestonHacks admin access.'
+        : 'Sign in with your CharlestonHacks account to continue.');
+      loginBtn.hidden = signedIn;
+    }
 
     function showAdmin(user) {
       authGate.hidden = true;
@@ -267,31 +280,65 @@
       userDisplay.textContent = user.user_metadata?.user_name || user.email || 'Admin';
     }
 
-    function showGate() {
-      authGate.hidden = false;
+    async function applyAccess(user) {
+      const checkId = ++accessCheckId;
       adminContent.hidden = true;
-    }
 
-    // Check session on load
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      // TODO: Add stricter admin role check here once a role system exists.
-      // For now, any signed-in user can view the admin hub.
-      showAdmin(session.user);
-    } else {
-      showGate();
-    }
-
-    // Auth state changes
-    supabase.auth.onAuthStateChange((_event, sess) => {
-      if (sess?.user) {
-        showAdmin(sess.user);
-      } else {
+      if (!user) {
         showGate();
+        return;
       }
+
+      showGate({
+        signedIn: true,
+        title: 'Checking admin access…',
+        message: 'Verifying your CharlestonHacks account.'
+      });
+
+      try {
+        const { data: profile, error } = await supabase
+          .from('community')
+          .select('user_role, is_disabled')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (checkId !== accessCheckId) return;
+        if (error) throw error;
+
+        if (profile?.user_role === 'Admin' && profile.is_disabled !== true) {
+          showAdmin(user);
+          return;
+        }
+
+        showGate({ signedIn: true });
+      } catch (error) {
+        console.error('[Admin] Access check failed:', error);
+        if (checkId === accessCheckId) {
+          showGate({
+            signedIn: true,
+            title: 'Admin access could not be verified',
+            message: 'Refresh the page or contact a CharlestonHacks administrator.'
+          });
+        }
+      }
+    }
+
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error('[Admin] Session check failed:', sessionError);
+      showGate({
+        signedIn: true,
+        title: 'Admin access could not be verified',
+        message: 'Refresh the page or contact a CharlestonHacks administrator.'
+      });
+    } else {
+      await applyAccess(session?.user ?? null);
+    }
+
+    supabase.auth.onAuthStateChange((_event, session) => {
+      void applyAccess(session?.user ?? null);
     });
 
-    // Login
     loginBtn.addEventListener('click', async () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'github',
@@ -300,7 +347,6 @@
       if (error) console.error('[Admin] Login error:', error.message);
     });
 
-    // Logout
     logoutBtn.addEventListener('click', async () => {
       await supabase.auth.signOut();
       showGate();
