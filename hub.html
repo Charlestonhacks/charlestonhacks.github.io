@@ -389,6 +389,34 @@
         </div>
         <!-- /card-stage -->
 
+        <!-- In-card destination views; the home card stays mounted underneath. -->
+        <section class="portal-view-panel" id="portal-view-panel" aria-labelledby="portal-view-title" aria-hidden="true" inert hidden>
+          <header class="portal-view-header">
+            <button type="button" class="portal-view-home" id="portal-view-home" aria-label="Return to the home card">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i><span>Home</span>
+            </button>
+            <h2 id="portal-view-title">Events</h2>
+            <a class="portal-view-external" id="portal-view-external" target="_blank" rel="noopener noreferrer" hidden>
+              Open separately <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </header>
+          <div class="portal-view-body">
+            <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming events" hidden>
+              <p class="portal-view-intro">Upcoming CharlestonHacks and community events</p>
+              <div id="portal-events-list" class="portal-events-list" role="list"></div>
+            </section>
+            <div class="portal-view-content" data-view="buildspace" hidden>
+              <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="news" hidden>
+              <iframe id="portal-news-frame" title="CharlestonHacks News" loading="lazy"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="chat" hidden>
+              <iframe id="portal-chat-frame" title="CharlestonHacks Community Chat" loading="lazy"></iframe>
+            </div>
+          </div>
+        </section>
+
         <!-- Cinematic Member Portal card reveal -->
         <div class="portal-card-reveal" id="portal-card-reveal" hidden aria-hidden="true">
           <div class="portal-card-reveal-inner" id="portal-card-reveal-inner">
