@@ -476,7 +476,7 @@ if (portalId === "btc") {
         src: "/bbs.html",
       },
     };
-    if (!stage || !panel || !title || !homeButton) return () => false;
+    if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
 
     let returnFocus = null;
     let eventsLoaded = false;
@@ -532,6 +532,11 @@ if (portalId === "btc") {
       }
 
       views.forEach((view) => { view.hidden = view !== content; });
+      const guide = document.getElementById("portal-discovery-guide");
+      if (guide) {
+        guide.hidden = true;
+        guide.classList.remove("is-visible");
+      }
       panel.dataset.origin = direction || "right";
       panel.classList.remove("is-open");
       panel.hidden = false;
