@@ -474,13 +474,28 @@ if (portalId === "btc") {
       stage.classList.remove("is-dragging");
       stage.style.removeProperty("--swipe-rotate-x");
       stage.style.removeProperty("--swipe-rotate-y");
+      stage.style.removeProperty("--swipe-translate-x");
+      stage.style.removeProperty("--swipe-translate-y");
+      stage.style.removeProperty("--swipe-scale");
     };
-    const setTilt = (dx, dy) => {
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const setTilt = (dx, dy, direction) => {
       const rect = stage.getBoundingClientRect();
-      const rotateY = Math.max(-14, Math.min(14, dx / Math.max(rect.width * 0.45, 1) * 14));
-      const rotateX = Math.max(-14, Math.min(14, -dy / Math.max(rect.height * 0.45, 1) * 14));
+      const horizontal = direction === "left" || direction === "right";
+      const primary = horizontal
+        ? clamp((dx / Math.max(rect.width, 1)) * 112, -48, 48)
+        : clamp((-dy / Math.max(rect.height, 1)) * 112, -48, 48);
+      const secondary = horizontal
+        ? clamp((-dy / Math.max(rect.height, 1)) * 24, -12, 12)
+        : clamp((dx / Math.max(rect.width, 1)) * 24, -12, 12);
+      const rotateX = horizontal ? secondary : primary;
+      const rotateY = horizontal ? primary : secondary;
       stage.style.setProperty("--swipe-rotate-x", `${rotateX}deg`);
       stage.style.setProperty("--swipe-rotate-y", `${rotateY}deg`);
+      stage.style.setProperty("--swipe-translate-x", `${clamp(dx * 0.14, -42, 42)}px`);
+      stage.style.setProperty("--swipe-translate-y", `${clamp(dy * 0.14, -42, 42)}px`);
+      const progress = Math.min(1, Math.max(Math.abs(dx) / Math.max(rect.width, 1), Math.abs(dy) / Math.max(rect.height, 1)));
+      stage.style.setProperty("--swipe-scale", String(1 - progress * 0.035));
     };
     const getDirection = (dx, dy) => {
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 12) return null;
@@ -513,6 +528,12 @@ if (portalId === "btc") {
         pointerId: event.pointerId,
         startX: event.clientX,
         startY: event.clientY,
+        startTime: event.timeStamp,
+        lastX: event.clientX,
+        lastY: event.clientY,
+        lastTime: event.timeStamp,
+        velocityX: 0,
+        velocityY: 0,
         direction: null,
         moved: false,
         clickTarget: event.target.closest?.(".clickable-area") || null,
@@ -524,6 +545,14 @@ if (portalId === "btc") {
       const dx = event.clientX - gesture.startX;
       const dy = event.clientY - gesture.startY;
       const direction = getDirection(dx, dy);
+      const elapsed = event.timeStamp - gesture.lastTime;
+      if (elapsed > 0) {
+        gesture.velocityX = (event.clientX - gesture.lastX) / elapsed;
+        gesture.velocityY = (event.clientY - gesture.lastY) / elapsed;
+      }
+      gesture.lastX = event.clientX;
+      gesture.lastY = event.clientY;
+      gesture.lastTime = event.timeStamp;
       if (!direction) return;
 
       if (!gesture.moved) {
@@ -532,7 +561,7 @@ if (portalId === "btc") {
       gesture.moved = true;
       gesture.direction = direction;
       stage.classList.add("is-dragging");
-      setTilt(dx, dy);
+      setTilt(dx, dy, direction);
       showPreview(direction);
     });
 
@@ -544,23 +573,29 @@ if (portalId === "btc") {
       const deltaY = event.clientY - current.startY;
       const direction = getDirection(deltaX, deltaY);
       const rect = stage.getBoundingClientRect();
-      const extent = direction === "left" || direction === "right" ? rect.width : rect.height;
-      const distance = direction === "left" || direction === "right" ? Math.abs(deltaX) : Math.abs(deltaY);
-      const threshold = Math.max(48, Math.min(92, extent * 0.16));
+      const horizontal = direction === "left" || direction === "right";
+      const extent = horizontal ? rect.width : rect.height;
+      const distance = horizontal ? Math.abs(deltaX) : Math.abs(deltaY);
+      const threshold = Math.max(28, Math.min(60, extent * 0.08));
+      const directedVelocity = horizontal ? current.velocityX : current.velocityY;
+      const velocity = direction === "left" || direction === "up" ? -directedVelocity : directedVelocity;
+      const quickFlick = distance >= 24 && velocity >= 0.55;
 
-      if (!direction || distance < threshold) {
+      if (!direction || (distance < threshold && !quickFlick)) {
         clearDrag();
         hideGuide();
         return;
       }
 
+      setTilt(deltaX, deltaY, direction);
       if (current.clickTarget) {
         suppressClickTarget = current.clickTarget;
         suppressClickUntil = Date.now() + 600;
       }
       stage.classList.remove("is-dragging");
-      clearDrag();
       stage.classList.add(`is-committing-${direction}`);
+      guide.textContent = `Opening ${destinations[direction].label}…`;
+      window.setTimeout(hideGuide, 280);
       window.setTimeout(() => openDestination(direction), 360);
     });
 
