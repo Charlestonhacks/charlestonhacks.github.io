@@ -197,6 +197,9 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
   const canPost = Boolean(user && currentProfile && !currentProfile.is_disabled);
   input.disabled = !canPost;
   sendButton.disabled = !canPost;
+  input.placeholder = currentMode === "zork"
+    ? "Zork command (or /exit)..."
+    : (canPost ? "type message..." : "Sign in to post…");
   if (canPost) {
     authDiv.innerHTML = `<span>Posting as <strong></strong></span>`;
     authDiv.querySelector("strong").textContent = currentProfile.name;
