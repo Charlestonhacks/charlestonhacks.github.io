@@ -515,7 +515,6 @@ if (portalId === "btc") {
         direction: null,
         moved: false,
       };
-      try { stage.setPointerCapture(event.pointerId); } catch {}
     });
 
     stage.addEventListener("pointermove", (event) => {
@@ -525,6 +524,9 @@ if (portalId === "btc") {
       const direction = getDirection(dx, dy);
       if (!direction) return;
 
+      if (!gesture.moved) {
+        try { stage.setPointerCapture(event.pointerId); } catch {}
+      }
       gesture.moved = true;
       gesture.direction = direction;
       stage.classList.add("is-dragging");
