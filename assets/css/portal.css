@@ -142,10 +142,20 @@ body {
    MAIN CARD ENHANCEMENTS
 ============================ */
 
-/* Ensure card-stage provides the correct positioning context for portal buttons */
+/* Card stage anchors portal buttons and supports direct directional gestures. */
 .card-stage {
   position: relative;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  transform: rotateX(var(--swipe-rotate-x, 0deg)) rotateY(var(--swipe-rotate-y, 0deg));
+  transition: transform 360ms cubic-bezier(0.2, 0.75, 0.25, 1), opacity 280ms ease;
+  touch-action: none;
 }
+.card-stage.is-dragging { transition: none; }
+.card-stage.is-committing-up { transform: rotateX(-88deg) scale(0.92); opacity: 0; }
+.card-stage.is-committing-right { transform: rotateY(88deg) scale(0.92); opacity: 0; }
+.card-stage.is-committing-down { transform: rotateX(88deg) scale(0.92); opacity: 0; }
+.card-stage.is-committing-left { transform: rotateY(-88deg) scale(0.92); opacity: 0; }
 
 .main-wrapper {
   min-height: 100vh;
@@ -338,7 +348,8 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .portal-card-reveal,
-  .portal-card-reveal-inner { transition: none !important; }
+  .portal-card-reveal-inner,
+  .card-stage { transition: none !important; }
   .clickable-area.is-guided { animation: none; }
 }
 
