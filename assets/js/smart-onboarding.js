@@ -141,7 +141,7 @@ async function checkOnboardingStatus() {
 
 // Calculate profile completeness
 function calculateProfileCompleteness(profile) {
-  const fields = ['name', 'bio', 'skills', 'user_role', 'availability'];
+  const fields = ['name', 'bio', 'skills', 'role', 'availability'];
   const completed = fields.filter(field => profile[field] && profile[field].trim().length > 0);
   return completed.length / fields.length;
 }
@@ -776,7 +776,7 @@ window.saveFormAndContinue = function() {
   if (currentUserProfile && supabase) {
     updateUserProfile({
       bio: bio || currentUserProfile.bio,
-      user_role: role || currentUserProfile.user_role,
+      role: role || currentUserProfile.role,
       availability: availability || currentUserProfile.availability
     });
   }
