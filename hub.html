@@ -301,7 +301,7 @@
       <div class="media-container">
 
         <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
-        <div class="card-stage" role="group" aria-label="Interactive portal card. Drag in a direction to open Events, Community Chat, Buildspace, or News. Portal buttons open other features.">
+        <div class="card-stage" role="group" aria-label="Interactive portal card. Drag in a direction to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace; other portal buttons open more features.">
           <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
@@ -388,6 +388,39 @@
           </div>
         </div>
         <!-- /card-stage -->
+
+        <!-- In-card destination views; the home card stays mounted underneath. -->
+        <section class="portal-view-panel" id="portal-view-panel" aria-labelledby="portal-view-title" aria-hidden="true" inert hidden>
+          <header class="portal-view-header">
+            <button type="button" class="portal-view-home" id="portal-view-home" aria-label="Return to the home card">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i><span>Home</span>
+            </button>
+            <h2 id="portal-view-title">Events</h2>
+            <a class="portal-view-external" id="portal-view-external" target="_blank" rel="noopener noreferrer" hidden>
+              Open separately <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
+            </a>
+          </header>
+          <div class="portal-view-body">
+            <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming events" hidden>
+              <p class="portal-view-intro">Upcoming CharlestonHacks and community events</p>
+              <div id="portal-events-list" class="portal-events-list" role="list"></div>
+            </section>
+            <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
+              <p class="portal-view-intro">If sign-in does not complete inside the card, use Open separately.</p>
+              <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="sandbox" hidden>
+              <iframe id="portal-sandbox-frame" title="CharlestonHacks Experimental Sandbox" loading="lazy"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="news" hidden>
+              <iframe id="portal-news-frame" title="CharlestonHacks News" loading="lazy"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="chat" hidden>
+              <p class="portal-view-intro">If sign-in does not finish inside the card, open Community Chat separately. Your card stays here.</p>
+              <iframe id="portal-chat-frame" title="CharlestonHacks Community Chat" loading="lazy"></iframe>
+            </div>
+          </div>
+        </section>
 
         <!-- Cinematic Member Portal card reveal -->
         <div class="portal-card-reveal" id="portal-card-reveal" hidden aria-hidden="true">

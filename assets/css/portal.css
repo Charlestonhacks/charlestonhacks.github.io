@@ -169,10 +169,149 @@ body {
     rotateX(calc(var(--swipe-rotate-x, 0deg) + 72deg)) rotateY(var(--swipe-rotate-y, 0deg)) scale(0.82);
   opacity: 0;
 }
+
 .card-stage.is-committing-left {
   transform: translate3d(calc(var(--swipe-translate-x, 0px) - 72px), var(--swipe-translate-y, 0px), 0)
     rotateX(var(--swipe-rotate-x, 0deg)) rotateY(calc(var(--swipe-rotate-y, 0deg) - 72deg)) scale(0.82);
   opacity: 0;
+}
+
+/* Destination views occupy the same portrait card footprint as the home face. */
+.portal-view-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 220;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 2px solid rgba(201,163,94,0.82);
+  border-radius: 16px;
+  color: #fff;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0,224,255,0.14), transparent 48%),
+    #05080f;
+  box-shadow: 0 0 35px rgba(0,224,255,0.18), 0 0 24px rgba(201,163,94,0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.94);
+  transform-origin: center;
+  transition: opacity 260ms ease, transform 420ms cubic-bezier(0.2,0.75,0.25,1);
+}
+.portal-view-panel[hidden],
+.portal-view-content[hidden] { display: none !important; }
+.portal-view-panel.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.portal-view-panel[data-origin="left"]:not(.is-open) { transform: translateX(-12%) rotateY(12deg) scale(0.94); }
+.portal-view-panel[data-origin="right"]:not(.is-open) { transform: translateX(12%) rotateY(-12deg) scale(0.94); }
+.portal-view-panel[data-origin="up"]:not(.is-open) { transform: translateY(-10%) rotateX(10deg) scale(0.94); }
+.portal-view-panel[data-origin="down"]:not(.is-open) { transform: translateY(10%) rotateX(-10deg) scale(0.94); }
+
+.portal-view-header {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 48px;
+  padding: 0.35rem 0.55rem;
+  background: rgba(0,0,0,0.92);
+  border-bottom: 1px solid rgba(0,224,255,0.24);
+}
+.portal-view-header h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--cyan);
+  font: 600 clamp(0.75rem, 2vw, 0.95rem)/1.2 "Orbitron", sans-serif;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+ .portal-view-home,
+.portal-view-external {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid rgba(0,224,255,0.5);
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(0,224,255,0.08);
+  font: 600 0.68rem/1 "Orbitron", sans-serif;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+.portal-view-home:hover,
+.portal-view-home:focus-visible,
+.portal-view-external:hover,
+.portal-view-external:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+ .portal-view-external { font-size: 0.56rem; }
+.portal-view-external[hidden] { display: none !important; }
+.portal-view-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.portal-view-content {
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
+}
+.portal-view-content:not(.portal-events-view) {
+  display: flex;
+  flex-direction: column;
+}
+.portal-view-content iframe {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  border: 0;
+  background: #05080f;
+}
+.portal-events-view {
+  overflow: auto;
+  padding: 0.65rem;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.portal-view-intro {
+  margin: 0 0 0.55rem;
+  color: rgba(255,255,255,0.7);
+  font: 0.68rem/1.4 Arial, sans-serif;
+  text-align: center;
+}
+.portal-events-list {
+  display: grid;
+  gap: 0.65rem;
+}
+.portal-events-list .ch-event-card {
+  margin: 0;
+  width: 100%;
+  max-width: none;
+}
+.portal-events-list .ch-event-desc {
+  display: none;
+}
+@media (max-width: 420px) {
+  .portal-view-header { grid-template-columns: auto minmax(0,1fr) auto; gap: 0.25rem; padding-inline: 0.35rem; }
+  .portal-view-home, .portal-view-external { min-height: 32px; padding: 0.35rem 0.42rem; font-size: 0.58rem; }
+  .portal-view-external { font-size: 0.52rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-view-panel { transition: none !important; }
 }
 
 .main-wrapper {
