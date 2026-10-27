@@ -229,7 +229,7 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.portal-view-home,
+ .portal-view-home,
 .portal-view-external {
   display: inline-flex;
   align-items: center;
@@ -254,7 +254,8 @@ body {
   color: var(--gold);
   box-shadow: 0 0 12px var(--gold-glow);
 }
-.portal-view-external { font-size: 0.56rem; }
+ .portal-view-external { font-size: 0.56rem; }
+.portal-view-external[hidden] { display: none !important; }
 .portal-view-body {
   position: relative;
   flex: 1 1 auto;
