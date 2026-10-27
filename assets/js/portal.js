@@ -474,6 +474,8 @@ if (portalId === "btc") {
         title: "Community Chat",
         frame: document.getElementById("portal-chat-frame"),
         src: "/bbs.html",
+        external: "/bbs.html",
+        externalLabel: "Open Community Chat separately",
       },
     };
     if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
@@ -526,7 +528,7 @@ if (portalId === "btc") {
       externalLink.hidden = !config.external;
       if (config.external) {
         externalLink.href = config.external;
-        externalLink.setAttribute("aria-label", "Open Buildspace separately");
+        externalLink.setAttribute("aria-label", config.externalLabel || `Open ${config.title} separately`);
       } else {
         externalLink.removeAttribute("href");
       }
