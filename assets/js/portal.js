@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v13-iframe-horizontal-gesture-20261028";
+  const VERSION = "portal-js-v14-iframe-touch-swipe-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -535,7 +535,8 @@
       if (!frameDocument) return;
       frame.dataset.swipeBridgeAttached = "true";
 
-      // Prevent the embedded document from taking over a horizontal gesture.
+      // Keep vertical page scrolling available, while reserving horizontal
+      // gestures for the feature deck even when the gesture starts in an iframe.
       const swipeStyle = frameDocument.createElement("style");
       swipeStyle.textContent = `
         html, body {
@@ -549,47 +550,99 @@
           touch-action: pan-y !important;
         }
       `;
-      frameDocument.head?.append(swipeStyle);
+      (frameDocument.head || frameDocument.documentElement)?.append(swipeStyle);
 
       let gesture = null;
       let suppressNextClick = false;
-      frameDocument.addEventListener("pointerdown", (event) => {
-        if (event.isPrimary === false || event.button > 0) return;
-        gesture = { x: event.clientX, y: event.clientY, horizontal: false };
-      }, true);
+      let clickSuppressionTimer = null;
 
-      frameDocument.addEventListener("pointermove", (event) => {
+      const beginGesture = (x, y) => {
+        gesture = { x, y, horizontal: false };
+      };
+
+      const moveGesture = (x, y, event) => {
         if (!gesture) return;
-        const deltaX = event.clientX - gesture.x;
-        const deltaY = event.clientY - gesture.y;
+        const deltaX = x - gesture.x;
+        const deltaY = y - gesture.y;
         if (Math.abs(deltaX) < 10 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
-        gesture.horizontal = true;
-        event.preventDefault();
-        event.stopPropagation();
-      }, { capture: true, passive: false });
 
-      frameDocument.addEventListener("pointerup", (event) => {
+        gesture.horizontal = true;
+        // Touch listeners are explicitly non-passive so iOS Safari can stop
+        // the embedded page from panning sideways once the intent is clear.
+        if (event.cancelable) event.preventDefault();
+        event.stopPropagation();
+      };
+
+      const finishGesture = (x, y, event) => {
         if (!gesture) return;
-        const deltaX = event.clientX - gesture.x;
-        const deltaY = event.clientY - gesture.y;
-        const isHorizontalSwipe = gesture.horizontal &&
+        const deltaX = x - gesture.x;
+        const deltaY = y - gesture.y;
+        const isHorizontalSwipe =
           Math.abs(deltaX) >= 42 &&
           Math.abs(deltaX) >= Math.abs(deltaY) * 1.2;
+        const wasHorizontal = gesture.horizontal || isHorizontalSwipe;
         gesture = null;
-        if (!isHorizontalSwipe) return;
+        if (!wasHorizontal || !isHorizontalSwipe || !featureSwiper) return;
 
-        const currentIndex = featureSwiper?.activeIndex;
-        const targetIndex = currentIndex + (deltaX < 0 ? 1 : -1);
-        if (!featureSwiper || targetIndex < 0 || targetIndex >= featureSwiper.slides.length) return;
+        const targetIndex = featureSwiper.activeIndex + (deltaX < 0 ? 1 : -1);
+        if (targetIndex < 0 || targetIndex >= featureSwiper.slides.length) return;
 
         suppressNextClick = true;
-        event.preventDefault();
-        event.stopPropagation();
+        if (event?.cancelable) event.preventDefault();
+        event?.stopPropagation();
         featureSwiper.slideTo(targetIndex);
-        window.setTimeout(() => { suppressNextClick = false; }, 450);
+
+        if (clickSuppressionTimer !== null) window.clearTimeout(clickSuppressionTimer);
+        clickSuppressionTimer = window.setTimeout(() => {
+          suppressNextClick = false;
+          clickSuppressionTimer = null;
+        }, 450);
+      };
+
+      // Use Pointer Events for mouse/pen. Mobile touch is handled separately:
+      // Safari may cancel pointer sequences when the gesture begins in an iframe.
+      frameDocument.addEventListener("pointerdown", (event) => {
+        if (event.pointerType === "touch" || event.isPrimary === false || event.button > 0) return;
+        beginGesture(event.clientX, event.clientY);
+      }, true);
+      frameDocument.addEventListener("pointermove", (event) => {
+        if (event.pointerType === "touch") return;
+        moveGesture(event.clientX, event.clientY, event);
+      }, { capture: true, passive: false });
+      frameDocument.addEventListener("pointerup", (event) => {
+        if (event.pointerType === "touch") return;
+        finishGesture(event.clientX, event.clientY, event);
+      }, true);
+      frameDocument.addEventListener("pointercancel", (event) => {
+        if (event.pointerType !== "touch") gesture = null;
       }, true);
 
-      frameDocument.addEventListener("pointercancel", () => { gesture = null; }, true);
+      // Touch Events provide the reliable path on iPhone/iPad Safari. Ignore
+      // additional contacts so pinch zoom and multi-touch gestures aren't swipes.
+      frameDocument.addEventListener("touchstart", (event) => {
+        if (event.touches.length !== 1) {
+          gesture = null;
+          return;
+        }
+        const touch = event.touches[0];
+        beginGesture(touch.clientX, touch.clientY);
+      }, { capture: true, passive: true });
+
+      frameDocument.addEventListener("touchmove", (event) => {
+        if (!gesture || event.touches.length !== 1) return;
+        const touch = event.touches[0];
+        moveGesture(touch.clientX, touch.clientY, event);
+      }, { capture: true, passive: false });
+
+      frameDocument.addEventListener("touchend", (event) => {
+        if (!gesture) return;
+        const touch = event.changedTouches[0];
+        if (touch) finishGesture(touch.clientX, touch.clientY, event);
+        else gesture = null;
+      }, { capture: true, passive: false });
+
+      frameDocument.addEventListener("touchcancel", () => { gesture = null; }, true);
+
       frameDocument.addEventListener("click", (event) => {
         if (!suppressNextClick) return;
         event.preventDefault();
