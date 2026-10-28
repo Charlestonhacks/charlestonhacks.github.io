@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=swiper-feature-deck-tap-rm-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=mobile-live-feature-cards-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -294,6 +294,14 @@
 </head>
 
 <body>
+  <section id="portal-desktop-notice" aria-labelledby="portal-desktop-title">
+    <div class="portal-desktop-notice-card">
+      <img src="/images/charlestonhackslogo.svg" alt="CharlestonHacks">
+      <h1 id="portal-desktop-title">Member Portal</h1>
+      <p>The swipeable member portal is designed for mobile screens. Open this page on your phone to browse features.</p>
+      <a href="/">Return to CharlestonHacks home</a>
+    </div>
+  </section>
   <nav class="top-nav" role="navigation" aria-label="Main navigation">
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
@@ -330,24 +338,12 @@
               </div>
             </div>
           </div>
-          <div class="portal-feature-overlay" aria-hidden="false">
-            <span id="portal-feature-count" aria-live="polite">PORTAL</span>
-            <button type="button" id="portal-feature-home" aria-label="Return to portal home" hidden>Home</button>
-          </div>
+          <span id="portal-feature-count" class="sr-only" aria-live="polite">PORTAL</span>
         </div>
         <!-- /card-stage -->
 
         <!-- In-card destination views; the home card stays mounted underneath. -->
         <section class="portal-view-panel" id="portal-view-panel" aria-labelledby="portal-view-title" aria-hidden="true" inert hidden>
-          <header class="portal-view-header">
-            <button type="button" class="portal-view-home" id="portal-view-home" aria-label="Return to the home card">
-              <i class="fas fa-arrow-left" aria-hidden="true"></i><span>Home</span>
-            </button>
-            <h2 id="portal-view-title">Events</h2>
-            <a class="portal-view-external" id="portal-view-external" target="_blank" rel="noopener noreferrer" hidden>
-              Open separately <i class="fas fa-arrow-up-right-from-square" aria-hidden="true"></i>
-            </a>
-          </header>
           <div class="portal-view-body">
             <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming events" hidden>
               <p class="portal-view-intro">Upcoming CharlestonHacks and community events</p>
@@ -356,7 +352,7 @@
             <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
               <div class="portal-buildspace-auth-gate" id="portal-buildspace-auth-gate">
                 <h3>Sign in to unlock Buildspace</h3>
-                <p>Use your active CharlestonHacks member account in Community Chat. Once signed in, return here to open Buildspace.</p>
+                <p>Sign in through Community Chat, then swipe back to Buildspace.</p>
                 <button type="button" id="portal-buildspace-sign-in">Go to Community Chat</button>
               </div>
               <p class="portal-view-intro" id="portal-buildspace-auth-status" hidden></p>
@@ -504,7 +500,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=swiper-feature-deck-tap-rm-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=mobile-live-feature-cards-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">

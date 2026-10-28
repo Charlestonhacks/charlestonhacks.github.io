@@ -1526,3 +1526,200 @@ button:focus {
   .portal-feature-swiper .swiper-slide { transition-duration: 0.01ms !important; }
   .portal-view-panel { transition: none !important; }
 }
+
+
+
+/* Feature cards contain the working destinations; the top rail stays clear for swiping. */
+.portal-feature-card {
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  text-align: left;
+  cursor: default;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(0,224,255,0.12), transparent 52%),
+    linear-gradient(155deg, #091421, #02060f 78%);
+}
+.portal-feature-header {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: clamp(0.45rem, 2vw, 0.8rem);
+  min-height: 62px;
+  padding: 0.45rem clamp(0.55rem, 2.5vw, 0.9rem);
+  border-bottom: 1px solid rgba(0,224,255,0.28);
+  background: rgba(0,0,0,0.74);
+  touch-action: pan-y;
+  cursor: grab;
+}
+.portal-feature-header:active { cursor: grabbing; }
+.portal-feature-heading {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 0.12rem;
+}
+.portal-feature-title {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  overflow: hidden;
+  color: #f3d69a;
+  font: 600 clamp(0.75rem, 2.5vw, 1rem)/1.2 "Orbitron", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.portal-feature-subtitle {
+  overflow: hidden;
+  color: rgba(235,246,255,0.56);
+  font: 600 clamp(0.48rem, 1.5vw, 0.62rem)/1.2 "Orbitron", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.portal-feature-header .portal-feature-icon {
+  flex: 0 0 clamp(34px, 10vw, 46px);
+  width: clamp(34px, 10vw, 46px);
+  font-size: clamp(1rem, 4vw, 1.35rem);
+}
+.portal-feature-header .portal-feature-number {
+  position: static;
+  flex: 0 0 auto;
+  font-size: clamp(0.48rem, 1.35vw, 0.62rem);
+  white-space: nowrap;
+}
+.portal-feature-content {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #05080f;
+}
+.portal-feature-content > iframe {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  background: #05080f;
+}
+.portal-feature-content > .portal-view-content {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.portal-feature-content .portal-view-content[hidden] { display: none !important; }
+.portal-feature-content .portal-view-content:not(.portal-events-view) {
+  display: flex;
+  flex-direction: column;
+}
+.portal-feature-content .portal-events-view {
+  overflow: auto;
+  padding: 0.55rem;
+}
+.portal-feature-swiper .swiper-slide:not(.swiper-slide-active) .portal-feature-card {
+  pointer-events: none;
+}
+
+/* The Bitcoin display now lives inside its feature card instead of covering the screen. */
+#matrix-btc-overlay.in-card {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2;
+  overflow: auto;
+  background: #020704;
+  backdrop-filter: none;
+  touch-action: pan-y;
+}
+#matrix-btc-overlay.in-card .btc-close-btn { display: none !important; }
+#matrix-btc-overlay.in-card .btc-data-container {
+  width: min(100%, 94%);
+  max-height: 100%;
+  padding: clamp(0.45rem, 2vw, 0.8rem);
+  overflow-y: auto;
+  background: rgba(0,0,0,0.24);
+}
+#matrix-btc-overlay.in-card .btc-main-price {
+  font-size: clamp(1.3rem, 7vw, 2.4rem);
+  margin-bottom: 0.3rem;
+}
+#matrix-btc-overlay.in-card .btc-label {
+  margin-bottom: 0.5rem;
+  font-size: clamp(0.7rem, 2.4vw, 1rem);
+}
+#matrix-btc-overlay.in-card .btc-stats-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0.5rem auto;
+}
+#matrix-btc-overlay.in-card .btc-stat-card { min-width: 0; padding: 0.5rem; }
+#matrix-btc-overlay.in-card .btc-stat-label { font-size: 0.55rem; }
+#matrix-btc-overlay.in-card .btc-stat-value {
+  overflow-wrap: anywhere;
+  font-size: clamp(0.72rem, 2.6vw, 1rem);
+}
+#matrix-btc-overlay.in-card .btc-mini-chart { margin-top: 0.55rem; padding: 0.45rem; }
+#matrix-btc-overlay.in-card .chart-placeholder { height: auto; min-height: 48px; font-size: 0.6rem; }
+
+/* Desktop gets only a brief mobile availability note, not the portal UI. */
+#portal-desktop-notice { display: none; }
+@media (min-width: 769px) {
+  html, body { width: 100%; height: 100%; min-height: 100%; overflow: hidden; }
+  body > :not(#portal-desktop-notice) { display: none !important; }
+  #portal-desktop-notice {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483647;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    padding: 24px;
+    color: #eefaff;
+    background:
+      radial-gradient(ellipse at 50% 35%, rgba(0,224,255,0.13), transparent 48%),
+      #03070d;
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  .portal-desktop-notice-card {
+    display: grid;
+    justify-items: center;
+    gap: 1rem;
+    width: min(460px, 100%);
+    padding: clamp(1.5rem, 5vw, 3rem);
+    border: 1px solid rgba(201,163,94,0.58);
+    border-radius: 20px;
+    background: rgba(7,16,26,0.88);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.45), 0 0 40px rgba(0,224,255,0.08);
+  }
+  .portal-desktop-notice-card img { display: block; width: min(240px, 72%); height: auto; }
+  .portal-desktop-notice-card h1 {
+    margin: 0;
+    color: #f3d69a;
+    font: 600 clamp(1.25rem, 2vw, 1.8rem)/1.2 "Orbitron", sans-serif;
+  }
+  .portal-desktop-notice-card p { max-width: 34rem; margin: 0; line-height: 1.6; color: rgba(235,246,255,0.75); }
+  .portal-desktop-notice-card a {
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(0,224,255,0.58);
+    border-radius: 999px;
+    color: #dffaff;
+    text-decoration: none;
+  }
+  .portal-desktop-notice-card a:hover,
+  .portal-desktop-notice-card a:focus-visible {
+    border-color: #f3d69a;
+    color: #f3d69a;
+    outline: 2px solid #00e0ff;
+    outline-offset: 3px;
+  }
+}
+@media (max-width: 768px) {
+  #portal-desktop-notice { display: none !important; }
+}
