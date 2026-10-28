@@ -486,7 +486,7 @@
     let eventsLoaded = false;
     let closeTimer = null;
     let focusTimer = null;
-    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 680;
+    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 260;
 
     function updateBuildspaceAccess() {
       const authorized = window.__CH_MEMBER_AUTH__ === true;
@@ -732,7 +732,8 @@
       gesture = null;
       stage.classList.remove("is-dragging");
       stage.style.removeProperty("--feature-drag-x");
-      if (Math.abs(dx) >= 44 && Math.abs(dx) > Math.abs(dy) * 1.2) step(dx < 0 ? 1 : -1);
+      const threshold = Math.max(48, Math.min(96, stage.getBoundingClientRect().width * 0.12));
+      if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy) * 1.2) step(dx < 0 ? 1 : -1);
     };
     stage.addEventListener("pointerup", finish);
     const cancel = (event) => {
