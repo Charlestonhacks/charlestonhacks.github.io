@@ -53,7 +53,8 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=horizontal-feature-deck-20261028"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=swiper-feature-deck-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -318,26 +319,20 @@
       <div class="media-container">
 
         <!-- Swipe-enabled card stage -->
-        <div class="card-stage" role="group" aria-label="CharlestonHacks feature card deck. Swipe left or right to browse features." tabindex="0">
-          <img id="missionImage" src="images/finalcard.png" alt="CharlestonHacks portal card. Swipe to explore." draggable="false"/>
-          <div class="portal-feature-deck" id="portal-feature-deck" hidden aria-label="Portal features">
-            <button type="button" class="portal-feature-home" id="portal-feature-home" aria-label="Return to the main portal card">Home</button>
-            <div class="portal-feature-cards" id="portal-feature-cards"></div>
-            <div class="portal-feature-controls">
-              <button type="button" id="portal-feature-previous" aria-label="Previous feature">‹</button>
-              <span id="portal-feature-count" aria-live="polite">FEATURE 01 OF 11</span>
-              <button type="button" id="portal-feature-next" aria-label="Next feature">›</button>
+        <div class="card-stage" role="region" aria-label="CharlestonHacks feature card deck">
+          <div class="swiper portal-feature-swiper" id="portal-feature-swiper" tabindex="0">
+            <div class="swiper-wrapper" id="portal-feature-slides">
+              <div class="swiper-slide portal-home-slide" aria-label="Portal home">
+                <div class="portal-home-card">
+                  <img src="images/finalcard.png" alt="CharlestonHacks member portal card" draggable="false">
+                  <span class="portal-home-swipe-hint">Swipe left or right to browse features</span>
+                </div>
+              </div>
             </div>
-            <p class="portal-feature-hint">Swipe left or right to browse</p>
           </div>
-          <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
-
-          <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
-            <source src="" type="video/mp4">
-          </video>
-
-          <div id="portal-discovery-guide" role="status" aria-live="polite" hidden>
-            Swipe left or right to browse feature cards, or use Quick Access below
+          <div class="portal-feature-overlay" aria-hidden="false">
+            <span id="portal-feature-count" aria-live="polite">PORTAL</span>
+            <button type="button" id="portal-feature-home" aria-label="Return to portal home" hidden>Home</button>
           </div>
         </div>
         <!-- /card-stage -->
@@ -506,10 +501,11 @@
   </script>
 
   <!-- Member authorization and Buildspace sign-in handoff -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.js"></script>
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=horizontal-feature-deck-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=swiper-feature-deck-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
