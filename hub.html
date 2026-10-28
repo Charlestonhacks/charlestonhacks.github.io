@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://api.coingecko.com" crossorigin>
 
   <!-- Preload key visuals -->
-  <link rel="preload" as="image" href="icons/card.png">
+  <link rel="preload" as="image" href="images/finalcard.png">
   <link rel="preload" as="image" href="images/charlestonhackslogo.svg">
 
   <!-- Neuron redirect (keeps querystring, removes source=neuron) -->
@@ -53,7 +53,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=quick-access-hidden-hotspots-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=final-card-scroll-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -181,7 +181,7 @@
       align-items: center;
     }
     .media-container {
-      width: min(100%, 620px, calc((100vh - 166px) * 2 / 3));
+      width: min(100%, 620px, calc((100vh - 166px) * 0.69));
       width: min(100%, 620px, calc((100dvh - 166px) * 2 / 3));
       max-width: 620px;
       margin: 0 auto;
@@ -351,7 +351,7 @@
 
         <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
         <div class="card-stage" role="group" aria-label="Interactive portal card. Swipe to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace and Quick Access below for other features.">
-          <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features" draggable="false"/>
+          <img id="missionImage" src="images/finalcard.png" alt="Interactive Portal Card - Discover 9 different features" draggable="false"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
           <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
@@ -424,7 +424,6 @@
         data-info="🚀 Buildspace — Explore projects and connect with the community"
         data-portal="innovation"
         aria-label="Buildspace Portal">
-  <img src="images/innovationenginebutton.webp" alt="">
   <span class="sr-only">Buildspace</span>
 </button>
 
