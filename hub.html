@@ -319,6 +319,7 @@
 
         <!-- Swipe-enabled card stage -->
         <div class="card-stage" role="group" aria-label="Portal card. Swipe in any direction to open Events, Sandbox, News, or Community Chat. Use Quick Access below for Buildspace and other features.">
+          <div class="portal-card-stack" aria-hidden="true"><span></span><span></span><span></span></div>
           <img id="missionImage" src="images/finalcard.png" alt="CharlestonHacks portal card. Swipe to explore." draggable="false"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
@@ -366,6 +367,12 @@
             <div class="portal-view-content" data-view="chat" hidden>
               <iframe id="portal-chat-frame" title="CharlestonHacks Community Chat" loading="lazy"></iframe>
             </div>
+            <div class="portal-view-content" data-view="poster" hidden><iframe id="portal-poster-frame" title="CharlestonHacks Event Poster" loading="lazy"></iframe></div>
+            <div class="portal-view-content" data-view="bitcoin" hidden></div>
+            <div class="portal-view-content" data-view="swag" hidden><iframe id="portal-swag-frame" title="CharlestonHacks Swag Vote" loading="lazy"></iframe></div>
+            <div class="portal-view-content" data-view="sponsor" hidden><iframe id="portal-sponsor-frame" title="CharlestonHacks Sponsorship and Donations" loading="lazy"></iframe></div>
+            <div class="portal-view-content" data-view="game" hidden><iframe id="portal-game-frame" title="CharlestonHacks Avatar Matching Game" loading="lazy"></iframe></div>
+            <div class="portal-view-content" data-view="newsletter" hidden><iframe id="portal-newsletter-frame" title="CharlestonHacks Newsletter Signup" loading="lazy"></iframe></div>
           </div>
         </section>
 
@@ -410,7 +417,7 @@
       <a href="cardmatchgame.html" title="Avatar Matching Game" aria-label="Avatar Matching Game" data-portal-shortcut="game">
         <i class="fas fa-gamepad" aria-hidden="true"></i>
       </a>
-      <a href="subscribe.html" title="Newsletter Signup" aria-label="Newsletter Signup">
+      <a href="subscribe.html" title="Newsletter Signup" aria-label="Newsletter Signup" data-portal-shortcut="newsletter">
         <i class="fas fa-envelope-open-text"></i>
       </a>
       <a href="https://www.linkedin.com/company/charlestonhacks" target="_blank" title="LinkedIn" aria-label="LinkedIn">
@@ -425,7 +432,7 @@
       <a href="https://www.facebook.com/charlestonhacks" target="_blank" title="Facebook" aria-label="Facebook">
         <i class="fab fa-facebook"></i>
       </a>
-      <a href="#" id="open-calendar" title="Charleston Events Calendar" aria-label="Events Calendar" style="cursor:pointer;">
+      <a href="#events" title="Charleston Events Calendar" aria-label="Events Calendar" data-portal-shortcut="events">
         <i class="fas fa-calendar-alt"></i>
       </a>
     </section>
