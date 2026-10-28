@@ -53,7 +53,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=desktop-icon-rail-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=no-card-click-zones-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -363,91 +363,18 @@
       <div class="media-container">
 
         <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
-        <div class="card-stage" role="group" aria-label="Interactive portal card. Swipe to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace and Quick Access below for other features.">
-          <img id="missionImage" src="images/finalcard.png" alt="Interactive Portal Card - Discover 9 different features" draggable="false"/>
+        <div class="card-stage" role="group" aria-label="Portal card. Swipe in any direction to open Events, Sandbox, News, or Community Chat. Use Quick Access below for Buildspace and other features.">
+          <img id="missionImage" src="images/finalcard.png" alt="CharlestonHacks portal card. Swipe to explore." draggable="false"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
           <video id="missionVideo" muted playsinline controls style="display:none;opacity:0;">
             <source src="" type="video/mp4">
           </video>
 
-          <!-- Interactive Portal Buttons -->
-          <button type="button" class="clickable-area top-left"
-                  data-sound="chime" data-url="Poster.html"
-                  data-info="📋 Event Poster - View the official event artwork"
-                  data-portal="poster" aria-label="Event Poster Portal">
-            <img src="images/informationbutton.webp" alt="">
-          </button>
-
-          <button type="button" class="clickable-area top-center"
-                  data-sound="chime" data-url="docs.html"
-                  data-info="📚 Documentation - Explore guides and resources"
-                  data-portal="docs" aria-label="Documentation Portal">
-            <img src="images/crestn.svg" alt="">
-          </button>
-
-          <!-- Top-right: BTC tracker overlay -->
-          <button type="button" class="clickable-area top-right"
-                  data-sound="cardflip" data-url="#"
-                  data-info="₿ Bitcoin Tracker - Click to reveal live BTC price"
-                  data-portal="btc" aria-label="Bitcoin Tracker Portal">
-            <img src="images/btcbutton.webp" alt="">
-          </button>
-
-          <button type="button" class="clickable-area middle-left"
-                  data-sound="chime" data-url="experimental.html"
-                  data-info="🧪 Sandbox - Experimental features and tools"
-                  data-portal="sandbox" aria-label="Sandbox Portal">
-            <img src="images/experiment.webp" alt="">
-          </button>
-
-          <button type="button" class="clickable-area middle-right"
-                  data-sound="chime" data-url="swag.html"
-                  data-info="🗳️ Swag Vote - Vote on official CharlestonHacks merchandise"
-                  data-portal="swag" aria-label="Swag Vote Portal">
-            <img src="images/case.webp" alt="">
-          </button>
-
-          <button type="button" class="clickable-area bottom-left"
-                  data-sound="chime" data-url="news.html"
-                  data-info="📰 News Feed - Latest updates and announcements"
-                  data-portal="news" aria-label="News Portal">
-            <img src="images/newsbutton.webp" alt="">
-          </button>
-
-          <button type="button" class="clickable-area bottom-center"
-                  data-sound="keys" data-url="donations.html"
-                  data-info="💝 Support Us - Become a sponsor or donate"
-                  data-portal="sponsor" aria-label="Sponsorship Portal">
-            <img src="images/keysn.svg" alt="">
-          </button>
-
-          <button type="button" class="clickable-area bottom-right"
-                  data-sound="chime" data-url="cardmatchgame.html"
-                  data-info="🎮 Avatar Matching Game - Learn about us"
-                  data-portal="game" aria-label="Game Portal">
-            <img src="images/peoplebutton.webp" alt="">
-          </button>
-
-         <!-- Center Portal: Buildspace -->
-<button type="button"
-        class="clickable-area center"
-        data-sound="chime"
-        data-url="https://deckerd451.github.io/innovation-engine/"
-        data-info="🚀 Buildspace — Explore projects and connect with the community"
-        data-portal="innovation"
-        aria-label="Buildspace Portal">
-  <span class="sr-only">Buildspace</span>
-</button>
-
-          <!-- Tooltip -->
-          <div id="infoLine" class="info-line" role="tooltip">
-            <span id="infoParticle"></span><span id="infoText"></span>
-          </div>
-          <div id="portal-discovery-guide" class="portal-discovery-guide" role="status" aria-live="polite" hidden>
+          <div id="portal-discovery-guide" role="status" aria-live="polite" hidden>
             Swipe the card to explore, or use Quick Access below
           </div>
-        </div>
+       </div>
         <!-- /card-stage -->
 
         <!-- In-card destination views; the home card stays mounted underneath. -->
@@ -647,7 +574,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=quick-access-hidden-hotspots-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=no-card-click-zones-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
