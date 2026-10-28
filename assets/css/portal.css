@@ -1323,18 +1323,42 @@ button:focus {
   outline-offset: 4px;
 }
 
-/* The expanded shortcut set wraps cleanly on phones and short desktop windows. */
+/* Keep the center Buildspace hit area active without showing an icon. */
+.clickable-area.center {
+  background: transparent !important;
+}
+.clickable-area.center > img,
+.clickable-area.center::before {
+  display: none !important;
+}
+
+/* Quick Access is a horizontal scroll rail, including on desktop. */
 .icons-container {
-  flex-wrap: wrap;
-  width: fit-content;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  width: min(720px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,224,255,0.48) rgba(255,255,255,0.06);
   gap: clamp(0.35rem, 1vw, 0.8rem);
   padding: 0.85rem 1rem;
+}
+.icons-container a {
+  flex: 0 0 45px;
+  scroll-snap-align: center;
+}
+@media (max-width: 768px) {
+  .icons-container a { flex-basis: 40px; }
 }
 @media (max-width: 600px) {
   .icons-container {
     width: calc(100vw - 24px);
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.4rem;
     padding: 0.7rem 0.75rem;
   }
