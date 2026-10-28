@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v4-hidden-hotspots-quick-access-20261028";
+  const VERSION = "portal-js-v5-no-card-click-zones-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -15,13 +15,57 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // Keep Quick Access shortcuts routed through the same portal handlers as the
-  // card hit areas, including the shared Buildspace member gate and BTC overlay.
+  // Quick Access is the only click-based way to open portal features.
+  function activatePortal(portalId, trigger) {
+    const urls = {
+      poster: "Poster.html",
+      docs: "docs.html",
+      swag: "swag.html",
+      sponsor: "donations.html",
+      game: "cardmatchgame.html",
+    };
+    const sounds = {
+      poster: "chime",
+      docs: "chime",
+      sandbox: "chime",
+      swag: "chime",
+      news: "chime",
+      sponsor: "keys",
+      game: "chime",
+    };
+
+    if (typeof gtag === "function") {
+      gtag("event", "portal_click", { portal_id: portalId });
+    }
+    if (portalId === "btc") {
+      openMatrixBTC(trigger);
+      return;
+    }
+    if (portalId === "innovation") {
+      playPortalActivationSound();
+      openCardDestination("buildspace", "right", trigger);
+      return;
+    }
+    if (portalId === "news" || portalId === "sandbox") {
+      const direction = portalId === "news" ? "down" : "right";
+      openCardDestination(portalId, direction, trigger);
+      return;
+    }
+
+    if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
+    const url = urls[portalId];
+    if (!url) return;
+    const destination = new URL(url, window.location.href);
+    if (destination.origin === window.location.origin) {
+      destination.searchParams.set("returnTo", "hub");
+    }
+    window.setTimeout(() => { window.location.href = destination.href; }, 200);
+  }
+
   $$('.icons-container [data-portal-shortcut]').forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
-      const portalId = link.dataset.portalShortcut;
-      document.querySelector(`.clickable-area[data-portal="${portalId}"]`)?.click();
+      activatePortal(link.dataset.portalShortcut, link);
     });
   });
 
@@ -389,80 +433,6 @@
   // ------------------------------------------------
   // Portal interactions
   // ------------------------------------------------
-  function initPortals() {
-    const areas = $$(".clickable-area");
-
-    areas.forEach((area) => {
-      const portalId = area.dataset.portal;
-
-      const showPortalInfo = () => {
-        if (!DOM.infoLine || !DOM.infoText) return;
-        DOM.infoText.textContent = area.dataset.info || "";
-        DOM.infoLine.classList.add("visible");
-      };
-      const hidePortalInfo = () => DOM.infoLine?.classList.remove("visible");
-
-      // Only the visible center control gets a hover tooltip; peripheral card
-      // hit areas stay visually quiet and are represented in Quick Access.
-      if (portalId === "innovation") {
-        area.addEventListener("mouseenter", showPortalInfo);
-        area.addEventListener("mouseleave", hidePortalInfo);
-        area.addEventListener("focus", showPortalInfo);
-        area.addEventListener("blur", hidePortalInfo);
-      }
-
-      area.addEventListener("click", (e) => {
-        e.preventDefault();
-
-        if (typeof gtag === "function") {
-          gtag("event", "portal_click", { portal_id: portalId });
-        }
-
-       // BTC portal opens the BTC overlay (top-right)
-if (portalId === "btc") {
-  openMatrixBTC(area); // pass trigger for focus restore
-  return;
-}
-        
-        if (portalId === "innovation") {
-          playPortalActivationSound();
-        } else {
-          const soundKey = area.dataset.sound;
-          if (soundKey) playSoundById(soundKey + "Sound");
-        }
-
-        if (portalId === "innovation") {
-          openCardDestination("buildspace", "right", area);
-          return;
-        }
-        if (portalId === "news") {
-          openCardDestination("news", "down", area);
-          return;
-        }
-        if (portalId === "sandbox") {
-          openCardDestination("sandbox", "right", area);
-          return;
-        }
-
-        const url = area.dataset.url;
-        if (url && url !== "#") {
-          const destination = new URL(url, window.location.href);
-          if (destination.origin === window.location.origin) {
-            destination.searchParams.set("returnTo", "hub");
-          }
-          setTimeout(() => { window.location.href = destination.href; }, 200);
-        }
-      });
-
-      area.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          area.click();
-        }
-      });
-    });
-  }
-
   // ------------------------------------------------
   // Card destination panel
   // ------------------------------------------------
@@ -604,7 +574,7 @@ if (portalId === "btc") {
         panel.hidden = true;
         panel.removeAttribute("data-origin");
         if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
-        else stage.querySelector(".clickable-area")?.focus({ preventScroll: true });
+        else document.querySelector('.icons-container [data-portal-shortcut]')?.focus({ preventScroll: true });
         returnFocus = null;
       }, 360);
     }
@@ -642,8 +612,6 @@ if (portalId === "btc") {
     };
 
     let gesture = null;
-    let suppressClickTarget = null;
-    let suppressClickUntil = 0;
     let resetGuideTimer = null;
 
     const hideGuide = () => {
@@ -716,7 +684,6 @@ if (portalId === "btc") {
         velocityY: 0,
         direction: null,
         moved: false,
-        clickTarget: event.target.closest?.(".clickable-area") || null,
       };
     });
 
@@ -768,10 +735,6 @@ if (portalId === "btc") {
       }
 
       setTilt(deltaX, deltaY, direction);
-      if (current.clickTarget) {
-        suppressClickTarget = current.clickTarget;
-        suppressClickUntil = Date.now() + 600;
-      }
       stage.classList.remove("is-dragging");
       stage.classList.add(`is-committing-${direction}`);
       guide.textContent = `Opening ${destinations[direction].label}…`;
@@ -787,20 +750,6 @@ if (portalId === "btc") {
     };
     stage.addEventListener("pointercancel", cancelGesture);
     stage.addEventListener("lostpointercapture", cancelGesture);
-
-    stage.addEventListener("click", (event) => {
-      if (
-        suppressClickTarget &&
-        (event.target === suppressClickTarget || suppressClickTarget.contains(event.target)) &&
-        event.detail > 0 &&
-        Date.now() < suppressClickUntil
-      ) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        suppressClickTarget = null;
-        suppressClickUntil = 0;
-      }
-    }, true);
   }
 
   // ------------------------------------------------
@@ -850,7 +799,6 @@ if (portalId === "btc") {
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
     openCardDestination = initCardDestinationPanel();
-    initPortals();
     initCardGestures();
     setIdleSoon();
     initEventsModal();
