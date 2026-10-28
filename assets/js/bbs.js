@@ -48,7 +48,7 @@ export async function initBBS() {
 
     const embedded = window.self !== window.top;
     if (embedded) {
-      try { localStorage.setItem("ch:bbs-return-to-hub", "1"); } catch (_) {}
+      try { localStorage.setItem("ch:bbs-return-to-hub", String(Date.now())); } catch (_) {}
     }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: button.dataset.provider,
@@ -94,7 +94,8 @@ export async function initBBS() {
     } else {
       let returnToHub = false;
       try {
-        returnToHub = localStorage.getItem("ch:bbs-return-to-hub") === "1";
+        const requestedAt = Number(localStorage.getItem("ch:bbs-return-to-hub"));
+        returnToHub = Number.isFinite(requestedAt) && Date.now() - requestedAt < 10 * 60 * 1000;
         localStorage.removeItem("ch:bbs-return-to-hub");
       } catch (_) {}
       if (returnToHub) {
