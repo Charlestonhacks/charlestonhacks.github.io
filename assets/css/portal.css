@@ -1290,3 +1290,7 @@ button:focus {
   outline: 2px solid #00e0ff;
   outline-offset: 3px;
 }
+
+.portal-buildspace-auth-gate[hidden],
+#portal-buildspace-auth-status[hidden],
+#portal-buildspace-frame[hidden] { display: none !important; }
