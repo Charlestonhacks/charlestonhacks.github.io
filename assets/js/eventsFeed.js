@@ -80,7 +80,24 @@ export async function loadEvents({
     }
 
     list.innerHTML = "";
-    const eventsToShow = events.slice(0, limit);
+    // The feed can arrive in a non-chronological order. Sort valid start
+    // dates earliest-first, leaving undated events at the end in their source order.
+    const eventsToShow = events
+      .map((event, index) => {
+        const rawDate = event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date;
+        const startTime = rawDate ? new Date(rawDate).getTime() : Number.NaN;
+        return { event, index, startTime };
+      })
+      .sort((a, b) => {
+        const aHasDate = Number.isFinite(a.startTime);
+        const bHasDate = Number.isFinite(b.startTime);
+        if (aHasDate && bHasDate) return a.startTime - b.startTime || a.index - b.index;
+        if (aHasDate) return -1;
+        if (bHasDate) return 1;
+        return a.index - b.index;
+      })
+      .slice(0, limit)
+      .map(({ event }) => event);
 
     for (const event of eventsToShow) {
       const title = safeText(event?.title || "Event");
