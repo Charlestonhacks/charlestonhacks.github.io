@@ -1294,3 +1294,48 @@ button:focus {
 .portal-buildspace-auth-gate[hidden],
 #portal-buildspace-auth-status[hidden],
 #portal-buildspace-frame[hidden] { display: none !important; }
+
+
+/* Keep peripheral card controls as working, invisible hit areas. Their
+   destinations are discoverable in the Quick Access icon bar below the card. */
+.clickable-area:not(.center) {
+  filter: none !important;
+  cursor: default;
+}
+.clickable-area:not(.center) > img {
+  opacity: 0;
+  visibility: hidden;
+}
+.clickable-area:not(.center)::before,
+.clickable-area:not(.center)::after {
+  display: none !important;
+}
+.clickable-area:not(.center):hover {
+  filter: none !important;
+  transform: none !important;
+  z-index: initial;
+}
+.clickable-area:not(.center):focus {
+  outline: none;
+}
+.clickable-area:not(.center):focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 4px;
+}
+
+/* The expanded shortcut set wraps cleanly on phones and short desktop windows. */
+.icons-container {
+  flex-wrap: wrap;
+  width: fit-content;
+  max-width: calc(100vw - 24px);
+  gap: clamp(0.35rem, 1vw, 0.8rem);
+  padding: 0.85rem 1rem;
+}
+@media (max-width: 600px) {
+  .icons-container {
+    width: calc(100vw - 24px);
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.7rem 0.75rem;
+  }
+}
