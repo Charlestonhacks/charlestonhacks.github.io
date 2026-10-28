@@ -90,7 +90,7 @@ window.addEventListener("message", async (event) => {
   }
 
   if (message.type === "SIGN_OUT_REQUEST" && message.nonce === pendingNonce) {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: "local" });
   }
 });
 
