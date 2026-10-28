@@ -589,6 +589,7 @@
       }
       if (closeTimer !== null) window.clearTimeout(closeTimer);
       closeTimer = window.setTimeout(() => {
+        stage.inert = false;
         panel.hidden = true;
         panel.removeAttribute("data-origin");
         
