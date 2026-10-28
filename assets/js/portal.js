@@ -537,7 +537,7 @@
     let eventsLoaded = false;
     let closeTimer = null;
     let focusTimer = null;
-    const transitionDuration = 680;
+    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 680;
 
     function updateBuildspaceAccess() {
       const authorized = window.__CH_MEMBER_AUTH__ === true;
@@ -699,6 +699,7 @@
 
     let gesture = null;
     let resetGuideTimer = null;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const hideGuide = () => {
       guide.classList.remove("is-visible");
@@ -825,7 +826,7 @@
       stage.classList.add(`is-committing-${direction}`);
       guide.textContent = `Opening ${destinations[direction].label}…`;
       window.setTimeout(hideGuide, 280);
-      window.setTimeout(() => openDestination(direction), 160);
+      window.setTimeout(() => openDestination(direction), reducedMotion ? 0 : 160);
     });
 
     const cancelGesture = (event) => {
