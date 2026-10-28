@@ -1424,3 +1424,98 @@ button:focus {
     transform: translate(-50%, -50%) scale(1) !important;
   }
 }
+
+
+/* A visible three-card fan makes every portal destination feel like it comes
+   from the same physical stack. The home face clears as the layers fan out. */
+.card-stage { isolation: isolate; }
+.portal-card-stack {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  perspective: 1000px;
+}
+.portal-card-stack span {
+  position: absolute;
+  inset: 1.5%;
+  border: 2px solid rgba(201,163,94,0.92);
+  border-radius: 16px;
+  background:
+    linear-gradient(145deg, rgba(1,10,22,0.38), rgba(0,224,255,0.16)),
+    url("/images/finalcard.png") center / 100% 100% no-repeat,
+    #06101b;
+  box-shadow: 0 14px 36px rgba(0,0,0,0.58), 0 0 22px rgba(0,224,255,0.16);
+  opacity: 0;
+  transform: translate3d(0, 4%, -18px) scale(0.94);
+  transform-origin: 50% 85%;
+  transition: transform 560ms cubic-bezier(0.16,0.84,0.28,1), opacity 240ms ease;
+}
+.portal-card-stack span:nth-child(1) { transition-delay: 0ms; }
+.portal-card-stack span:nth-child(2) { transition-delay: 55ms; }
+.portal-card-stack span:nth-child(3) { transition-delay: 110ms; }
+#missionImage {
+  position: relative;
+  z-index: 1;
+  transition: opacity 320ms ease, transform 560ms cubic-bezier(0.16,0.84,0.28,1);
+}
+.card-stage.is-committing-up .portal-card-stack span,
+.card-stage.is-committing-right .portal-card-stack span,
+.card-stage.is-committing-down .portal-card-stack span,
+.card-stage.is-committing-left .portal-card-stack span { opacity: 1; }
+.card-stage.is-committing-up .portal-card-stack span:nth-child(1) {
+  transform: translate3d(-7%, 6%, -24px) rotate(-10deg) scale(0.96);
+}
+.card-stage.is-committing-up .portal-card-stack span:nth-child(2) {
+  transform: translate3d(7%, 3%, -12px) rotate(8deg) scale(0.98);
+}
+.card-stage.is-committing-up .portal-card-stack span:nth-child(3) {
+  transform: translate3d(0, -5%, 0) rotate(-2deg) scale(1);
+}
+.card-stage.is-committing-right .portal-card-stack span:nth-child(1) {
+  transform: translate3d(-7%, 5%, -24px) rotate(-9deg) scale(0.96);
+}
+.card-stage.is-committing-right .portal-card-stack span:nth-child(2) {
+  transform: translate3d(8%, 0, -12px) rotate(10deg) scale(0.98);
+}
+.card-stage.is-committing-right .portal-card-stack span:nth-child(3) {
+  transform: translate3d(3%, -5%, 0) rotate(3deg) scale(1);
+}
+.card-stage.is-committing-down .portal-card-stack span:nth-child(1) {
+  transform: translate3d(-7%, -3%, -24px) rotate(-10deg) scale(0.96);
+}
+.card-stage.is-committing-down .portal-card-stack span:nth-child(2) {
+  transform: translate3d(7%, -1%, -12px) rotate(8deg) scale(0.98);
+}
+.card-stage.is-committing-down .portal-card-stack span:nth-child(3) {
+  transform: translate3d(0, 6%, 0) rotate(-2deg) scale(1);
+}
+.card-stage.is-committing-left .portal-card-stack span:nth-child(1) {
+  transform: translate3d(-8%, 0, -24px) rotate(-10deg) scale(0.96);
+}
+.card-stage.is-committing-left .portal-card-stack span:nth-child(2) {
+  transform: translate3d(7%, 5%, -12px) rotate(9deg) scale(0.98);
+}
+.card-stage.is-committing-left .portal-card-stack span:nth-child(3) {
+  transform: translate3d(-3%, -5%, 0) rotate(-3deg) scale(1);
+}
+.card-stage.is-committing-up #missionImage,
+.card-stage.is-committing-right #missionImage,
+.card-stage.is-committing-down #missionImage,
+.card-stage.is-committing-left #missionImage {
+  opacity: 0;
+  animation: none;
+}
+.card-stage.is-committing-up #missionImage { transform: translate3d(0,-7%,30px) rotateX(12deg) scale(0.92); }
+.card-stage.is-committing-right #missionImage { transform: translate3d(8%,0,30px) rotateY(14deg) scale(0.92); }
+.card-stage.is-committing-down #missionImage { transform: translate3d(0,7%,30px) rotateX(-12deg) scale(0.92); }
+.card-stage.is-committing-left #missionImage { transform: translate3d(-8%,0,30px) rotateY(-14deg) scale(0.92); }
+
+.portal-view-content iframe {
+  height: 100%;
+  min-height: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-card-stack span,
+  #missionImage { transition: none !important; }
+}
