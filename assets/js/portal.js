@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v7-card-stack-feature-reveal-20261028";
+  const VERSION = "portal-js-v8-responsive-stack-routing-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   function setDirectionalCardPose(stage, direction) {
@@ -39,6 +39,9 @@
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   // Quick Access is the only click-based way to open portal features.
+  let portalNavigationPending = false;
+  const portalStackRevealDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 520;
+
   function activatePortal(portalId, trigger) {
     const sounds = {
       poster: "chime", sandbox: "chime", swag: "chime", news: "chime",
@@ -46,29 +49,44 @@
     };
     const destinations = {
       innovation: ["buildspace", "right"],
-      poster: ["poster", "up"],
       events: ["events", "up"],
-      swag: ["swag", "up"],
-      sponsor: ["sponsor", "up"],
-      game: ["game", "up"],
-      newsletter: ["newsletter", "up"],
       news: ["news", "down"],
       sandbox: ["sandbox", "right"],
+    };
+    const fullPageRoutes = {
+      poster: "/Poster.html",
+      swag: "/swag.html",
+      sponsor: "/donations.html",
+      game: "/cardmatchgame.html",
+      newsletter: "/subscribe.html",
     };
 
     if (typeof gtag === "function") gtag("event", "portal_click", { portal_id: portalId });
 
     if (portalId === "btc") {
       revealCardStack("up");
-      window.setTimeout(() => openMatrixBTC(trigger), 620);
+      window.setTimeout(() => openMatrixBTC(trigger), portalStackRevealDuration);
       return;
     }
     if (portalId === "innovation") playPortalActivationSound();
     else if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
 
     const destination = destinations[portalId];
-    if (!destination) return;
-    openCardDestination(destination[0], destination[1], trigger);
+    if (destination) {
+      openCardDestination(destination[0], destination[1], trigger);
+      return;
+    }
+
+    const route = fullPageRoutes[portalId];
+    if (!route || portalNavigationPending) return;
+    portalNavigationPending = true;
+    revealCardStack("up");
+    const rail = document.querySelector(".icons-container");
+    rail?.classList.add("is-departing");
+    rail?.setAttribute("aria-busy", "true");
+    const url = new URL(route, window.location.origin);
+    url.searchParams.set("returnTo", "hub");
+    window.setTimeout(() => window.location.assign(url.href), portalStackRevealDuration);
   }
 
   function initQuickAccessTooltips() {
@@ -536,11 +554,6 @@
         frame: document.getElementById("portal-chat-frame"),
         src: "/bbs.html",
       },
-      poster: { title: "Event Poster", frame: document.getElementById("portal-poster-frame"), src: "/Poster.html?returnTo=hub" },
-      swag: { title: "Swag Vote", frame: document.getElementById("portal-swag-frame"), src: "/swag.html?returnTo=hub" },
-      sponsor: { title: "Sponsorship and Donations", frame: document.getElementById("portal-sponsor-frame"), src: "/donations.html?returnTo=hub" },
-      game: { title: "Avatar Matching Game", frame: document.getElementById("portal-game-frame"), src: "/cardmatchgame.html?returnTo=hub" },
-      newsletter: { title: "Newsletter Signup", frame: document.getElementById("portal-newsletter-frame"), src: "/subscribe.html?returnTo=hub" },
     };
     if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
 
