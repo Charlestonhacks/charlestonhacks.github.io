@@ -4,9 +4,13 @@ const CHANNEL = "chs-buildspace-auth-v1";
 const BUILDSPACE_ORIGIN = "https://deckerd451.github.io";
 const BUILDSPACE_PATH = "/innovation-engine/";
 const frame = document.getElementById("portal-buildspace-frame");
+const accountControls = document.getElementById("portal-account-controls");
+const accountName = document.getElementById("portal-account-name");
+const signOutButton = document.getElementById("portal-sign-out");
 
 let activeSession = null;
 let activeMember = false;
+let activeProfileName = "";
 let pendingNonce = null;
 let authRevision = 0;
 
@@ -38,10 +42,11 @@ async function refreshMemberAccess(session) {
     try {
       const { data: profile, error } = await supabase
         .from("community")
-        .select("is_disabled")
+        .select("name, is_disabled")
         .eq("user_id", activeSession.user.id)
         .maybeSingle();
       if (revision !== authRevision) return;
+      activeProfileName = !error && profile ? (profile.name || "") : "";
       activeMember = !error && Boolean(profile) && profile.is_disabled !== true;
     } catch (error) {
       console.warn("[PORTAL AUTH] Member check failed:", error);
@@ -50,6 +55,12 @@ async function refreshMemberAccess(session) {
 
   if (revision !== authRevision) return;
   window.__CH_MEMBER_AUTH__ = activeMember;
+  if (accountControls) accountControls.hidden = !activeSession?.user;
+  if (accountName) accountName.textContent = activeProfileName || activeSession?.user?.email || "Signed in";
+  if (signOutButton) {
+    signOutButton.disabled = false;
+    signOutButton.textContent = "Sign out";
+  }
   window.dispatchEvent(new CustomEvent("ch:member-auth-changed", {
     detail: { authorized: activeMember }
   }));
@@ -71,6 +82,18 @@ async function refreshMemberAccess(session) {
 function validNonce(value) {
   return typeof value === "string" && /^[a-zA-Z0-9_-]{20,80}$/.test(value);
 }
+
+signOutButton?.addEventListener("click", async () => {
+  if (!signOutButton) return;
+  signOutButton.disabled = true;
+  signOutButton.textContent = "Signing out…";
+  const { error } = await supabase.auth.signOut({ scope: "local" });
+  if (error) {
+    console.error("[PORTAL AUTH] Sign-out failed:", error);
+    signOutButton.disabled = false;
+    signOutButton.textContent = "Try again";
+  }
+});
 
 window.addEventListener("message", async (event) => {
   if (event.origin !== BUILDSPACE_ORIGIN || event.source !== getBuildspaceFrame()) return;
