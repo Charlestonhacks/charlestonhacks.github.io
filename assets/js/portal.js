@@ -750,8 +750,6 @@
     };
     stage.addEventListener("pointercancel", cancelGesture);
     stage.addEventListener("lostpointercapture", cancelGesture);
-
-
   }
 
   // ------------------------------------------------
