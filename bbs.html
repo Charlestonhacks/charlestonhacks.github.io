@@ -166,6 +166,26 @@
       letter-spacing: 0.02em;
     }
     .bbs-hint strong, .bbs-hint code { color: #caffca; }
+    #bbs-auth [data-bbs-sign-out] {
+      margin-left: 0.5rem;
+      padding: 3px 8px;
+      border: 1px solid rgba(240,198,106,0.55);
+      border-radius: 5px;
+      color: #ffe4a3;
+      background: rgba(240,198,106,0.06);
+      font: inherit;
+      font-size: 0.78em;
+      cursor: pointer;
+    }
+    #bbs-auth [data-bbs-sign-out]:hover,
+    #bbs-auth [data-bbs-sign-out]:focus-visible {
+      background: rgba(240,198,106,0.16);
+      outline: 2px solid #f0c66a;
+      outline-offset: 2px;
+    }
+    #bbs-auth [data-bbs-sign-out]:disabled { opacity: 0.6; cursor: wait; }
+    html.is-embedded #bbs-auth [data-bbs-sign-out] { display: none !important; }
+
     html.is-embedded .top-nav { display: none !important; }
     html.is-embedded #bbs-modal {
       min-height: 100vh;
@@ -196,7 +216,7 @@
 
 
   <script type="module">
-    import { initBBS } from "/assets/js/bbs.js?v=member-auth-handoff-20261028";
+    import { initBBS } from "/assets/js/bbs.js?v=portal-card-logout-20261028";
     document.addEventListener("DOMContentLoaded", initBBS);
   </script>
 
