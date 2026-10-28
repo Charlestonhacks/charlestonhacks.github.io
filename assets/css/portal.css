@@ -1363,3 +1363,24 @@ button:focus {
     padding: 0.7rem 0.75rem;
   }
 }
+
+
+/* On desktop, place the horizontal Quick Access rail below the card instead
+   of inheriting the global site's fixed vertical side toolbar. */
+@media (min-width: 769px) {
+  .icons-container {
+    position: fixed;
+    top: auto;
+    right: auto;
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    left: 50%;
+    translate: -50% 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    z-index: 999;
+    border-radius: 50px;
+    background: rgba(0,0,0,0.58);
+  }
+}
