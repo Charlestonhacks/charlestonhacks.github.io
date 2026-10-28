@@ -9,6 +9,21 @@
   const VERSION = "portal-js-v6-quick-access-tooltips-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
+  function setDirectionalCardPose(stage, direction) {
+    const poses = {
+      up: { rotateX: "-8deg", rotateY: "0deg", x: "0px", y: "-4px" },
+      right: { rotateX: "0deg", rotateY: "8deg", x: "4px", y: "0px" },
+      down: { rotateX: "8deg", rotateY: "0deg", x: "0px", y: "4px" },
+      left: { rotateX: "0deg", rotateY: "-8deg", x: "-4px", y: "0px" },
+    };
+    const pose = poses[direction] || poses.right;
+    stage.style.setProperty("--swipe-rotate-x", pose.rotateX);
+    stage.style.setProperty("--swipe-rotate-y", pose.rotateY);
+    stage.style.setProperty("--swipe-translate-x", pose.x);
+    stage.style.setProperty("--swipe-translate-y", pose.y);
+    stage.style.setProperty("--swipe-scale", "0.985");
+  }
+
   // ------------------------------------------------
   // DOM helpers
   // ------------------------------------------------
@@ -520,6 +535,9 @@
 
     let returnFocus = null;
     let eventsLoaded = false;
+    let closeTimer = null;
+    let focusTimer = null;
+    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 680;
 
     function updateBuildspaceAccess() {
       const authorized = window.__CH_MEMBER_AUTH__ === true;
@@ -576,6 +594,14 @@
       const content = panel.querySelector(`[data-view="${viewName}"]`);
       if (!config || !content) return false;
 
+      if (closeTimer !== null) {
+        window.clearTimeout(closeTimer);
+        closeTimer = null;
+      }
+      if (focusTimer !== null) {
+        window.clearTimeout(focusTimer);
+        focusTimer = null;
+      }
       returnFocus = trigger instanceof HTMLElement ? trigger : null;
       title.textContent = config.title;
       externalLink.hidden = !config.external;
@@ -600,10 +626,16 @@
       panel.inert = false;
       panel.setAttribute("aria-hidden", "false");
       stage.inert = true;
+      setDirectionalCardPose(stage, direction || "right");
       stage.classList.add(`is-committing-${direction || "right"}`);
 
       requestAnimationFrame(() => panel.classList.add("is-open"));
-      window.setTimeout(() => homeButton.focus({ preventScroll: true }), 360);
+      focusTimer = window.setTimeout(() => {
+        if (!panel.hidden && panel.classList.contains("is-open")) {
+          homeButton.focus({ preventScroll: true });
+        }
+        focusTimer = null;
+      }, transitionDuration + 40);
 
       if (config.frame && viewName !== "buildspace" && !config.frame.hasAttribute("src")) {
         config.frame.src = config.src;
@@ -618,13 +650,19 @@
       panel.inert = true;
       panel.setAttribute("aria-hidden", "true");
       resetStage();
-      window.setTimeout(() => {
+      if (focusTimer !== null) {
+        window.clearTimeout(focusTimer);
+        focusTimer = null;
+      }
+      if (closeTimer !== null) window.clearTimeout(closeTimer);
+      closeTimer = window.setTimeout(() => {
         panel.hidden = true;
         panel.removeAttribute("data-origin");
         if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
         else document.querySelector('.icons-container [data-portal-shortcut]')?.focus({ preventScroll: true });
         returnFocus = null;
-      }, 360);
+        closeTimer = null;
+      }, transitionDuration);
     }
 
     document.getElementById("portal-buildspace-sign-in")?.addEventListener("click", (event) => {
@@ -661,6 +699,7 @@
 
     let gesture = null;
     let resetGuideTimer = null;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const hideGuide = () => {
       guide.classList.remove("is-visible");
@@ -782,12 +821,12 @@
         return;
       }
 
-      setTilt(deltaX, deltaY, direction);
+      setDirectionalCardPose(stage, direction);
       stage.classList.remove("is-dragging");
       stage.classList.add(`is-committing-${direction}`);
       guide.textContent = `Opening ${destinations[direction].label}…`;
       window.setTimeout(hideGuide, 280);
-      window.setTimeout(() => openDestination(direction), 360);
+      window.setTimeout(() => openDestination(direction), reducedMotion ? 0 : 160);
     });
 
     const cancelGesture = (event) => {
