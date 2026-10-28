@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v5-no-card-click-zones-20261028";
+  const VERSION = "portal-js-v6-quick-access-tooltips-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -62,7 +62,51 @@
     window.setTimeout(() => { window.location.href = destination.href; }, 200);
   }
 
-  $$('.icons-container [data-portal-shortcut]').forEach((link) => {
+  function initQuickAccessTooltips() {
+    const rail = $(".icons-container");
+    if (!rail) return;
+
+    const tooltip = document.createElement("div");
+    tooltip.id = "quick-access-tooltip";
+    tooltip.setAttribute("role", "tooltip");
+    tooltip.setAttribute("aria-hidden", "true");
+    document.body.append(tooltip);
+
+    let activeLink = null;
+    const hide = () => {
+      activeLink = null;
+      tooltip.classList.remove("is-visible");
+    };
+    const position = () => {
+      if (!activeLink) return;
+      const rect = activeLink.getBoundingClientRect();
+      if (rect.right < 0 || rect.left > window.innerWidth) {
+        hide();
+        return;
+      }
+      const centerX = rect.left + rect.width / 2;
+      const boundedX = Math.max(8, Math.min(window.innerWidth - 8, centerX));
+      tooltip.style.left = `${boundedX}px`;
+      tooltip.style.top = `${Math.max(8, rect.top - 8)}px`;
+    };
+    const show = (link) => {
+      activeLink = link;
+      tooltip.textContent = link.getAttribute("aria-label") || link.title;
+      tooltip.classList.add("is-visible");
+      requestAnimationFrame(position);
+    };
+
+    rail.querySelectorAll("a[title]").forEach((link) => {
+      link.addEventListener("mouseenter", () => show(link));
+      link.addEventListener("mouseleave", hide);
+      link.addEventListener("focus", () => show(link));
+      link.addEventListener("blur", hide);
+    });
+    rail.addEventListener("scroll", position, { passive: true });
+    window.addEventListener("resize", position);
+  }
+
+  $('.icons-container [data-portal-shortcut]').forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       activatePortal(link.dataset.portalShortcut, link);
@@ -800,6 +844,7 @@
   window.addEventListener("DOMContentLoaded", () => {
     openCardDestination = initCardDestinationPanel();
     initCardGestures();
+    initQuickAccessTooltips();
     setIdleSoon();
     initEventsModal();
     initBTCModalControls();
