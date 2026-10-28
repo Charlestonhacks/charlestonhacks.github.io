@@ -454,6 +454,12 @@
     // Reset UI after transition
     setTimeout(() => {
       DOM.btcOverlay.hidden = true;
+      if (!embeddedInPortal) {
+        const stage = document.querySelector(".card-stage");
+        ["up", "right", "down", "left"].forEach((side) => stage?.classList.remove(`is-committing-${side}`));
+        ["--swipe-rotate-x", "--swipe-rotate-y", "--swipe-translate-x", "--swipe-translate-y", "--swipe-scale"]
+          .forEach((property) => stage?.style.removeProperty(property));
+      }
 
       DOM.btcDataContainer?.classList.remove("visible");
       if (DOM.btcLoading) {
