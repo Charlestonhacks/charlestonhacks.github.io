@@ -180,6 +180,37 @@
 
     .nav-logo img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
 
+    /* Invisible quick access target next to the logo. */
+    .member-portal-secret-link {
+      display: inline-flex;
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      margin-left: -8px;
+      border: 0;
+      border-radius: 8px;
+      color: transparent;
+      opacity: 0;
+      text-decoration: none;
+    }
+    .member-portal-secret-link:focus-visible {
+      width: auto;
+      flex-basis: auto;
+      padding: 0 0.65rem;
+      border: 1px solid rgba(0,224,255,0.72);
+      color: #e8fbff;
+      background: rgba(0,8,16,0.96);
+      opacity: 1;
+      outline: 2px solid #00e0ff;
+      outline-offset: 2px;
+      font: 600 0.68rem/1 "Orbitron", sans-serif;
+      white-space: nowrap;
+    }
+    .member-portal-secret-link:focus-visible::after { content: "Member Portal"; }
+
     .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
     .nav-links a {
       color: rgba(255,255,255,0.62);
@@ -1266,6 +1297,7 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
+    <a href="/hub.html" class="member-portal-secret-link" aria-label="Member Portal" title="Member Portal"></a>
     <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
       <span aria-hidden="true">☰</span>
     </button>
