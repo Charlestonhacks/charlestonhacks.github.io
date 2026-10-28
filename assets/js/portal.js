@@ -60,7 +60,7 @@
 
     if (portalId === "btc") {
       revealCardStack("up");
-      window.setTimeout(() => openMatrixBTC(trigger), 360);
+      window.setTimeout(() => openMatrixBTC(trigger), 620);
       return;
     }
     if (portalId === "innovation") playPortalActivationSound();
