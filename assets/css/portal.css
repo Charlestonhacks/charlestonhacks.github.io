@@ -145,25 +145,13 @@ body {
 /* Card stage anchors portal buttons and supports direct directional gestures. */
 .card-stage {
   position: relative;
-  transform-style: preserve-3d;
-  transform-origin: center;
-  transform: translate3d(var(--swipe-translate-x, 0px), var(--swipe-translate-y, 0px), 0)
-    rotateX(var(--swipe-rotate-x, 0deg)) rotateY(var(--swipe-rotate-y, 0deg))
-    scale(var(--swipe-scale, 1));
-  transition: transform 420ms cubic-bezier(0.18, 0.82, 0.28, 1), opacity 300ms ease, filter 420ms ease;
-  touch-action: none;
+  isolation: isolate;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
 }
-.card-stage.is-dragging { transition: none; }
-.card-stage.is-committing-up,
-.card-stage.is-committing-right,
-.card-stage.is-committing-down,
-.card-stage.is-committing-left {
-  transform: translate3d(var(--swipe-translate-x, 0px), var(--swipe-translate-y, 0px), 0)
-    rotateX(var(--swipe-rotate-x, 0deg)) rotateY(var(--swipe-rotate-y, 0deg))
-    scale(var(--swipe-scale, 0.985));
-  opacity: 0.86;
-  filter: brightness(0.74) saturate(0.82);
-}
+.card-stage.is-dragging { cursor: grabbing; }
 
 /* Destination views occupy the same portrait card footprint as the home face. */
 .portal-view-panel {
@@ -1341,187 +1329,209 @@ button:focus {
 }
 
 
-/* Directional aperture reveal: a restrained card hinge precedes the panel reveal. */
+
+/* Keep destination panels calm; the feature deck below is the main interaction. */
 .portal-view-panel {
-  --portal-aperture-x: 50%;
-  --portal-aperture-y: 50%;
-  --portal-hinge-x: 0deg;
-  --portal-hinge-y: 0deg;
-  clip-path: circle(0% at var(--portal-aperture-x) var(--portal-aperture-y));
-  opacity: 1;
-  transform: scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y));
-  transition:
-    clip-path 680ms cubic-bezier(0.2, 0.75, 0.2, 1),
-    transform 480ms cubic-bezier(0.2, 0.75, 0.2, 1),
-    opacity 220ms ease;
+  clip-path: none !important;
+  transition: opacity 180ms ease, transform 220ms ease;
 }
-.portal-view-panel[data-origin="left"] {
-  --portal-aperture-x: 0%;
-  --portal-aperture-y: 50%;
-  --portal-hinge-y: 8deg;
-}
-.portal-view-panel[data-origin="right"] {
-  --portal-aperture-x: 100%;
-  --portal-aperture-y: 50%;
-  --portal-hinge-y: -8deg;
-}
-.portal-view-panel[data-origin="up"] {
-  --portal-aperture-x: 50%;
-  --portal-aperture-y: 0%;
-  --portal-hinge-x: 8deg;
-}
-.portal-view-panel[data-origin="down"] {
-  --portal-aperture-x: 50%;
-  --portal-aperture-y: 100%;
-  --portal-hinge-x: -8deg;
-}
+.portal-view-panel::after { display: none !important; }
 .portal-view-panel[data-origin]:not(.is-open) {
-  opacity: 1 !important;
-  transform: scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+  opacity: 0 !important;
+  transform: scale(0.985) !important;
 }
 .portal-view-panel.is-open {
-  clip-path: circle(150% at var(--portal-aperture-x) var(--portal-aperture-y)) !important;
+  clip-path: none !important;
   opacity: 1;
-  transform: none !important;
 }
-.portal-view-panel::after {
-  content: "";
-  position: absolute;
-  z-index: 10;
-  top: var(--portal-aperture-y);
-  left: var(--portal-aperture-x);
-  width: clamp(32px, 8vw, 88px);
-  aspect-ratio: 1;
-  border: 2px solid rgba(0, 224, 255, 0.92);
-  border-radius: 50%;
-  box-shadow: 0 0 14px rgba(0, 224, 255, 0.85), 0 0 38px rgba(0, 224, 255, 0.5), inset 0 0 14px rgba(201, 163, 94, 0.52);
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%, -50%) scale(0.12);
-}
-.portal-view-panel.is-open::after {
-  animation: portalApertureRing 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
-}
-@keyframes portalApertureRing {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.12); }
-  14% { opacity: 0.96; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(22); }
-}
-
-@media (orientation: landscape) {
+@media (min-width: 700px) and (orientation: landscape) {
   .portal-view-panel[data-origin]:not(.is-open) {
-    transform: translate(-50%, -50%) scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+    transform: translate(-50%, -50%) scale(0.985) !important;
   }
-  .portal-view-panel.is-open {
-    transform: translate(-50%, -50%) scale(1) !important;
-  }
+  .portal-view-panel.is-open { transform: translate(-50%, -50%) scale(1) !important; }
 }
 @media (max-width: 899px) and (orientation: portrait) {
   .portal-view-panel[data-origin]:not(.is-open) {
-    transform: translate(-50%, -50%) scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+    transform: translate(-50%, -50%) scale(0.985) !important;
   }
-  .portal-view-panel.is-open {
-    transform: translate(-50%, -50%) scale(1) !important;
-  }
+  .portal-view-panel.is-open { transform: translate(-50%, -50%) scale(1) !important; }
 }
 
-
-/* A visible three-card fan makes every portal destination feel like it comes
-   from the same physical stack. The home face clears as the layers fan out. */
-.card-stage { isolation: isolate; }
-.portal-card-stack {
+/* Horizontal feature deck: layered cards move one position with each swipe. */
+.card-stage { touch-action: pan-y; }
+.portal-feature-deck {
   position: absolute;
-  z-index: 0;
+  z-index: 20;
   inset: 0;
   pointer-events: none;
-  perspective: 1000px;
 }
-.portal-card-stack span {
+.portal-feature-deck[hidden] { display: none !important; }
+.portal-feature-cards { position: absolute; inset: 0; }
+.portal-feature-card {
   position: absolute;
-  inset: 1.5%;
-  border: 2px solid rgba(201,163,94,0.92);
-  border-radius: 16px;
+  inset: 2.5%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 3%, 1.2rem);
+  padding: clamp(1rem, 5%, 2.4rem);
+  overflow: hidden;
+  border: 1px solid rgba(0,224,255,0.68);
+  border-radius: clamp(12px, 2vw, 20px);
+  color: #eefaff;
+  text-align: center;
   background:
-    linear-gradient(145deg, rgba(1,10,22,0.38), rgba(0,224,255,0.16)),
-    url("/images/finalcard.png") center / 100% 100% no-repeat,
-    #06101b;
-  box-shadow: 0 14px 36px rgba(0,0,0,0.58), 0 0 22px rgba(0,224,255,0.16);
+    radial-gradient(ellipse at 50% 25%, rgba(0,224,255,0.18), transparent 55%),
+    linear-gradient(155deg, rgba(10,25,42,0.98), rgba(2,6,15,0.98) 78%);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.58), 0 0 24px rgba(0,224,255,0.15);
   opacity: 0;
-  transform: translate3d(0, 4%, -18px) scale(0.94);
-  transform-origin: 50% 85%;
-  transition: transform 420ms cubic-bezier(0.16,0.84,0.28,1), opacity 200ms ease;
+  visibility: hidden;
+  pointer-events: none;
+  transform-origin: center;
+  transition: transform 300ms cubic-bezier(0.2,0.7,0.25,1), opacity 220ms ease;
+  will-change: transform, opacity;
 }
-.portal-card-stack span:nth-child(1) { transition-delay: 0ms; }
-.portal-card-stack span:nth-child(2) { transition-delay: 40ms; }
-.portal-card-stack span:nth-child(3) { transition-delay: 80ms; }
-#missionImage {
-  position: relative;
-  z-index: 1;
-  transition: opacity 240ms ease, transform 420ms cubic-bezier(0.16,0.84,0.28,1);
+.portal-feature-card[data-position="front"] {
+  z-index: 4;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(var(--feature-drag-x, 0px));
 }
-.card-stage.is-committing-up .portal-card-stack span,
-.card-stage.is-committing-right .portal-card-stack span,
-.card-stage.is-committing-down .portal-card-stack span,
-.card-stage.is-committing-left .portal-card-stack span { opacity: 1; }
-.card-stage.is-committing-up .portal-card-stack span:nth-child(1) {
-  transform: translate3d(-7%, 6%, -24px) rotate(-10deg) scale(0.96);
+.portal-feature-card[data-position="next"] {
+  z-index: 3;
+  opacity: 0.82;
+  visibility: visible;
+  transform: translate(7%, 1.5%) scale(0.96);
 }
-.card-stage.is-committing-up .portal-card-stack span:nth-child(2) {
-  transform: translate3d(7%, 3%, -12px) rotate(8deg) scale(0.98);
+.portal-feature-card[data-position="next-next"] {
+  z-index: 2;
+  opacity: 0.55;
+  visibility: visible;
+  transform: translate(13%, 3%) scale(0.92);
 }
-.card-stage.is-committing-up .portal-card-stack span:nth-child(3) {
-  transform: translate3d(0, -5%, 0) rotate(-2deg) scale(1);
+.portal-feature-card[data-position="previous"] {
+  z-index: 3;
+  opacity: 0.62;
+  visibility: visible;
+  transform: translate(-7%, 1.5%) scale(0.96);
 }
-.card-stage.is-committing-right .portal-card-stack span:nth-child(1) {
-  transform: translate3d(-7%, 5%, -24px) rotate(-9deg) scale(0.96);
+.portal-feature-card[data-position="hidden"] { transform: scale(0.9); }
+.card-stage.is-dragging .portal-feature-card { transition: none; }
+.portal-feature-number {
+  position: absolute;
+  top: clamp(0.85rem, 4%, 1.4rem);
+  left: clamp(0.85rem, 4%, 1.4rem);
+  color: rgba(214,239,250,0.58);
+  font: 600 clamp(0.55rem, 1.4vw, 0.72rem)/1 "Orbitron", sans-serif;
+  letter-spacing: 0.12em;
 }
-.card-stage.is-committing-right .portal-card-stack span:nth-child(2) {
-  transform: translate3d(8%, 0, -12px) rotate(10deg) scale(0.98);
+.portal-feature-icon {
+  display: grid;
+  place-items: center;
+  width: clamp(54px, 18%, 92px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(0,224,255,0.42);
+  border-radius: 50%;
+  color: #00e0ff;
+  background: rgba(0,224,255,0.08);
+  box-shadow: 0 0 22px rgba(0,224,255,0.12);
+  font-size: clamp(1.5rem, 6vw, 2.6rem);
 }
-.card-stage.is-committing-right .portal-card-stack span:nth-child(3) {
-  transform: translate3d(3%, -5%, 0) rotate(3deg) scale(1);
+.portal-feature-card h2 {
+  max-width: 100%;
+  margin: 0;
+  color: #f3d69a;
+  font: 600 clamp(1.1rem, 4vw, 1.8rem)/1.2 "Orbitron", sans-serif;
+  text-wrap: balance;
 }
-.card-stage.is-committing-down .portal-card-stack span:nth-child(1) {
-  transform: translate3d(-7%, -3%, -24px) rotate(-10deg) scale(0.96);
+.portal-feature-card p {
+  max-width: 28rem;
+  margin: 0;
+  color: rgba(235,246,255,0.78);
+  font: clamp(0.8rem, 2.2vw, 1rem)/1.5 Arial, sans-serif;
+  text-wrap: pretty;
 }
-.card-stage.is-committing-down .portal-card-stack span:nth-child(2) {
-  transform: translate3d(7%, -1%, -12px) rotate(8deg) scale(0.98);
+.portal-feature-open {
+  min-height: 42px;
+  max-width: 100%;
+  margin-top: clamp(0.3rem, 2%, 0.7rem);
+  padding: 0.7rem 1.1rem;
+  border: 1px solid rgba(201,163,94,0.8);
+  border-radius: 999px;
+  color: #07111a;
+  background: linear-gradient(120deg, #f3d69a, #c9a35e);
+  font: 700 clamp(0.65rem, 1.8vw, 0.8rem)/1.2 "Orbitron", sans-serif;
+  cursor: pointer;
 }
-.card-stage.is-committing-down .portal-card-stack span:nth-child(3) {
-  transform: translate3d(0, 6%, 0) rotate(-2deg) scale(1);
+.portal-feature-open:hover,
+.portal-feature-open:focus-visible {
+  box-shadow: 0 0 20px rgba(201,163,94,0.32);
+  outline: 2px solid #f3d69a;
+  outline-offset: 3px;
 }
-.card-stage.is-committing-left .portal-card-stack span:nth-child(1) {
-  transform: translate3d(-8%, 0, -24px) rotate(-10deg) scale(0.96);
+.portal-feature-home,
+.portal-feature-controls button {
+  position: absolute;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  min-height: 38px;
+  border: 1px solid rgba(0,224,255,0.45);
+  border-radius: 999px;
+  color: #e8fbff;
+  background: rgba(0,8,16,0.88);
+  font: 600 0.72rem/1 "Orbitron", sans-serif;
+  cursor: pointer;
+  pointer-events: auto;
 }
-.card-stage.is-committing-left .portal-card-stack span:nth-child(2) {
-  transform: translate3d(7%, 5%, -12px) rotate(9deg) scale(0.98);
+.portal-feature-home {
+  top: clamp(0.7rem, 3%, 1rem);
+  right: clamp(0.7rem, 3%, 1rem);
+  padding: 0.5rem 0.8rem;
 }
-.card-stage.is-committing-left .portal-card-stack span:nth-child(3) {
-  transform: translate3d(-3%, -5%, 0) rotate(-3deg) scale(1);
+.portal-feature-controls {
+  position: absolute;
+  z-index: 8;
+  right: 0;
+  bottom: clamp(0.7rem, 3%, 1rem);
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.5rem, 3vw, 1.2rem);
+  pointer-events: none;
 }
-.card-stage.is-committing-up #missionImage,
-.card-stage.is-committing-right #missionImage,
-.card-stage.is-committing-down #missionImage,
-.card-stage.is-committing-left #missionImage {
-  opacity: 0;
-  animation: none;
+.portal-feature-controls button { position: static; width: 38px; font-size: 1.3rem; }
+.portal-feature-controls span {
+  color: rgba(235,246,255,0.62);
+  font: 600 0.56rem/1 "Orbitron", sans-serif;
+  letter-spacing: 0.08em;
 }
-.card-stage.is-committing-up #missionImage { transform: translate3d(0,-7%,30px) rotateX(12deg) scale(0.92); }
-.card-stage.is-committing-right #missionImage { transform: translate3d(8%,0,30px) rotateY(14deg) scale(0.92); }
-.card-stage.is-committing-down #missionImage { transform: translate3d(0,7%,30px) rotateX(-12deg) scale(0.92); }
-.card-stage.is-committing-left #missionImage { transform: translate3d(-8%,0,30px) rotateY(-14deg) scale(0.92); }
-
-.portal-view-content iframe {
-  height: 100%;
-  min-height: 100%;
+.portal-feature-hint {
+  position: absolute;
+  right: 0;
+  bottom: clamp(0.5rem, 2%, 0.8rem);
+  left: 0;
+  margin: 0;
+  color: rgba(235,246,255,0.35);
+  font: 0.58rem/1.2 Arial, sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+@media (max-height: 520px) {
+  .portal-feature-card { gap: 0.45rem; padding: 2.6rem 1.1rem 3rem; }
+  .portal-feature-icon { width: clamp(42px, 12vh, 62px); }
+  .portal-feature-card p { font-size: 0.76rem; }
+  .portal-feature-open { min-height: 36px; padding: 0.5rem 0.85rem; }
+  .portal-feature-home { min-height: 32px; }
+  .portal-feature-controls { bottom: 0.45rem; }
+  .portal-feature-controls button { min-height: 30px; width: 32px; }
+  .portal-feature-hint { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .portal-card-stack span,
-  #missionImage { transition: none !important; }
-}
-
-.icons-container.is-departing {
-  opacity: 0.42;
-  pointer-events: none;
-  transition: opacity 180ms ease;
+  .portal-feature-card, .portal-view-panel { transition: none !important; }
 }
