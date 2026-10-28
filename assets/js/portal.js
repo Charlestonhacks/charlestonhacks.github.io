@@ -62,7 +62,7 @@
     window.setTimeout(() => { window.location.href = destination.href; }, 200);
   }
 
-  $('.icons-container [data-portal-shortcut]').forEach((link) => {
+  $$('.icons-container [data-portal-shortcut]').forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       activatePortal(link.dataset.portalShortcut, link);
