@@ -297,7 +297,7 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
-    <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="event-countdown-banner" role="region" aria-label="Upcoming event"></div>
     <div class="portal-account-controls" id="portal-account-controls" hidden>
         <span id="portal-account-name">Signed in</span>
         <button type="button" id="portal-sign-out">Sign out</button>
@@ -550,6 +550,7 @@
       label.textContent = "NEXT EVENT";
       const countdown = document.createElement("span");
       countdown.className = "cd-time";
+      countdown.setAttribute("aria-hidden", "true");
 
       banner.replaceChildren(label, eventAnchor, countdown);
       banner.style.setProperty("--ticker-duration", `${Math.max(22, Math.round(14 + eventTitle.length * 0.4))}s`);
