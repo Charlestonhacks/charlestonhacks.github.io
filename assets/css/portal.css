@@ -1535,3 +1535,21 @@ button:focus {
 @media (prefers-reduced-motion: reduce) {
   .portal-feature-card, .portal-view-panel { transition: none !important; }
 }
+
+.portal-feature-prompt {
+  position: absolute;
+  right: 0;
+  bottom: -1.55rem;
+  left: 0;
+  margin: 0;
+  color: rgba(235,246,255,0.55);
+  font: 0.62rem/1.2 Arial, sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .portal-feature-prompt { bottom: -1.25rem; font-size: 0.58rem; }
+}
+@media (max-height: 520px) {
+  .portal-feature-prompt { bottom: -1rem; }
+}
