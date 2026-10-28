@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v9-horizontal-feature-deck-20261028";
+  const VERSION = "portal-js-v10-swiper-feature-deck-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -621,130 +621,109 @@
   // Directional card gestures
   // ------------------------------------------------
   function initCardGestures() {
-    const stage = document.querySelector(".card-stage");
-    const deck = document.getElementById("portal-feature-deck");
-    const deckCards = document.getElementById("portal-feature-cards");
+    const container = document.getElementById("portal-feature-swiper");
+    const slidesContainer = document.getElementById("portal-feature-slides");
     const counter = document.getElementById("portal-feature-count");
-    const guide = document.getElementById("portal-discovery-guide");
-    if (!stage || !deck || !deckCards || !counter) return;
+    const homeButton = document.getElementById("portal-feature-home");
+    if (!container || !slidesContainer || !counter || !homeButton || typeof window.Swiper !== "function") return;
+
     const features = [
-      { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", action: "Browse events" },
-      { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Explore experimental projects and prototypes from CharlestonHacks.", action: "Open sandbox" },
-      { id: "news", title: "News", icon: "fas fa-newspaper", description: "Catch up on CharlestonHacks updates and community stories.", action: "Read the news" },
-      { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", action: "Open community chat" },
-      { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Open the member workspace for projects, connections, and collaboration.", action: "Open Buildspace" },
-      { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster and share it with your community.", action: "View poster" },
-      { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "See the live Bitcoin tracker in the portal.", action: "Open tracker" },
-      { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", action: "Explore swag" },
-      { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Learn how to support CharlestonHacks and its programs.", action: "Support CharlestonHacks" },
-      { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", action: "Play the game" },
-      { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates by email.", action: "Sign up" },
+      { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups." },
+      { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Explore experimental projects and prototypes from CharlestonHacks." },
+      { id: "news", title: "News", icon: "fas fa-newspaper", description: "Catch up on CharlestonHacks updates and community stories." },
+      { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation." },
+      { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Open the member workspace for projects, connections, and collaboration." },
+      { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster and share it with your community." },
+      { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "See the live Bitcoin tracker in the portal." },
+      { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag." },
+      { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Learn how to support CharlestonHacks and its programs." },
+      { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game." },
+      { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates by email." },
     ];
-    let currentIndex = 0, deckOpen = false, gesture = null;
-    const cards = features.map((feature, index) => {
-      const card = document.createElement("article");
+
+    features.forEach((feature, index) => {
+      const slide = document.createElement("div");
+      slide.className = "swiper-slide";
+      slide.setAttribute("aria-label", `Feature ${index + 1} of ${features.length}: ${feature.title}`);
+
+      const card = document.createElement("button");
+      card.type = "button";
       card.className = "portal-feature-card";
-      card.dataset.index = String(index);
+      card.dataset.featureId = feature.id;
+      card.setAttribute("aria-label", `Open ${feature.title}`);
+      card.tabIndex = -1;
+
       const number = document.createElement("span");
       number.className = "portal-feature-number";
       number.textContent = `${String(index + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
-      const iconWrap = document.createElement("div");
+
+      const iconWrap = document.createElement("span");
       iconWrap.className = "portal-feature-icon";
+      iconWrap.setAttribute("aria-hidden", "true");
       const icon = document.createElement("i");
       icon.className = feature.icon;
-      icon.setAttribute("aria-hidden", "true");
       iconWrap.append(icon);
-      const title = document.createElement("h2");
+
+      const title = document.createElement("span");
+      title.className = "portal-feature-title";
       title.textContent = feature.title;
-      const description = document.createElement("p");
+
+      const description = document.createElement("span");
+      description.className = "portal-feature-description";
       description.textContent = feature.description;
-      const open = document.createElement("button");
-      open.type = "button";
-      open.className = "portal-feature-open";
-      open.textContent = feature.action;
-      open.addEventListener("click", (event) => activatePortal(feature.id, event.currentTarget));
-      card.append(number, iconWrap, title, description, open);
-      deckCards.append(card);
-      return card;
+      const tapHint = document.createElement("span");
+      tapHint.className = "portal-feature-tap-hint";
+      tapHint.textContent = "Tap card to open";
+
+      card.append(number, iconWrap, title, description, tapHint);
+      card.addEventListener("click", (event) => activatePortal(feature.id, event.currentTarget));
+      slide.append(card);
+      slidesContainer.append(slide);
     });
-    const wrap = (value) => (value + features.length) % features.length;
-    const render = () => {
-      cards.forEach((card, index) => {
-        let offset = index - currentIndex;
-        if (offset > features.length / 2) offset -= features.length;
-        if (offset < -features.length / 2) offset += features.length;
-        const position = offset === 0 ? "front" : offset === 1 ? "next" : offset === 2 ? "next-next" : offset === -1 ? "previous" : "hidden";
-        card.dataset.position = position;
-        card.setAttribute("aria-hidden", position === "front" ? "false" : "true");
-        card.inert = position !== "front";
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const swiper = new window.Swiper(container, {
+      effect: "cards",
+      direction: "horizontal",
+      slidesPerView: 1,
+      speed: reducedMotion ? 0 : 240,
+      threshold: 4,
+      touchAngle: 45,
+      shortSwipes: true,
+      longSwipes: true,
+      longSwipesMs: 180,
+      longSwipesRatio: 0.22,
+      preventInteractionOnTransition: false,
+      preventClicks: true,
+      preventClicksPropagation: true,
+      grabCursor: true,
+      loop: false,
+      keyboard: { enabled: true, onlyInViewport: true },
+      a11y: { enabled: true },
+      cardsEffect: {
+        perSlideOffset: 12,
+        perSlideRotate: 0,
+        rotate: false,
+        slideShadows: false,
+      },
+    });
+
+    const syncDeckControls = () => {
+      const activeIndex = swiper.activeIndex;
+      const onHome = activeIndex === 0;
+      counter.textContent = onHome ? "PORTAL" : `${activeIndex} / ${features.length}`;
+      homeButton.hidden = onHome;
+      [...slidesContainer.children].forEach((slide, index) => {
+        const active = index === activeIndex;
+        slide.setAttribute("aria-hidden", active ? "false" : "true");
+        const card = slide.querySelector(".portal-feature-card");
+        if (card) card.tabIndex = active ? 0 : -1;
       });
-      counter.textContent = `FEATURE ${String(currentIndex + 1).padStart(2, "0")} OF ${String(features.length).padStart(2, "0")}`;
     };
-    const openDeck = (index) => {
-      currentIndex = wrap(index);
-      deckOpen = true;
-      deck.hidden = false;
-      stage.classList.add("has-feature-deck");
-      if (guide) guide.hidden = true;
-      render();
-    };
-    const closeDeck = () => {
-      deckOpen = false;
-      deck.hidden = true;
-      stage.classList.remove("has-feature-deck", "is-dragging");
-      stage.style.removeProperty("--feature-drag-x");
-      stage.focus({ preventScroll: true });
-    };
-    const step = (direction) => {
-      if (!deckOpen) { openDeck(direction < 0 ? 0 : features.length - 1); return; }
-      currentIndex = wrap(currentIndex + direction);
-      render();
-    };
-    document.getElementById("portal-feature-home")?.addEventListener("click", closeDeck);
-    document.getElementById("portal-feature-previous")?.addEventListener("click", () => step(-1));
-    document.getElementById("portal-feature-next")?.addEventListener("click", () => step(1));
-    stage.addEventListener("keydown", (event) => {
-      if (!deckOpen) {
-        if (event.key === "ArrowLeft") { event.preventDefault(); openDeck(0); }
-        if (event.key === "ArrowRight") { event.preventDefault(); openDeck(features.length - 1); }
-        return;
-      }
-      if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
-      if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
-      if (event.key === "Escape") { event.preventDefault(); closeDeck(); }
-    });
-    stage.addEventListener("dragstart", (event) => event.preventDefault());
-    stage.addEventListener("pointerdown", (event) => {
-      if (!event.isPrimary || event.button !== 0 || stage.inert || event.target.closest("button, a")) return;
-      gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
-    });
-    stage.addEventListener("pointermove", (event) => {
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
-      const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
-      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-      try { stage.setPointerCapture(event.pointerId); } catch {}
-      stage.classList.add("is-dragging");
-      stage.style.setProperty("--feature-drag-x", `${Math.max(-72, Math.min(72, dx))}px`);
-    });
-    const finish = (event) => {
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
-      const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
-      gesture = null;
-      stage.classList.remove("is-dragging");
-      stage.style.removeProperty("--feature-drag-x");
-      const threshold = Math.max(48, Math.min(96, stage.getBoundingClientRect().width * 0.12));
-      if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy) * 1.2) step(dx < 0 ? 1 : -1);
-    };
-    stage.addEventListener("pointerup", finish);
-    const cancel = (event) => {
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
-      gesture = null;
-      stage.classList.remove("is-dragging");
-      stage.style.removeProperty("--feature-drag-x");
-    };
-    stage.addEventListener("pointercancel", cancel);
-    stage.addEventListener("lostpointercapture", cancel);
-    render();
+
+    swiper.on("slideChange", syncDeckControls);
+    homeButton.addEventListener("click", () => swiper.slideTo(0));
+    syncDeckControls();
   }
 
   // ------------------------------------------------
