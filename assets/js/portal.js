@@ -467,7 +467,6 @@ if (portalId === "btc") {
         title: "Buildspace",
         frame: document.getElementById("portal-buildspace-frame"),
         src: "https://deckerd451.github.io/innovation-engine/",
-        external: "https://deckerd451.github.io/innovation-engine/",
       },
       sandbox: {
         title: "Sandbox",
@@ -501,7 +500,7 @@ if (portalId === "btc") {
       if (authorized && frame && !frame.hasAttribute("src")) frame.src = viewConfig.buildspace.src;
       if (status) {
         status.hidden = !authorized || !frame || !frame.hasAttribute("src");
-        status.textContent = "If Buildspace asks you to sign in, use Open separately to complete OAuth outside the embedded card.";
+        status.textContent = "Loading your signed-in member workspace…";
       }
     }
 
