@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v3-card-controller-logout-20261028";
+  const VERSION = "portal-js-v4-hidden-hotspots-quick-access-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -15,11 +15,14 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // Keep every Buildspace entry point behind the same member gate.
-  const quickBuildspaceLink = $('.icons-container a[aria-label="Buildspace"]');
-  quickBuildspaceLink?.addEventListener("click", (event) => {
-    event.preventDefault();
-    document.querySelector('.clickable-area[data-portal="innovation"]')?.click();
+  // Keep Quick Access shortcuts routed through the same portal handlers as the
+  // card hit areas, including the shared Buildspace member gate and BTC overlay.
+  $('.icons-container [data-portal-shortcut]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const portalId = link.dataset.portalShortcut;
+      document.querySelector(`.clickable-area[data-portal="${portalId}"]`)?.click();
+    });
   });
 
   // Cache DOM once (performance + consistency)
@@ -399,10 +402,14 @@
       };
       const hidePortalInfo = () => DOM.infoLine?.classList.remove("visible");
 
-      area.addEventListener("mouseenter", showPortalInfo);
-      area.addEventListener("mouseleave", hidePortalInfo);
-      area.addEventListener("focus", showPortalInfo);
-      area.addEventListener("blur", hidePortalInfo);
+      // Only the visible center control gets a hover tooltip; peripheral card
+      // hit areas stay visually quiet and are represented in Quick Access.
+      if (portalId === "innovation") {
+        area.addEventListener("mouseenter", showPortalInfo);
+        area.addEventListener("mouseleave", hidePortalInfo);
+        area.addEventListener("focus", showPortalInfo);
+        area.addEventListener("blur", hidePortalInfo);
+      }
 
       area.addEventListener("click", (e) => {
         e.preventDefault();
