@@ -696,7 +696,7 @@
       keyboard: { enabled: true, onlyInViewport: true },
       a11y: { enabled: true },
       cardsEffect: {
-        perSlideOffset: 12,
+        perSlideOffset: 6,
         perSlideRotate: 0,
         rotate: false,
         slideShadows: false,
