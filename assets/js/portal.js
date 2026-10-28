@@ -80,7 +80,13 @@
     const position = () => {
       if (!activeLink) return;
       const rect = activeLink.getBoundingClientRect();
-      if (rect.right < 0 || rect.left > window.innerWidth) {
+      const railRect = rail.getBoundingClientRect();
+      if (
+        rect.right < railRect.left ||
+        rect.left > railRect.right ||
+        rect.bottom < railRect.top ||
+        rect.top > railRect.bottom
+      ) {
         hide();
         return;
       }
@@ -106,7 +112,7 @@
     window.addEventListener("resize", position);
   }
 
-  $('.icons-container [data-portal-shortcut]').forEach((link) => {
+  $$('.icons-container [data-portal-shortcut]').forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       activatePortal(link.dataset.portalShortcut, link);
