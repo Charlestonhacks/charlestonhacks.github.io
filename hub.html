@@ -58,10 +58,11 @@
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
   <style>
-    /* ===== Top Nav (same as home page) ===== */
+    /* Compact portal navigation with room for the event ticker. */
     .top-nav {
       display: flex;
       align-items: center;
+      box-sizing: border-box;
       padding: 0 24px;
       height: 58px;
       border-bottom: 1px solid rgba(0,224,255,0.1);
@@ -72,28 +73,16 @@
       background: rgba(0,0,0,0.92);
       backdrop-filter: blur(10px);
       z-index: 10002;
-      gap: 8px;
+      gap: 12px;
     }
-
     .nav-logo img { width: 140px; height: auto; display: block; filter: brightness(1.12); }
-
-    .nav-links { display: flex; align-items: center; gap: 6px; margin-left: auto; }
-    .nav-links a {
-      color: rgba(255,255,255,0.62);
-      text-decoration: none;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      padding: 7px 10px;
-      border-radius: 7px;
-      transition: color 0.2s ease, background 0.2s ease;
-    }
-    .nav-links a:hover { color: #00e0ff; background: rgba(0,224,255,0.06); }
 
     .portal-account-controls {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-left: 6px;
+      margin-left: auto;
+      flex: 0 0 auto;
     }
     .portal-account-controls[hidden] { display: none !important; }
     #portal-account-name {
@@ -125,45 +114,11 @@
       outline-offset: 2px;
     }
     #portal-sign-out:disabled { opacity: 0.6; cursor: wait; }
-    @media (max-width: 768px) {
-      .nav-links.open .portal-account-controls {
-        width: 100%;
-        justify-content: space-between;
-        margin: 8px 0 0;
-      }
-      #portal-account-name { max-width: 60vw; }
-    }
-
-    .nav-toggle {
-      display: none;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.72);
-      font-size: 1.3rem;
-      cursor: pointer;
-      padding: 6px;
-      margin-left: auto;
-    }
 
     @media (max-width: 768px) {
-      .top-nav { padding: 0 16px; height: 54px; }
+      .top-nav { padding: 0 16px; height: 54px; gap: 8px; }
       .nav-logo img { width: 140px; }
-      .nav-links { display: none; }
-      .nav-links.open {
-        display: flex;
-        flex-direction: column;
-        position: absolute;
-        top: 54px;
-        left: 0;
-        right: 0;
-        background: rgba(0,0,0,0.97);
-        border-bottom: 1px solid rgba(0,224,255,0.1);
-        padding: 12px 16px;
-        gap: 4px;
-        backdrop-filter: blur(12px);
-      }
-      .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
-      .nav-toggle { display: block; }
+      #portal-account-name { max-width: 38vw; }
     }
 
     .ch-top-logo { display: none; }
@@ -207,91 +162,105 @@
         width: min(100%, 500px, calc((100vh - 218px - env(safe-area-inset-bottom)) * 0.69));
         width: min(100%, 500px, calc((100dvh - 218px - env(safe-area-inset-bottom)) * 0.69));
       }
-      .ch-tagline { bottom: calc(105px + env(safe-area-inset-bottom)); font-size: 0.6rem; }
     }
     @media (max-height: 520px) {
       .main-wrapper { padding-top: 64px; padding-bottom: 64px; }
        .media-container { width: min(52vw, calc((100vh - 130px) * 0.69)); width: min(52vw, calc((100dvh - 130px) * 0.69)); }
     }
 
-    .ch-tagline {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9998;
-      margin: 0;
-      color: rgba(255, 255, 255, 0.45);
-      font-size: clamp(0.65rem, 1.8vw, 0.8rem);
-      letter-spacing: 0.1em;
-      text-align: center;
-      white-space: nowrap;
-      pointer-events: none;
-      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
-      font-family: 'Orbitron', sans-serif;
-      text-transform: uppercase;
-    }
-
-    /* Countdown - inline in the nav bar */
+    /* A steady marquee keeps the next event visible without blocking its link. */
     #event-countdown-banner {
       display: none;
       align-items: center;
-      gap: 6px;
+      gap: 10px;
+      flex: 1 1 auto;
+      min-width: 0;
+      margin: 0 8px 0 24px;
+      padding: 7px 12px;
+      border: 1px solid rgba(0,224,255,0.15);
+      border-radius: 24px;
+      background: rgba(0,224,255,0.06);
+      color: rgba(255,255,255,0.7);
       font-family: 'Orbitron', monospace;
       font-size: 0.62rem;
       letter-spacing: 0.05em;
-      color: rgba(255,255,255,0.7);
-      white-space: nowrap;
-      margin-left: auto;
-      margin-right: 8px;
-      padding: 5px 12px;
-      background: rgba(0,224,255,0.06);
-      border: 1px solid rgba(0,224,255,0.15);
-      border-radius: 20px;
     }
-    #event-countdown-banner a {
+    #event-countdown-banner .cd-label {
+      flex: 0 0 auto;
+      opacity: 0.6;
+    }
+    #event-countdown-banner .cd-time {
+      flex: 0 0 auto;
+      color: #00e0ff;
+      font-weight: bold;
+    }
+    #event-countdown-banner .next-event-link {
+      display: block;
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
       color: #00e0ff;
       text-decoration: none;
     }
-    #event-countdown-banner a:hover { text-decoration: underline; }
-    #event-countdown-banner .cd-time { color: #00e0ff; font-weight: bold; }
-    #event-countdown-banner .cd-label { opacity: 0.6; margin-right: 4px; }
-
-    /* When banner is visible, nav-links lose their auto margin */
-    body.has-countdown-banner .nav-links { margin-left: 0; }
+    #event-countdown-banner .next-event-link:hover,
+    #event-countdown-banner .next-event-link:focus-visible {
+      color: #9bf4ff;
+      text-decoration: underline;
+      outline-offset: 3px;
+    }
+    #event-countdown-banner .next-event-viewport {
+      display: block;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    #event-countdown-banner .next-event-track {
+      display: flex;
+      width: max-content;
+      animation: nextEventScroll var(--ticker-duration, 36s) linear infinite;
+    }
+    #event-countdown-banner .next-event-copy {
+      display: block;
+      flex: 0 0 auto;
+      padding-right: 3rem;
+    }
+    #event-countdown-banner .next-event-link:hover .next-event-track,
+    #event-countdown-banner .next-event-link:focus-visible .next-event-track {
+      animation-play-state: paused;
+    }
+    @keyframes nextEventScroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
 
     @media (max-width: 768px) {
-      #event-countdown-banner { font-size: 0.55rem; padding: 4px 8px; margin-left: 0; margin-right: auto; }
-      /* On mobile, move countdown below nav as a small bar */
-      body.has-countdown-banner #event-countdown-banner {
+      #event-countdown-banner {
         position: fixed;
         top: 54px;
         left: 0;
         right: 0;
+        box-sizing: border-box;
+        width: 100%;
         margin: 0;
-        border-radius: 0;
-        justify-content: center;
-        background: rgba(0,12,20,0.95);
+        padding: 6px 10px;
         border: none;
         border-bottom: 1px solid rgba(0,224,255,0.2);
-        padding: 5px 10px;
+        border-radius: 0;
+        background: rgba(0,12,20,0.95);
         z-index: 10001;
+        font-size: 0.55rem;
+        gap: 7px;
       }
-      body.has-countdown-banner .main-wrapper { padding-top: 94px; }
     }
-    .hub-mini-nav { display: none; }
-
     /* Reserve a footer lane for the desktop Quick Access rail so it never
        overlays the portrait card; keep the existing mobile layout unchanged. */
     @media (min-width: 769px) {
       /* Match the card's height limit to the space left for the nav, card,
-         tagline, and fixed Quick Access rail. */
+         navigation and fixed Quick Access rail. */
       .main-wrapper { padding-bottom: 128px; }
       .media-container {
         width: min(100%, 620px, calc((100vh - 206px) * 0.69));
         width: min(100%, 620px, calc((100dvh - 206px) * 0.69));
       }
-      .ch-tagline { bottom: calc(104px + env(safe-area-inset-bottom)); }
     }
   </style>
   <script type="application/ld+json">
@@ -328,28 +297,14 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
-    <!-- Event countdown - inline in nav -->
     <div id="event-countdown-banner" role="status" aria-live="polite" aria-atomic="true"></div>
-    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-nav">
-      <i class="fas fa-bars"></i>
-    </button>
-    <div class="nav-links" id="primary-nav">
-      <a href="/#events-section">Events</a>
-      <a href="/hub.html">Member Portal</a>
-      <a href="/bbs.html">Community Chat</a>
-      <div class="portal-account-controls" id="portal-account-controls" hidden>
+    <div class="portal-account-controls" id="portal-account-controls" hidden>
         <span id="portal-account-name">Signed in</span>
         <button type="button" id="portal-sign-out">Sign out</button>
-      </div>
     </div>
   </nav>
 
-  <!-- Upcoming event countdown is now inline in the nav bar above -->
-
   <canvas id="neural-bg"></canvas>
-
-  <!-- Tagline -->
-  <p class="ch-tagline">Charleston's community for builders, hackers &amp; makers</p>
 
   <!-- Sounds (lazy) -->
   <audio id="cardflipSound" src="assets/atmospherel.m4a" preload="none"></audio>
@@ -522,31 +477,6 @@
     </div>
   </div>
 
-  <!-- Hamburger menu toggle (same as home page) -->
-  <script>
-    (function () {
-      const toggle = document.querySelector('.nav-toggle');
-      const links = document.querySelector('.nav-links');
-      if (!toggle || !links) return;
-
-      toggle.addEventListener('click', function () {
-        const open = links.classList.toggle('open');
-        toggle.setAttribute('aria-expanded', String(open));
-        const icon = toggle.querySelector('i');
-        if (icon) icon.className = open ? 'fas fa-times' : 'fas fa-bars';
-      });
-
-      links.querySelectorAll('a').forEach(function (a) {
-        a.addEventListener('click', function () {
-          links.classList.remove('open');
-          toggle.setAttribute('aria-expanded', 'false');
-          const icon = toggle.querySelector('i');
-          if (icon) icon.className = 'fas fa-bars';
-        });
-      });
-    })();
-  </script>
-
   <!-- Core modules you already use -->
   <script type="module">
     import "/assets/js/animation-lifecycle.js";
@@ -584,35 +514,68 @@
     function pad(n) { return String(n).padStart(2, "0"); }
 
     function renderCountdown(eventTitle, eventLink, target) {
+      const eventAnchor = document.createElement("a");
+      eventAnchor.className = "next-event-link";
+      eventAnchor.target = "_blank";
+      eventAnchor.rel = "noopener noreferrer";
+      eventAnchor.setAttribute("aria-label", `Open event details: ${eventTitle}`);
+
+      let destination;
+      try {
+        destination = new URL(eventLink || "/#events-section", window.location.href);
+      } catch {
+        destination = new URL("/#events-section", window.location.href);
+      }
+      if (destination.protocol !== "https:" && destination.protocol !== "http:") {
+        destination = new URL("/#events-section", window.location.href);
+      }
+      eventAnchor.href = destination.href;
+
+      const viewport = document.createElement("span");
+      viewport.className = "next-event-viewport";
+      viewport.setAttribute("aria-hidden", "true");
+      const track = document.createElement("span");
+      track.className = "next-event-track";
+      for (let i = 0; i < 2; i += 1) {
+        const copy = document.createElement("span");
+        copy.className = "next-event-copy";
+        copy.textContent = eventTitle;
+        track.append(copy);
+      }
+      viewport.append(track);
+      eventAnchor.append(viewport);
+
+      const label = document.createElement("span");
+      label.className = "cd-label";
+      label.textContent = "NEXT EVENT";
+      const countdown = document.createElement("span");
+      countdown.className = "cd-time";
+
+      banner.replaceChildren(label, eventAnchor, countdown);
+      banner.style.setProperty("--ticker-duration", `${Math.max(22, Math.round(14 + eventTitle.length * 0.4))}s`);
+      banner.style.display = "flex";
+      document.body.classList.add("has-countdown-banner");
+
+      let countdownTimer = null;
       const tick = () => {
         const diff = target - Date.now();
         if (diff <= 0) {
           banner.style.display = "none";
           document.body.classList.remove("has-countdown-banner");
+          if (countdownTimer !== null) window.clearInterval(countdownTimer);
           return;
         }
-        const days  = Math.floor(diff / 86400000);
-        const hrs   = Math.floor((diff % 86400000) / 3600000);
-        const mins  = Math.floor((diff % 3600000)  / 60000);
-        const secs  = Math.floor((diff % 60000)    / 1000);
-
-        const timeStr = days > 0
+        const days = Math.floor(diff / 86400000);
+        const hrs = Math.floor((diff % 86400000) / 3600000);
+        const mins = Math.floor((diff % 3600000) / 60000);
+        const secs = Math.floor((diff % 60000) / 1000);
+        countdown.textContent = days > 0
           ? `${days}d ${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`
           : `${pad(hrs)}h ${pad(mins)}m ${pad(secs)}s`;
-
-        const titleHtml = eventLink
-          ? `<a href="${eventLink}" target="_blank" rel="noopener noreferrer">${eventTitle}</a>`
-          : eventTitle;
-
-        banner.innerHTML =
-          `<span class="cd-label">NEXT EVENT</span>${titleHtml}&ensp;` +
-          `<span class="cd-time">${timeStr}</span>`;
       };
 
-      banner.style.display = "flex";
-      document.body.classList.add("has-countdown-banner");
       tick();
-      setInterval(tick, 1000);
+      countdownTimer = window.setInterval(tick, 1000);
     }
 
     async function initCountdown() {
@@ -631,9 +594,8 @@
 
         const next = upcoming[0];
         const target = new Date(next.startDate).getTime();
-        const title = String(next.title ?? "Upcoming Event")
-          .replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]));
-        const link = next.link ?? null;
+        const title = String(next.title ?? "Upcoming Event");
+        const link = next.link ?? "/#events-section";
         renderCountdown(title, link, target);
       } catch {
         /* silently skip — banner stays hidden */
