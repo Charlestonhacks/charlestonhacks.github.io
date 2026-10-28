@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v6-quick-access-tooltips-20261028";
+  const VERSION = "portal-js-v7-card-stack-feature-reveal-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   function setDirectionalCardPose(stage, direction) {
@@ -24,6 +24,14 @@
     stage.style.setProperty("--swipe-scale", "0.985");
   }
 
+  function revealCardStack(direction = "up") {
+    const stage = document.querySelector(".card-stage");
+    if (!stage) return;
+    ["up", "right", "down", "left"].forEach((side) => stage.classList.remove(`is-committing-${side}`));
+    setDirectionalCardPose(stage, direction);
+    stage.classList.add(`is-committing-${direction}`);
+  }
+
   // ------------------------------------------------
   // DOM helpers
   // ------------------------------------------------
@@ -32,47 +40,35 @@
 
   // Quick Access is the only click-based way to open portal features.
   function activatePortal(portalId, trigger) {
-    const urls = {
-      poster: "Poster.html",
-      swag: "swag.html",
-      sponsor: "donations.html",
-      game: "cardmatchgame.html",
-    };
     const sounds = {
-      poster: "chime",
-      sandbox: "chime",
-      swag: "chime",
-      news: "chime",
-      sponsor: "keys",
-      game: "chime",
+      poster: "chime", sandbox: "chime", swag: "chime", news: "chime",
+      sponsor: "keys", game: "chime", newsletter: "chime", events: "chime",
+    };
+    const destinations = {
+      innovation: ["buildspace", "right"],
+      poster: ["poster", "up"],
+      events: ["events", "up"],
+      swag: ["swag", "up"],
+      sponsor: ["sponsor", "up"],
+      game: ["game", "up"],
+      newsletter: ["newsletter", "up"],
+      news: ["news", "down"],
+      sandbox: ["sandbox", "right"],
     };
 
-    if (typeof gtag === "function") {
-      gtag("event", "portal_click", { portal_id: portalId });
-    }
-    if (portalId === "btc") {
-      openMatrixBTC(trigger);
-      return;
-    }
-    if (portalId === "innovation") {
-      playPortalActivationSound();
-      openCardDestination("buildspace", "right", trigger);
-      return;
-    }
-    if (portalId === "news" || portalId === "sandbox") {
-      const direction = portalId === "news" ? "down" : "right";
-      openCardDestination(portalId, direction, trigger);
-      return;
-    }
+    if (typeof gtag === "function") gtag("event", "portal_click", { portal_id: portalId });
 
-    if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
-    const url = urls[portalId];
-    if (!url) return;
-    const destination = new URL(url, window.location.href);
-    if (destination.origin === window.location.origin) {
-      destination.searchParams.set("returnTo", "hub");
+    if (portalId === "btc") {
+      revealCardStack("up");
+      window.setTimeout(() => openMatrixBTC(trigger), 360);
+      return;
     }
-    window.setTimeout(() => { window.location.href = destination.href; }, 200);
+    if (portalId === "innovation") playPortalActivationSound();
+    else if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
+
+    const destination = destinations[portalId];
+    if (!destination) return;
+    openCardDestination(destination[0], destination[1], trigger);
   }
 
   function initQuickAccessTooltips() {
@@ -355,8 +351,9 @@
 
   function matrixResize() {
     if (!DOM.matrixCanvas) return;
-    DOM.matrixCanvas.width = window.innerWidth;
-    DOM.matrixCanvas.height = window.innerHeight;
+    const bounds = DOM.matrixCanvas.parentElement?.getBoundingClientRect();
+    DOM.matrixCanvas.width = Math.max(1, Math.round(bounds?.width || window.innerWidth));
+    DOM.matrixCanvas.height = Math.max(1, Math.round(bounds?.height || window.innerHeight));
     columns = Math.floor(DOM.matrixCanvas.width / 20);
     drops = Array(columns).fill(1);
   }
@@ -440,11 +437,14 @@
     // Stop animation first
     stopMatrixRain();
 
-    // Move focus OUT before hiding/inerting
-    try {
-      if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
-      else document.body?.focus?.();
-    } catch (_) {}
+    // When embedded in the portal card, the card panel owns focus restoration.
+    const embeddedInPortal = !!DOM.btcOverlay.closest(".portal-view-panel");
+    if (!embeddedInPortal) {
+      try {
+        if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
+        else document.body?.focus?.();
+      } catch (_) {}
+    }
 
     // Hide interaction
     DOM.btcOverlay.classList.remove("active");
@@ -530,6 +530,11 @@
         frame: document.getElementById("portal-chat-frame"),
         src: "/bbs.html",
       },
+      poster: { title: "Event Poster", frame: document.getElementById("portal-poster-frame"), src: "/Poster.html?returnTo=hub" },
+      swag: { title: "Swag Vote", frame: document.getElementById("portal-swag-frame"), src: "/swag.html?returnTo=hub" },
+      sponsor: { title: "Sponsorship and Donations", frame: document.getElementById("portal-sponsor-frame"), src: "/donations.html?returnTo=hub" },
+      game: { title: "Avatar Matching Game", frame: document.getElementById("portal-game-frame"), src: "/cardmatchgame.html?returnTo=hub" },
+      newsletter: { title: "Newsletter Signup", frame: document.getElementById("portal-newsletter-frame"), src: "/subscribe.html?returnTo=hub" },
     };
     if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
 
@@ -626,6 +631,7 @@
       panel.inert = false;
       panel.setAttribute("aria-hidden", "false");
       stage.inert = true;
+      resetStage();
       setDirectionalCardPose(stage, direction || "right");
       stage.classList.add(`is-committing-${direction || "right"}`);
 
@@ -649,7 +655,7 @@
       panel.classList.remove("is-open");
       panel.inert = true;
       panel.setAttribute("aria-hidden", "true");
-      resetStage();
+      if (isBTCOpen()) closeMatrixBTC();
       if (focusTimer !== null) {
         window.clearTimeout(focusTimer);
         focusTimer = null;
@@ -658,6 +664,7 @@
       closeTimer = window.setTimeout(() => {
         panel.hidden = true;
         panel.removeAttribute("data-origin");
+        resetStage();
         if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
         else document.querySelector('.icons-container [data-portal-shortcut]')?.focus({ preventScroll: true });
         returnFocus = null;
