@@ -68,7 +68,7 @@ export async function initBBS() {
       // OAuth providers block authentication inside many cross-frame contexts.
       // Continue in the top-level tab, then return to the member portal.
       try {
-        window.top.location.assign(data.url);
+        window.top.location.href = data.url;
       } catch (navigationError) {
         console.error("[BBS] Top-level OAuth navigation failed:", navigationError);
         try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
