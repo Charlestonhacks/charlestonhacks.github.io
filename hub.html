@@ -182,7 +182,7 @@
     }
     .media-container {
       width: min(100%, 620px, calc((100vh - 166px) * 0.69));
-      width: min(100%, 620px, calc((100dvh - 166px) * 2 / 3));
+      width: min(100%, 620px, calc((100dvh - 166px) * 0.69));
       max-width: 620px;
       margin: 0 auto;
       flex: 0 1 auto;
@@ -196,22 +196,22 @@
         justify-content: center;
       }
       .media-container {
-        width: min(100%, 500px, calc((100vh - 178px - env(safe-area-inset-bottom)) * 2 / 3));
-        width: min(100%, 500px, calc((100dvh - 178px - env(safe-area-inset-bottom)) * 2 / 3));
+        width: min(100%, 500px, calc((100vh - 178px - env(safe-area-inset-bottom)) * 0.69));
+        width: min(100%, 500px, calc((100dvh - 178px - env(safe-area-inset-bottom)) * 0.69));
         max-width: 500px;
       }
       body.has-countdown-banner .main-wrapper {
         padding-top: 106px;
       }
       body.has-countdown-banner .media-container {
-        width: min(100%, 500px, calc((100vh - 218px - env(safe-area-inset-bottom)) * 2 / 3));
-        width: min(100%, 500px, calc((100dvh - 218px - env(safe-area-inset-bottom)) * 2 / 3));
+        width: min(100%, 500px, calc((100vh - 218px - env(safe-area-inset-bottom)) * 0.69));
+        width: min(100%, 500px, calc((100dvh - 218px - env(safe-area-inset-bottom)) * 0.69));
       }
       .ch-tagline { bottom: calc(105px + env(safe-area-inset-bottom)); font-size: 0.6rem; }
     }
     @media (max-height: 520px) {
       .main-wrapper { padding-top: 64px; padding-bottom: 64px; }
-       .media-container { width: min(52vw, calc((100vh - 130px) * 2 / 3)); width: min(52vw, calc((100dvh - 130px) * 2 / 3)); }
+       .media-container { width: min(52vw, calc((100vh - 130px) * 0.69)); width: min(52vw, calc((100dvh - 130px) * 0.69)); }
     }
 
     .ch-tagline {
@@ -478,7 +478,7 @@
         <div class="portal-card-reveal" id="portal-card-reveal" hidden aria-hidden="true">
           <div class="portal-card-reveal-inner" id="portal-card-reveal-inner">
             <div class="portal-reveal-face portal-reveal-front">
-              <img src="icons/card.png" alt="" aria-hidden="true">
+              <img src="images/finalcard.png" alt="" aria-hidden="true">
             </div>
             <div class="portal-reveal-face portal-reveal-back">
               <video id="portal-reveal-video" muted playsinline preload="none" aria-hidden="true"></video>
