@@ -6,7 +6,15 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v10-swiper-feature-deck-20261028";
+  const mobilePortalMedia = window.matchMedia("(max-width: 768px)");
+  if (!mobilePortalMedia.matches) {
+    mobilePortalMedia.addEventListener("change", (event) => {
+      if (event.matches) window.location.reload();
+    });
+    return;
+  }
+
+  const VERSION = "portal-js-v11-live-feature-cards-mobile-only-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -15,25 +23,25 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  // Quick Access is the only click-based way to open portal features.
+  let featureSwiper = null;
+  let featureIndexes = new Map();
+  let featureContentById = new Map();
+  let activeFeatureId = "home";
+  let updateBuildspaceAccess = () => {};
+  let loadEventsIntoPanel = () => {};
+
   function activatePortal(portalId, trigger) {
-    const sounds = { poster: "chime", sandbox: "chime", swag: "chime", news: "chime", sponsor: "keys", game: "chime", newsletter: "chime", events: "chime" };
-    const destinations = {
-      innovation: ["buildspace", "right"], events: ["events", "right"], news: ["news", "right"],
-      sandbox: ["sandbox", "right"], chat: ["chat", "right"],
+    const sounds = {
+      innovation: null, events: "chime", news: "chime", sandbox: "chime",
+      chat: "chime", poster: "chime", btc: null, swag: "chime",
+      sponsor: "keys", game: "chime", newsletter: "chime",
     };
-    const routes = { poster: "/Poster.html", swag: "/swag.html", sponsor: "/donations.html", game: "/cardmatchgame.html", newsletter: "/subscribe.html" };
     if (typeof gtag === "function") gtag("event", "portal_click", { portal_id: portalId });
-    if (portalId === "btc") { openMatrixBTC(trigger); return; }
     if (portalId === "innovation") playPortalActivationSound();
     else if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
-    const destination = destinations[portalId];
-    if (destination) { openCardDestination(destination[0], destination[1], trigger); return; }
-    const route = routes[portalId];
-    if (!route) return;
-    const url = new URL(route, window.location.origin);
-    url.searchParams.set("returnTo", "hub");
-    window.location.assign(url.href);
+
+    const showFeature = window.__CH_SHOW_PORTAL_FEATURE__;
+    if (typeof showFeature === "function") showFeature(portalId, trigger);
   }
 
   function initQuickAccessTooltips() {
@@ -366,46 +374,54 @@
   // BTC Overlay: inert + focus restore (fixes aria-hidden warning)
   // ------------------------------------------------
   let btcLastFocusEl = null;
+  let btcEmbeddedMode = false;
+  let btcCloseTimer = null;
 
   function isBTCOpen() {
     return !!(DOM.btcOverlay && !DOM.btcOverlay.hidden && DOM.btcOverlay.classList.contains("active"));
   }
 
-  function openMatrixBTC(triggerEl) {
+  function openMatrixBTC(triggerEl, options = {}) {
     if (!DOM.btcOverlay) return;
+    if (btcCloseTimer !== null) {
+      window.clearTimeout(btcCloseTimer);
+      btcCloseTimer = null;
+    }
+    btcEmbeddedMode = options.embedded === true;
     if (isBTCOpen()) return;
 
-    btcLastFocusEl = triggerEl || document.activeElement;
-
-    // Make visible + interactive
+    btcLastFocusEl = triggerEl || (btcEmbeddedMode ? null : document.activeElement);
     DOM.btcOverlay.hidden = false;
     DOM.btcOverlay.inert = false;
     DOM.btcOverlay.classList.add("active");
     DOM.btcOverlay.setAttribute("aria-hidden", "false");
+    DOM.btcOverlay.setAttribute("aria-modal", btcEmbeddedMode ? "false" : "true");
 
-    // Focus close
-    requestAnimationFrame(() => {
-      try {
-        DOM.btcCloseBtn?.focus();
-      } catch (_) {}
-    });
+    if (!btcEmbeddedMode) {
+      requestAnimationFrame(() => {
+        try { DOM.btcCloseBtn?.focus(); } catch (_) {}
+      });
+    }
 
     playSoundById("cardflipSound");
     startMatrixRain();
     fetchBTCData();
   }
 
-  function closeMatrixBTC() {
+  function closeMatrixBTC(options = {}) {
     if (!DOM.btcOverlay || !isBTCOpen()) return;
+    const fromSwipe = options.fromSwipe === true;
     stopMatrixRain();
-    try {
-      if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
-      else document.body?.focus?.();
-    } catch (_) {}
+    if (!fromSwipe && !btcEmbeddedMode) {
+      try {
+        if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
+        else document.body?.focus?.();
+      } catch (_) {}
+    }
     DOM.btcOverlay.classList.remove("active");
     DOM.btcOverlay.setAttribute("aria-hidden", "true");
     DOM.btcOverlay.inert = true;
-    setTimeout(() => {
+    btcCloseTimer = window.setTimeout(() => {
       DOM.btcOverlay.hidden = true;
       DOM.btcDataContainer?.classList.remove("visible");
       if (DOM.btcLoading) {
@@ -414,6 +430,7 @@
       }
       if (DOM.btcContent) DOM.btcContent.style.display = "none";
       if (DOM.matrixCanvas) DOM.matrixCanvas.getContext("2d")?.clearRect(0, 0, DOM.matrixCanvas.width, DOM.matrixCanvas.height);
+      btcCloseTimer = null;
     }, 250);
   }
 
@@ -443,72 +460,60 @@
   }
 
   // ------------------------------------------------
-  // Portal interactions
+  // Swipe deck with live feature content inside each card
   // ------------------------------------------------
-  // ------------------------------------------------
-  // Card destination panel
-  // ------------------------------------------------
-  let openCardDestination = () => false;
+  const features = [
+    { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", view: "events" },
+    { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Experimental projects and prototypes.", view: "sandbox" },
+    { id: "news", title: "News", icon: "fas fa-newspaper", description: "CharlestonHacks updates and community stories.", view: "news" },
+    { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", view: "chat" },
+    { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
+    { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster.", src: "/Poster.html" },
+    { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "Live Bitcoin price and market data." },
+    { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", src: "/swag.html" },
+    { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Support CharlestonHacks and its programs.", src: "/donations.html" },
+    { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", src: "/cardmatchgame.html" },
+    { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates.", src: "/subscribe.html" },
+  ];
 
-  function initCardDestinationPanel() {
-    const stage = document.querySelector(".card-stage");
-    const panel = document.getElementById("portal-view-panel");
-    const title = document.getElementById("portal-view-title");
-    const homeButton = document.getElementById("portal-view-home");
-    const externalLink = document.getElementById("portal-view-external");
-    const views = [...(panel?.querySelectorAll("[data-view]") || [])];
-    const viewConfig = {
-      events: { title: "Events" },
-      buildspace: {
-        title: "Buildspace",
-        frame: document.getElementById("portal-buildspace-frame"),
-        src: "https://deckerd451.github.io/innovation-engine/",
-      },
-      sandbox: {
-        title: "Sandbox",
-        frame: document.getElementById("portal-sandbox-frame"),
-        src: "/experimental.html",
-      },
-      news: {
-        title: "News",
-        frame: document.getElementById("portal-news-frame"),
-        src: "/news.html",
-      },
-      chat: {
-        title: "Community Chat",
-        frame: document.getElementById("portal-chat-frame"),
-        src: "/bbs.html",
-      },
-    };
-    if (!stage || !panel || !title || !homeButton || !externalLink) return () => false;
+  function initFeatureViews() {
+    const sourcePanel = document.getElementById("portal-view-panel");
+    const viewNodes = new Map();
+    sourcePanel?.querySelectorAll("[data-view]").forEach((node) => {
+      viewNodes.set(node.dataset.view, node);
+    });
 
-    let returnFocus = null;
-    let eventsLoaded = false;
-    let closeTimer = null;
-    let focusTimer = null;
-    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 260;
+    featureContentById = new Map(features.map((feature) => [
+      feature.id,
+      feature.view ? viewNodes.get(feature.view) || null : null,
+    ]));
 
-    function updateBuildspaceAccess() {
+    const buildspaceGate = document.getElementById("portal-buildspace-auth-gate");
+    buildspaceGate?.querySelector("button")?.addEventListener("click", (event) => {
+      window.__CH_SHOW_PORTAL_FEATURE__?.("chat", event.currentTarget);
+    });
+
+    updateBuildspaceAccess = () => {
       const authorized = window.__CH_MEMBER_AUTH__ === true;
       const gate = document.getElementById("portal-buildspace-auth-gate");
-      const frame = viewConfig.buildspace.frame;
+      const frame = document.getElementById("portal-buildspace-frame");
       const status = document.getElementById("portal-buildspace-auth-status");
       if (gate) gate.hidden = authorized;
       if (frame) frame.hidden = !authorized;
-      if (externalLink && viewConfig.buildspace.external) externalLink.hidden = !authorized;
-      if (authorized && frame && !frame.hasAttribute("src")) frame.src = viewConfig.buildspace.src;
+      if (authorized && activeFeatureId === "innovation" && frame && !frame.hasAttribute("src")) {
+        frame.src = "https://deckerd451.github.io/innovation-engine/";
+      }
       if (status) {
         status.hidden = !authorized || !frame || !frame.hasAttribute("src");
         status.textContent = "Loading your signed-in member workspace…";
       }
-    }
+    };
 
-
-    async function loadEventsIntoPanel() {
-      if (eventsLoaded) return;
-      eventsLoaded = true;
+    loadEventsIntoPanel = async () => {
       const list = document.getElementById("portal-events-list");
-      if (list) list.textContent = "Loading events…";
+      if (!list || list.dataset.loaded === "true") return;
+      list.dataset.loaded = "true";
+      list.textContent = "Loading events…";
       try {
         const loadEvents = await loadEventsFeedModule();
         if (typeof loadEvents === "function") {
@@ -520,142 +525,34 @@
           });
         }
       } catch {
-        if (list) list.textContent = "The event list could not load. Please try again later.";
+        list.textContent = "The event list could not load. Please try again later.";
       }
-    }
+    };
 
-    function show(viewName, direction, trigger = document.activeElement) {
-      const config = viewConfig[viewName];
-      const content = panel.querySelector(`[data-view="${viewName}"]`);
-      if (!config || !content) return false;
-
-      if (closeTimer !== null) {
-        window.clearTimeout(closeTimer);
-        closeTimer = null;
-      }
-      if (focusTimer !== null) {
-        window.clearTimeout(focusTimer);
-        focusTimer = null;
-      }
-      returnFocus = trigger instanceof HTMLElement ? trigger : null;
-      title.textContent = config.title;
-      externalLink.hidden = !config.external;
-      if (config.external) {
-        externalLink.href = config.external;
-        externalLink.setAttribute("aria-label", config.externalLabel || `Open ${config.title} separately`);
-      } else {
-        externalLink.removeAttribute("href");
-      }
-
-      views.forEach((view) => { view.hidden = view !== content; });
-      const guide = document.getElementById("portal-discovery-guide");
-      if (viewName === "buildspace") updateBuildspaceAccess();
-
-      if (guide) {
-        guide.hidden = true;
-        guide.classList.remove("is-visible");
-      }
-      panel.dataset.origin = direction || "right";
-      panel.classList.remove("is-open");
-      panel.hidden = false;
-      panel.inert = false;
-      panel.setAttribute("aria-hidden", "false");
-      stage.inert = true;
-
-      requestAnimationFrame(() => panel.classList.add("is-open"));
-      focusTimer = window.setTimeout(() => {
-        if (!panel.hidden && panel.classList.contains("is-open")) {
-          homeButton.focus({ preventScroll: true });
-        }
-        focusTimer = null;
-      }, transitionDuration + 40);
-
-      if (config.frame && viewName !== "buildspace" && !config.frame.hasAttribute("src")) {
-        config.frame.src = config.src;
-      }
-      if (viewName === "events") loadEventsIntoPanel();
-      return true;
-    }
-
-    function close() {
-      if (panel.hidden) return;
-      panel.classList.remove("is-open");
-      panel.inert = true;
-      panel.setAttribute("aria-hidden", "true");
-      if (isBTCOpen()) closeMatrixBTC();
-      if (focusTimer !== null) {
-        window.clearTimeout(focusTimer);
-        focusTimer = null;
-      }
-      if (closeTimer !== null) window.clearTimeout(closeTimer);
-      closeTimer = window.setTimeout(() => {
-        stage.inert = false;
-        panel.hidden = true;
-        panel.removeAttribute("data-origin");
-        
-        if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
-        else document.querySelector('.icons-container [data-portal-shortcut]')?.focus({ preventScroll: true });
-        returnFocus = null;
-        closeTimer = null;
-      }, transitionDuration);
-    }
-
-    document.getElementById("portal-buildspace-sign-in")?.addEventListener("click", (event) => {
-      show("chat", "left", event.currentTarget);
-    });
-    window.addEventListener("ch:member-auth-changed", () => {
-      if (!panel.hidden && panel.querySelector('[data-view="buildspace"]:not([hidden])')) {
-        updateBuildspaceAccess();
-      }
-    });
-
-    homeButton.addEventListener("click", close);
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !panel.hidden) close();
-    });
-
-    return (viewName, direction, trigger) => show(viewName, direction, trigger);
+    window.addEventListener("ch:member-auth-changed", updateBuildspaceAccess);
+    return viewNodes;
   }
 
-  // ------------------------------------------------
-  // Directional card gestures
-  // ------------------------------------------------
-  function initCardGestures() {
+  function initCardGestures(viewNodes) {
     const container = document.getElementById("portal-feature-swiper");
     const slidesContainer = document.getElementById("portal-feature-slides");
     const counter = document.getElementById("portal-feature-count");
-    const homeButton = document.getElementById("portal-feature-home");
-    if (!container || !slidesContainer || !counter || !homeButton || typeof window.Swiper !== "function") return;
+    if (!container || !slidesContainer || !counter || typeof window.Swiper !== "function") return;
 
-    const features = [
-      { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups." },
-      { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Explore experimental projects and prototypes from CharlestonHacks." },
-      { id: "news", title: "News", icon: "fas fa-newspaper", description: "Catch up on CharlestonHacks updates and community stories." },
-      { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation." },
-      { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Open the member workspace for projects, connections, and collaboration." },
-      { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster and share it with your community." },
-      { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "See the live Bitcoin tracker in the portal." },
-      { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag." },
-      { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Learn how to support CharlestonHacks and its programs." },
-      { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game." },
-      { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates by email." },
-    ];
+    featureIndexes = new Map(features.map((feature, index) => [feature.id, index + 1]));
 
     features.forEach((feature, index) => {
       const slide = document.createElement("div");
-      slide.className = "swiper-slide";
+      slide.className = "swiper-slide portal-feature-slide";
       slide.setAttribute("aria-label", `Feature ${index + 1} of ${features.length}: ${feature.title}`);
 
-      const card = document.createElement("button");
-      card.type = "button";
+      const card = document.createElement("article");
       card.className = "portal-feature-card";
       card.dataset.featureId = feature.id;
-      card.setAttribute("aria-label", `Open ${feature.title}`);
-      card.tabIndex = -1;
 
-      const number = document.createElement("span");
-      number.className = "portal-feature-number";
-      number.textContent = `${String(index + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
+      const header = document.createElement("div");
+      header.className = "portal-feature-header";
+      header.setAttribute("aria-label", `Swipe area. ${feature.title}, feature ${index + 1} of ${features.length}`);
 
       const iconWrap = document.createElement("span");
       iconWrap.className = "portal-feature-icon";
@@ -664,29 +561,60 @@
       icon.className = feature.icon;
       iconWrap.append(icon);
 
-      const title = document.createElement("span");
+      const heading = document.createElement("div");
+      heading.className = "portal-feature-heading";
+      const title = document.createElement("h2");
       title.className = "portal-feature-title";
       title.textContent = feature.title;
+      const subtitle = document.createElement("span");
+      subtitle.className = "portal-feature-subtitle";
+      subtitle.textContent = "Swipe left or right to browse";
+      heading.append(title, subtitle);
 
-      const description = document.createElement("span");
-      description.className = "portal-feature-description";
-      description.textContent = feature.description;
-      const tapHint = document.createElement("span");
-      tapHint.className = "portal-feature-tap-hint";
-      tapHint.textContent = "Tap card to open";
+      const number = document.createElement("span");
+      number.className = "portal-feature-number";
+      number.textContent = `${String(index + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
+      header.append(iconWrap, heading, number);
 
-      card.append(number, iconWrap, title, description, tapHint);
-      card.addEventListener("click", (event) => activatePortal(feature.id, event.currentTarget));
+      const content = document.createElement("div");
+      content.className = "portal-feature-content";
+      content.setAttribute("aria-label", `${feature.title} content`);
+
+      const nativeView = feature.view ? viewNodes.get(feature.view) : null;
+      if (nativeView) {
+        nativeView.hidden = false;
+        content.append(nativeView);
+      } else if (feature.id === "btc") {
+        const btcPanel = document.createElement("div");
+        btcPanel.className = "portal-btc-content";
+        const overlay = document.getElementById("matrix-btc-overlay");
+        if (overlay) {
+          overlay.classList.add("in-card");
+          overlay.setAttribute("aria-modal", "false");
+          overlay.setAttribute("role", "region");
+          content.append(overlay);
+        }
+      } else {
+        const frame = document.createElement("iframe");
+        frame.title = `CharlestonHacks ${feature.title}`;
+        frame.loading = "lazy";
+        frame.referrerPolicy = "strict-origin-when-cross-origin";
+        frame.dataset.src = feature.src;
+        frame.setAttribute("allow", "fullscreen; clipboard-read; clipboard-write");
+        content.append(frame);
+      }
+
+      card.append(header, content);
       slide.append(card);
       slidesContainer.append(slide);
     });
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const swiper = new window.Swiper(container, {
+    featureSwiper = new window.Swiper(container, {
       effect: "cards",
       direction: "horizontal",
       slidesPerView: 1,
-      speed: reducedMotion ? 0 : 240,
+      speed: reducedMotion ? 0 : 260,
       threshold: 4,
       touchAngle: 45,
       shortSwipes: true,
@@ -708,47 +636,54 @@
       },
     });
 
-    const syncDeckControls = () => {
-      const activeIndex = swiper.activeIndex;
-      const onHome = activeIndex === 0;
-      counter.textContent = onHome ? "PORTAL" : `${activeIndex} / ${features.length}`;
-      homeButton.hidden = onHome;
+    const syncDeck = () => {
+      const activeIndex = featureSwiper.activeIndex;
+      const feature = activeIndex === 0 ? null : features[activeIndex - 1];
+      activeFeatureId = feature?.id || "home";
+      counter.textContent = feature ? `${activeIndex} / ${features.length} · ${feature.title.toUpperCase()}` : "PORTAL";
       [...slidesContainer.children].forEach((slide, index) => {
         const active = index === activeIndex;
         slide.setAttribute("aria-hidden", active ? "false" : "true");
-        const card = slide.querySelector(".portal-feature-card");
-        if (card) card.tabIndex = active ? 0 : -1;
+        slide.inert = !active;
       });
+
+      if (isBTCOpen() && activeFeatureId !== "btc") closeMatrixBTC({ fromSwipe: true });
+      if (!feature) return;
+
+      if (feature.id === "events") loadEventsIntoPanel();
+      if (feature.id === "innovation") updateBuildspaceAccess();
+      if (feature.id === "btc" && DOM.btcOverlay) openMatrixBTC(null, { embedded: true });
+      const activeCard = slidesContainer.children[activeIndex]?.querySelector(".portal-feature-card");
+      const iframe = activeCard?.querySelector("iframe[data-src]");
+      if (iframe && !iframe.hasAttribute("src")) {
+        if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
+          iframe.src = iframe.dataset.src;
+        }
+      }
     };
 
-    swiper.on("slideChange", syncDeckControls);
-    homeButton.addEventListener("click", () => swiper.slideTo(0));
-    syncDeckControls();
+    window.__CH_SHOW_PORTAL_FEATURE__ = (featureId) => {
+      const index = featureIndexes.get(featureId);
+      if (Number.isInteger(index)) featureSwiper.slideTo(index);
+    };
+
+    featureSwiper.on("slideChange", syncDeck);
+    syncDeck();
   }
 
   // ------------------------------------------------
   // Boot
   // ------------------------------------------------
   window.addEventListener("DOMContentLoaded", () => {
-    openCardDestination = initCardDestinationPanel();
-    initCardGestures();
+    const viewNodes = initFeatureViews();
+    initCardGestures(viewNodes);
     initQuickAccessTooltips();
     setIdleSoon();
-    initEventsModal();
-    initBTCModalControls();
 
-    // Ensure BTC overlay is safely inert/hidden when not active (in case HTML changed)
     if (DOM.btcOverlay && !DOM.btcOverlay.classList.contains("active")) {
       DOM.btcOverlay.hidden = true;
       DOM.btcOverlay.inert = true;
       DOM.btcOverlay.setAttribute("aria-hidden", "true");
-    }
-
-    // Warm-load events module after idle, but don't block paint
-    if ("requestIdleCallback" in window) {
-      requestIdleCallback(() => loadEventsFeedModule().catch(() => {}), { timeout: 1500 });
-    } else {
-      setTimeout(() => loadEventsFeedModule().catch(() => {}), 1200);
     }
   });
 })();
