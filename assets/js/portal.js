@@ -671,8 +671,11 @@
       const description = document.createElement("span");
       description.className = "portal-feature-description";
       description.textContent = feature.description;
+      const tapHint = document.createElement("span");
+      tapHint.className = "portal-feature-tap-hint";
+      tapHint.textContent = "Tap card to open";
 
-      card.append(number, iconWrap, title, description);
+      card.append(number, iconWrap, title, description, tapHint);
       card.addEventListener("click", (event) => activatePortal(feature.id, event.currentTarget));
       slide.append(card);
       slidesContainer.append(slide);
