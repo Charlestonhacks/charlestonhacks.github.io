@@ -402,7 +402,6 @@
       });
     }
 
-    playSoundById("cardflipSound");
     startMatrixRain();
     fetchBTCData();
   }
@@ -470,9 +469,7 @@
     { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster.", src: "/Poster.html" },
     { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "Live Bitcoin price and market data." },
     { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", src: "/swag.html" },
-    { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Support CharlestonHacks and its programs.", src: "/donations.html" },
     { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", src: "/cardmatchgame.html" },
-    { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates.", src: "/subscribe.html" },
   ];
 
   function initFeatureViews() {
