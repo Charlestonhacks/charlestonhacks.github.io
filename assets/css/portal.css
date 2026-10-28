@@ -1296,42 +1296,6 @@ button:focus {
 #portal-buildspace-frame[hidden] { display: none !important; }
 
 
-/* Keep peripheral card controls as working, invisible hit areas. Their
-   destinations are discoverable in the Quick Access icon bar below the card. */
-.clickable-area:not(.center) {
-  filter: none !important;
-  cursor: default;
-}
-.clickable-area:not(.center) > img {
-  opacity: 0;
-  visibility: hidden;
-}
-.clickable-area:not(.center)::before,
-.clickable-area:not(.center)::after {
-  display: none !important;
-}
-.clickable-area:not(.center):hover {
-  filter: none !important;
-  transform: none !important;
-  z-index: initial;
-}
-.clickable-area:not(.center):focus {
-  outline: none;
-}
-.clickable-area:not(.center):focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 4px;
-}
-
-/* Keep the center Buildspace hit area active without showing an icon. */
-.clickable-area.center {
-  background: transparent !important;
-}
-.clickable-area.center > img,
-.clickable-area.center::before {
-  display: none !important;
-}
-
 /* Quick Access is a horizontal scroll rail, including on desktop. */
 .icons-container {
   flex-wrap: nowrap;
