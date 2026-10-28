@@ -6,7 +6,7 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v2-aria-inert-20260223-no-discovery-progress";
+  const VERSION = "portal-js-v3-card-controller-logout-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
