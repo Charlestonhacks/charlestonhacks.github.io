@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v11-live-feature-cards-mobile-only-20261028";
+  const VERSION = "portal-js-v12-iframe-swipe-bridge-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -495,6 +495,7 @@
       if (gate) gate.hidden = authorized;
       if (frame) frame.hidden = !authorized;
       if (authorized && activeFeatureId === "innovation" && frame && !frame.hasAttribute("src")) {
+        frame.addEventListener("load", () => enableIframeSwipeBridge(frame), { once: true });
         frame.src = "https://deckerd451.github.io/innovation-engine/";
       }
       if (status) {
@@ -525,6 +526,49 @@
 
     window.addEventListener("ch:member-auth-changed", updateBuildspaceAccess);
     return viewNodes;
+  }
+
+  function enableIframeSwipeBridge(frame) {
+    if (frame.dataset.swipeBridgeAttached === "true") return;
+    try {
+      const frameDocument = frame.contentDocument;
+      if (!frameDocument) return;
+      frame.dataset.swipeBridgeAttached = "true";
+
+      let startPoint = null;
+      let suppressNextClick = false;
+      frameDocument.addEventListener("pointerdown", (event) => {
+        if (event.isPrimary === false || event.button > 0) return;
+        startPoint = { x: event.clientX, y: event.clientY };
+      }, true);
+
+      frameDocument.addEventListener("pointerup", (event) => {
+        if (!startPoint) return;
+        const deltaX = event.clientX - startPoint.x;
+        const deltaY = event.clientY - startPoint.y;
+        startPoint = null;
+
+        if (Math.abs(deltaX) < 42 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+        const currentIndex = featureSwiper?.activeIndex;
+        const targetIndex = currentIndex + (deltaX < 0 ? 1 : -1);
+        if (!featureSwiper || targetIndex < 0 || targetIndex >= featureSwiper.slides.length) return;
+
+        suppressNextClick = true;
+        event.preventDefault();
+        event.stopPropagation();
+        featureSwiper.slideTo(targetIndex);
+        window.setTimeout(() => { suppressNextClick = false; }, 400);
+      }, true);
+
+      frameDocument.addEventListener("pointercancel", () => { startPoint = null; }, true);
+      frameDocument.addEventListener("click", (event) => {
+        if (!suppressNextClick) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
+    } catch {
+      // Cross-origin frames cannot expose their document; the card header remains swipeable.
+    }
   }
 
   function initCardGestures(viewNodes) {
@@ -651,8 +695,11 @@
       const iframe = activeCard?.querySelector("iframe[data-src]");
       if (iframe && !iframe.hasAttribute("src")) {
         if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
+          iframe.addEventListener("load", () => enableIframeSwipeBridge(iframe), { once: true });
           iframe.src = iframe.dataset.src;
         }
+      } else if (iframe) {
+        enableIframeSwipeBridge(iframe);
       }
     };
 
