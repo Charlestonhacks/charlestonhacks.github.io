@@ -154,26 +154,15 @@ body {
   touch-action: none;
 }
 .card-stage.is-dragging { transition: none; }
-.card-stage.is-committing-up {
-  transform: translate3d(var(--swipe-translate-x, 0px), calc(var(--swipe-translate-y, 0px) - 72px), 0)
-    rotateX(calc(var(--swipe-rotate-x, 0deg) - 72deg)) rotateY(var(--swipe-rotate-y, 0deg)) scale(0.82);
-  opacity: 0;
-}
-.card-stage.is-committing-right {
-  transform: translate3d(calc(var(--swipe-translate-x, 0px) + 72px), var(--swipe-translate-y, 0px), 0)
-    rotateX(var(--swipe-rotate-x, 0deg)) rotateY(calc(var(--swipe-rotate-y, 0deg) + 72deg)) scale(0.82);
-  opacity: 0;
-}
-.card-stage.is-committing-down {
-  transform: translate3d(var(--swipe-translate-x, 0px), calc(var(--swipe-translate-y, 0px) + 72px), 0)
-    rotateX(calc(var(--swipe-rotate-x, 0deg) + 72deg)) rotateY(var(--swipe-rotate-y, 0deg)) scale(0.82);
-  opacity: 0;
-}
-
+.card-stage.is-committing-up,
+.card-stage.is-committing-right,
+.card-stage.is-committing-down,
 .card-stage.is-committing-left {
-  transform: translate3d(calc(var(--swipe-translate-x, 0px) - 72px), var(--swipe-translate-y, 0px), 0)
-    rotateX(var(--swipe-rotate-x, 0deg)) rotateY(calc(var(--swipe-rotate-y, 0deg) - 72deg)) scale(0.82);
-  opacity: 0;
+  transform: translate3d(var(--swipe-translate-x, 0px), var(--swipe-translate-y, 0px), 0)
+    rotateX(var(--swipe-rotate-x, 0deg)) rotateY(var(--swipe-rotate-y, 0deg))
+    scale(var(--swipe-scale, 0.985));
+  opacity: 0.86;
+  filter: brightness(0.74) saturate(0.82);
 }
 
 /* Destination views occupy the same portrait card footprint as the home face. */
@@ -1348,5 +1337,90 @@ button:focus {
     z-index: 999;
     border-radius: 50px;
     background: rgba(0,0,0,0.58);
+  }
+}
+
+
+/* Directional aperture reveal: a restrained card hinge precedes the panel reveal. */
+.portal-view-panel {
+  --portal-aperture-x: 50%;
+  --portal-aperture-y: 50%;
+  --portal-hinge-x: 0deg;
+  --portal-hinge-y: 0deg;
+  clip-path: circle(0% at var(--portal-aperture-x) var(--portal-aperture-y));
+  opacity: 1;
+  transform: scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y));
+  transition:
+    clip-path 680ms cubic-bezier(0.2, 0.75, 0.2, 1),
+    transform 480ms cubic-bezier(0.2, 0.75, 0.2, 1),
+    opacity 220ms ease;
+}
+.portal-view-panel[data-origin="left"] {
+  --portal-aperture-x: 0%;
+  --portal-aperture-y: 50%;
+  --portal-hinge-y: 8deg;
+}
+.portal-view-panel[data-origin="right"] {
+  --portal-aperture-x: 100%;
+  --portal-aperture-y: 50%;
+  --portal-hinge-y: -8deg;
+}
+.portal-view-panel[data-origin="up"] {
+  --portal-aperture-x: 50%;
+  --portal-aperture-y: 0%;
+  --portal-hinge-x: 8deg;
+}
+.portal-view-panel[data-origin="down"] {
+  --portal-aperture-x: 50%;
+  --portal-aperture-y: 100%;
+  --portal-hinge-x: -8deg;
+}
+.portal-view-panel[data-origin]:not(.is-open) {
+  opacity: 1 !important;
+  transform: scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+}
+.portal-view-panel.is-open {
+  clip-path: circle(150% at var(--portal-aperture-x) var(--portal-aperture-y)) !important;
+  opacity: 1;
+  transform: none !important;
+}
+.portal-view-panel::after {
+  content: "";
+  position: absolute;
+  z-index: 10;
+  top: var(--portal-aperture-y);
+  left: var(--portal-aperture-x);
+  width: clamp(32px, 8vw, 88px);
+  aspect-ratio: 1;
+  border: 2px solid rgba(0, 224, 255, 0.92);
+  border-radius: 50%;
+  box-shadow: 0 0 14px rgba(0, 224, 255, 0.85), 0 0 38px rgba(0, 224, 255, 0.5), inset 0 0 14px rgba(201, 163, 94, 0.52);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0.12);
+}
+.portal-view-panel.is-open::after {
+  animation: portalApertureRing 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+}
+@keyframes portalApertureRing {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.12); }
+  14% { opacity: 0.96; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(22); }
+}
+
+@media (orientation: landscape) {
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) scale(1) !important;
+  }
+}
+@media (max-width: 899px) and (orientation: portrait) {
+  .portal-view-panel[data-origin]:not(.is-open) {
+    transform: translate(-50%, -50%) scale(0.985) rotateX(var(--portal-hinge-x)) rotateY(var(--portal-hinge-y)) !important;
+  }
+  .portal-view-panel.is-open {
+    transform: translate(-50%, -50%) scale(1) !important;
   }
 }
