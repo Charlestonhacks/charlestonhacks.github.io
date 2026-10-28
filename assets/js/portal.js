@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v12-iframe-swipe-bridge-20261028";
+  const VERSION = "portal-js-v13-iframe-horizontal-gesture-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -535,20 +535,49 @@
       if (!frameDocument) return;
       frame.dataset.swipeBridgeAttached = "true";
 
-      let startPoint = null;
+      // Prevent the embedded document from taking over a horizontal gesture.
+      const swipeStyle = frameDocument.createElement("style");
+      swipeStyle.textContent = `
+        html, body {
+          max-width: 100% !important;
+          overflow-x: hidden !important;
+          overscroll-behavior-x: none !important;
+          touch-action: pan-y !important;
+        }
+        *, *::before, *::after {
+          overscroll-behavior-x: none !important;
+          touch-action: pan-y !important;
+        }
+      `;
+      frameDocument.head?.append(swipeStyle);
+
+      let gesture = null;
       let suppressNextClick = false;
       frameDocument.addEventListener("pointerdown", (event) => {
         if (event.isPrimary === false || event.button > 0) return;
-        startPoint = { x: event.clientX, y: event.clientY };
+        gesture = { x: event.clientX, y: event.clientY, horizontal: false };
       }, true);
 
-      frameDocument.addEventListener("pointerup", (event) => {
-        if (!startPoint) return;
-        const deltaX = event.clientX - startPoint.x;
-        const deltaY = event.clientY - startPoint.y;
-        startPoint = null;
+      frameDocument.addEventListener("pointermove", (event) => {
+        if (!gesture) return;
+        const deltaX = event.clientX - gesture.x;
+        const deltaY = event.clientY - gesture.y;
+        if (Math.abs(deltaX) < 10 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+        gesture.horizontal = true;
+        event.preventDefault();
+        event.stopPropagation();
+      }, { capture: true, passive: false });
 
-        if (Math.abs(deltaX) < 42 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) return;
+      frameDocument.addEventListener("pointerup", (event) => {
+        if (!gesture) return;
+        const deltaX = event.clientX - gesture.x;
+        const deltaY = event.clientY - gesture.y;
+        const isHorizontalSwipe = gesture.horizontal &&
+          Math.abs(deltaX) >= 42 &&
+          Math.abs(deltaX) >= Math.abs(deltaY) * 1.2;
+        gesture = null;
+        if (!isHorizontalSwipe) return;
+
         const currentIndex = featureSwiper?.activeIndex;
         const targetIndex = currentIndex + (deltaX < 0 ? 1 : -1);
         if (!featureSwiper || targetIndex < 0 || targetIndex >= featureSwiper.slides.length) return;
@@ -557,10 +586,10 @@
         event.preventDefault();
         event.stopPropagation();
         featureSwiper.slideTo(targetIndex);
-        window.setTimeout(() => { suppressNextClick = false; }, 400);
+        window.setTimeout(() => { suppressNextClick = false; }, 450);
       }, true);
 
-      frameDocument.addEventListener("pointercancel", () => { startPoint = null; }, true);
+      frameDocument.addEventListener("pointercancel", () => { gesture = null; }, true);
       frameDocument.addEventListener("click", (event) => {
         if (!suppressNextClick) return;
         event.preventDefault();
