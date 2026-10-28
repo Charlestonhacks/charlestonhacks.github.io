@@ -13,7 +13,7 @@
   // DOM helpers
   // ------------------------------------------------
   const $ = (sel) => document.querySelector(sel);
-  const $ = (sel) => Array.from(document.querySelectorAll(sel));
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   // Keep every Buildspace entry point behind the same member gate.
   const quickBuildspaceLink = $('.icons-container a[aria-label="Buildspace"]');
