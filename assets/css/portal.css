@@ -1723,3 +1723,14 @@ button:focus {
 @media (max-width: 768px) {
   #portal-desktop-notice { display: none !important; }
 }
+
+
+/* Keep mobile horizontal swipes on the card deck instead of shifting the page. */
+@media (max-width: 768px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+}
