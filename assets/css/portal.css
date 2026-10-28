@@ -770,23 +770,29 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.icons-container a::before {
-  content: attr(title);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%) translateY(-5px);
-  background: rgba(0, 0, 0, 0.95);
-  color: var(--cyan);
+#quick-access-tooltip {
+  position: fixed;
+  z-index: 10005;
+  max-width: min(280px, calc(100vw - 16px));
   padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: var(--transition-smooth);
   border: 1px solid var(--cyan);
-  font-family: "Orbitron", sans-serif;
+  border-radius: 6px;
+  color: var(--cyan);
+  background: rgba(0, 0, 0, 0.96);
+  box-shadow: 0 4px 16px rgba(0, 224, 255, 0.22);
+  font: 0.75rem "Orbitron", sans-serif;
+  line-height: 1.35;
+  text-align: center;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -100%);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+#quick-access-tooltip.is-visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 .icons-container a:hover {
@@ -796,10 +802,6 @@ body {
   color: var(--cyan);
 }
 
-.icons-container a:hover::before {
-  opacity: 1;
-  transform: translateX(-50%) translateY(-10px);
-}
 
 /* ============================
    MATRIX BTC OVERLAY
