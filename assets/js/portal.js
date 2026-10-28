@@ -17,7 +17,7 @@
 
   // Keep Quick Access shortcuts routed through the same portal handlers as the
   // card hit areas, including the shared Buildspace member gate and BTC overlay.
-  $('.icons-container [data-portal-shortcut]').forEach((link) => {
+  $$('.icons-container [data-portal-shortcut]').forEach((link) => {
     link.addEventListener("click", (event) => {
       event.preventDefault();
       const portalId = link.dataset.portalShortcut;
