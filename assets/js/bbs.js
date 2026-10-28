@@ -41,6 +41,23 @@ export async function initBBS() {
   });
 
   authDiv.addEventListener("click", async (event) => {
+    const signOutButton = event.target.closest("[data-bbs-sign-out]");
+    if (signOutButton) {
+      signOutButton.disabled = true;
+      signOutButton.textContent = "Signing out…";
+      try {
+        const { error } = await supabase.auth.signOut({ scope: "local" });
+        if (error) throw error;
+        feedbackDiv.textContent = "Signed out.";
+      } catch (error) {
+        console.error("[BBS] Sign-out error:", error);
+        feedbackDiv.textContent = "Sign-out failed. Please try again.";
+        signOutButton.disabled = false;
+        signOutButton.textContent = "Sign out";
+      }
+      return;
+    }
+
     const button = event.target.closest("[data-provider]");
     if (!button) return;
     button.disabled = true;
@@ -240,7 +257,7 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
     ? "Zork command (or /exit)..."
     : (canPost ? "type message..." : "Sign in to post…");
   if (canPost) {
-    authDiv.innerHTML = `<span>Posting as <strong></strong></span>`;
+    authDiv.innerHTML = `<span>Posting as <strong></strong></span> <button type="button" data-bbs-sign-out aria-label="Sign out of Community Chat">Sign out</button>`;
     authDiv.querySelector("strong").textContent = currentProfile.name;
     feedbackDiv.textContent = currentProfile.user_role === "Admin" ? "Admin tools enabled." : "";
   } else {
