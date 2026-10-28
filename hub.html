@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=mobile-swipe-clipped-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-no-bitcoin-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -399,10 +399,7 @@
       <a href="Poster.html" title="Event Poster" aria-label="Event Poster" data-portal-shortcut="poster">
         <i class="fas fa-image" aria-hidden="true"></i>
       </a>
-      <a href="#bitcoin-tracker" title="Bitcoin Tracker" aria-label="Bitcoin Tracker" data-portal-shortcut="btc">
-        <i class="fab fa-bitcoin" aria-hidden="true"></i>
-      </a>
-      <a href="swag.html" title="Swag Vote" aria-label="Swag Vote" data-portal-shortcut="swag">
+            <a href="swag.html" title="Swag Vote" aria-label="Swag Vote" data-portal-shortcut="swag">
         <i class="fas fa-shirt" aria-hidden="true"></i>
       </a>
       <a href="donations.html" title="Sponsorship and Donations" aria-label="Sponsorship and Donations">
@@ -441,37 +438,6 @@
     </div>
   </div>
 
-  <!-- Matrix-Style Bitcoin Tracker -->
-  <div id="matrix-btc-overlay" hidden inert aria-hidden="true" role="dialog" aria-modal="true" aria-label="Bitcoin Tracker">
-    <canvas id="matrix-canvas"></canvas>
-    <button class="btc-close-btn" id="close-matrix-btc" aria-label="Close Bitcoin Tracker">×</button>
-
-    <div class="btc-data-container" id="btc-data-container">
-      <div class="btc-loading" id="btc-loading">LOADING BTC DATA...</div>
-
-      <div id="btc-content" style="display:none;">
-        <div class="btc-main-price" id="btc-main-price">$0.00</div>
-        <div class="btc-label">BITCOIN / USD</div>
-        <p style="font-size:.75rem;color:#888;margin:.25rem 0 1rem;letter-spacing:.04em;">
-          Charleston's tech community monitors the open financial network rewriting how value moves.
-        </p>
-
-        <div class="btc-stats-grid">
-          <div class="btc-stat-card"><div class="btc-stat-label">24h Change</div><div class="btc-stat-value" id="btc-24h-change">+0.00%</div></div>
-          <div class="btc-stat-card"><div class="btc-stat-label">24h High</div><div class="btc-stat-value" id="btc-24h-high">--</div></div>
-          <div class="btc-stat-card"><div class="btc-stat-label">24h Low</div><div class="btc-stat-value" id="btc-24h-low">--</div></div>
-          <div class="btc-stat-card"><div class="btc-stat-label">Market Cap</div><div class="btc-stat-value" id="btc-market-cap">$0.00B</div></div>
-          <div class="btc-stat-card"><div class="btc-stat-label">24h Volume</div><div class="btc-stat-value" id="btc-volume">$0.00B</div></div>
-          <div class="btc-stat-card"><div class="btc-stat-label">Last Update</div><div class="btc-stat-value" id="btc-last-update">--:--:--</div></div>
-        </div>
-
-        <div class="btc-mini-chart">
-          <div class="chart-placeholder">📈 Live price tracking • Data from CoinGecko API</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Core modules you already use -->
   <script type="module">
     import "/assets/js/animation-lifecycle.js";
@@ -500,7 +466,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=portal-events-chronological-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=portal-no-bitcoin-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
