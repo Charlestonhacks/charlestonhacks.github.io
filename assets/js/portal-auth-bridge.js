@@ -35,6 +35,7 @@ async function refreshMemberAccess(session) {
   const revision = ++authRevision;
   activeSession = session || null;
   activeMember = false;
+  activeProfileName = "";
   window.__CH_SESSION__ = activeSession;
   window.__CH_MEMBER_AUTH__ = false;
 
@@ -87,8 +88,10 @@ signOutButton?.addEventListener("click", async () => {
   if (!signOutButton) return;
   signOutButton.disabled = true;
   signOutButton.textContent = "Signing out…";
-  const { error } = await supabase.auth.signOut({ scope: "local" });
-  if (error) {
+  try {
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) throw error;
+  } catch (error) {
     console.error("[PORTAL AUTH] Sign-out failed:", error);
     signOutButton.disabled = false;
     signOutButton.textContent = "Try again";
