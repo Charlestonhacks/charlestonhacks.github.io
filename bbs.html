@@ -61,67 +61,6 @@
       filter: brightness(1.12);
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      margin-left: auto;
-    }
-
-    .nav-links a {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 8px 13px;
-      border: 1px solid rgba(240,198,106,0.5);
-      border-radius: 7px;
-      background: rgba(240,198,106,0.04);
-      color: rgba(255,255,255,0.78);
-      text-decoration: none;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-    }
-
-    .nav-links a::after {
-      content: "→";
-      color: #f0c66a;
-      opacity: 0;
-      transform: translateX(-5px);
-      transition: opacity 180ms ease, transform 180ms ease;
-    }
-
-    .nav-links a:hover,
-    .nav-links a:focus-visible {
-      color: #ffe4a3;
-      border-color: #f0c66a;
-      background: rgba(240,198,106,0.1);
-      box-shadow: 0 0 14px rgba(240,198,106,0.22);
-    }
-
-    .nav-links a:hover::after,
-    .nav-links a:focus-visible::after {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    .nav-links a:focus-visible {
-      outline: 2px solid #f0c66a;
-      outline-offset: 3px;
-    }
-
-    @media (max-width: 768px) {
-      .top-nav { padding: 0 16px; height: 54px; }
-      .nav-logo img { width: 140px; }
-      .nav-links a { padding: 7px 10px; font-size: 0.68rem; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .nav-links a,
-      .nav-links a::after {
-        transition: none;
-      }
-    }
-
     /* ===== BBS Content ===== */
     #bbs-modal {
       display: flex;
@@ -200,9 +139,6 @@
     <a href="/" class="nav-logo" aria-label="CharlestonHacks home">
       <img src="images/charlestonhackslogo.svg" alt="CharlestonHacks">
     </a>
-    <div class="nav-links">
-      <a href="/hub.html">Member Portal</a>
-    </div>
   </nav>
 
   <p class="bbs-hint" id="bbs-intro">
