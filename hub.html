@@ -53,7 +53,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=final-card-scroll-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=desktop-icon-rail-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -280,6 +280,13 @@
       body.has-countdown-banner .main-wrapper { padding-top: 94px; }
     }
     .hub-mini-nav { display: none; }
+
+    /* Reserve a footer lane for the desktop Quick Access rail so it never
+       overlays the portrait card; keep the existing mobile layout unchanged. */
+    @media (min-width: 769px) {
+      .main-wrapper { padding-bottom: clamp(150px, 14vh, 180px); }
+      .ch-tagline { bottom: calc(106px + env(safe-area-inset-bottom)); }
+    }
   </style>
   <script type="application/ld+json">
   {
