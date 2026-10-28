@@ -406,8 +406,13 @@
               <div id="portal-events-list" class="portal-events-list" role="list"></div>
             </section>
             <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
-              <p class="portal-view-intro">If sign-in does not complete inside the card, use Open separately.</p>
-              <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+              <div class="portal-buildspace-auth-gate" id="portal-buildspace-auth-gate">
+                <h3>Sign in to unlock Buildspace</h3>
+                <p>Use your active CharlestonHacks member account in Community Chat. Once signed in, return here to open Buildspace.</p>
+                <button type="button" id="portal-buildspace-sign-in">Go to Community Chat</button>
+              </div>
+              <p class="portal-view-intro" id="portal-buildspace-auth-status" hidden></p>
+              <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
             </div>
             <div class="portal-view-content" data-view="sandbox" hidden>
               <iframe id="portal-sandbox-frame" title="CharlestonHacks Experimental Sandbox" loading="lazy"></iframe>
@@ -558,6 +563,9 @@
       window.__CH_AUTH_READY__ = true;
     }
   </script>
+
+  <!-- Member authorization and Buildspace sign-in handoff -->
+  <script type="module" src="/assets/js/portal-auth-bridge.js"></script>
 
   <!-- Portal logic -->
   <script type="module" src="/assets/js/portal.js"></script>
