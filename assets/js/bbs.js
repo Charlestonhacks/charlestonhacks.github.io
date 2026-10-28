@@ -75,6 +75,10 @@ export async function initBBS() {
         feedbackDiv.textContent = "Open Community Chat separately to sign in.";
         button.disabled = false;
       }
+    } else if (embedded) {
+      try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
+      feedbackDiv.textContent = "Sign-in could not start. Please try again.";
+      button.disabled = false;
     }
   });
 
