@@ -19,14 +19,12 @@
   function activatePortal(portalId, trigger) {
     const urls = {
       poster: "Poster.html",
-      docs: "docs.html",
       swag: "swag.html",
       sponsor: "donations.html",
       game: "cardmatchgame.html",
     };
     const sounds = {
       poster: "chime",
-      docs: "chime",
       sandbox: "chime",
       swag: "chime",
       news: "chime",
