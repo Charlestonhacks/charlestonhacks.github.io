@@ -681,11 +681,12 @@
       slidesContainer.append(slide);
     });
 
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const swiper = new window.Swiper(container, {
       effect: "cards",
       direction: "horizontal",
       slidesPerView: 1,
-      speed: 240,
+      speed: reducedMotion ? 0 : 240,
       threshold: 4,
       touchAngle: 45,
       shortSwipes: true,
