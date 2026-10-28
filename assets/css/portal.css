@@ -1734,3 +1734,22 @@ button:focus {
     overscroll-behavior-x: none;
   }
 }
+
+
+/* Contain the transformed card stack so it cannot expand the mobile page width. */
+@media (max-width: 768px) {
+  html,
+  body,
+  main,
+  .main-wrapper,
+  .media-container {
+    max-width: 100%;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+  }
+  .media-container,
+  .card-stage,
+  .portal-feature-swiper {
+    overflow: hidden !important;
+  }
+}
