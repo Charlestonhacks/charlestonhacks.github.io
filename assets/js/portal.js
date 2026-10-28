@@ -6,31 +6,8 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v8-responsive-stack-routing-20261028";
+  const VERSION = "portal-js-v9-horizontal-feature-deck-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
-
-  function setDirectionalCardPose(stage, direction) {
-    const poses = {
-      up: { rotateX: "-8deg", rotateY: "0deg", x: "0px", y: "-4px" },
-      right: { rotateX: "0deg", rotateY: "8deg", x: "4px", y: "0px" },
-      down: { rotateX: "8deg", rotateY: "0deg", x: "0px", y: "4px" },
-      left: { rotateX: "0deg", rotateY: "-8deg", x: "-4px", y: "0px" },
-    };
-    const pose = poses[direction] || poses.right;
-    stage.style.setProperty("--swipe-rotate-x", pose.rotateX);
-    stage.style.setProperty("--swipe-rotate-y", pose.rotateY);
-    stage.style.setProperty("--swipe-translate-x", pose.x);
-    stage.style.setProperty("--swipe-translate-y", pose.y);
-    stage.style.setProperty("--swipe-scale", "0.985");
-  }
-
-  function revealCardStack(direction = "up") {
-    const stage = document.querySelector(".card-stage");
-    if (!stage) return;
-    ["up", "right", "down", "left"].forEach((side) => stage.classList.remove(`is-committing-${side}`));
-    setDirectionalCardPose(stage, direction);
-    stage.classList.add(`is-committing-${direction}`);
-  }
 
   // ------------------------------------------------
   // DOM helpers
@@ -39,54 +16,24 @@
   const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   // Quick Access is the only click-based way to open portal features.
-  let portalNavigationPending = false;
-  const portalStackRevealDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 520;
-
   function activatePortal(portalId, trigger) {
-    const sounds = {
-      poster: "chime", sandbox: "chime", swag: "chime", news: "chime",
-      sponsor: "keys", game: "chime", newsletter: "chime", events: "chime",
-    };
+    const sounds = { poster: "chime", sandbox: "chime", swag: "chime", news: "chime", sponsor: "keys", game: "chime", newsletter: "chime", events: "chime" };
     const destinations = {
-      innovation: ["buildspace", "right"],
-      events: ["events", "up"],
-      news: ["news", "down"],
-      sandbox: ["sandbox", "right"],
+      innovation: ["buildspace", "right"], events: ["events", "right"], news: ["news", "right"],
+      sandbox: ["sandbox", "right"], chat: ["chat", "right"],
     };
-    const fullPageRoutes = {
-      poster: "/Poster.html",
-      swag: "/swag.html",
-      sponsor: "/donations.html",
-      game: "/cardmatchgame.html",
-      newsletter: "/subscribe.html",
-    };
-
+    const routes = { poster: "/Poster.html", swag: "/swag.html", sponsor: "/donations.html", game: "/cardmatchgame.html", newsletter: "/subscribe.html" };
     if (typeof gtag === "function") gtag("event", "portal_click", { portal_id: portalId });
-
-    if (portalId === "btc") {
-      revealCardStack("up");
-      window.setTimeout(() => openMatrixBTC(trigger), portalStackRevealDuration);
-      return;
-    }
+    if (portalId === "btc") { openMatrixBTC(trigger); return; }
     if (portalId === "innovation") playPortalActivationSound();
     else if (sounds[portalId]) playSoundById(sounds[portalId] + "Sound");
-
     const destination = destinations[portalId];
-    if (destination) {
-      openCardDestination(destination[0], destination[1], trigger);
-      return;
-    }
-
-    const route = fullPageRoutes[portalId];
-    if (!route || portalNavigationPending) return;
-    portalNavigationPending = true;
-    revealCardStack("up");
-    const rail = document.querySelector(".icons-container");
-    rail?.classList.add("is-departing");
-    rail?.setAttribute("aria-busy", "true");
+    if (destination) { openCardDestination(destination[0], destination[1], trigger); return; }
+    const route = routes[portalId];
+    if (!route) return;
     const url = new URL(route, window.location.origin);
     url.searchParams.set("returnTo", "hub");
-    window.setTimeout(() => window.location.assign(url.href), portalStackRevealDuration);
+    window.location.assign(url.href);
   }
 
   function initQuickAccessTooltips() {
@@ -449,46 +396,24 @@
   }
 
   function closeMatrixBTC() {
-    if (!DOM.btcOverlay) return;
-    if (!isBTCOpen()) return;
-
-    // Stop animation first
+    if (!DOM.btcOverlay || !isBTCOpen()) return;
     stopMatrixRain();
-
-    // When embedded in the portal card, the card panel owns focus restoration.
-    const embeddedInPortal = !!DOM.btcOverlay.closest(".portal-view-panel");
-    if (!embeddedInPortal) {
-      try {
-        if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
-        else document.body?.focus?.();
-      } catch (_) {}
-    }
-
-    // Hide interaction
+    try {
+      if (btcLastFocusEl && typeof btcLastFocusEl.focus === "function") btcLastFocusEl.focus();
+      else document.body?.focus?.();
+    } catch (_) {}
     DOM.btcOverlay.classList.remove("active");
     DOM.btcOverlay.setAttribute("aria-hidden", "true");
     DOM.btcOverlay.inert = true;
-
-    // Reset UI after transition
     setTimeout(() => {
       DOM.btcOverlay.hidden = true;
-      if (!embeddedInPortal) {
-        const stage = document.querySelector(".card-stage");
-        ["up", "right", "down", "left"].forEach((side) => stage?.classList.remove(`is-committing-${side}`));
-        ["--swipe-rotate-x", "--swipe-rotate-y", "--swipe-translate-x", "--swipe-translate-y", "--swipe-scale"]
-          .forEach((property) => stage?.style.removeProperty(property));
-      }
-
       DOM.btcDataContainer?.classList.remove("visible");
       if (DOM.btcLoading) {
         DOM.btcLoading.style.display = "block";
         DOM.btcLoading.textContent = "LOADING BTC DATA...";
       }
       if (DOM.btcContent) DOM.btcContent.style.display = "none";
-
-      if (DOM.matrixCanvas) {
-        DOM.matrixCanvas.getContext("2d")?.clearRect(0, 0, DOM.matrixCanvas.width, DOM.matrixCanvas.height);
-      }
+      if (DOM.matrixCanvas) DOM.matrixCanvas.getContext("2d")?.clearRect(0, 0, DOM.matrixCanvas.width, DOM.matrixCanvas.height);
     }, 250);
   }
 
@@ -561,7 +486,7 @@
     let eventsLoaded = false;
     let closeTimer = null;
     let focusTimer = null;
-    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 680;
+    const transitionDuration = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 260;
 
     function updateBuildspaceAccess() {
       const authorized = window.__CH_MEMBER_AUTH__ === true;
@@ -578,20 +503,6 @@
       }
     }
 
-    function resetStage() {
-      stage.classList.remove(
-        "is-committing-up",
-        "is-committing-right",
-        "is-committing-down",
-        "is-committing-left"
-      );
-      stage.style.removeProperty("--swipe-rotate-x");
-      stage.style.removeProperty("--swipe-rotate-y");
-      stage.style.removeProperty("--swipe-translate-x");
-      stage.style.removeProperty("--swipe-translate-y");
-      stage.style.removeProperty("--swipe-scale");
-      stage.inert = false;
-    }
 
     async function loadEventsIntoPanel() {
       if (eventsLoaded) return;
@@ -650,9 +561,6 @@
       panel.inert = false;
       panel.setAttribute("aria-hidden", "false");
       stage.inert = true;
-      resetStage();
-      setDirectionalCardPose(stage, direction || "right");
-      stage.classList.add(`is-committing-${direction || "right"}`);
 
       requestAnimationFrame(() => panel.classList.add("is-open"));
       focusTimer = window.setTimeout(() => {
@@ -681,9 +589,10 @@
       }
       if (closeTimer !== null) window.clearTimeout(closeTimer);
       closeTimer = window.setTimeout(() => {
+        stage.inert = false;
         panel.hidden = true;
         panel.removeAttribute("data-origin");
-        resetStage();
+        
         if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
         else document.querySelector('.icons-container [data-portal-shortcut]')?.focus({ preventScroll: true });
         returnFocus = null;
@@ -713,198 +622,129 @@
   // ------------------------------------------------
   function initCardGestures() {
     const stage = document.querySelector(".card-stage");
+    const deck = document.getElementById("portal-feature-deck");
+    const deckCards = document.getElementById("portal-feature-cards");
+    const counter = document.getElementById("portal-feature-count");
     const guide = document.getElementById("portal-discovery-guide");
-    if (!stage || !guide) return;
-
-    const destinations = {
-      up: { label: "Events", view: "events" },
-      right: { label: "Sandbox", view: "sandbox" },
-      down: { label: "News", view: "news" },
-      left: { label: "Community Chat", view: "chat" },
-    };
-
-    let gesture = null;
-    let resetGuideTimer = null;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const hideGuide = () => {
-      guide.classList.remove("is-visible");
-      resetGuideTimer = window.setTimeout(() => { guide.hidden = true; }, 240);
-    };
-    const showPreview = (direction) => {
-      const destination = destinations[direction];
-      if (!destination) return;
-      window.clearTimeout(resetGuideTimer);
-      const arrow = { up: "↑", right: "→", down: "↓", left: "←" }[direction];
-      guide.textContent = `${arrow} ${destination.label} — release to open`;
-      guide.hidden = false;
-      requestAnimationFrame(() => guide.classList.add("is-visible"));
-    };
-    const clearDrag = () => {
-      stage.classList.remove("is-dragging");
-      stage.style.removeProperty("--swipe-rotate-x");
-      stage.style.removeProperty("--swipe-rotate-y");
-      stage.style.removeProperty("--swipe-translate-x");
-      stage.style.removeProperty("--swipe-translate-y");
-      stage.style.removeProperty("--swipe-scale");
-    };
-    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-    const setTilt = (dx, dy, direction) => {
-      const rect = stage.getBoundingClientRect();
-      const horizontal = direction === "left" || direction === "right";
-      const primary = horizontal
-        ? clamp((dx / Math.max(rect.width, 1)) * 112, -48, 48)
-        : clamp((-dy / Math.max(rect.height, 1)) * 112, -48, 48);
-      const secondary = horizontal
-        ? clamp((-dy / Math.max(rect.height, 1)) * 24, -12, 12)
-        : clamp((dx / Math.max(rect.width, 1)) * 24, -12, 12);
-      const rotateX = horizontal ? secondary : primary;
-      const rotateY = horizontal ? primary : secondary;
-      stage.style.setProperty("--swipe-rotate-x", `${rotateX}deg`);
-      stage.style.setProperty("--swipe-rotate-y", `${rotateY}deg`);
-      stage.style.setProperty("--swipe-translate-x", `${clamp(dx * 0.14, -42, 42)}px`);
-      stage.style.setProperty("--swipe-translate-y", `${clamp(dy * 0.14, -42, 42)}px`);
-      const progress = Math.min(1, Math.max(Math.abs(dx) / Math.max(rect.width, 1), Math.abs(dy) / Math.max(rect.height, 1)));
-      stage.style.setProperty("--swipe-scale", String(1 - progress * 0.035));
-    };
-    const getDirection = (dx, dy) => {
-      if (Math.max(Math.abs(dx), Math.abs(dy)) < 12) return null;
-      if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? "right" : "left";
-      return dy > 0 ? "down" : "up";
-    };
-    const openDestination = (direction) => {
-      const destination = destinations[direction];
-      if (!destination) return;
-      if (typeof gtag === "function") {
-        gtag("event", "portal_swipe_open", { direction, destination: destination.label });
-      }
-      openCardDestination(destination.view, direction, document.activeElement);
-    };
-
-    stage.addEventListener("dragstart", (event) => event.preventDefault());
-
-    stage.addEventListener("pointerdown", (event) => {
-      if (!event.isPrimary || event.button !== 0 || stage.inert) return;
-      gesture = {
-        pointerId: event.pointerId,
-        startX: event.clientX,
-        startY: event.clientY,
-        startTime: event.timeStamp,
-        lastX: event.clientX,
-        lastY: event.clientY,
-        lastTime: event.timeStamp,
-        velocityX: 0,
-        velocityY: 0,
-        direction: null,
-        moved: false,
-      };
+    if (!stage || !deck || !deckCards || !counter) return;
+    const features = [
+      { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", action: "Browse events" },
+      { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Explore experimental projects and prototypes from CharlestonHacks.", action: "Open sandbox" },
+      { id: "news", title: "News", icon: "fas fa-newspaper", description: "Catch up on CharlestonHacks updates and community stories.", action: "Read the news" },
+      { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", action: "Open community chat" },
+      { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Open the member workspace for projects, connections, and collaboration.", action: "Open Buildspace" },
+      { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster and share it with your community.", action: "View poster" },
+      { id: "btc", title: "Bitcoin Tracker", icon: "fab fa-bitcoin", description: "See the live Bitcoin tracker in the portal.", action: "Open tracker" },
+      { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", action: "Explore swag" },
+      { id: "sponsor", title: "Sponsorship", icon: "fas fa-hand-holding-heart", description: "Learn how to support CharlestonHacks and its programs.", action: "Support CharlestonHacks" },
+      { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", action: "Play the game" },
+      { id: "newsletter", title: "Newsletter", icon: "fas fa-envelope-open-text", description: "Get CharlestonHacks news and event updates by email.", action: "Sign up" },
+    ];
+    let currentIndex = 0, deckOpen = false, gesture = null;
+    const cards = features.map((feature, index) => {
+      const card = document.createElement("article");
+      card.className = "portal-feature-card";
+      card.dataset.index = String(index);
+      const number = document.createElement("span");
+      number.className = "portal-feature-number";
+      number.textContent = `${String(index + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
+      const iconWrap = document.createElement("div");
+      iconWrap.className = "portal-feature-icon";
+      const icon = document.createElement("i");
+      icon.className = feature.icon;
+      icon.setAttribute("aria-hidden", "true");
+      iconWrap.append(icon);
+      const title = document.createElement("h2");
+      title.textContent = feature.title;
+      const description = document.createElement("p");
+      description.textContent = feature.description;
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "portal-feature-open";
+      open.textContent = feature.action;
+      open.addEventListener("click", (event) => activatePortal(feature.id, event.currentTarget));
+      card.append(number, iconWrap, title, description, open);
+      deckCards.append(card);
+      return card;
     });
-
-    stage.addEventListener("pointermove", (event) => {
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
-      const dx = event.clientX - gesture.startX;
-      const dy = event.clientY - gesture.startY;
-      const direction = getDirection(dx, dy);
-      const elapsed = event.timeStamp - gesture.lastTime;
-      if (elapsed > 0) {
-        gesture.velocityX = (event.clientX - gesture.lastX) / elapsed;
-        gesture.velocityY = (event.clientY - gesture.lastY) / elapsed;
-      }
-      gesture.lastX = event.clientX;
-      gesture.lastY = event.clientY;
-      gesture.lastTime = event.timeStamp;
-      if (!direction) return;
-
-      if (!gesture.moved) {
-        try { stage.setPointerCapture(event.pointerId); } catch {}
-      }
-      gesture.moved = true;
-      gesture.direction = direction;
-      stage.classList.add("is-dragging");
-      setTilt(dx, dy, direction);
-      showPreview(direction);
-    });
-
-    stage.addEventListener("pointerup", (event) => {
-      if (!gesture || gesture.pointerId !== event.pointerId) return;
-      const current = gesture;
-      gesture = null;
-      const deltaX = event.clientX - current.startX;
-      const deltaY = event.clientY - current.startY;
-      const direction = getDirection(deltaX, deltaY);
-      const rect = stage.getBoundingClientRect();
-      const horizontal = direction === "left" || direction === "right";
-      const extent = horizontal ? rect.width : rect.height;
-      const distance = horizontal ? Math.abs(deltaX) : Math.abs(deltaY);
-      const threshold = Math.max(28, Math.min(60, extent * 0.08));
-      const directedVelocity = horizontal ? current.velocityX : current.velocityY;
-      const velocity = direction === "left" || direction === "up" ? -directedVelocity : directedVelocity;
-      const quickFlick = distance >= 24 && velocity >= 0.55;
-
-      if (!direction || (distance < threshold && !quickFlick)) {
-        clearDrag();
-        hideGuide();
+    const wrap = (value) => (value + features.length) % features.length;
+    const render = () => {
+      cards.forEach((card, index) => {
+        let offset = index - currentIndex;
+        if (offset > features.length / 2) offset -= features.length;
+        if (offset < -features.length / 2) offset += features.length;
+        const position = offset === 0 ? "front" : offset === 1 ? "next" : offset === 2 ? "next-next" : offset === -1 ? "previous" : "hidden";
+        card.dataset.position = position;
+        card.setAttribute("aria-hidden", position === "front" ? "false" : "true");
+        card.inert = position !== "front";
+      });
+      counter.textContent = `FEATURE ${String(currentIndex + 1).padStart(2, "0")} OF ${String(features.length).padStart(2, "0")}`;
+    };
+    const openDeck = (index) => {
+      currentIndex = wrap(index);
+      deckOpen = true;
+      deck.hidden = false;
+      stage.classList.add("has-feature-deck");
+      if (guide) guide.hidden = true;
+      render();
+    };
+    const closeDeck = () => {
+      deckOpen = false;
+      deck.hidden = true;
+      stage.classList.remove("has-feature-deck", "is-dragging");
+      stage.style.removeProperty("--feature-drag-x");
+      stage.focus({ preventScroll: true });
+    };
+    const step = (direction) => {
+      if (!deckOpen) { openDeck(direction < 0 ? 0 : features.length - 1); return; }
+      currentIndex = wrap(currentIndex + direction);
+      render();
+    };
+    document.getElementById("portal-feature-home")?.addEventListener("click", closeDeck);
+    document.getElementById("portal-feature-previous")?.addEventListener("click", () => step(-1));
+    document.getElementById("portal-feature-next")?.addEventListener("click", () => step(1));
+    stage.addEventListener("keydown", (event) => {
+      if (!deckOpen) {
+        if (event.key === "ArrowLeft") { event.preventDefault(); openDeck(0); }
+        if (event.key === "ArrowRight") { event.preventDefault(); openDeck(features.length - 1); }
         return;
       }
-
-      setDirectionalCardPose(stage, direction);
-      stage.classList.remove("is-dragging");
-      stage.classList.add(`is-committing-${direction}`);
-      guide.textContent = `Opening ${destinations[direction].label}…`;
-      window.setTimeout(hideGuide, 280);
-      window.setTimeout(() => openDestination(direction), reducedMotion ? 0 : 160);
+      if (event.key === "ArrowLeft") { event.preventDefault(); step(-1); }
+      if (event.key === "ArrowRight") { event.preventDefault(); step(1); }
+      if (event.key === "Escape") { event.preventDefault(); closeDeck(); }
     });
-
-    const cancelGesture = (event) => {
+    stage.addEventListener("dragstart", (event) => event.preventDefault());
+    stage.addEventListener("pointerdown", (event) => {
+      if (!event.isPrimary || event.button !== 0 || stage.inert || event.target.closest("button, a")) return;
+      gesture = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+    });
+    stage.addEventListener("pointermove", (event) => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+      if (Math.abs(dx) < 8 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+      try { stage.setPointerCapture(event.pointerId); } catch {}
+      stage.classList.add("is-dragging");
+      stage.style.setProperty("--feature-drag-x", `${Math.max(-72, Math.min(72, dx))}px`);
+    });
+    const finish = (event) => {
+      if (!gesture || gesture.pointerId !== event.pointerId) return;
+      const dx = event.clientX - gesture.x, dy = event.clientY - gesture.y;
+      gesture = null;
+      stage.classList.remove("is-dragging");
+      stage.style.removeProperty("--feature-drag-x");
+      const threshold = Math.max(48, Math.min(96, stage.getBoundingClientRect().width * 0.12));
+      if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy) * 1.2) step(dx < 0 ? 1 : -1);
+    };
+    stage.addEventListener("pointerup", finish);
+    const cancel = (event) => {
       if (!gesture || gesture.pointerId !== event.pointerId) return;
       gesture = null;
-      clearDrag();
-      hideGuide();
+      stage.classList.remove("is-dragging");
+      stage.style.removeProperty("--feature-drag-x");
     };
-    stage.addEventListener("pointercancel", cancelGesture);
-    stage.addEventListener("lostpointercapture", cancelGesture);
-  }
-
-  // ------------------------------------------------
-  // Events modal controls
-  // ------------------------------------------------
-  function initEventsModal() {
-    if (!DOM.openCalendarBtn || !DOM.eventsOverlay) return;
-
-    DOM.openCalendarBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
-      DOM.eventsOverlay.classList.add("active");
-
-      try {
-        const fn = await loadEventsFeedModule();
-        if (typeof fn === "function") fn();
-      } catch (err) {
-        console.error("[PORTAL] Failed to load events feed on demand:", err);
-      }
-    });
-
-    DOM.eventsCloseBtn?.addEventListener("click", () => DOM.eventsOverlay?.classList.remove("active"));
-
-    DOM.eventsOverlay.addEventListener("click", (e) => {
-      if (e.target === DOM.eventsOverlay) DOM.eventsOverlay.classList.remove("active");
-    });
-  }
-
-  // ------------------------------------------------
-  // BTC overlay close controls
-  // ------------------------------------------------
-  function initBTCModalControls() {
-    DOM.btcCloseBtn?.addEventListener("click", closeMatrixBTC);
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      if (!isBTCOpen()) return;
-      closeMatrixBTC();
-    });
-
-    DOM.btcOverlay?.addEventListener("click", (e) => {
-      if (e.target === DOM.btcOverlay) closeMatrixBTC();
-    });
+    stage.addEventListener("pointercancel", cancel);
+    stage.addEventListener("lostpointercapture", cancel);
+    render();
   }
 
   // ------------------------------------------------
