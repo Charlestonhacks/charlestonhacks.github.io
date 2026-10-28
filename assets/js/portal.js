@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v14-iframe-touch-swipe-20261028";
+  const VERSION = "portal-js-v15-chronological-events-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -449,7 +449,7 @@
   async function loadEventsFeedModule() {
     if (typeof window.loadEvents === "function") return window.loadEvents;
 
-    const module = await import("/assets/js/eventsFeed.js");
+    const module = await import("/assets/js/eventsFeed.js?v=chronological-20261028");
     if (module?.loadEvents) {
       window.loadEvents = module.loadEvents;
       return window.loadEvents;
