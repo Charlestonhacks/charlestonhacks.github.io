@@ -45,12 +45,38 @@ export async function initBBS() {
     if (!button) return;
     button.disabled = true;
     feedbackDiv.textContent = "Opening sign-in…";
-    const { error } = await supabase.auth.signInWithOAuth({
+
+    const embedded = window.self !== window.top;
+    if (embedded) {
+      try { localStorage.setItem("ch:bbs-return-to-hub", String(Date.now())); } catch (_) {}
+    }
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: button.dataset.provider,
-      options: { redirectTo: `${window.location.origin}${window.location.pathname}` }
+      options: {
+        redirectTo: window.location.origin + "/bbs.html",
+        skipBrowserRedirect: embedded
+      }
     });
     if (error) {
       console.error("[BBS] OAuth error:", error);
+      try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
+      feedbackDiv.textContent = "Sign-in could not start. Please try again.";
+      button.disabled = false;
+      return;
+    }
+    if (embedded && data?.url) {
+      // OAuth providers block authentication inside many cross-frame contexts.
+      // Continue in the top-level tab, then return to the member portal.
+      try {
+        window.top.location.href = data.url;
+      } catch (navigationError) {
+        console.error("[BBS] Top-level OAuth navigation failed:", navigationError);
+        try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
+        feedbackDiv.textContent = "Open Community Chat separately to sign in.";
+        button.disabled = false;
+      }
+    } else if (embedded) {
+      try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
       feedbackDiv.textContent = "Sign-in could not start. Please try again.";
       button.disabled = false;
     }
@@ -64,11 +90,24 @@ export async function initBBS() {
     if (error) {
       console.error("[BBS] OAuth callback error:", error);
       feedbackDiv.textContent = "Sign-in could not be completed. Please try again.";
+      try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
+    } else {
+      let returnToHub = false;
+      try {
+        const requestedAt = Number(localStorage.getItem("ch:bbs-return-to-hub"));
+        returnToHub = Number.isFinite(requestedAt) && Date.now() - requestedAt < 10 * 60 * 1000;
+        localStorage.removeItem("ch:bbs-return-to-hub");
+      } catch (_) {}
+      if (returnToHub) {
+        window.location.replace("/hub.html");
+        return;
+      }
     }
     url.search = "";
     window.history.replaceState({}, document.title, url.toString());
   }
   if (url.searchParams.has("error")) {
+    try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
     url.search = "";
     window.history.replaceState({}, document.title, url.toString());
   }

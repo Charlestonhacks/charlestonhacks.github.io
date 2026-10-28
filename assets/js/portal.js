@@ -13,7 +13,14 @@
   // DOM helpers
   // ------------------------------------------------
   const $ = (sel) => document.querySelector(sel);
-  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+  const $ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  // Keep every Buildspace entry point behind the same member gate.
+  const quickBuildspaceLink = $('.icons-container a[aria-label="Buildspace"]');
+  quickBuildspaceLink?.addEventListener("click", (event) => {
+    event.preventDefault();
+    document.querySelector('.clickable-area[data-portal="innovation"]')?.click();
+  });
 
   // Cache DOM once (performance + consistency)
   const DOM = {
@@ -467,7 +474,6 @@ if (portalId === "btc") {
         title: "Buildspace",
         frame: document.getElementById("portal-buildspace-frame"),
         src: "https://deckerd451.github.io/innovation-engine/",
-        external: "https://deckerd451.github.io/innovation-engine/",
       },
       sandbox: {
         title: "Sandbox",
@@ -489,6 +495,21 @@ if (portalId === "btc") {
 
     let returnFocus = null;
     let eventsLoaded = false;
+
+    function updateBuildspaceAccess() {
+      const authorized = window.__CH_MEMBER_AUTH__ === true;
+      const gate = document.getElementById("portal-buildspace-auth-gate");
+      const frame = viewConfig.buildspace.frame;
+      const status = document.getElementById("portal-buildspace-auth-status");
+      if (gate) gate.hidden = authorized;
+      if (frame) frame.hidden = !authorized;
+      if (externalLink && viewConfig.buildspace.external) externalLink.hidden = !authorized;
+      if (authorized && frame && !frame.hasAttribute("src")) frame.src = viewConfig.buildspace.src;
+      if (status) {
+        status.hidden = !authorized || !frame || !frame.hasAttribute("src");
+        status.textContent = "Loading your signed-in member workspace…";
+      }
+    }
 
     function resetStage() {
       stage.classList.remove(
@@ -542,6 +563,8 @@ if (portalId === "btc") {
 
       views.forEach((view) => { view.hidden = view !== content; });
       const guide = document.getElementById("portal-discovery-guide");
+      if (viewName === "buildspace") updateBuildspaceAccess();
+
       if (guide) {
         guide.hidden = true;
         guide.classList.remove("is-visible");
@@ -557,7 +580,7 @@ if (portalId === "btc") {
       requestAnimationFrame(() => panel.classList.add("is-open"));
       window.setTimeout(() => homeButton.focus({ preventScroll: true }), 360);
 
-      if (config.frame && !config.frame.hasAttribute("src")) {
+      if (config.frame && viewName !== "buildspace" && !config.frame.hasAttribute("src")) {
         config.frame.src = config.src;
       }
       if (viewName === "events") loadEventsIntoPanel();
@@ -578,6 +601,15 @@ if (portalId === "btc") {
         returnFocus = null;
       }, 360);
     }
+
+    document.getElementById("portal-buildspace-sign-in")?.addEventListener("click", (event) => {
+      show("chat", "left", event.currentTarget);
+    });
+    window.addEventListener("ch:member-auth-changed", () => {
+      if (!panel.hidden && panel.querySelector('[data-view="buildspace"]:not([hidden])')) {
+        updateBuildspaceAccess();
+      }
+    });
 
     homeButton.addEventListener("click", close);
     document.addEventListener("keydown", (event) => {
