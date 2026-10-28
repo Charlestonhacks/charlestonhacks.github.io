@@ -25,7 +25,6 @@
 
   let featureSwiper = null;
   let featureIndexes = new Map();
-  let featureContentById = new Map();
   let activeFeatureId = "home";
   let updateBuildspaceAccess = () => {};
   let loadEventsIntoPanel = () => {};
@@ -483,11 +482,6 @@
       viewNodes.set(node.dataset.view, node);
     });
 
-    featureContentById = new Map(features.map((feature) => [
-      feature.id,
-      feature.view ? viewNodes.get(feature.view) || null : null,
-    ]));
-
     const buildspaceGate = document.getElementById("portal-buildspace-auth-gate");
     buildspaceGate?.querySelector("button")?.addEventListener("click", (event) => {
       window.__CH_SHOW_PORTAL_FEATURE__?.("chat", event.currentTarget);
@@ -585,8 +579,6 @@
         nativeView.hidden = false;
         content.append(nativeView);
       } else if (feature.id === "btc") {
-        const btcPanel = document.createElement("div");
-        btcPanel.className = "portal-btc-content";
         const overlay = document.getElementById("matrix-btc-overlay");
         if (overlay) {
           overlay.classList.add("in-card");
@@ -608,6 +600,8 @@
       slide.append(card);
       slidesContainer.append(slide);
     });
+
+    document.getElementById("portal-view-panel")?.remove();
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     featureSwiper = new window.Swiper(container, {
