@@ -53,7 +53,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-logout-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=quick-access-hidden-hotspots-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -350,7 +350,7 @@
       <div class="media-container">
 
         <!-- Card-stage wrapper ensures buttons center on the card image bounds -->
-        <div class="card-stage" role="group" aria-label="Interactive portal card. Drag in a direction to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace; other portal buttons open more features.">
+        <div class="card-stage" role="group" aria-label="Interactive portal card. Swipe to open Events, Sandbox, News, or Community Chat. Use the center button for Buildspace and Quick Access below for other features.">
           <img id="missionImage" src="icons/card.png" alt="Interactive Portal Card - Discover 9 different features" draggable="false"/>
           <img id="cardFrame" src="images/cardframe2.svg" style="display:none;" alt="Portal Frame"/>
 
@@ -433,7 +433,7 @@
             <span id="infoParticle"></span><span id="infoText"></span>
           </div>
           <div id="portal-discovery-guide" class="portal-discovery-guide" role="status" aria-live="polite" hidden>
-            Tap an icon to explore
+            Swipe the card to explore, or use Quick Access below
           </div>
         </div>
         <!-- /card-stage -->
@@ -501,8 +501,26 @@
       <a href="https://github.com/sponsors/deckerd451" target="_blank" title="Sponsor on GitHub" aria-label="Sponsor on GitHub">
         <i class="fas fa-heart"></i>
       </a>
-      <a href="#buildspace" title="Buildspace" aria-label="Buildspace">
+      <a href="#buildspace" title="Buildspace" aria-label="Buildspace" data-portal-shortcut="innovation">
         <i class="fas fa-people-arrows"></i>
+      </a>
+      <a href="Poster.html" title="Event Poster" aria-label="Event Poster" data-portal-shortcut="poster">
+        <i class="fas fa-image" aria-hidden="true"></i>
+      </a>
+      <a href="docs.html" title="Documentation" aria-label="Documentation" data-portal-shortcut="docs">
+        <i class="fas fa-book-open" aria-hidden="true"></i>
+      </a>
+      <a href="#bitcoin-tracker" title="Bitcoin Tracker" aria-label="Bitcoin Tracker" data-portal-shortcut="btc">
+        <i class="fab fa-bitcoin" aria-hidden="true"></i>
+      </a>
+      <a href="swag.html" title="Swag Vote" aria-label="Swag Vote" data-portal-shortcut="swag">
+        <i class="fas fa-shirt" aria-hidden="true"></i>
+      </a>
+      <a href="donations.html" title="Sponsorship and Donations" aria-label="Sponsorship and Donations" data-portal-shortcut="sponsor">
+        <i class="fas fa-hand-holding-heart" aria-hidden="true"></i>
+      </a>
+      <a href="cardmatchgame.html" title="Avatar Matching Game" aria-label="Avatar Matching Game" data-portal-shortcut="game">
+        <i class="fas fa-gamepad" aria-hidden="true"></i>
       </a>
       <a href="subscribe.html" title="Newsletter Signup" aria-label="Newsletter Signup">
         <i class="fas fa-envelope-open-text"></i>
@@ -617,7 +635,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=portal-card-logout-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=quick-access-hidden-hotspots-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
