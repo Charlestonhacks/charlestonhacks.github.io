@@ -53,7 +53,7 @@
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=member-auth-handoff-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-logout-20261028"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -88,6 +88,51 @@
       transition: color 0.2s ease, background 0.2s ease;
     }
     .nav-links a:hover { color: #00e0ff; background: rgba(0,224,255,0.06); }
+
+    .portal-account-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 6px;
+    }
+    .portal-account-controls[hidden] { display: none !important; }
+    #portal-account-name {
+      max-width: 150px;
+      overflow: hidden;
+      color: rgba(255,255,255,0.7);
+      font-size: 0.66rem;
+      letter-spacing: 0.04em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #portal-sign-out {
+      padding: 7px 10px;
+      border: 1px solid rgba(201,163,94,0.55);
+      border-radius: 7px;
+      color: rgba(255,255,255,0.72);
+      background: transparent;
+      font: inherit;
+      font-size: 0.68rem;
+      letter-spacing: 0.07em;
+      cursor: pointer;
+    }
+    #portal-sign-out:hover,
+    #portal-sign-out:focus-visible {
+      color: #ffe4a3;
+      border-color: #c9a35e;
+      background: rgba(201,163,94,0.1);
+      outline: 2px solid #c9a35e;
+      outline-offset: 2px;
+    }
+    #portal-sign-out:disabled { opacity: 0.6; cursor: wait; }
+    @media (max-width: 768px) {
+      .nav-links.open .portal-account-controls {
+        width: 100%;
+        justify-content: space-between;
+        margin: 8px 0 0;
+      }
+      #portal-account-name { max-width: 60vw; }
+    }
 
     .nav-toggle {
       display: none;
@@ -279,6 +324,10 @@
       <a href="/#events-section">Events</a>
       <a href="/hub.html">Member Portal</a>
       <a href="/bbs.html">Community Chat</a>
+      <div class="portal-account-controls" id="portal-account-controls" hidden>
+        <span id="portal-account-name">Signed in</span>
+        <button type="button" id="portal-sign-out">Sign out</button>
+      </div>
     </div>
   </nav>
 
@@ -565,10 +614,10 @@
   </script>
 
   <!-- Member authorization and Buildspace sign-in handoff -->
-  <script type="module" src="/assets/js/portal-auth-bridge.js?v=member-auth-handoff-20261028"></script>
+  <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=member-auth-handoff-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=portal-card-logout-20261028"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">

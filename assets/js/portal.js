@@ -6,14 +6,14 @@
 (() => {
   "use strict";
 
-  const VERSION = "portal-js-v2-aria-inert-20260223-no-discovery-progress";
+  const VERSION = "portal-js-v3-card-controller-logout-20261028";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
   // DOM helpers
   // ------------------------------------------------
   const $ = (sel) => document.querySelector(sel);
-  const $ = (sel) => Array.from(document.querySelectorAll(sel));
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
   // Keep every Buildspace entry point behind the same member gate.
   const quickBuildspaceLink = $('.icons-container a[aria-label="Buildspace"]');
