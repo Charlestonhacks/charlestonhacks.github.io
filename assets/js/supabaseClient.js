@@ -1,8 +1,7 @@
 // ======================================================================
-// CharlestonHacks Innovation Engine — SUPABASE CLIENT (CYNQ Enhanced)
+// CharlestonHacks Innovation Engine — SUPABASE CLIENT
 // Fully aligned with:
 //   ✓ community table (user_id PK, unique email)
-//   ✓ cynq_cards table for Human-Centered Design workflows
 //   ✓ RLS: auth.uid() = user_id
 //   ✓ Profile System FINAL
 //   ✓ Storage: hacksbucket
@@ -206,140 +205,14 @@ export async function ensureCommunityUser() {
 }
 
 // ======================================================================
-// 4. CYNQ WORKFLOW HELPER FUNCTIONS
-// ======================================================================
-
-/**
- * Fetch all CYNQ cards for the current user
- */
-export async function getCYNQCards() {
-  const user = window.currentAuthUser;
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  const { data, error } = await supabase
-    .from("cynq_cards")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data || [];
-}
-
-/**
- * Create a new CYNQ card
- */
-export async function createCYNQCard(cardData) {
-  const user = window.currentAuthUser;
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  const { data, error } = await supabase
-    .from("cynq_cards")
-    .insert({
-      ...cardData,
-      user_id: user.id,
-    })
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-/**
- * Update an existing CYNQ card
- */
-export async function updateCYNQCard(cardId, updates) {
-  const { data, error } = await supabase
-    .from("cynq_cards")
-    .update(updates)
-    .eq("id", cardId)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-/**
- * Delete a CYNQ card
- */
-export async function deleteCYNQCard(cardId) {
-  const { error } = await supabase
-    .from("cynq_cards")
-    .delete()
-    .eq("id", cardId);
-
-  if (error) throw error;
-  return true;
-}
-
-/**
- * Get CYNQ cards by stage
- */
-export async function getCYNQCardsByStage(stage) {
-  const user = window.currentAuthUser;
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  const { data, error } = await supabase
-    .from("cynq_cards")
-    .select("*")
-    .eq("user_id", user.id)
-    .eq("stage", stage)
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data || [];
-}
-
-/**
- * Get card count by stage for current user
- */
-export async function getCYNQCardCounts() {
-  const cards = await getCYNQCards();
-  
-  const counts = {
-    empathize: 0,
-    define: 0,
-    ideate: 0,
-    prototype: 0,
-    test: 0,
-  };
-
-  cards.forEach(card => {
-    if (counts.hasOwnProperty(card.stage)) {
-      counts[card.stage]++;
-    }
-  });
-
-  return counts;
-}
-
-/**
- * Move card to different stage
- */
-export async function moveCYNQCard(cardId, newStage) {
-  return await updateCYNQCard(cardId, { stage: newStage });
-}
-
-// ======================================================================
-// 5. AUTH STATE LISTENER
+// 4. AUTH STATE LISTENER
 // ======================================================================
 // NOTE: Auth state changes are handled by auth.js to avoid duplicate
 // listeners and lock contention. The ensureCommunityUser() function
 // is called from profile.js after successful authentication.
 
 // ======================================================================
-// 6. UTILITY FUNCTIONS
+// 5. UTILITY FUNCTIONS
 // ======================================================================
 
 /**
@@ -378,20 +251,13 @@ export async function getUserProfile() {
 }
 
 // ======================================================================
-// 7. EXPORT ALL FUNCTIONS
+// 6. EXPORT ALL FUNCTIONS
 // ======================================================================
 export default {
   supabase,
   signInWithGitHub,
   signInWithGoogle,
   ensureCommunityUser,
-  getCYNQCards,
-  createCYNQCard,
-  updateCYNQCard,
-  deleteCYNQCard,
-  getCYNQCardsByStage,
-  getCYNQCardCounts,
-  moveCYNQCard,
   isAuthenticated,
   getCurrentUser,
   getUserProfile,
