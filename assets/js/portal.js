@@ -608,6 +608,16 @@
         subtitle.className = "portal-feature-subtitle";
         subtitle.textContent = "Swipe left or right to browse";
         heading.append(title, subtitle);
+        if (feature.id === "nearify") {
+          const openLink = document.createElement("a");
+          openLink.className = "portal-feature-subtitle portal-feature-open-link swiper-no-swiping";
+          openLink.href = feature.src;
+          openLink.target = "_blank";
+          openLink.rel = "noopener noreferrer";
+          openLink.textContent = "Open Nearify in a new tab";
+          openLink.setAttribute("aria-label", "Open Nearify in a new tab");
+          heading.append(openLink);
+        }
 
         const isPinned = deckPreferences.pinned.includes(feature.id);
         const pinButton = document.createElement("button");
