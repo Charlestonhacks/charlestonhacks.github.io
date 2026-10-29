@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-prioritized-features-20261029"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-card-library-20261029"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -338,7 +338,7 @@
               <div class="swiper-slide portal-home-slide" aria-label="Portal home">
                 <div class="portal-home-card">
                   <img src="images/finalcard.png" alt="CharlestonHacks member portal card" draggable="false">
-                  <span class="portal-home-swipe-hint">Swipe left or right to browse features</span>
+                  <button type="button" class="portal-home-swipe-hint swiper-no-swiping" id="portal-manage-deck" aria-haspopup="dialog" aria-controls="portal-deck-manager">Swipe to browse · Manage cards</button>
                 </div>
               </div>
             </div>
@@ -423,6 +423,25 @@
     </section>
   </main>
 
+  <!-- Manage the mobile swipe deck: pins change order; toggles add/remove cards. -->
+  <dialog class="portal-deck-manager" id="portal-deck-manager" aria-labelledby="portal-deck-manager-title">
+    <div class="portal-deck-manager-panel">
+      <header class="portal-deck-manager-header">
+        <div>
+          <span class="portal-deck-manager-kicker">PERSONALIZE YOUR DECK</span>
+          <h2 id="portal-deck-manager-title">Manage cards</h2>
+        </div>
+        <button type="button" class="portal-deck-close" id="portal-deck-close" aria-label="Close card manager">×</button>
+      </header>
+      <p class="portal-deck-manager-help">Pin cards to the front, or remove cards you don’t use. Every card in your deck remains swipeable.</p>
+      <div class="portal-deck-options" id="portal-deck-options" role="group" aria-label="Portal cards"></div>
+      <footer class="portal-deck-manager-actions">
+        <button type="button" class="portal-deck-cancel" id="portal-deck-cancel">Cancel</button>
+        <button type="button" class="portal-deck-save" id="portal-deck-save">Apply changes</button>
+      </footer>
+    </div>
+  </dialog>
+
   <!-- Events Modal -->
   <div id="events-overlay" role="dialog" aria-modal="true" aria-labelledby="events-title">
     <div class="events-modal">
@@ -460,7 +479,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-prioritized-features-20261029"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=portal-prioritized-features-20261029"></script>
+  <script type="module" src="/assets/js/portal.js?v=portal-card-library-20261029"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
