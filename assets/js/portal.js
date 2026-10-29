@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v15-chronological-events-20261028";
+  const VERSION = "portal-js-v16-mobile-portal-polish-20261029";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   // ------------------------------------------------
@@ -472,6 +472,7 @@
       const activeIndex = featureSwiper.activeIndex;
       const feature = activeIndex === 0 ? null : features[activeIndex - 1];
       activeFeatureId = feature?.id || "home";
+    document.body.classList.toggle("portal-buildspace-active", activeFeatureId === "innovation");
       counter.textContent = feature ? `${activeIndex} / ${features.length} · ${feature.title.toUpperCase()}` : "PORTAL";
       [...slidesContainer.children].forEach((slide, index) => {
         const active = index === activeIndex;
