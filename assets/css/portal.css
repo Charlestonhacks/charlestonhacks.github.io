@@ -1,7 +1,7 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v8-personal-deck-20261029
+   Version: portal-css-v9-explicit-card-actions-20261029
    Notes:
    - Adds proper support for an <img> inside the CENTER clickable area
    - Keeps existing center pulse/glow behavior
@@ -1847,4 +1847,44 @@ button:focus {
     animation: none !important;
   }
   .portal-feature-pin { transition: none !important; }
+}
+
+
+/* Make card removal explicit: each row has a visible Add or Remove action. */
+.portal-deck-option {
+  grid-template-columns: minmax(0,1fr) auto auto;
+}
+.portal-deck-option-main { cursor: default; }
+.portal-deck-toggle {
+  min-width: 72px;
+  min-height: 44px;
+  padding: 0 9px;
+  border: 1px solid rgba(243,214,154,.52);
+  border-radius: 999px;
+  color: #ffe9b5;
+  background: rgba(201,163,94,.1);
+  font: 600 .62rem/1 "Orbitron", sans-serif;
+  cursor: pointer;
+}
+.portal-deck-toggle[data-included="false"] {
+  border-color: rgba(0,224,255,.48);
+  color: #c9f8ff;
+  background: rgba(0,224,255,.09);
+}
+.portal-deck-toggle:focus-visible {
+  outline: 2px solid #00e0ff;
+  outline-offset: 3px;
+}
+@media (max-width: 360px) {
+  .portal-deck-option {
+    grid-template-columns: minmax(0,1fr) 68px 76px;
+    gap: 5px;
+    padding-right: 6px;
+    padding-left: 7px;
+  }
+  .portal-deck-toggle {
+    min-width: 68px;
+    padding: 0 5px;
+    font-size: .56rem;
+  }
 }
