@@ -83,6 +83,82 @@
       display: block;
     }
 
+    /* Live project cards for prototypes without dedicated artwork */
+    .project-card {
+      min-height: 360px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: #f7f3e8;
+      text-decoration: none;
+      border: 1px solid rgba(0, 224, 255, 0.42);
+      background:
+        radial-gradient(circle at 82% 18%, rgba(0, 224, 255, 0.19), transparent 34%),
+        radial-gradient(circle at 14% 88%, rgba(227, 184, 107, 0.16), transparent 38%),
+        linear-gradient(145deg, #111923, #090b10 72%);
+    }
+
+    .project-card__icon {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(0, 224, 255, 0.7);
+      border-radius: 18px;
+      color: #00e0ff;
+      font-size: 28px;
+      box-shadow: 0 0 22px rgba(0, 224, 255, 0.14);
+    }
+
+    .project-card__content {
+      margin-top: 30px;
+    }
+
+    .project-card__eyebrow {
+      margin-bottom: 8px;
+      color: #00e0ff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .project-card h2 {
+      margin: 0 0 12px;
+      color: #f0c77e;
+      font-size: 26px;
+    }
+
+    .project-card p {
+      margin: 0;
+      color: #d1d8de;
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .project-card__cta {
+      margin-top: 22px;
+      color: #00e0ff;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .project-card:hover {
+      border-color: rgba(0, 224, 255, 0.8);
+      box-shadow: 0 0 25px rgba(0, 224, 255, 0.28), 0 0 45px rgba(227, 184, 107, 0.12);
+    }
+
+    .project-card:focus-visible {
+      outline: 3px solid #00e0ff;
+      outline-offset: 4px;
+    }
+
+    @media (max-width: 480px) {
+      .project-card { min-height: 320px; padding: 24px; }
+      .project-card h2 { font-size: 23px; }
+    }
+
     /* Glow on hover */
     .gallery-item:hover {
       transform: translateY(-5px) scale(1.05);
@@ -198,16 +274,28 @@
   <main class="gallery-container">
     <div id="gallery" class="gallery">
 
-      <a class="gallery-item" href="https://v1-codestream-vkcw4hai2hmtkthjxbpbn.build-preview.cloudflare.dev/login" target="_blank" rel="noopener noreferrer">
-        <img loading="lazy" src="images/synapsecard.png" alt="Synapse Project">
+      <a class="gallery-item project-card project-card--cynq" href="/cynq.html" target="_blank" rel="noopener noreferrer" aria-label="Open CYNQ Human-Centered Design Workflow">
+        <span class="project-card__icon" aria-hidden="true"><i class="fa-solid fa-diagram-project"></i></span>
+        <div class="project-card__content">
+          <div class="project-card__eyebrow">Member workflow</div>
+          <h2>CYNQ Workflow</h2>
+          <p>Organize human-centered design work from research and problem definition through ideas, prototypes, and testing.</p>
+        </div>
+        <span class="project-card__cta">Sign in with your CharlestonHacks account <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
       </a>
 
-      <a class="gallery-item" href="https://hackathon-chs-git-main-maxs-projects-ff8c32db.vercel.app/" target="_blank" rel="noopener noreferrer">
+      <a class="gallery-item" href="https://hackathon-chs-git-main-maxs-projects-ff8c32db.vercel.app/" target="_blank" rel="noopener noreferrer" aria-label="Open the IE Hackathon project">
         <img loading="lazy" src="images/x2.png" alt="IE Hackathon Project">
       </a>
 
-      <a class="gallery-item" href="https://v1-codestream-vkcw4hai2hmtkthjxbpbn.build-preview.cloudflare.dev/login" target="_blank" rel="noopener noreferrer">
-        <img loading="lazy" src="images/ieexperimentalcard.png" alt="Team Building Project">
+      <a class="gallery-item project-card project-card--theater" href="/hackertheater/" target="_blank" rel="noopener noreferrer" aria-label="Open the Hacker Theater interactive presentation demo">
+        <span class="project-card__icon" aria-hidden="true"><i class="fa-solid fa-clapperboard"></i></span>
+        <div class="project-card__content">
+          <div class="project-card__eyebrow">Interactive demo</div>
+          <h2>Hacker Theater</h2>
+          <p>Explore a presentation control room with clips, discussion prompts, a session timer, and a separate projector view.</p>
+        </div>
+        <span class="project-card__cta">Open the demo <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i></span>
       </a>
 
     </div>
