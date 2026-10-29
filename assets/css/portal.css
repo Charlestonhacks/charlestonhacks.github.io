@@ -1542,11 +1542,12 @@ button:focus {
   appearance: none;
   font-family: inherit;
   cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
   pointer-events: auto;
   touch-action: manipulation;
   z-index: 5;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .portal-home-swipe-hint:hover,
 .portal-home-swipe-hint:focus-visible {
   border-color: rgba(243,214,154,0.9);
