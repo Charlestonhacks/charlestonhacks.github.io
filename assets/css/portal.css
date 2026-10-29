@@ -1026,6 +1026,12 @@ button:focus {
   line-height: 1.6;
   color: rgba(235, 246, 255, 0.82);
 }
+.portal-buildspace-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
 .portal-buildspace-auth-gate button {
   padding: 0.7rem 1rem;
   border: 1px solid rgba(0, 224, 255, 0.65);
@@ -1036,6 +1042,16 @@ button:focus {
   font-weight: 700;
   cursor: pointer;
 }
+.portal-buildspace-auth-gate button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+.portal-buildspace-auth-feedback {
+  min-height: 1.4em;
+  color: #ffc97a !important;
+  font-size: 0.9em;
+}
+.portal-buildspace-auth-feedback[hidden] { display: none !important; }
 .portal-buildspace-auth-gate button:hover,
 .portal-buildspace-auth-gate button:focus-visible {
   background: rgba(0, 224, 255, 0.2);
