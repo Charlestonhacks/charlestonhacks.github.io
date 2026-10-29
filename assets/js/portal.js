@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v18-prioritized-features-20261029";
+  const VERSION = "portal-js-v19-pinnable-deck-20261029";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -206,6 +206,51 @@
     { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", src: "/cardmatchgame.html" },
   ];
 
+
+  const DECK_PREFERENCES_KEY = "ch:portal-deck-preferences:v1";
+
+  function normalizeDeckPreferences(value) {
+    const validIds = new Set(features.map((feature) => feature.id));
+    const hidden = Array.isArray(value?.hidden)
+      ? [...new Set(value.hidden.filter((id) => validIds.has(id)))]
+      : [];
+    const pinned = Array.isArray(value?.pinned)
+      ? [...new Set(value.pinned.filter((id) => validIds.has(id) && !hidden.includes(id)))]
+      : [];
+    return { hidden, pinned };
+  }
+
+  function readDeckPreferences() {
+    try {
+      return normalizeDeckPreferences(JSON.parse(localStorage.getItem(DECK_PREFERENCES_KEY) || "{}"));
+    } catch {
+      return { hidden: [], pinned: [] };
+    }
+  }
+
+  let deckPreferences = readDeckPreferences();
+
+  function orderedDeckFeatures(preferences = deckPreferences) {
+    const available = features.filter((feature) => !preferences.hidden.includes(feature.id));
+    const availableIds = new Set(available.map((feature) => feature.id));
+    const pinned = preferences.pinned.filter((id) => availableIds.has(id));
+    const pinnedIds = new Set(pinned);
+    return [
+      ...pinned.map((id) => available.find((feature) => feature.id === id)).filter(Boolean),
+      ...available.filter((feature) => !pinnedIds.has(feature.id)),
+    ];
+  }
+
+  function saveDeckPreferences(value) {
+    deckPreferences = normalizeDeckPreferences(value);
+    try {
+      localStorage.setItem(DECK_PREFERENCES_KEY, JSON.stringify(deckPreferences));
+    } catch {
+      // Keep the current preference for this page even when storage is unavailable.
+    }
+    return deckPreferences;
+  }
+
   function initFeatureViews() {
     const sourcePanel = document.getElementById("portal-view-panel");
     const viewNodes = new Map();
@@ -385,133 +430,314 @@
     const counter = document.getElementById("portal-feature-count");
     if (!container || !slidesContainer || !counter || typeof window.Swiper !== "function") return;
 
-    featureIndexes = new Map(features.map((feature, index) => [feature.id, index + 1]));
-
-    features.forEach((feature, index) => {
-      const slide = document.createElement("div");
-      slide.className = "swiper-slide portal-feature-slide";
-      slide.setAttribute("aria-label", `Feature ${index + 1} of ${features.length}: ${feature.title}`);
-
-      const card = document.createElement("article");
-      card.className = "portal-feature-card";
-      card.dataset.featureId = feature.id;
-
-      const header = document.createElement("div");
-      header.className = "portal-feature-header";
-      header.setAttribute("aria-label", `Swipe area. ${feature.title}, feature ${index + 1} of ${features.length}`);
-
-      const iconWrap = document.createElement("span");
-      iconWrap.className = "portal-feature-icon";
-      iconWrap.setAttribute("aria-hidden", "true");
-      const icon = document.createElement("i");
-      icon.className = feature.icon;
-      iconWrap.append(icon);
-
-      const heading = document.createElement("div");
-      heading.className = "portal-feature-heading";
-      const title = document.createElement("h2");
-      title.className = "portal-feature-title";
-      title.textContent = feature.title;
-      const subtitle = document.createElement("span");
-      subtitle.className = "portal-feature-subtitle";
-      subtitle.textContent = "Swipe left or right to browse";
-      heading.append(title, subtitle);
-
-      const number = document.createElement("span");
-      number.className = "portal-feature-number";
-      number.textContent = `${String(index + 1).padStart(2, "0")} / ${String(features.length).padStart(2, "0")}`;
-      header.append(iconWrap, heading, number);
-
-      const content = document.createElement("div");
-      content.className = "portal-feature-content";
-      content.setAttribute("aria-label", `${feature.title} content`);
-
-      const nativeView = feature.view ? viewNodes.get(feature.view) : null;
-      if (nativeView) {
-        nativeView.hidden = false;
-        content.append(nativeView);
-      } else {
-        const frame = document.createElement("iframe");
-        frame.title = `CharlestonHacks ${feature.title}`;
-        frame.loading = "lazy";
-        frame.referrerPolicy = "strict-origin-when-cross-origin";
-        frame.dataset.src = feature.src;
-        frame.setAttribute("allow", "fullscreen; clipboard-read; clipboard-write");
-        content.append(frame);
-      }
-
-      card.append(header, content);
-      slide.append(card);
-      slidesContainer.append(slide);
-    });
-
-    document.getElementById("portal-view-panel")?.remove();
-
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    featureSwiper = new window.Swiper(container, {
-      effect: "cards",
-      direction: "horizontal",
-      slidesPerView: 1,
-      speed: reducedMotion ? 0 : 260,
-      threshold: 4,
-      touchAngle: 45,
-      shortSwipes: true,
-      longSwipes: true,
-      longSwipesMs: 180,
-      longSwipesRatio: 0.22,
-      preventInteractionOnTransition: false,
-      preventClicks: true,
-      preventClicksPropagation: true,
-      grabCursor: true,
-      loop: false,
-      keyboard: { enabled: true, onlyInViewport: true },
-      a11y: { enabled: true },
-      cardsEffect: {
-        perSlideOffset: 6,
-        perSlideRotate: 0,
-        rotate: false,
-        slideShadows: false,
-      },
+    const homeManageButton = document.getElementById("portal-manage-deck");
+    const manager = document.getElementById("portal-deck-manager");
+    const managerList = document.getElementById("portal-deck-options");
+    const managerClose = document.getElementById("portal-deck-close");
+    const managerCancel = document.getElementById("portal-deck-cancel");
+    const managerSave = document.getElementById("portal-deck-save");
+    let draftPreferences = null;
+
+    function updateManagerPinButton(button, featureId) {
+      const hidden = draftPreferences?.hidden.includes(featureId) ?? false;
+      const pinned = draftPreferences?.pinned.includes(featureId) ?? false;
+      button.disabled = hidden;
+      button.setAttribute("aria-pressed", String(pinned));
+      button.setAttribute("aria-label", hidden ? "Add " + features.find((feature) => feature.id === featureId)?.title + " before pinning" : (pinned ? "Unpin " + features.find((feature) => feature.id === featureId)?.title : "Pin " + features.find((feature) => feature.id === featureId)?.title + " to the front"));
+      button.textContent = pinned ? "Pinned" : "Pin to front";
+      button.title = hidden ? "Add this card to pin it" : (pinned ? "Unpin this card" : "Pin this card to the front");
+    }
+
+    function renderManagerOptions() {
+      if (!managerList || !draftPreferences) return;
+      managerList.replaceChildren();
+
+      features.forEach((feature) => {
+        const row = document.createElement("div");
+        row.className = "portal-deck-option";
+        row.dataset.featureId = feature.id;
+
+        const includeLabel = document.createElement("label");
+        includeLabel.className = "portal-deck-option-main";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = !draftPreferences.hidden.includes(feature.id);
+        checkbox.setAttribute("aria-label", "Keep " + feature.title + " in the swipe deck");
+
+        const featureIcon = document.createElement("i");
+        featureIcon.className = "portal-deck-option-icon " + feature.icon;
+        featureIcon.setAttribute("aria-hidden", "true");
+
+        const copy = document.createElement("span");
+        copy.className = "portal-deck-option-copy";
+        const title = document.createElement("strong");
+        title.textContent = feature.title;
+        const status = document.createElement("small");
+        status.textContent = checkbox.checked ? "In swipe deck" : "Removed from deck";
+        copy.append(title, status);
+        includeLabel.append(checkbox, featureIcon, copy);
+
+        const pinButton = document.createElement("button");
+        pinButton.type = "button";
+        pinButton.className = "portal-deck-pin-toggle";
+        pinButton.setAttribute("aria-label", "Pin " + feature.title + " to the front");
+        updateManagerPinButton(pinButton, feature.id);
+
+        row.classList.toggle("is-excluded", !checkbox.checked);
+        row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
+
+        checkbox.addEventListener("change", () => {
+          const hidden = new Set(draftPreferences.hidden);
+          if (checkbox.checked) hidden.delete(feature.id);
+          else {
+            hidden.add(feature.id);
+            draftPreferences.pinned = draftPreferences.pinned.filter((id) => id !== feature.id);
+          }
+          draftPreferences.hidden = [...hidden];
+          row.classList.toggle("is-excluded", !checkbox.checked);
+          row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
+          status.textContent = checkbox.checked ? "In swipe deck" : "Removed from deck";
+          updateManagerPinButton(pinButton, feature.id);
+          row.classList.remove("portal-option-changed");
+          void row.offsetWidth;
+          row.classList.add("portal-option-changed");
+        });
+
+        pinButton.addEventListener("click", () => {
+          if (draftPreferences.hidden.includes(feature.id)) return;
+          const isPinned = draftPreferences.pinned.includes(feature.id);
+          draftPreferences.pinned = isPinned
+            ? draftPreferences.pinned.filter((id) => id !== feature.id)
+            : [feature.id, ...draftPreferences.pinned.filter((id) => id !== feature.id)];
+          row.classList.toggle("is-pinned", !isPinned);
+          updateManagerPinButton(pinButton, feature.id);
+          row.classList.remove("portal-option-changed");
+          void row.offsetWidth;
+          row.classList.add("portal-option-changed");
+        });
+
+        row.append(includeLabel, pinButton);
+        managerList.append(row);
+      });
+    }
+
+    function openDeckManager() {
+      if (!manager || !managerList) return;
+      draftPreferences = {
+        hidden: [...deckPreferences.hidden],
+        pinned: [...deckPreferences.pinned],
+      };
+      renderManagerOptions();
+      if (typeof manager.showModal === "function") manager.showModal();
+      else manager.setAttribute("open", "");
+    }
+
+    function closeDeckManager() {
+      if (!manager) return;
+      if (typeof manager.close === "function" && manager.open) manager.close();
+      else manager.removeAttribute("open");
+    }
+
+    homeManageButton?.addEventListener("click", openDeckManager);
+    managerClose?.addEventListener("click", closeDeckManager);
+    managerCancel?.addEventListener("click", closeDeckManager);
+
+    managerSave?.addEventListener("click", () => {
+      if (!draftPreferences) return;
+      const nextPreferences = saveDeckPreferences(draftPreferences);
+      const currentStillIncluded = !nextPreferences.hidden.includes(activeFeatureId);
+      const orderedFeatures = orderedDeckFeatures(nextPreferences);
+      const firstPinned = orderedFeatures[0]?.id;
+      const nextFeatureId = nextPreferences.pinned.length
+        ? firstPinned
+        : (currentStillIncluded ? activeFeatureId : firstPinned);
+      draftPreferences = null;
+      closeDeckManager();
+      renderDeck(nextFeatureId || "home", true);
     });
 
-    const syncDeck = () => {
-      const activeIndex = featureSwiper.activeIndex;
-      const feature = activeIndex === 0 ? null : features[activeIndex - 1];
-      activeFeatureId = feature?.id || "home";
-      document.body.classList.toggle("portal-buildspace-active", activeFeatureId === "innovation");
-      counter.textContent = feature ? `${activeIndex} / ${features.length} · ${feature.title.toUpperCase()}` : "PORTAL";
-      [...slidesContainer.children].forEach((slide, index) => {
-        const active = index === activeIndex;
-        slide.setAttribute("aria-hidden", active ? "false" : "true");
-        slide.inert = !active;
+    manager?.addEventListener("click", (event) => {
+      if (event.target === manager) closeDeckManager();
+    });
+
+    let shouldRestoreBuildspace = consumeBuildspaceReturn();
+
+    function renderDeck(startFeatureId = "home", animate = false) {
+      if (featureSwiper) {
+        featureSwiper.destroy(true, true);
+        featureSwiper = null;
+      }
+      container.classList.remove("portal-deck-restacking");
+      slidesContainer.querySelectorAll(".portal-feature-slide").forEach((slide) => slide.remove());
+
+      const deckFeatures = orderedDeckFeatures();
+      featureIndexes = new Map(deckFeatures.map((feature, index) => [feature.id, index + 1]));
+
+      deckFeatures.forEach((feature, index) => {
+        const slide = document.createElement("div");
+        slide.className = "swiper-slide portal-feature-slide";
+        slide.setAttribute("aria-label", "Feature " + (index + 1) + " of " + deckFeatures.length + ": " + feature.title);
+
+        const card = document.createElement("article");
+        card.className = "portal-feature-card";
+        card.dataset.featureId = feature.id;
+
+        const header = document.createElement("div");
+        header.className = "portal-feature-header";
+        header.setAttribute("aria-label", "Swipe area. " + feature.title + ", feature " + (index + 1) + " of " + deckFeatures.length);
+
+        const iconWrap = document.createElement("span");
+        iconWrap.className = "portal-feature-icon";
+        iconWrap.setAttribute("aria-hidden", "true");
+        const icon = document.createElement("i");
+        icon.className = feature.icon;
+        iconWrap.append(icon);
+
+        const heading = document.createElement("div");
+        heading.className = "portal-feature-heading";
+        const title = document.createElement("h2");
+        title.className = "portal-feature-title";
+        title.textContent = feature.title;
+        const subtitle = document.createElement("span");
+        subtitle.className = "portal-feature-subtitle";
+        subtitle.textContent = "Swipe left or right to browse";
+        heading.append(title, subtitle);
+
+        const isPinned = deckPreferences.pinned.includes(feature.id);
+        const pinButton = document.createElement("button");
+        pinButton.type = "button";
+        pinButton.className = "portal-feature-pin swiper-no-swiping";
+        pinButton.setAttribute("aria-label", (isPinned ? "Unpin " : "Pin ") + feature.title + (isPinned ? " from" : " to") + " the front");
+        pinButton.setAttribute("aria-pressed", String(isPinned));
+        pinButton.title = isPinned ? "Unpin card" : "Pin card to front";
+        pinButton.innerHTML = '<i class="fas fa-thumbtack" aria-hidden="true"></i>';
+        pinButton.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const currentlyPinned = deckPreferences.pinned.includes(feature.id);
+          const nextPreferences = {
+            hidden: [...deckPreferences.hidden],
+            pinned: currentlyPinned
+              ? deckPreferences.pinned.filter((id) => id !== feature.id)
+              : [feature.id, ...deckPreferences.pinned.filter((id) => id !== feature.id)],
+          };
+          saveDeckPreferences(nextPreferences);
+          const newFront = orderedDeckFeatures()[0]?.id || "home";
+          renderDeck(newFront, true);
+        });
+
+        const number = document.createElement("span");
+        number.className = "portal-feature-number";
+        number.textContent = String(index + 1).padStart(2, "0") + " / " + String(deckFeatures.length).padStart(2, "0");
+        header.append(iconWrap, heading, pinButton, number);
+
+        const content = document.createElement("div");
+        content.className = "portal-feature-content";
+        content.setAttribute("aria-label", feature.title + " content");
+
+        const nativeView = feature.view ? viewNodes.get(feature.view) : null;
+        if (nativeView) {
+          nativeView.hidden = false;
+          content.append(nativeView);
+        } else {
+          const frame = document.createElement("iframe");
+          frame.title = "CharlestonHacks " + feature.title;
+          frame.loading = "lazy";
+          frame.referrerPolicy = "strict-origin-when-cross-origin";
+          frame.dataset.src = feature.src;
+          frame.setAttribute("allow", "fullscreen; clipboard-read; clipboard-write");
+          content.append(frame);
+        }
+
+        card.append(header, content);
+        slide.append(card);
+        slidesContainer.append(slide);
       });
 
-      if (!feature) return;
+      document.getElementById("portal-view-panel")?.remove();
 
-      if (feature.id === "events") loadEventsIntoPanel();
-      if (feature.id === "innovation") updateBuildspaceAccess();
-      const activeCard = slidesContainer.children[activeIndex]?.querySelector(".portal-feature-card");
-      const iframe = activeCard?.querySelector("iframe[data-src]");
-      if (iframe && !iframe.hasAttribute("src")) {
-        if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
-          iframe.addEventListener("load", () => enableIframeSwipeBridge(iframe), { once: true });
-          iframe.src = iframe.dataset.src;
+      featureSwiper = new window.Swiper(container, {
+        effect: "cards",
+        direction: "horizontal",
+        slidesPerView: 1,
+        speed: reducedMotion ? 0 : 280,
+        threshold: 4,
+        touchAngle: 45,
+        shortSwipes: true,
+        longSwipes: true,
+        longSwipesMs: 180,
+        longSwipesRatio: 0.22,
+        preventInteractionOnTransition: false,
+        preventClicks: true,
+        preventClicksPropagation: true,
+        grabCursor: true,
+        loop: false,
+        keyboard: { enabled: true, onlyInViewport: true },
+        a11y: { enabled: true },
+        cardsEffect: {
+          perSlideOffset: 6,
+          perSlideRotate: 0,
+          rotate: false,
+          slideShadows: false,
+        },
+      });
+
+      const syncDeck = () => {
+        const activeIndex = featureSwiper.activeIndex;
+        const feature = activeIndex === 0 ? null : deckFeatures[activeIndex - 1];
+        activeFeatureId = feature?.id || "home";
+        document.body.classList.toggle("portal-buildspace-active", activeFeatureId === "innovation");
+        counter.textContent = feature ? activeIndex + " / " + deckFeatures.length + " · " + feature.title.toUpperCase() : "PORTAL";
+        [...slidesContainer.children].forEach((slide, index) => {
+          const active = index === activeIndex;
+          slide.setAttribute("aria-hidden", active ? "false" : "true");
+          slide.inert = !active;
+        });
+
+        if (!feature) return;
+
+        if (feature.id === "events") loadEventsIntoPanel();
+        if (feature.id === "innovation") updateBuildspaceAccess();
+        const activeCard = slidesContainer.children[activeIndex]?.querySelector(".portal-feature-card");
+        const iframe = activeCard?.querySelector("iframe[data-src]");
+        if (iframe && !iframe.hasAttribute("src")) {
+          if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
+            iframe.addEventListener("load", () => enableIframeSwipeBridge(iframe), { once: true });
+            iframe.src = iframe.dataset.src;
+          }
+        } else if (iframe) {
+          enableIframeSwipeBridge(iframe);
         }
-      } else if (iframe) {
-        enableIframeSwipeBridge(iframe);
+      };
+
+      window.__CH_SHOW_PORTAL_FEATURE__ = (featureId) => {
+        const index = featureIndexes.get(featureId);
+        if (Number.isInteger(index) && featureSwiper) featureSwiper.slideTo(index);
+      };
+
+      if (shouldRestoreBuildspace && featureIndexes.has("innovation")) {
+        startFeatureId = "innovation";
       }
-    };
+      shouldRestoreBuildspace = false;
+      const targetIndex = featureIndexes.get(startFeatureId);
+      featureSwiper.slideTo(Number.isInteger(targetIndex) ? targetIndex : 0, 0);
+      featureSwiper.on("slideChange", syncDeck);
+      syncDeck();
 
-    window.__CH_SHOW_PORTAL_FEATURE__ = (featureId) => {
-      const index = featureIndexes.get(featureId);
-      if (Number.isInteger(index)) featureSwiper.slideTo(index);
-    };
-
-    if (consumeBuildspaceReturn()) {
-      featureSwiper.slideTo(featureIndexes.get("innovation"), 0);
+      if (animate && !reducedMotion) {
+        container.classList.add("portal-deck-restacking");
+        const arrivingCard = slidesContainer.children[featureSwiper.activeIndex]?.querySelector(".portal-feature-card");
+        arrivingCard?.classList.add("portal-card-arriving");
+        window.setTimeout(() => {
+          container.classList.remove("portal-deck-restacking");
+          arrivingCard?.classList.remove("portal-card-arriving");
+        }, 760);
+      }
     }
-    featureSwiper.on("slideChange", syncDeck);
-    syncDeck();
+
+    renderDeck(shouldRestoreBuildspace ? "innovation" : "home");
   }
 
   // ------------------------------------------------

@@ -1,7 +1,7 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v7-mobile-polish-20261029
+   Version: portal-css-v8-personal-deck-20261029
    Notes:
    - Adds proper support for an <img> inside the CENTER clickable area
    - Keeps existing center pulse/glow behavior
@@ -1534,4 +1534,317 @@ button:focus {
   .icons-container {
     justify-content: center;
   }
+}
+
+
+/* Mobile deck management: controls stay inside the swipe-card model. */
+.portal-home-swipe-hint {
+  appearance: none;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.portal-home-swipe-hint:hover,
+.portal-home-swipe-hint:focus-visible {
+  border-color: rgba(243,214,154,0.9);
+  color: #fff0c8;
+  box-shadow: 0 0 22px rgba(0,224,255,0.2), inset 0 0 18px rgba(201,163,94,0.12);
+  outline: 2px solid rgba(0,224,255,0.72);
+  outline-offset: 3px;
+}
+
+.portal-feature-header {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) 44px auto;
+}
+.portal-feature-pin {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  padding: 0;
+  border: 1px solid rgba(0,224,255,0.35);
+  border-radius: 50%;
+  color: rgba(228,246,255,0.72);
+  background: rgba(0,224,255,0.06);
+  font-size: 0.95rem;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1);
+}
+.portal-feature-pin:hover,
+.portal-feature-pin:focus-visible {
+  border-color: #f3d69a;
+  color: #f3d69a;
+  background: rgba(201,163,94,0.12);
+  outline: 2px solid rgba(0,224,255,0.72);
+  outline-offset: 2px;
+}
+.portal-feature-pin[aria-pressed="true"] {
+  border-color: #f3d69a;
+  color: #081018;
+  background: linear-gradient(145deg, #ffe6a6, #c9a35e);
+  box-shadow: 0 0 18px rgba(201,163,94,0.48);
+}
+.portal-feature-pin.is-pin-pulsing { animation: portalPinPulse 540ms cubic-bezier(.2,.8,.2,1); }
+@keyframes portalPinPulse {
+  0% { transform: scale(1); }
+  42% { transform: scale(1.22) rotate(-12deg); box-shadow: 0 0 30px rgba(201,163,94,.75); }
+  100% { transform: scale(1); }
+}
+
+.portal-deck-manager {
+  position: fixed;
+  inset: auto 10px max(10px, env(safe-area-inset-bottom));
+  width: min(580px, calc(100vw - 20px));
+  max-width: none;
+  max-height: min(82vh, 760px);
+  max-height: min(82dvh, 760px);
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(0,224,255,0.38);
+  border-radius: 22px;
+  color: #effaff;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0,224,255,0.14), transparent 52%), rgba(4,11,19,0.985);
+  box-shadow: 0 28px 90px rgba(0,0,0,0.68), 0 0 42px rgba(0,224,255,0.15);
+}
+.portal-deck-manager[open] {
+  display: block;
+  animation: portalDeckSheetIn 440ms cubic-bezier(.18,.82,.22,1) both;
+}
+.portal-deck-manager::backdrop {
+  background: rgba(0,3,8,0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+@keyframes portalDeckSheetIn {
+  0% { opacity: 0; transform: translateY(38px) scale(.965); filter: blur(5px); }
+  62% { opacity: 1; transform: translateY(-3px) scale(1.008); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: none; }
+}
+.portal-deck-manager-panel {
+  display: flex;
+  flex-direction: column;
+  max-height: min(82vh, 760px);
+  max-height: min(82dvh, 760px);
+  padding: 18px 18px max(14px, env(safe-area-inset-bottom));
+}
+.portal-deck-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.portal-deck-manager-kicker {
+  color: #00e0ff;
+  font: 600 0.58rem/1.2 "Orbitron", sans-serif;
+  letter-spacing: .16em;
+}
+.portal-deck-manager-header h2 {
+  margin: 5px 0 0;
+  color: #f3d69a;
+  font: 600 clamp(1.05rem, 4.5vw, 1.35rem)/1.2 "Orbitron", sans-serif;
+}
+.portal-deck-close {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 50%;
+  color: #effaff;
+  background: rgba(255,255,255,.06);
+  font: 300 1.75rem/1 Arial, sans-serif;
+  cursor: pointer;
+}
+.portal-deck-manager-help {
+  margin: 10px 0 14px;
+  color: rgba(235,246,255,.68);
+  font: 0.78rem/1.45 Arial, sans-serif;
+}
+.portal-deck-options {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 3px 8px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.portal-deck-option {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 62px;
+  padding: 7px 8px 7px 10px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 13px;
+  background: rgba(255,255,255,.035);
+  transition: border-color 220ms ease, background 220ms ease, transform 220ms ease, opacity 220ms ease;
+}
+.portal-deck-option.is-pinned {
+  border-color: rgba(201,163,94,.54);
+  background: linear-gradient(100deg, rgba(201,163,94,.12), rgba(0,224,255,.035));
+}
+.portal-deck-option.is-excluded { opacity: .62; }
+.portal-deck-option.portal-option-changed { animation: portalOptionPop 360ms cubic-bezier(.2,.8,.2,1); }
+@keyframes portalOptionPop {
+  0% { transform: scale(.985); }
+  58% { transform: scale(1.018); }
+  100% { transform: scale(1); }
+}
+.portal-deck-option-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 48px;
+  cursor: pointer;
+}
+.portal-deck-option-main input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  accent-color: #00e0ff;
+}
+.portal-deck-option-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  flex: 0 0 34px;
+  color: #00e0ff;
+  font-size: 1.05rem;
+  text-align: center;
+}
+.portal-deck-option-copy {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+  font-family: Arial, sans-serif;
+}
+.portal-deck-option-copy strong {
+  overflow: hidden;
+  color: #f5dfb1;
+  font-size: .84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.portal-deck-option-copy small {
+  color: rgba(235,246,255,.54);
+  font-size: .67rem;
+}
+.portal-deck-pin-toggle {
+  min-width: 86px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid rgba(0,224,255,.36);
+  border-radius: 999px;
+  color: #dffaff;
+  background: rgba(0,224,255,.07);
+  font: 600 .62rem/1 "Orbitron", sans-serif;
+  cursor: pointer;
+}
+.portal-deck-pin-toggle[aria-pressed="true"] {
+  border-color: rgba(243,214,154,.82);
+  color: #ffe9b5;
+  background: rgba(201,163,94,.15);
+}
+.portal-deck-pin-toggle:disabled { opacity: .45; cursor: not-allowed; }
+.portal-deck-close:focus-visible,
+.portal-deck-pin-toggle:focus-visible,
+.portal-deck-cancel:focus-visible,
+.portal-deck-save:focus-visible {
+  outline: 2px solid #00e0ff;
+  outline-offset: 3px;
+}
+.portal-deck-manager-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,224,255,.16);
+}
+.portal-deck-cancel,
+.portal-deck-save {
+  min-width: 112px;
+  min-height: 48px;
+  padding: 0 16px;
+  border-radius: 999px;
+  font: 600 .68rem/1 "Orbitron", sans-serif;
+  cursor: pointer;
+}
+.portal-deck-cancel {
+  border: 1px solid rgba(255,255,255,.22);
+  color: rgba(255,255,255,.82);
+  background: transparent;
+}
+.portal-deck-save {
+  border: 1px solid rgba(0,224,255,.82);
+  color: #021014;
+  background: linear-gradient(110deg, #00e0ff, #a5f6ff);
+  box-shadow: 0 5px 20px rgba(0,224,255,.18);
+}
+.portal-deck-save:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+.portal-deck-manager:not([open]) { display: none; }
+.portal-deck-manager[open]::backdrop { animation: portalDeckBackdropIn 360ms ease both; }
+@keyframes portalDeckBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.portal-deck-restacking .swiper-slide-active .portal-feature-card {
+  animation: portalCardArrive 680ms cubic-bezier(.18,.82,.22,1) both;
+}
+.portal-feature-card.portal-card-arriving::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(112deg, transparent 28%, rgba(255,255,255,.18) 45%, rgba(0,224,255,.24) 50%, transparent 68%);
+  transform: translateX(-120%);
+  animation: portalCardSheen 680ms ease-out both;
+}
+@keyframes portalCardArrive {
+  0% { opacity: .58; filter: brightness(.68) saturate(.7); transform: perspective(900px) translateX(34%) rotateY(-17deg) scale(.9); }
+  54% { opacity: 1; filter: brightness(1.18) saturate(1.16); transform: perspective(900px) translateX(-2%) rotateY(2deg) scale(1.018); }
+  78% { transform: perspective(900px) translateX(1%) rotateY(-1deg) scale(.995); }
+  100% { opacity: 1; filter: none; transform: none; }
+}
+@keyframes portalCardSheen {
+  from { transform: translateX(-120%); opacity: .9; }
+  to { transform: translateX(120%); opacity: 0; }
+}
+
+@media (max-width: 360px) {
+  .portal-feature-header {
+    grid-template-columns: auto minmax(0,1fr) 40px auto;
+    gap: 0.35rem;
+  }
+  .portal-feature-pin { width: 40px; height: 40px; flex-basis: 40px; }
+  .portal-feature-number { font-size: .46rem !important; }
+  .portal-deck-manager-panel { padding-right: 12px; padding-left: 12px; }
+  .portal-deck-option { grid-template-columns: minmax(0,1fr) 78px; gap: 5px; }
+  .portal-deck-pin-toggle { min-width: 76px; padding: 0 6px; font-size: .55rem; }
+}
+@media (orientation: landscape) and (max-height: 560px) {
+  .portal-deck-manager-panel { max-height: 84dvh; }
+  .portal-deck-options { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-deck-manager[open],
+  .portal-deck-manager[open]::backdrop,
+  .portal-deck-option.portal-option-changed,
+  .portal-feature-pin.is-pin-pulsing,
+  .portal-deck-restacking .swiper-slide-active .portal-feature-card,
+  .portal-feature-card.portal-card-arriving::after {
+    animation: none !important;
+  }
+  .portal-feature-pin { transition: none !important; }
 }
