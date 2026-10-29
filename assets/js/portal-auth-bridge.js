@@ -7,6 +7,65 @@ const frame = document.getElementById("portal-buildspace-frame");
 const accountControls = document.getElementById("portal-account-controls");
 const accountName = document.getElementById("portal-account-name");
 const signOutButton = document.getElementById("portal-sign-out");
+const buildspaceGate = document.getElementById("portal-buildspace-auth-gate");
+const authFeedback = document.getElementById("portal-buildspace-auth-feedback");
+const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
+const BBS_RETURN_KEY = "ch:bbs-return-to-hub";
+const AUTH_FEEDBACK_KEY = "ch:portal-auth-feedback";
+
+try {
+  const savedFeedback = localStorage.getItem(AUTH_FEEDBACK_KEY);
+  if (savedFeedback && authFeedback) {
+    authFeedback.textContent = savedFeedback;
+    authFeedback.hidden = false;
+    localStorage.removeItem(AUTH_FEEDBACK_KEY);
+  }
+} catch {}
+
+buildspaceGate?.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-portal-provider]");
+  if (!button) return;
+
+  const provider = button.dataset.portalProvider;
+  if (provider !== "google" && provider !== "github") return;
+
+  buildspaceGate.querySelectorAll("[data-portal-provider]").forEach((providerButton) => {
+    providerButton.disabled = true;
+  });
+  if (authFeedback) {
+    authFeedback.textContent = "Opening secure sign-in…";
+    authFeedback.hidden = false;
+  }
+
+  const requestedAt = String(Date.now());
+  try {
+    localStorage.setItem(BUILDSPACE_RETURN_KEY, requestedAt);
+    localStorage.setItem(BBS_RETURN_KEY, requestedAt);
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: new URL("/bbs.html", window.location.origin).toString(),
+        skipBrowserRedirect: true
+      }
+    });
+    if (error) throw error;
+    if (!data?.url) throw new Error("No sign-in URL was returned");
+    window.location.assign(data.url);
+  } catch (error) {
+    console.error("[PORTAL AUTH] Sign-in could not start:", error);
+    try {
+      localStorage.removeItem(BUILDSPACE_RETURN_KEY);
+      localStorage.removeItem(BBS_RETURN_KEY);
+    } catch {}
+    buildspaceGate.querySelectorAll("[data-portal-provider]").forEach((providerButton) => {
+      providerButton.disabled = false;
+    });
+    if (authFeedback) {
+      authFeedback.textContent = "Sign-in could not start. Please try again.";
+      authFeedback.hidden = false;
+    }
+  }
+});
 
 let activeSession = null;
 let activeMember = false;
