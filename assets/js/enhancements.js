@@ -413,48 +413,6 @@ const initEnhancements = setInterval(() => {
     },
     
     // ===========================================
-    // PHASE 3: PDF EXPORT
-    // ===========================================
-    
-    setupPDFExport() {
-      // Add export button when viewing CYNQ
-      const cynqSection = document.getElementById('cynq');
-      if (!cynqSection) return;
-      
-      if (!document.getElementById('export-pdf-btn')) {
-        const exportBtn = document.createElement('button');
-        exportBtn.id = 'export-pdf-btn';
-        exportBtn.className = 'action-btn';
-        exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export as PDF';
-        exportBtn.style.cssText = 'position: fixed; bottom: 30px; right: 30px; z-index: 9999;';
-        exportBtn.onclick = () => this.exportWorkflowPDF();
-        
-        document.body.appendChild(exportBtn);
-      }
-    },
-    
-    async exportWorkflowPDF() {
-      if (!window.jspdf) {
-        this.notify('PDF library not loaded', 'error');
-        return;
-      }
-      
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      // Get project data from current context
-      doc.setFontSize(20);
-      doc.text('CYNQ Workflow Export', 10, 10);
-      
-      doc.setFontSize(12);
-      doc.text('CharlestonHacks Innovation Engine', 10, 20);
-      doc.text(new Date().toLocaleDateString(), 10, 30);
-      
-      doc.save('workflow-export.pdf');
-      this.notify('PDF exported!', 'success');
-    },
-    
-    // ===========================================
     // UTILITIES
     // ===========================================
     

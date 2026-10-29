@@ -223,13 +223,12 @@ const EcosystemConnector = (function() {
     
     renderProjectCard(project) {
       return `
-        <div class="project-card" onclick="switchToTab('cynq')">
+        <div class="project-card">
           <h4>${project.title}</h4>
           <div class="project-meta">
             <span>Team: ${project.current_team_size}/${project.max_team_size || '∞'}</span>
             <span>Status: ${project.status}</span>
           </div>
-          <button class="btn-small">View Project</button>
         </div>
       `;
     },
@@ -251,13 +250,12 @@ const EcosystemConnector = (function() {
           <h3>💡 Recommended For You</h3>
           <div class="recommendations-list">
             ${recommendations.map(idea => `
-              <div class="recommendation-card" onclick="switchToTab('cynq')">
+              <div class="recommendation-card">
                 <h4>${idea.title}</h4>
                 <div class="match-score">
                   <span class="score">${idea.matchScore}% Match</span>
                   <span class="skills">${idea.matchingSkills.join(', ')}</span>
                 </div>
-                <button class="btn-small">View Details</button>
               </div>
             `).join('')}
           </div>
