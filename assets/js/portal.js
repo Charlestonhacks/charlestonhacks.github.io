@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v19-pinnable-deck-20261029";
+  const VERSION = "portal-js-v20-clear-card-actions-20261029";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -458,13 +458,8 @@
         row.className = "portal-deck-option";
         row.dataset.featureId = feature.id;
 
-        const includeLabel = document.createElement("label");
-        includeLabel.className = "portal-deck-option-main";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = !draftPreferences.hidden.includes(feature.id);
-        checkbox.setAttribute("aria-label", "Keep " + feature.title + " in the swipe deck");
+        const main = document.createElement("div");
+        main.className = "portal-deck-option-main";
 
         const featureIcon = document.createElement("i");
         featureIcon.className = "portal-deck-option-icon " + feature.icon;
@@ -475,31 +470,41 @@
         const title = document.createElement("strong");
         title.textContent = feature.title;
         const status = document.createElement("small");
-        status.textContent = checkbox.checked ? "In swipe deck" : "Removed from deck";
         copy.append(title, status);
-        includeLabel.append(checkbox, featureIcon, copy);
+        main.append(featureIcon, copy);
+
+        const includeButton = document.createElement("button");
+        includeButton.type = "button";
+        includeButton.className = "portal-deck-toggle";
 
         const pinButton = document.createElement("button");
         pinButton.type = "button";
         pinButton.className = "portal-deck-pin-toggle";
-        pinButton.setAttribute("aria-label", "Pin " + feature.title + " to the front");
-        updateManagerPinButton(pinButton, feature.id);
 
-        row.classList.toggle("is-excluded", !checkbox.checked);
-        row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
+        function syncOptionState() {
+          const included = !draftPreferences.hidden.includes(feature.id);
+          includeButton.textContent = included ? "Remove" : "Add";
+          includeButton.dataset.included = String(included);
+          includeButton.setAttribute("aria-label", (included ? "Remove " : "Add ") + feature.title + (included ? " from" : " to") + " the swipe deck");
+          status.textContent = included
+            ? (draftPreferences.pinned.includes(feature.id) ? "Pinned to the front" : "In swipe deck")
+            : "Removed from deck";
+          row.classList.toggle("is-excluded", !included);
+          row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
+          updateManagerPinButton(pinButton, feature.id);
+        }
 
-        checkbox.addEventListener("change", () => {
+        syncOptionState();
+
+        includeButton.addEventListener("click", () => {
           const hidden = new Set(draftPreferences.hidden);
-          if (checkbox.checked) hidden.delete(feature.id);
+          if (hidden.has(feature.id)) hidden.delete(feature.id);
           else {
             hidden.add(feature.id);
             draftPreferences.pinned = draftPreferences.pinned.filter((id) => id !== feature.id);
           }
           draftPreferences.hidden = [...hidden];
-          row.classList.toggle("is-excluded", !checkbox.checked);
-          row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
-          status.textContent = checkbox.checked ? "In swipe deck" : "Removed from deck";
-          updateManagerPinButton(pinButton, feature.id);
+          syncOptionState();
           row.classList.remove("portal-option-changed");
           void row.offsetWidth;
           row.classList.add("portal-option-changed");
@@ -511,18 +516,16 @@
           draftPreferences.pinned = isPinned
             ? draftPreferences.pinned.filter((id) => id !== feature.id)
             : [feature.id, ...draftPreferences.pinned.filter((id) => id !== feature.id)];
-          row.classList.toggle("is-pinned", !isPinned);
-          updateManagerPinButton(pinButton, feature.id);
+          syncOptionState();
           row.classList.remove("portal-option-changed");
           void row.offsetWidth;
           row.classList.add("portal-option-changed");
         });
 
-        row.append(includeLabel, pinButton);
+        row.append(main, includeButton, pinButton);
         managerList.append(row);
       });
     }
-
     function openDeckManager() {
       if (!manager || !managerList) return;
       draftPreferences = {
