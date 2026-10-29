@@ -302,7 +302,7 @@ const BBS_HTML = `
       <button id="bbs-send" type="submit" style="padding:8px 16px; background:#0f0; color:black; border:none; font-family:monospace; font-weight:bold; cursor:pointer; white-space:nowrap;">Send</button>
     </form>
     <div id="bbs-feedback" role="status" aria-live="polite" style="min-height:1.3em; margin-top:8px; color:#ffd166; font:0.85rem monospace;"></div>
-    <div style="margin-top:12px; color:#0f0; font-family:monospace; font-size:0.9rem;">People online: <span id="bbs-online" aria-live="polite">Checking…</span></div>
+    <div style="margin-top:12px; color:#0f0; font-family:monospace; font-size:0.9rem;">Chat activity: <span id="bbs-online" aria-live="polite">Checking…</span></div>
   </div>`;
 
 function setBbsInputMode(input, sendButton, isZork) {
@@ -390,7 +390,7 @@ async function loadOnlineUsers(div) {
     return;
   }
   const names = data?.map((user) => user.username).filter(Boolean) || [];
-  div.textContent = names.length ? `${names.length} online: ${names.join(", ")}` : "0 people online right now";
+  div.textContent = names.length ? `${names.length} active (${names.join(", ")})` : "0 active";
 }
 
 async function heartbeat(username) {
