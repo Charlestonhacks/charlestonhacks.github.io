@@ -8,6 +8,22 @@ let renderedMessageIds = new Set();
 let currentAuthUser = null;
 let currentProfile = null;
 
+function returnToBuildspaceAfterAuthFailure() {
+  try {
+    const requestedAt = Number(localStorage.getItem("ch:portal-return-to-buildspace"));
+    const pending = Number.isFinite(requestedAt) &&
+      requestedAt <= Date.now() &&
+      Date.now() - requestedAt < 10 * 60 * 1000;
+    if (!pending) return false;
+    localStorage.setItem("ch:portal-auth-feedback", "Sign-in was cancelled or could not be completed. Please try again.");
+    localStorage.removeItem("ch:bbs-return-to-hub");
+    window.location.replace("/hub.html");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function initBBS() {
   if (initialized) return;
   const modal = document.getElementById("bbs-modal");
@@ -108,6 +124,7 @@ export async function initBBS() {
       console.error("[BBS] OAuth callback error:", error);
       feedbackDiv.textContent = "Sign-in could not be completed. Please try again.";
       try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
+      if (returnToBuildspaceAfterAuthFailure()) return;
     } else {
       let returnToHub = false;
       try {
@@ -123,7 +140,8 @@ export async function initBBS() {
     url.search = "";
     window.history.replaceState({}, document.title, url.toString());
   }
-  if (url.searchParams.has("error")) {
+  if (url.searchParams.has("error") || (oauthError && !url.searchParams.has("code"))) {
+    if (returnToBuildspaceAfterAuthFailure()) return;
     try { localStorage.removeItem("ch:bbs-return-to-hub"); } catch (_) {}
     url.search = "";
     window.history.replaceState({}, document.title, url.toString());
