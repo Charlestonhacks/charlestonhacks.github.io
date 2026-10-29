@@ -14,8 +14,19 @@
     return;
   }
 
-  const VERSION = "portal-js-v16-mobile-portal-polish-20261029";
+  const VERSION = "portal-js-v17-inline-buildspace-auth-20261029";
   console.log(`[PORTAL] loaded ${VERSION}`);
+
+  const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
+  function consumeBuildspaceReturn() {
+    try {
+      const requestedAt = Number(localStorage.getItem(BUILDSPACE_RETURN_KEY));
+      localStorage.removeItem(BUILDSPACE_RETURN_KEY);
+      return Number.isFinite(requestedAt) && requestedAt <= Date.now() && Date.now() - requestedAt < 10 * 60 * 1000;
+    } catch {
+      return false;
+    }
+  }
 
   // ------------------------------------------------
   // DOM helpers
@@ -200,11 +211,6 @@
     const viewNodes = new Map();
     sourcePanel?.querySelectorAll("[data-view]").forEach((node) => {
       viewNodes.set(node.dataset.view, node);
-    });
-
-    const buildspaceGate = document.getElementById("portal-buildspace-auth-gate");
-    buildspaceGate?.querySelector("button")?.addEventListener("click", (event) => {
-      window.__CH_SHOW_PORTAL_FEATURE__?.("chat", event.currentTarget);
     });
 
     updateBuildspaceAccess = () => {
@@ -501,6 +507,9 @@
       if (Number.isInteger(index)) featureSwiper.slideTo(index);
     };
 
+    if (consumeBuildspaceReturn()) {
+      featureSwiper.slideTo(featureIndexes.get("innovation"), 0);
+    }
     featureSwiper.on("slideChange", syncDeck);
     syncDeck();
   }
