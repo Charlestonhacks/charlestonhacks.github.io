@@ -82,7 +82,8 @@ export async function signInWithGitHub() {
   return await supabase.auth.signInWithOAuth({
     provider: "github",
     options: {
-      redirectTo: window.location.origin + "/dashboard.html",
+      // Return to the page that started sign-in (the old dashboard is retired)
+      redirectTo: window.location.origin + window.location.pathname,
     },
   });
 }
@@ -91,7 +92,8 @@ export async function signInWithGoogle() {
   return await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: window.location.origin + "/dashboard.html",
+      // Return to the page that started sign-in (the old dashboard is retired)
+      redirectTo: window.location.origin + window.location.pathname,
     },
   });
 }
