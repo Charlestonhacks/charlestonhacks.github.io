@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=mobile-portal-polish-20261029"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-inline-buildspace-auth-20261029"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -357,8 +357,12 @@
             <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
               <div class="portal-buildspace-auth-gate" id="portal-buildspace-auth-gate">
                 <h3>Sign in to unlock Buildspace</h3>
-                <p>Sign in through Community Chat, then swipe back to Buildspace.</p>
-                <button type="button" id="portal-buildspace-sign-in">Go to Community Chat</button>
+                <p>Use the Google or GitHub account linked to your active CharlestonHacks membership. You’ll return to this card after sign-in.</p>
+                <div class="portal-buildspace-auth-actions" aria-label="Choose a sign-in provider">
+                  <button type="button" data-portal-provider="google">Continue with Google</button>
+                  <button type="button" data-portal-provider="github">Continue with GitHub</button>
+                </div>
+                <p id="portal-buildspace-auth-feedback" class="portal-buildspace-auth-feedback" role="status" aria-live="polite" hidden></p>
               </div>
               <p class="portal-view-intro" id="portal-buildspace-auth-status" hidden></p>
               <iframe id="portal-buildspace-frame" title="CharlestonHacks Buildspace" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" hidden></iframe>
@@ -453,10 +457,10 @@
 
   <!-- Member authorization and Buildspace sign-in handoff -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.js"></script>
-  <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
+  <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-inline-buildspace-auth-20261029"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=mobile-portal-polish-20261029"></script>
+  <script type="module" src="/assets/js/portal.js?v=portal-inline-buildspace-auth-20261029"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
