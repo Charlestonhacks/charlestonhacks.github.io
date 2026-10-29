@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-no-bitcoin-20261028"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=mobile-portal-polish-20261029"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -172,10 +172,12 @@
     /* A steady marquee keeps the next event visible without blocking its link. */
     #event-countdown-banner {
       display: none;
+      grid-template-columns: max-content minmax(0, 1fr) max-content;
       align-items: center;
       gap: 10px;
       flex: 1 1 auto;
       min-width: 0;
+      box-sizing: border-box;
       margin: 0 8px 0 24px;
       padding: 7px 12px;
       border: 1px solid rgba(0,224,255,0.15);
@@ -189,16 +191,19 @@
     #event-countdown-banner .cd-label {
       flex: 0 0 auto;
       opacity: 0.6;
+      white-space: nowrap;
     }
     #event-countdown-banner .cd-time {
       flex: 0 0 auto;
       color: #00e0ff;
       font-weight: bold;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
     }
     #event-countdown-banner .next-event-link {
       display: block;
-      flex: 1 1 auto;
       min-width: 0;
+      width: 100%;
       overflow: hidden;
       color: #00e0ff;
       text-decoration: none;
@@ -392,22 +397,14 @@
     </div>
 
     <!-- Icon Bar -->
-    <section class="icons-container" role="navigation" aria-label="Quick Access">
-      <a href="#buildspace" title="Buildspace" aria-label="Buildspace" data-portal-shortcut="innovation">
-        <i class="fas fa-people-arrows"></i>
-      </a>
-      <a href="Poster.html" title="Event Poster" aria-label="Event Poster" data-portal-shortcut="poster">
-        <i class="fas fa-image" aria-hidden="true"></i>
-      </a>
-            <a href="swag.html" title="Swag Vote" aria-label="Swag Vote" data-portal-shortcut="swag">
-        <i class="fas fa-shirt" aria-hidden="true"></i>
-      </a>
+    <section class="icons-container" role="navigation" aria-label="More CharlestonHacks links">
+      
+      
+            
       <a href="donations.html" title="Sponsorship and Donations" aria-label="Sponsorship and Donations">
         <i class="fas fa-hand-holding-heart" aria-hidden="true"></i>
       </a>
-      <a href="cardmatchgame.html" title="Avatar Matching Game" aria-label="Avatar Matching Game" data-portal-shortcut="game">
-        <i class="fas fa-gamepad" aria-hidden="true"></i>
-      </a>
+      
       <a href="subscribe.html" title="Newsletter Signup" aria-label="Newsletter Signup">
         <i class="fas fa-envelope-open-text"></i>
       </a>
@@ -423,9 +420,7 @@
       <a href="https://www.facebook.com/charlestonhacks" target="_blank" title="Facebook" aria-label="Facebook">
         <i class="fab fa-facebook"></i>
       </a>
-      <a href="#events" title="Charleston Events Calendar" aria-label="Events Calendar" data-portal-shortcut="events">
-        <i class="fas fa-calendar-alt"></i>
-      </a>
+      
     </section>
   </main>
 
@@ -466,7 +461,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-logout-20261028"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=portal-no-bitcoin-20261028"></script>
+  <script type="module" src="/assets/js/portal.js?v=mobile-portal-polish-20261029"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">
@@ -516,7 +511,7 @@
 
       banner.replaceChildren(label, eventAnchor, countdown);
       banner.style.setProperty("--ticker-duration", `${Math.max(22, Math.round(14 + eventTitle.length * 0.4))}s`);
-      banner.style.display = "flex";
+      banner.style.display = "grid";
       document.body.classList.add("has-countdown-banner");
 
       let countdownTimer = null;
