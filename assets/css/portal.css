@@ -1,7 +1,7 @@
 /* ==========================================================
    CharlestonHacks Portal Stylesheet
    File: /assets/css/portal.css
-   Version: portal-css-v6-no-bitcoin-20261028
+   Version: portal-css-v7-mobile-polish-20261029
    Notes:
    - Adds proper support for an <img> inside the CENTER clickable area
    - Keeps existing center pulse/glow behavior
@@ -1484,5 +1484,38 @@ button:focus {
   .card-stage,
   .portal-feature-swiper {
     overflow: hidden !important;
+  }
+}
+
+
+/* Screenshot-led portal refinements */
+#neural-bg {
+  opacity: 0.16;
+}
+
+.portal-buildspace-active .icons-container,
+.portal-buildspace-active #quick-access-tooltip {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.portal-buildspace-active .icons-container {
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.portal-view-body,
+.portal-feature-content,
+.portal-feature-content > iframe,
+.portal-feature-content .portal-view-content {
+  overscroll-behavior: contain;
+}
+.portal-feature-content > iframe,
+.portal-feature-content .portal-view-content {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 600px) {
+  .icons-container {
+    justify-content: center;
   }
 }
