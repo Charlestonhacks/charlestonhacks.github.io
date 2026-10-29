@@ -223,7 +223,7 @@ const EcosystemConnector = (function() {
     
     renderProjectCard(project) {
       return `
-        <div class="project-card" >
+        <div class="project-card">
           <h4>${project.title}</h4>
           <div class="project-meta">
             <span>Team: ${project.current_team_size}/${project.max_team_size || '∞'}</span>
@@ -250,7 +250,7 @@ const EcosystemConnector = (function() {
           <h3>💡 Recommended For You</h3>
           <div class="recommendations-list">
             ${recommendations.map(idea => `
-              <div class="recommendation-card" >
+              <div class="recommendation-card">
                 <h4>${idea.title}</h4>
                 <div class="match-score">
                   <span class="score">${idea.matchScore}% Match</span>
