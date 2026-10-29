@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v20-clear-card-actions-20261029";
+  const VERSION = "portal-js-v21-nearify-in-card-20261029";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -199,6 +199,7 @@
     { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", view: "events" },
     { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
     { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", view: "chat" },
+    { id: "nearify", title: "Nearify", icon: "fas fa-user-group", description: "Meet people at events and follow up with context.", src: "https://nearify.org/" },
     { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Experimental projects and prototypes.", view: "sandbox" },
     { id: "news", title: "News", icon: "fas fa-newspaper", description: "CharlestonHacks updates and community stories.", view: "news" },
     { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster.", src: "/Poster.html" },
@@ -607,6 +608,16 @@
         subtitle.className = "portal-feature-subtitle";
         subtitle.textContent = "Swipe left or right to browse";
         heading.append(title, subtitle);
+        if (feature.id === "nearify") {
+          const openLink = document.createElement("a");
+          openLink.className = "portal-feature-subtitle portal-feature-open-link swiper-no-swiping";
+          openLink.href = feature.src;
+          openLink.target = "_blank";
+          openLink.rel = "noopener noreferrer";
+          openLink.textContent = "Open Nearify in a new tab";
+          openLink.setAttribute("aria-label", "Open Nearify in a new tab");
+          heading.append(openLink);
+        }
 
         const isPinned = deckPreferences.pinned.includes(feature.id);
         const pinButton = document.createElement("button");
