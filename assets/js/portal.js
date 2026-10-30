@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v21-nearify-in-card-20261029";
+  const VERSION = "portal-js-v22-optional-sandbox-cards-20261030";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -202,6 +202,8 @@
     { id: "discord", title: "Discord", icon: "fa-brands fa-discord", description: "Join the CharlestonHacks Discord community.", view: "discord" },
     { id: "nearify", title: "Nearify", icon: "fas fa-user-group", description: "Meet people at events and follow up with context.", src: "https://nearify.org/" },
     { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Experimental projects and prototypes.", view: "sandbox" },
+    { id: "ie-hackathon", title: "IE Hackathon", icon: "fas fa-laptop-code", description: "Open the Innovation Engine hackathon project.", src: "https://hackathon-chs-git-main-maxs-projects-ff8c32db.vercel.app/" },
+    { id: "hacker-theater", title: "Hacker Theater", icon: "fas fa-clapperboard", description: "Explore the interactive presentation demo.", src: "/hackertheater/" },
     { id: "news", title: "News", icon: "fas fa-newspaper", description: "CharlestonHacks updates and community stories.", view: "news" },
     { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster.", src: "/Poster.html" },
     { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", src: "/swag.html" },
@@ -222,11 +224,20 @@
     return { hidden, pinned };
   }
 
+  const OPTIONAL_PROJECT_FEATURE_IDS = ["ie-hackathon", "hacker-theater"];
+  const OPTIONAL_PROJECTS_SEEDED_KEY = "ch:portal-optional-projects-seeded:v1";
+
   function readDeckPreferences() {
     try {
-      return normalizeDeckPreferences(JSON.parse(localStorage.getItem(DECK_PREFERENCES_KEY) || "{}"));
+      const preferences = normalizeDeckPreferences(JSON.parse(localStorage.getItem(DECK_PREFERENCES_KEY) || "{}"));
+      if (localStorage.getItem(OPTIONAL_PROJECTS_SEEDED_KEY) !== "true") {
+        preferences.hidden = [...new Set([...preferences.hidden, ...OPTIONAL_PROJECT_FEATURE_IDS])];
+        localStorage.setItem(DECK_PREFERENCES_KEY, JSON.stringify(preferences));
+        localStorage.setItem(OPTIONAL_PROJECTS_SEEDED_KEY, "true");
+      }
+      return preferences;
     } catch {
-      return { hidden: [], pinned: [] };
+      return { hidden: [...OPTIONAL_PROJECT_FEATURE_IDS], pinned: [] };
     }
   }
 
