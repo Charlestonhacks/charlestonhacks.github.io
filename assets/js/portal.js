@@ -199,6 +199,7 @@
     { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", view: "events" },
     { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
     { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", view: "chat" },
+    { id: "discord", title: "Discord", icon: "fa-brands fa-discord", description: "Join the CharlestonHacks Discord community.", view: "discord" },
     { id: "nearify", title: "Nearify", icon: "fas fa-user-group", description: "Meet people at events and follow up with context.", src: "https://nearify.org/" },
     { id: "sandbox", title: "Sandbox", icon: "fas fa-flask", description: "Experimental projects and prototypes.", view: "sandbox" },
     { id: "news", title: "News", icon: "fas fa-newspaper", description: "CharlestonHacks updates and community stories.", view: "news" },
