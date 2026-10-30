@@ -68,13 +68,9 @@ export function setupChatBubble() {
   const bubble = document.createElement('button');
   bubble.type = 'button';
   bubble.id = 'discord-bubble';
-  bubble.setAttribute('aria-label', 'Open CharlestonHacks community chat');
-  bubble.title = 'Community chat';
-  bubble.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5.2L10 21v-3H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h8v1.17L14.17 16H20V6H4zm3 3h10v2H7V9zm0 4h7v2H7v-2z"/>
-    </svg>
-  `;
+  bubble.setAttribute('aria-label', 'Open CharlestonHacks Discord');
+  bubble.title = 'CharlestonHacks Discord';
+  bubble.innerHTML = '<i class="fa-brands fa-discord" aria-hidden="true"></i>';
 
   // Restore position if saved.
   let saved = null;
