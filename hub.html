@@ -271,25 +271,24 @@
   
     .portal-discord-entry {
       display: grid;
-      grid-template-rows: minmax(360px, 1fr) auto;
-      gap: 0.65rem;
-      min-height: 100%;
+      grid-template-rows: minmax(0, 1fr);
+      flex: 1 1 auto;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      box-sizing: border-box;
       padding: 0.5rem;
       color: #d8e5ea;
-      font: 500 0.78rem/1.4 Inter, sans-serif;
     }
     #portal-discord-frame {
       display: block;
       width: 100%;
-      height: min(68vh, 760px);
-      min-height: 460px;
+      height: 100%;
+      min-height: 0;
       border: 0;
       border-radius: 10px;
       background: #111;
-    }
-    .portal-discord-entry p { margin: 0; text-align: center; }
-    @media (max-width: 600px) {
-      #portal-discord-frame { height: 64vh; min-height: 380px; }
     }
 </style>
   <script type="application/ld+json">
