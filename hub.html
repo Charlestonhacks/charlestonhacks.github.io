@@ -268,7 +268,30 @@
         width: min(100%, 620px, calc((100dvh - 206px) * 0.69));
       }
     }
-  </style>
+  
+    .portal-discord-entry {
+      display: grid;
+      grid-template-rows: minmax(360px, 1fr) auto;
+      gap: 0.65rem;
+      min-height: 100%;
+      padding: 0.5rem;
+      color: #d8e5ea;
+      font: 500 0.78rem/1.4 Inter, sans-serif;
+    }
+    #portal-discord-frame {
+      display: block;
+      width: 100%;
+      height: min(68vh, 760px);
+      min-height: 460px;
+      border: 0;
+      border-radius: 10px;
+      background: #111;
+    }
+    .portal-discord-entry p { margin: 0; text-align: center; }
+    @media (max-width: 600px) {
+      #portal-discord-frame { height: 64vh; min-height: 380px; }
+    }
+</style>
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -375,6 +398,19 @@
             </div>
             <div class="portal-view-content" data-view="chat" hidden>
               <iframe id="portal-chat-frame" title="CharlestonHacks Community Chat" loading="lazy" data-src="/bbs.html"></iframe>
+            </div>
+            <div class="portal-view-content" data-view="discord" hidden>
+              <div class="portal-discord-entry">
+                <iframe
+                  id="portal-discord-frame"
+                  title="CharlestonHacks Discord"
+                  loading="lazy"
+                  referrerpolicy="strict-origin-when-cross-origin"
+                  allow="clipboard-write; fullscreen"
+                  src="https://e.widgetbot.io/channels/1365587542975713320/1365587543696867384"
+                ></iframe>
+                <p>Use your Discord account to join the conversation.</p>
+              </div>
             </div>
           </div>
         </section>
@@ -585,5 +621,6 @@
     }
   </script>
   <script type="module" src="/assets/js/portal-reveal.js"></script>
+
 </body>
 </html>
