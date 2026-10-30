@@ -805,6 +805,11 @@
       color: var(--text-muted);
       font: 400 0.86rem/1.55 var(--font-body);
     }
+    .community-chat-card .community-chat-status {
+      margin-top: 9px;
+      color: #ffb4b4;
+      font-size: 0.78rem;
+    }
     .community-chat-open {
       flex: 0 0 auto;
       border: 1px solid rgba(0,224,255,0.42);
@@ -1430,6 +1435,7 @@
             <p class="community-chat-kicker">Keep the conversation going</p>
             <h3 id="community-chat-title">CharlestonHacks Community Chat</h3>
             <p>Meet other builders, ask questions, and stay connected between events.</p>
+            <p class="community-chat-status" id="community-chat-status" aria-live="polite" hidden></p>
           </div>
           <button class="community-chat-open" id="community-chat-open" type="button">
             <i class="fa-regular fa-comments" aria-hidden="true"></i>
@@ -2067,15 +2073,23 @@
     setupChatBubble();
 
     const openChatButton = document.getElementById('community-chat-open');
+    const chatStatus = document.getElementById('community-chat-status');
     if (openChatButton) {
       openChatButton.addEventListener('click', async () => {
         openChatButton.disabled = true;
         openChatButton.setAttribute('aria-busy', 'true');
         try {
           await window.openCommunityChat();
+          if (chatStatus) {
+            chatStatus.hidden = true;
+            chatStatus.textContent = '';
+          }
         } catch (error) {
           console.error('Community chat could not open:', error);
-          openChatButton.title = 'Community chat could not load. Please try again.';
+          if (chatStatus) {
+            chatStatus.textContent = 'Chat is temporarily unavailable. Please try again shortly.';
+            chatStatus.hidden = false;
+          }
         } finally {
           openChatButton.disabled = false;
           openChatButton.removeAttribute('aria-busy');
