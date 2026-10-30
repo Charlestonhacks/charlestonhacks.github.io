@@ -4,16 +4,16 @@
 // - No WidgetBot loaded until user clicks the bubble
 // - All WidgetBot containers have pointer-events: none
 //   unless the crate is open (prevents blocking clicks)
-// - Draggable, position persisted, no duplicates
+// - Optional fixed launcher; can also be opened from a page card
 // ===============================================
 
-export function setupChatBubble() {
+export function setupChatBubble({ showLauncher = true } = {}) {
   // Prevent duplicates
   document.querySelectorAll('#discord-bubble').forEach((b, i) => i > 0 && b.remove());
-  if (window.CH_BUBBLE_INITIALIZED && document.getElementById('discord-bubble')) return;
+  if (window.CH_BUBBLE_INITIALIZED) return window.openCommunityChat;
   window.CH_BUBBLE_INITIALIZED = true;
 
-  // Inject styles (bubble + widgetbot click safety)
+  // Inject styles (optional bubble + widgetbot click safety)
   if (!document.getElementById('chat-bubble-style')) {
     const style = document.createElement('style');
     style.id = 'chat-bubble-style';
@@ -64,77 +64,79 @@ export function setupChatBubble() {
     document.head.appendChild(style);
   }
 
-  // Create bubble
-  const bubble = document.createElement('button');
-  bubble.type = 'button';
-  bubble.id = 'discord-bubble';
-  bubble.setAttribute('aria-label', 'Open CharlestonHacks community chat');
-  bubble.title = 'Community chat';
-  bubble.innerHTML = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5.2L10 21v-3H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h8v1.17L14.17 16H20V6H4zm3 3h10v2H7V9zm0 4h7v2H7v-2z"/>
-    </svg>
-  `;
-
-  // Restore position if saved.
-  let saved = null;
-  try {
-    saved = JSON.parse(localStorage.getItem('discordBubblePos') || 'null');
-  } catch {
-    localStorage.removeItem('discordBubblePos');
-  }
-  if (saved?.left && saved?.top) {
-    bubble.style.left = saved.left;
-    bubble.style.top = saved.top;
-    bubble.style.right = 'auto';
-    bubble.style.bottom = 'auto';
-  }
-
-  document.body.appendChild(bubble);
-  bubble.classList.add('visible');
-
-  // Drag handling
-  let dragging = false, dragMoved = false, offsetX = 0, offsetY = 0;
-  const startDrag = e => {
-    dragging = true;
-    dragMoved = false;
-    bubble.classList.add('dragging');
-    const rect = bubble.getBoundingClientRect();
-    const p = e.touches ? e.touches[0] : e;
-    offsetX = p.clientX - rect.left;
-    offsetY = p.clientY - rect.top;
-  };
-  const moveDrag = e => {
-    if (!dragging) return;
-    const p = e.touches ? e.touches[0] : e;
-    if (Math.abs(p.clientX - (offsetX + bubble.getBoundingClientRect().left)) > 6 ||
-        Math.abs(p.clientY - (offsetY + bubble.getBoundingClientRect().top)) > 6) {
-      dragMoved = true;
+  let bubble = null;
+  let dragMoved = false;
+  if (showLauncher) {
+    // Create bubble
+    bubble = document.createElement('button');
+    bubble.type = 'button';
+    bubble.id = 'discord-bubble';
+    bubble.setAttribute('aria-label', 'Open CharlestonHacks Discord');
+    bubble.title = 'CharlestonHacks Discord';
+    bubble.innerHTML = '<i class="fa-brands fa-discord" aria-hidden="true"></i>';
+  
+    // Restore position if saved.
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem('discordBubblePos') || 'null');
+    } catch {
+      localStorage.removeItem('discordBubblePos');
     }
-    if (!dragMoved) return;
-    e.preventDefault();
-    bubble.style.left = (p.clientX - offsetX) + 'px';
-    bubble.style.top  = (p.clientY - offsetY) + 'px';
-    bubble.style.right = 'auto';
-    bubble.style.bottom = 'auto';
-  };
-  const stopDrag = () => {
-    if (!dragging) return;
-    dragging = false;
-    bubble.classList.remove('dragging');
-    if (dragMoved) {
-      localStorage.setItem('discordBubblePos', JSON.stringify({
-        left: bubble.style.left, top: bubble.style.top
-      }));
+    if (saved?.left && saved?.top) {
+      bubble.style.left = saved.left;
+      bubble.style.top = saved.top;
+      bubble.style.right = 'auto';
+      bubble.style.bottom = 'auto';
     }
-  };
-
-  bubble.addEventListener('mousedown', startDrag);
-  window.addEventListener('mousemove', moveDrag);
-  window.addEventListener('mouseup', stopDrag);
-  bubble.addEventListener('touchstart', startDrag, { passive: true });
-  window.addEventListener('touchmove', moveDrag, { passive: false });
-  window.addEventListener('touchend', stopDrag);
+  
+    document.body.appendChild(bubble);
+    bubble.classList.add('visible');
+  
+    // Drag handling
+    let dragging = false, offsetX = 0, offsetY = 0;
+    const startDrag = e => {
+      dragging = true;
+      dragMoved = false;
+      bubble.classList.add('dragging');
+      const rect = bubble.getBoundingClientRect();
+      const p = e.touches ? e.touches[0] : e;
+      offsetX = p.clientX - rect.left;
+      offsetY = p.clientY - rect.top;
+    };
+    const moveDrag = e => {
+      if (!dragging) return;
+      const p = e.touches ? e.touches[0] : e;
+      if (Math.abs(p.clientX - (offsetX + bubble.getBoundingClientRect().left)) > 6 ||
+          Math.abs(p.clientY - (offsetY + bubble.getBoundingClientRect().top)) > 6) {
+        dragMoved = true;
+      }
+      if (!dragMoved) return;
+      e.preventDefault();
+      bubble.style.left = (p.clientX - offsetX) + 'px';
+      bubble.style.top  = (p.clientY - offsetY) + 'px';
+      bubble.style.right = 'auto';
+      bubble.style.bottom = 'auto';
+    };
+    const stopDrag = () => {
+      if (!dragging) return;
+      dragging = false;
+      bubble.classList.remove('dragging');
+      if (dragMoved) {
+        localStorage.setItem('discordBubblePos', JSON.stringify({
+          left: bubble.style.left, top: bubble.style.top
+        }));
+      }
+    };
+  
+    bubble.addEventListener('mousedown', startDrag);
+    window.addEventListener('mousemove', moveDrag);
+    window.addEventListener('mouseup', stopDrag);
+    bubble.addEventListener('touchstart', startDrag, { passive: true });
+    window.addEventListener('touchmove', moveDrag, { passive: false });
+    window.addEventListener('touchend', stopDrag);
+  
+  
+  }
 
   // Lazy load WidgetBot only when the visitor opens the chat.
   let crateReady = Boolean(window.CrateInstance);
@@ -222,17 +224,19 @@ export function setupChatBubble() {
   };
 
   window.openCommunityChat = openChat;
-  bubble.addEventListener('click', async () => {
-    if (dragMoved) {
-      dragMoved = false;
-      return;
-    }
-    try {
-      await toggleChat();
-    } catch (error) {
-      console.error('Community chat could not open:', error);
-    }
-  });
+  if (bubble) {
+    bubble.addEventListener('click', async () => {
+      if (dragMoved) {
+        dragMoved = false;
+        return;
+      }
+      try {
+        await toggleChat();
+      } catch (error) {
+        console.error('Community chat could not open:', error);
+      }
+    });
+  }
 
   console.log('Community chat launcher ready.');
 }
