@@ -25,6 +25,8 @@ export function setupChatBubble() {
         right: 24px;
         width: 60px;
         height: 60px;
+        padding: 0;
+        border: 0;
         border-radius: 50%;
         background: radial-gradient(circle at 30% 30%, #7289da, #404eed 80%);
         box-shadow: 0 0 20px rgba(64,78,237,0.6), 0 4px 16px rgba(0,0,0,0.4);
@@ -36,6 +38,10 @@ export function setupChatBubble() {
         opacity: 0; pointer-events: none;
       }
       #discord-bubble.visible { opacity: 1; pointer-events: auto; }
+      #discord-bubble:focus-visible {
+        outline: 3px solid #fff;
+        outline-offset: 4px;
+      }
       #discord-bubble:hover { transform: scale(1.12); box-shadow: 0 0 30px rgba(114,137,218,0.9); }
       #discord-bubble.dragging { opacity: .85; cursor: grabbing; }
       @media (max-width: 600px) { #discord-bubble { width: 50px; height: 50px; bottom: 16px; right: 16px; } }
@@ -59,16 +65,24 @@ export function setupChatBubble() {
   }
 
   // Create bubble
-  const bubble = document.createElement('div');
+  const bubble = document.createElement('button');
+  bubble.type = 'button';
   bubble.id = 'discord-bubble';
+  bubble.setAttribute('aria-label', 'Open CharlestonHacks community chat');
+  bubble.title = 'Community chat';
   bubble.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="white" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3C7.03 3 2.73 6.11 1 10.5c1.73 4.39 6.03 7.5 11 7.5s9.27-3.11 11-7.5C21.27 6.11 16.97 3 12 3zm0 12c-2.48 0-4.5-1.79-4.5-4s2.02-4 4.5-4 4.5 1.79 4.5 4-2.02 4-4.5 4z"/>
+      <path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-5.2L10 21v-3H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v10h8v1.17L14.17 16H20V6H4zm3 3h10v2H7V9zm0 4h7v2H7v-2z"/>
     </svg>
   `;
 
-  // Restore position if saved
-  const saved = JSON.parse(localStorage.getItem('discordBubblePos') || 'null');
+  // Restore position if saved.
+  let saved = null;
+  try {
+    saved = JSON.parse(localStorage.getItem('discordBubblePos') || 'null');
+  } catch {
+    localStorage.removeItem('discordBubblePos');
+  }
   if (saved?.left && saved?.top) {
     bubble.style.left = saved.left;
     bubble.style.top = saved.top;
@@ -77,11 +91,13 @@ export function setupChatBubble() {
   }
 
   document.body.appendChild(bubble);
+  bubble.classList.add('visible');
 
   // Drag handling
-  let dragging = false, offsetX = 0, offsetY = 0;
+  let dragging = false, dragMoved = false, offsetX = 0, offsetY = 0;
   const startDrag = e => {
     dragging = true;
+    dragMoved = false;
     bubble.classList.add('dragging');
     const rect = bubble.getBoundingClientRect();
     const p = e.touches ? e.touches[0] : e;
@@ -90,8 +106,13 @@ export function setupChatBubble() {
   };
   const moveDrag = e => {
     if (!dragging) return;
-    e.preventDefault();
     const p = e.touches ? e.touches[0] : e;
+    if (Math.abs(p.clientX - (offsetX + bubble.getBoundingClientRect().left)) > 6 ||
+        Math.abs(p.clientY - (offsetY + bubble.getBoundingClientRect().top)) > 6) {
+      dragMoved = true;
+    }
+    if (!dragMoved) return;
+    e.preventDefault();
     bubble.style.left = (p.clientX - offsetX) + 'px';
     bubble.style.top  = (p.clientY - offsetY) + 'px';
     bubble.style.right = 'auto';
@@ -101,9 +122,11 @@ export function setupChatBubble() {
     if (!dragging) return;
     dragging = false;
     bubble.classList.remove('dragging');
-    localStorage.setItem('discordBubblePos', JSON.stringify({
-      left: bubble.style.left, top: bubble.style.top
-    }));
+    if (dragMoved) {
+      localStorage.setItem('discordBubblePos', JSON.stringify({
+        left: bubble.style.left, top: bubble.style.top
+      }));
+    }
   };
 
   bubble.addEventListener('mousedown', startDrag);
@@ -113,71 +136,103 @@ export function setupChatBubble() {
   window.addEventListener('touchmove', moveDrag, { passive: false });
   window.addEventListener('touchend', stopDrag);
 
-  // 🔄 Lazy load WidgetBot only when first clicked
-  let crateReady = false;
-  const ensureCrate = () => new Promise(resolve => {
-    if (crateReady && window.CrateInstance) return resolve();
-    if (document.getElementById('widgetbot-crate')) {
-      // Script is loading; poll until ready
-      const tick = setInterval(() => {
-        if (window.Crate && !window.CrateInstance) {
-          window.CrateInstance = new window.Crate({
-            server: '1365587542975713320',
-            channel: '1365587543696867384'
-          });
-        }
-        if (window.CrateInstance) {
-          crateReady = true;
-          clearInterval(tick);
-          hookCrateEvents();
-          resolve();
-        }
-      }, 100);
-      return;
+  // Lazy load WidgetBot only when the visitor opens the chat.
+  let crateReady = Boolean(window.CrateInstance);
+  const initializeCrate = () => {
+    if (!window.Crate) throw new Error('WidgetBot did not initialize.');
+    if (!window.CrateInstance) {
+      window.CrateInstance = new window.Crate({
+        server: '1365587542975713320',
+        channel: '1365587543696867384'
+      });
     }
-    const s = document.createElement('script');
-    s.id = 'widgetbot-crate';
-    s.src = 'https://cdn.jsdelivr.net/npm/@widgetbot/crate@3';
-    s.async = true; s.defer = true;
-    s.onload = () => {
-      if (!window.CrateInstance) {
-        window.CrateInstance = new window.Crate({
-          server: '1365587542975713320',
-          channel: '1365587543696867384'
-        });
+    crateReady = true;
+    hookCrateEvents();
+  };
+
+  const ensureCrate = () => {
+    if (crateReady && window.CrateInstance) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      let script = document.getElementById('widgetbot-crate');
+      let settled = false;
+      const finish = (handler, value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        script?.removeEventListener('load', onLoad);
+        script?.removeEventListener('error', onError);
+        handler(value);
+      };
+      const onLoad = () => {
+        try {
+          initializeCrate();
+          finish(resolve);
+        } catch (error) {
+          finish(reject, error);
+        }
+      };
+      const onError = () => finish(reject, new Error('Could not load the community chat.'));
+      const timeout = setTimeout(
+        () => finish(reject, new Error('The community chat took too long to load.')),
+        15000
+      );
+
+      if (window.Crate) {
+        onLoad();
+        return;
       }
-      crateReady = true;
-      hookCrateEvents();
-      resolve();
-    };
-    document.body.appendChild(s);
-  });
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'widgetbot-crate';
+        script.src = 'https://cdn.jsdelivr.net/npm/@widgetbot/crate@3';
+        script.async = true;
+        script.defer = true;
+      }
+      script.addEventListener('load', onLoad, { once: true });
+      script.addEventListener('error', onError, { once: true });
+      if (!script.isConnected) document.body.appendChild(script);
+    });
+  };
 
   function hookCrateEvents() {
-    // Guard
     if (!window.CrateInstance || window.CrateHooked) return;
     window.CrateHooked = true;
-
-    // When open, allow widgetbot to receive clicks; when closed, disable
     try {
       window.CrateInstance.on('open', () => document.body.classList.add('wb-open'));
       window.CrateInstance.on('close', () => document.body.classList.remove('wb-open'));
     } catch {
-      // Some builds of Crate don't expose .on; fail gracefully
-      // Fallback: toggle class after toggle calls (below)
+      // The open/close class is also managed when this launcher is used.
     }
   }
 
-  // Toggle on bubble click (and fallback class management)
-  bubble.addEventListener('click', async () => {
-    if (bubble.classList.contains('dragging')) return; // ignore drag end
+  const toggleChat = async () => {
     await ensureCrate();
-    if (window.CrateInstance) {
-      const wasOpen = document.body.classList.contains('wb-open');
+    if (!window.CrateInstance) throw new Error('The community chat is unavailable.');
+    const wasOpen = document.body.classList.contains('wb-open');
+    window.CrateInstance.toggle();
+    document.body.classList.toggle('wb-open', !wasOpen);
+  };
+
+  const openChat = async () => {
+    await ensureCrate();
+    if (!document.body.classList.contains('wb-open')) {
       window.CrateInstance.toggle();
-      document.body.classList.toggle('wb-open', !wasOpen);
+      document.body.classList.add('wb-open');
+    }
+  };
+
+  window.openCommunityChat = openChat;
+  bubble.addEventListener('click', async () => {
+    if (dragMoved) {
+      dragMoved = false;
+      return;
+    }
+    try {
+      await toggleChat();
+    } catch (error) {
+      console.error('Community chat could not open:', error);
     }
   });
 
-  console.log('🟣 Chat bubble ready (lazy load).');
+  console.log('Community chat launcher ready.');
 }
