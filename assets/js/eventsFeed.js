@@ -178,6 +178,60 @@ export async function loadUnifiedEvents({
   if (!list) return;
   list.textContent = "Loading events and posters…";
 
+  const filterGroup = document.getElementById("portal-events-filter-controls");
+  const filterButtons = Array.from(filterGroup?.querySelectorAll("[data-event-filter]") || []);
+  const filterStatus = document.getElementById("portal-events-filter-status");
+
+  function applyEventSourceFilters() {
+    if (!filterButtons.length) return;
+    const activeSources = new Set(
+      filterButtons
+        .filter((button) => button.getAttribute("aria-pressed") === "true")
+        .map((button) => button.dataset.eventFilter)
+    );
+    let visibleCount = 0;
+    list.querySelectorAll(".ch-event-card").forEach((card) => {
+      card.hidden = !activeSources.has(card.dataset.source);
+      if (!card.hidden) visibleCount += 1;
+    });
+    list.querySelectorAll(".ch-events-section-title").forEach((heading) => {
+      let sibling = heading.nextElementSibling;
+      let hasVisibleEvents = false;
+      while (sibling && !sibling.classList.contains("ch-events-section-title")) {
+        if (sibling.classList.contains("ch-event-card") && !sibling.hidden) hasVisibleEvents = true;
+        sibling = sibling.nextElementSibling;
+      }
+      heading.hidden = !hasVisibleEvents;
+    });
+
+    const emptyMessage = list.querySelector(".ch-events-filter-empty");
+    if (emptyMessage) {
+      emptyMessage.hidden = visibleCount > 0;
+      emptyMessage.textContent = activeSources.size
+        ? "No events match the selected source."
+        : "Choose CharlestonHacks or Community to show events.";
+    }
+    if (filterStatus) {
+      const names = filterButtons
+        .filter((button) => button.getAttribute("aria-pressed") === "true")
+        .map((button) => button.textContent.trim());
+      filterStatus.textContent = names.length
+        ? `${names.join(" and ")} events shown. ${visibleCount} events.`
+        : "No event sources selected.";
+    }
+  }
+
+  if (filterGroup && filterGroup.dataset.filtersBound !== "true") {
+    filterGroup.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-event-filter]");
+      if (!button || !filterGroup.contains(button)) return;
+      const isPressed = button.getAttribute("aria-pressed") === "true";
+      button.setAttribute("aria-pressed", String(!isPressed));
+      applyEventSourceFilters();
+    });
+    filterGroup.dataset.filtersBound = "true";
+  }
+
   async function getArchiveEvents() {
     const response = await fetch("/Poster.html", { cache: "force-cache" });
     if (!response.ok) throw new Error("Poster archive unavailable");
@@ -384,7 +438,15 @@ export async function loadUnifiedEvents({
 
     appendSection("Upcoming", upcoming);
     appendSection("Past events", past);
-    if (!upcoming.length && !past.length) list.textContent = safeText(emptyText);
+    if (!upcoming.length && !past.length) {
+      list.textContent = safeText(emptyText);
+      return;
+    }
+    const filterEmptyMessage = document.createElement("p");
+    filterEmptyMessage.className = "ch-events-filter-empty";
+    filterEmptyMessage.hidden = true;
+    list.append(filterEmptyMessage);
+    applyEventSourceFilters();
   } catch (error) {
     console.error("Unable to load unified event archive:", error);
     list.textContent = safeText(errorText);
