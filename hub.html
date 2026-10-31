@@ -278,6 +278,28 @@
     }
     .portal-events-intro .portal-view-intro { margin: 0; }
     .portal-events-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.45rem; }
+    .portal-events-filter {
+      appearance: none;
+      font: inherit;
+      cursor: pointer;
+      transition: opacity 0.18s ease, transform 0.18s ease, background-color 0.18s ease;
+    }
+    .portal-events-filter[aria-pressed="false"] { opacity: 0.38; background: transparent; }
+    .portal-events-filter:hover { transform: translateY(-1px); }
+    .portal-events-filter:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+    .portal-events-filter-status {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .ch-event-card[hidden], .ch-events-section-title[hidden] { display: none !important; }
+    .ch-events-filter-empty { margin: 1rem; color: rgba(255,255,255,0.76); text-align: center; }
     .ch-events-section-title {
       position: sticky;
       top: 0;
@@ -435,10 +457,11 @@
             <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming and past events with posters" hidden>
               <div class="portal-events-intro">
                 <p class="portal-view-intro">Upcoming events and past events, with posters where available.</p>
-                <div class="portal-events-legend" aria-label="Event categories">
-                  <span class="ch-source-badge ch-source-charlestonhacks">CharlestonHacks</span>
-                  <span class="ch-source-badge ch-source-community">Community</span>
+                <div class="portal-events-legend" id="portal-events-filter-controls" role="group" aria-label="Filter events by source">
+                  <button type="button" class="ch-source-badge ch-source-charlestonhacks portal-events-filter" data-event-filter="charlestonhacks" aria-pressed="true">CharlestonHacks</button>
+                  <button type="button" class="ch-source-badge ch-source-community portal-events-filter" data-event-filter="community" aria-pressed="true">Community</button>
                 </div>
+                <p class="portal-events-filter-status" id="portal-events-filter-status" aria-live="polite"></p>
               </div>
               <div id="portal-events-list" class="portal-events-list" role="list"></div>
             </section>
