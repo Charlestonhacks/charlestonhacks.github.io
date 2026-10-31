@@ -64,6 +64,8 @@
 
     if (event.data?.channel === "chs-portal-event-v1" && event.data?.type === "READY") {
       frame.dataset.portalDeckReady = "true";
+      const status = document.getElementById("portal-buildspace-auth-status");
+      if (status) status.hidden = true;
       if (activeFeatureId === "innovation") sendPendingBuildspaceEvent(frame);
       return;
     }
