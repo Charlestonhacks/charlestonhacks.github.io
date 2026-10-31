@@ -633,6 +633,7 @@
     managerSave?.addEventListener("click", () => {
       if (!draftPreferences) return;
       const nextPreferences = saveDeckPreferences(draftPreferences);
+      window.__CH_SAVE_DECK_PREFERENCES__?.(nextPreferences);
       const currentStillIncluded = !nextPreferences.hidden.includes(activeFeatureId);
       const orderedFeatures = orderedDeckFeatures(nextPreferences);
       const firstOrderedFeature = orderedFeatures[0]?.id;
@@ -811,6 +812,25 @@
           arrivingCard?.classList.remove("portal-card-arriving");
         }, 760);
       }
+    }
+
+    function syncDeckPreferencesFromAccount(detail = {}) {
+      if (detail.authorized !== true) return;
+      if (detail.deckPreferences && typeof detail.deckPreferences === "object") {
+        const next = saveDeckPreferences(detail.deckPreferences);
+        renderDeck(activeFeatureId);
+      } else {
+        // First signed-in use: keep the member's current device order as their
+        // account default. Later devices load the account value above.
+        window.__CH_SAVE_DECK_PREFERENCES__?.(deckPreferences);
+      }
+    }
+    window.addEventListener("ch:member-auth-changed", (event) => syncDeckPreferencesFromAccount(event.detail));
+    if (window.__CH_MEMBER_AUTH__ === true) {
+      syncDeckPreferencesFromAccount({
+        authorized: true,
+        deckPreferences: window.__CH_SESSION__?.user?.user_metadata?.ch_portal_deck_preferences || null
+      });
     }
 
     renderDeck(shouldRestoreBuildspace ? "innovation" : "home");
