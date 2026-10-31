@@ -54,7 +54,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12.2.0/swiper-bundle.min.css"/>
-  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-card-actions-20261029"/>
+  <link rel="stylesheet" href="/assets/css/portal.css?v=portal-card-order-20261031"/>
   <link rel="stylesheet" href="/assets/css/events.css"/>
 
   <!-- ✅ Minimal, safe header logo positioning (won’t fight your existing CSS) -->
@@ -556,7 +556,8 @@
         </div>
         <button type="button" class="portal-deck-close" id="portal-deck-close" aria-label="Close card manager">×</button>
       </header>
-      <p class="portal-deck-manager-help">Tap <strong>Remove</strong> to take a card out, or <strong>Add</strong> to bring it back. Pin cards to the front; everything in the deck remains swipeable.</p>
+      <p class="portal-deck-manager-help">Tap <strong>Remove</strong> to take a card out, or <strong>Add</strong> to bring it back. Use ↑ and ↓ to change card order. Apply changes to save.</p>
+      <p class="portal-deck-order-status" id="portal-deck-order-status" aria-live="polite"></p>
       <div class="portal-deck-options" id="portal-deck-options" role="group" aria-label="Portal cards"></div>
       <footer class="portal-deck-manager-actions">
         <button type="button" class="portal-deck-cancel" id="portal-deck-cancel">Cancel</button>
@@ -602,7 +603,7 @@
   <script type="module" src="/assets/js/portal-auth-bridge.js?v=portal-prioritized-features-20261029"></script>
 
   <!-- Portal logic -->
-  <script type="module" src="/assets/js/portal.js?v=portal-sandbox-project-cards-20261031-poster-cachefix"></script>
+  <script type="module" src="/assets/js/portal.js?v=portal-card-order-20261031"></script>
 
   <!-- Countdown banner: fetches next event from the same feed as the calendar modal -->
   <script type="module">

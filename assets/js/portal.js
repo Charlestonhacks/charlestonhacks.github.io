@@ -217,10 +217,17 @@
     const hidden = Array.isArray(value?.hidden)
       ? [...new Set(value.hidden.filter((id) => validIds.has(id)))]
       : [];
-    const pinned = Array.isArray(value?.pinned)
-      ? [...new Set(value.pinned.filter((id) => validIds.has(id) && !hidden.includes(id)))]
+    const legacyPinnedOrder = Array.isArray(value?.pinned)
+      ? value.pinned.filter((id) => validIds.has(id) && !hidden.includes(id))
       : [];
-    return { hidden, pinned };
+    const savedOrder = Array.isArray(value?.order)
+      ? value.order
+      : [...legacyPinnedOrder, ...features.map((feature) => feature.id)];
+    const order = [...new Set(savedOrder.filter((id) => validIds.has(id)))];
+    features.forEach((feature) => {
+      if (!order.includes(feature.id)) order.push(feature.id);
+    });
+    return { hidden, order };
   }
 
   const OPTIONAL_PROJECT_FEATURE_IDS = ["ie-hackathon", "hacker-theater"];
@@ -236,21 +243,26 @@
       }
       return preferences;
     } catch {
-      return { hidden: [...OPTIONAL_PROJECT_FEATURE_IDS], pinned: [] };
+      return { hidden: [...OPTIONAL_PROJECT_FEATURE_IDS], order: features.map((feature) => feature.id) };
     }
   }
 
   let deckPreferences = readDeckPreferences();
 
   function orderedDeckFeatures(preferences = deckPreferences) {
-    const available = features.filter((feature) => !preferences.hidden.includes(feature.id));
-    const availableIds = new Set(available.map((feature) => feature.id));
-    const pinned = preferences.pinned.filter((id) => availableIds.has(id));
-    const pinnedIds = new Set(pinned);
-    return [
-      ...pinned.map((id) => available.find((feature) => feature.id === id)).filter(Boolean),
-      ...available.filter((feature) => !pinnedIds.has(feature.id)),
-    ];
+    const hidden = new Set(preferences.hidden);
+    const byId = new Map(features.map((feature) => [feature.id, feature]));
+    return preferences.order
+      .filter((id) => byId.has(id) && !hidden.has(id))
+      .map((id) => byId.get(id));
+  }
+
+  function orderedRemovedFeatures(preferences = deckPreferences) {
+    const hidden = new Set(preferences.hidden);
+    const byId = new Map(features.map((feature) => [feature.id, feature]));
+    return preferences.order
+      .filter((id) => byId.has(id) && hidden.has(id))
+      .map((id) => byId.get(id));
   }
 
   function saveDeckPreferences(value) {
@@ -451,21 +463,21 @@
     const managerSave = document.getElementById("portal-deck-save");
     let draftPreferences = null;
 
-    function updateManagerPinButton(button, featureId) {
-      const hidden = draftPreferences?.hidden.includes(featureId) ?? false;
-      const pinned = draftPreferences?.pinned.includes(featureId) ?? false;
-      button.disabled = hidden;
-      button.setAttribute("aria-pressed", String(pinned));
-      button.setAttribute("aria-label", hidden ? "Add " + features.find((feature) => feature.id === featureId)?.title + " before pinning" : (pinned ? "Unpin " + features.find((feature) => feature.id === featureId)?.title : "Pin " + features.find((feature) => feature.id === featureId)?.title + " to the front"));
-      button.textContent = pinned ? "Pinned" : "Pin to front";
-      button.title = hidden ? "Add this card to pin it" : (pinned ? "Unpin this card" : "Pin this card to the front");
-    }
-
     function renderManagerOptions() {
       if (!managerList || !draftPreferences) return;
       managerList.replaceChildren();
 
-      features.forEach((feature) => {
+      const includedFeatures = orderedDeckFeatures(draftPreferences);
+      const removedFeatures = orderedRemovedFeatures(draftPreferences);
+
+      function appendSectionHeading(label) {
+        const heading = document.createElement("h3");
+        heading.className = "portal-deck-section-heading";
+        heading.textContent = label;
+        managerList.append(heading);
+      }
+
+      function appendOption(feature, included, position = -1) {
         const row = document.createElement("div");
         row.className = "portal-deck-option";
         row.dataset.featureId = feature.id;
@@ -482,67 +494,101 @@
         const title = document.createElement("strong");
         title.textContent = feature.title;
         const status = document.createElement("small");
+        status.textContent = included
+          ? "Position " + (position + 1) + " of " + includedFeatures.length
+          : "Removed from deck";
         copy.append(title, status);
         main.append(featureIcon, copy);
 
         const includeButton = document.createElement("button");
         includeButton.type = "button";
         includeButton.className = "portal-deck-toggle";
+        includeButton.textContent = included ? "Remove" : "Add";
+        includeButton.dataset.included = String(included);
+        includeButton.setAttribute("aria-label", (included ? "Remove " : "Add ") + feature.title + (included ? " from" : " to") + " the swipe deck");
 
-        const pinButton = document.createElement("button");
-        pinButton.type = "button";
-        pinButton.className = "portal-deck-pin-toggle";
+        const orderControls = document.createElement("div");
+        orderControls.className = "portal-deck-order-controls";
+        orderControls.hidden = !included;
+        if (included) {
+          const up = document.createElement("button");
+          up.type = "button";
+          up.className = "portal-deck-order-button";
+          up.dataset.orderDirection = "up";
+          up.textContent = "↑";
+          up.disabled = position === 0;
+          up.setAttribute("aria-label", "Move " + feature.title + " earlier");
+          up.title = "Move earlier";
+          up.addEventListener("click", () => moveIncludedFeature(feature.id, -1));
 
-        function syncOptionState() {
-          const included = !draftPreferences.hidden.includes(feature.id);
-          includeButton.textContent = included ? "Remove" : "Add";
-          includeButton.dataset.included = String(included);
-          includeButton.setAttribute("aria-label", (included ? "Remove " : "Add ") + feature.title + (included ? " from" : " to") + " the swipe deck");
-          status.textContent = included
-            ? (draftPreferences.pinned.includes(feature.id) ? "Pinned to the front" : "In swipe deck")
-            : "Removed from deck";
-          row.classList.toggle("is-excluded", !included);
-          row.classList.toggle("is-pinned", draftPreferences.pinned.includes(feature.id));
-          updateManagerPinButton(pinButton, feature.id);
+          const down = document.createElement("button");
+          down.type = "button";
+          down.className = "portal-deck-order-button";
+          down.dataset.orderDirection = "down";
+          down.textContent = "↓";
+          down.disabled = position === includedFeatures.length - 1;
+          down.setAttribute("aria-label", "Move " + feature.title + " later");
+          down.title = "Move later";
+          down.addEventListener("click", () => moveIncludedFeature(feature.id, 1));
+          orderControls.append(up, down);
         }
-
-        syncOptionState();
 
         includeButton.addEventListener("click", () => {
           const hidden = new Set(draftPreferences.hidden);
-          if (hidden.has(feature.id)) hidden.delete(feature.id);
-          else {
+          if (included) {
             hidden.add(feature.id);
-            draftPreferences.pinned = draftPreferences.pinned.filter((id) => id !== feature.id);
+          } else {
+            hidden.delete(feature.id);
+            const activeOrder = orderedDeckFeatures(draftPreferences).map((item) => item.id);
+            activeOrder.push(feature.id);
+            const removedOrder = draftPreferences.order.filter((id) => hidden.has(id));
+            draftPreferences.order = [...activeOrder, ...removedOrder];
           }
           draftPreferences.hidden = [...hidden];
-          syncOptionState();
-          row.classList.remove("portal-option-changed");
-          void row.offsetWidth;
-          row.classList.add("portal-option-changed");
+          renderManagerOptions();
         });
 
-        pinButton.addEventListener("click", () => {
-          if (draftPreferences.hidden.includes(feature.id)) return;
-          const isPinned = draftPreferences.pinned.includes(feature.id);
-          draftPreferences.pinned = isPinned
-            ? draftPreferences.pinned.filter((id) => id !== feature.id)
-            : [feature.id, ...draftPreferences.pinned.filter((id) => id !== feature.id)];
-          syncOptionState();
-          row.classList.remove("portal-option-changed");
-          void row.offsetWidth;
-          row.classList.add("portal-option-changed");
-        });
-
-        row.append(main, includeButton, pinButton);
+        row.append(main, includeButton, orderControls);
         managerList.append(row);
-      });
+      }
+
+      if (includedFeatures.length) {
+        appendSectionHeading("In swipe deck");
+        includedFeatures.forEach((feature, index) => appendOption(feature, true, index));
+      }
+      if (removedFeatures.length) {
+        appendSectionHeading("Removed");
+        removedFeatures.forEach((feature) => appendOption(feature, false));
+      }
     }
+
+    function moveIncludedFeature(featureId, direction) {
+      if (!draftPreferences) return;
+      const activeOrder = orderedDeckFeatures(draftPreferences).map((feature) => feature.id);
+      const index = activeOrder.indexOf(featureId);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= activeOrder.length) return;
+
+      [activeOrder[index], activeOrder[nextIndex]] = [activeOrder[nextIndex], activeOrder[index]];
+      const hidden = new Set(draftPreferences.hidden);
+      const removedOrder = draftPreferences.order.filter((id) => hidden.has(id));
+      draftPreferences.order = [...activeOrder, ...removedOrder];
+      renderManagerOptions();
+
+      const movedFeature = features.find((feature) => feature.id === featureId);
+      const position = activeOrder.indexOf(featureId) + 1;
+      const orderStatus = document.getElementById("portal-deck-order-status");
+      if (orderStatus) {
+        orderStatus.textContent = "Moved " + movedFeature.title + " to position " + position + " of " + activeOrder.length + ". Apply changes to save the new card order.";
+      }
+      managerList.querySelector('[data-feature-id="' + featureId + '"] [data-order-direction="' + (direction < 0 ? "up" : "down") + '"]')?.focus({ preventScroll: true });
+    }
+
     function openDeckManager() {
       if (!manager || !managerList) return;
       draftPreferences = {
         hidden: [...deckPreferences.hidden],
-        pinned: [...deckPreferences.pinned],
+        order: [...deckPreferences.order],
       };
       renderManagerOptions();
       if (typeof manager.showModal === "function") manager.showModal();
@@ -564,10 +610,8 @@
       const nextPreferences = saveDeckPreferences(draftPreferences);
       const currentStillIncluded = !nextPreferences.hidden.includes(activeFeatureId);
       const orderedFeatures = orderedDeckFeatures(nextPreferences);
-      const firstPinned = orderedFeatures[0]?.id;
-      const nextFeatureId = nextPreferences.pinned.length
-        ? firstPinned
-        : (currentStillIncluded ? activeFeatureId : firstPinned);
+      const firstOrderedFeature = orderedFeatures[0]?.id;
+      const nextFeatureId = currentStillIncluded ? activeFeatureId : firstOrderedFeature;
       draftPreferences = null;
       closeDeckManager();
       renderDeck(nextFeatureId || "home", true);
@@ -630,33 +674,10 @@
           heading.append(openLink);
         }
 
-        const isPinned = deckPreferences.pinned.includes(feature.id);
-        const pinButton = document.createElement("button");
-        pinButton.type = "button";
-        pinButton.className = "portal-feature-pin swiper-no-swiping";
-        pinButton.setAttribute("aria-label", (isPinned ? "Unpin " : "Pin ") + feature.title + (isPinned ? " from" : " to") + " the front");
-        pinButton.setAttribute("aria-pressed", String(isPinned));
-        pinButton.title = isPinned ? "Unpin card" : "Pin card to front";
-        pinButton.innerHTML = '<i class="fas fa-thumbtack" aria-hidden="true"></i>';
-        pinButton.addEventListener("click", (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const currentlyPinned = deckPreferences.pinned.includes(feature.id);
-          const nextPreferences = {
-            hidden: [...deckPreferences.hidden],
-            pinned: currentlyPinned
-              ? deckPreferences.pinned.filter((id) => id !== feature.id)
-              : [feature.id, ...deckPreferences.pinned.filter((id) => id !== feature.id)],
-          };
-          saveDeckPreferences(nextPreferences);
-          const newFront = orderedDeckFeatures()[0]?.id || "home";
-          renderDeck(newFront, true);
-        });
-
-        const number = document.createElement("span");
+card pin code        const number = document.createElement("span");
         number.className = "portal-feature-number";
         number.textContent = String(index + 1).padStart(2, "0") + " / " + String(deckFeatures.length).padStart(2, "0");
-        header.append(iconWrap, heading, pinButton, number);
+        header.append(iconWrap, heading, number);
 
         const content = document.createElement("div");
         content.className = "portal-feature-content";
