@@ -109,6 +109,72 @@
       display: block;
     }
 
+    .poster-order-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 0 20px 12px;
+      text-align: center;
+    }
+    .poster-order-toolbar button {
+      border: 1px solid rgba(201,163,94,0.75);
+      border-radius: 8px;
+      padding: 9px 14px;
+      color: #ffe4a3;
+      background: rgba(201,163,94,0.12);
+      font: inherit;
+      cursor: pointer;
+    }
+    .poster-order-toolbar button:hover,
+    .poster-order-toolbar button:focus-visible {
+      background: rgba(201,163,94,0.25);
+      outline: 2px solid #c9a35e;
+      outline-offset: 2px;
+    }
+    #poster-order-reset[hidden],
+    #poster-order-status[hidden] { display: none !important; }
+    #poster-order-status {
+      flex-basis: 100%;
+      margin: 0;
+      color: rgba(255,255,255,0.75);
+      font-size: 0.9rem;
+    }
+
+    .poster-order-actions {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      z-index: 2;
+      display: none;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    body.poster-reordering .poster-order-actions { display: flex; }
+    .poster-order-actions button {
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(201,163,94,0.9);
+      border-radius: 50%;
+      color: #ffe4a3;
+      background: rgba(0,0,0,0.88);
+      font-size: 1.3rem;
+      line-height: 1;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+    .poster-order-actions button:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .poster-order-actions button:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+    body.poster-reordering .gallery-item { cursor: default; }
+
     /* External link overlay */
     .external-icon {
       position: absolute;
@@ -186,12 +252,21 @@
       <h1 class="page-title">Past CharlestonHacks Events</h1>
     </a>
   </div>
+  <div class="poster-order-toolbar" aria-label="Poster order controls">
+    <button id="poster-reorder-toggle" type="button" aria-pressed="false">Reorder posters</button>
+    <button id="poster-order-reset" type="button" hidden>Reset original order</button>
+    <p id="poster-order-status" role="status" aria-live="polite" hidden></p>
+  </div>
 
   <!-- Gallery -->
   <main class="gallery-container">
     <div id="gallery" class="gallery">
       <a href="https://www.meetup.com/charlestonhacks/events/316203017/?utm_medium=referral&utm_campaign=share-btn_savedevents_share_modal&utm_source=link&utm_version=v2&member_id=184433601" class="gallery-item external" aria-label="CharlestonHacks Show & Tell at Center for Intentionality on September 22, 2026">
         <img loading="lazy" decoding="async" src="/images/show-and-tell-6.webp" alt="CharlestonHacks: Show & Tell at Center for Intentionality, Tuesday September 22, 5:30–7:00 PM" />
+        <i class="fas fa-arrow-up-right-from-square external-icon"></i>
+      </a>
+      <a href="https://www.meetup.com/charlestonhacks/events/315932578/?utm_medium=referral&utm_campaign=share-btn_savedevents_share_modal&utm_source=link&utm_version=v2&member_id=184433601" class="gallery-item external" aria-label="CharlestonHacks Show & Tell at Sugey's Bar on August 11">
+        <img loading="lazy" decoding="async" src="/images/show-and-tell-5.webp" alt="CharlestonHacks: Show & Tell today at Sugey's Bar, Tuesday August 11, 5:30–7:30 PM" />
         <i class="fas fa-arrow-up-right-from-square external-icon"></i>
       </a>
       <a href="/harborhack-2026/" class="gallery-item" aria-label="HarborHack 2026: Agent in the Loop event archive">
@@ -278,6 +353,124 @@
     </div>
     <p style="margin-top: 16px; font-size: 16px;">© 2026 CharlestonHacks. All rights reserved.</p>
   </footer>
+  <script>
+    (() => {
+      const gallery = document.getElementById("gallery");
+      const toggle = document.getElementById("poster-reorder-toggle");
+      const reset = document.getElementById("poster-order-reset");
+      const status = document.getElementById("poster-order-status");
+      if (!gallery || !toggle || !reset || !status) return;
+
+      const STORAGE_KEY = "charlestonhacks:poster-gallery-order:v1";
+      const posters = Array.from(gallery.querySelectorAll(".gallery-item"));
+      const posterId = (poster) => {
+        if (poster.dataset.posterId) return poster.dataset.posterId;
+        const image = poster.querySelector("img");
+        poster.dataset.posterId = (poster.getAttribute("href") || "") + "|" + (image?.getAttribute("src") || "");
+        return poster.dataset.posterId;
+      };
+      const initialOrder = posters.map(posterId);
+      let reordering = false;
+
+      function saveOrder() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(gallery.children).map(posterId)));
+        } catch {}
+      }
+
+      function applyOrder(ids) {
+        const byId = new Map(Array.from(gallery.children).map((poster) => [posterId(poster), poster]));
+        ids.forEach((id) => {
+          const poster = byId.get(id);
+          if (poster) gallery.append(poster);
+        });
+        byId.forEach((poster, id) => {
+          if (!ids.includes(id)) gallery.append(poster);
+        });
+        syncControls();
+      }
+
+      function syncControls() {
+        const items = Array.from(gallery.querySelectorAll(".gallery-item"));
+        items.forEach((poster, index) => {
+          let actions = poster.querySelector(".poster-order-actions");
+          if (!actions) {
+            actions = document.createElement("div");
+            actions.className = "poster-order-actions";
+            actions.setAttribute("aria-label", "Change poster position");
+
+            const up = document.createElement("button");
+            up.type = "button";
+            up.textContent = "↑";
+            up.addEventListener("click", () => movePoster(poster, -1));
+
+            const down = document.createElement("button");
+            down.type = "button";
+            down.textContent = "↓";
+            down.addEventListener("click", () => movePoster(poster, 1));
+
+            actions.append(up, down);
+            poster.append(actions);
+          }
+          const image = poster.querySelector("img");
+          const label = image?.alt || "Poster";
+          const buttons = actions.querySelectorAll("button");
+          buttons[0].setAttribute("aria-label", "Move " + label + " earlier");
+          buttons[0].title = "Move earlier";
+          buttons[0].disabled = index === 0;
+          buttons[1].setAttribute("aria-label", "Move " + label + " later");
+          buttons[1].title = "Move later";
+          buttons[1].disabled = index === items.length - 1;
+          poster.setAttribute("aria-posinset", String(index + 1));
+          poster.setAttribute("aria-setsize", String(items.length));
+        });
+      }
+
+      function movePoster(poster, direction) {
+        const neighbor = direction < 0 ? poster.previousElementSibling : poster.nextElementSibling;
+        if (!neighbor) return;
+        if (direction < 0) gallery.insertBefore(poster, neighbor);
+        else gallery.insertBefore(poster, neighbor.nextElementSibling);
+        saveOrder();
+        syncControls();
+        const index = Array.from(gallery.children).indexOf(poster) + 1;
+        status.textContent = "Moved " + (poster.querySelector("img")?.alt || "poster") + " to position " + index + " of " + gallery.children.length + ".";
+      }
+
+      posters.forEach((poster) => {
+        poster.addEventListener("click", (event) => {
+          if (reordering && !event.target.closest(".poster-order-actions")) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+        });
+      });
+
+      toggle.addEventListener("click", () => {
+        reordering = !reordering;
+        document.body.classList.toggle("poster-reordering", reordering);
+        toggle.setAttribute("aria-pressed", String(reordering));
+        toggle.textContent = reordering ? "Done reordering" : "Reorder posters";
+        reset.hidden = !reordering;
+        status.hidden = !reordering;
+        status.textContent = reordering
+          ? "Use the arrows on a poster to move it. Your order saves in this browser."
+          : "Poster order saved in this browser.";
+      });
+
+      reset.addEventListener("click", () => {
+        try { localStorage.removeItem(STORAGE_KEY); } catch {}
+        applyOrder(initialOrder);
+        status.textContent = "Original poster order restored.";
+      });
+
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        if (Array.isArray(saved)) applyOrder(saved);
+      } catch {}
+      syncControls();
+    })();
+  </script>
   <script src="/assets/js/portal-return.js"></script>
 </body>
 </html>
