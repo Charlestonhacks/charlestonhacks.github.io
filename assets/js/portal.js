@@ -14,7 +14,7 @@
     return;
   }
 
-  const VERSION = "portal-js-v22-optional-sandbox-cards-20261030";
+  const VERSION = "portal-js-v23-card-manager-tap-20261031";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -591,8 +591,12 @@
         order: [...deckPreferences.order],
       };
       renderManagerOptions();
-      if (typeof manager.showModal === "function") manager.showModal();
-      else manager.setAttribute("open", "");
+      try {
+        if (typeof manager.showModal === "function" && !manager.open) manager.showModal();
+        else manager.setAttribute("open", "");
+      } catch {
+        manager.setAttribute("open", "");
+      }
     }
 
     function closeDeckManager() {
@@ -601,7 +605,11 @@
       else manager.removeAttribute("open");
     }
 
-    homeManageButton?.addEventListener("click", openDeckManager);
+    homeManageButton?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openDeckManager();
+    }, true);
     managerClose?.addEventListener("click", closeDeckManager);
     managerCancel?.addEventListener("click", closeDeckManager);
 
