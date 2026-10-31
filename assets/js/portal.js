@@ -38,15 +38,23 @@
   let activeFeatureId = "home";
   let updateBuildspaceAccess = () => {};
   let loadEventsIntoPanel = () => {};
+  let pendingBuildspaceEvent = null;
 
   // Buildspace is a cross-origin iframe, so it reports horizontal gestures
   // through postMessage instead of relying on parent access to contentDocument.
   window.addEventListener("message", (event) => {
     if (event.origin !== "https://deckerd451.github.io") return;
-    if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
     if (activeFeatureId !== "innovation" || !featureSwiper) return;
     const activeSlide = slidesContainerForSwipe();
     if (!activeSlide || event.source !== activeSlide.contentWindow) return;
+
+    if (event.data?.channel === "chs-portal-event-v1" && event.data?.type === "READY") {
+      activeSlide.dataset.portalDeckReady = "true";
+      sendPendingBuildspaceEvent(activeSlide);
+      return;
+    }
+
+    if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
     const step = event.data.direction === "next" ? 1 : event.data.direction === "previous" ? -1 : 0;
     if (!step) return;
     const target = featureSwiper.activeIndex + step;
@@ -56,6 +64,30 @@
   function slidesContainerForSwipe() {
     return document.querySelector("#portal-feature-slides .swiper-slide-active iframe");
   }
+
+  function sendPendingBuildspaceEvent(frame = slidesContainerForSwipe()) {
+    if (!pendingBuildspaceEvent || !frame?.contentWindow || frame.dataset.portalDeckReady !== "true") return;
+    frame.contentWindow.postMessage({
+      channel: "chs-portal-event-v1",
+      type: "EVENT_CONTEXT",
+      event: pendingBuildspaceEvent
+    }, "https://deckerd451.github.io");
+    pendingBuildspaceEvent = null;
+  }
+
+  window.addEventListener("ch:open-buildspace-event", (event) => {
+    const detail = event.detail?.event;
+    if (!detail || typeof detail.title !== "string") return;
+    pendingBuildspaceEvent = {
+      title: detail.title.slice(0, 200),
+      startDate: String(detail.startDate || "").slice(0, 40),
+      link: String(detail.link || ""),
+      source: String(detail.source || "").slice(0, 80),
+      nearifyJoinUrl: String(detail.nearifyJoinUrl || "")
+    };
+    window.__CH_SHOW_PORTAL_FEATURE__?.("innovation");
+    sendPendingBuildspaceEvent();
+  });
 
   function activatePortal(portalId, trigger) {
     const sounds = {
@@ -778,6 +810,7 @@
         if (feature.id === "events") loadEventsIntoPanel();
         if (feature.id === "innovation") updateBuildspaceAccess();
         const activeCard = slidesContainer.children[activeIndex]?.querySelector(".portal-feature-card");
+        if (feature.id === "innovation") sendPendingBuildspaceEvent(activeCard?.querySelector("iframe"));
         const iframe = activeCard?.querySelector("iframe[data-src]");
         if (iframe && !iframe.hasAttribute("src")) {
           if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
