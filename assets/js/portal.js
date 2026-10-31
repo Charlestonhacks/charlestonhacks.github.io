@@ -13,7 +13,7 @@
     });
   }
 
-  const VERSION = "portal-js-v25-syntax-fix-20261031";
+  const VERSION = "portal-js-v26-event-bridge-20261031";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -233,7 +233,7 @@
   async function loadEventsFeedModule() {
     if (typeof window.loadUnifiedEvents === "function") return window.loadUnifiedEvents;
 
-    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-20261031-poster-cachefix");
+    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-follow-up-20261031");
     if (module?.loadUnifiedEvents) {
       window.loadUnifiedEvents = module.loadUnifiedEvents;
       return window.loadUnifiedEvents;
