@@ -39,6 +39,24 @@
   let updateBuildspaceAccess = () => {};
   let loadEventsIntoPanel = () => {};
 
+  // Buildspace is a cross-origin iframe, so it reports horizontal gestures
+  // through postMessage instead of relying on parent access to contentDocument.
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://deckerd451.github.io") return;
+    if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
+    if (activeFeatureId !== "innovation" || !featureSwiper) return;
+    const activeSlide = slidesContainerForSwipe();
+    if (!activeSlide || event.source !== activeSlide.contentWindow) return;
+    const step = event.data.direction === "next" ? 1 : event.data.direction === "previous" ? -1 : 0;
+    if (!step) return;
+    const target = featureSwiper.activeIndex + step;
+    if (target >= 0 && target < featureSwiper.slides.length) featureSwiper.slideTo(target);
+  });
+
+  function slidesContainerForSwipe() {
+    return document.querySelector("#portal-feature-slides .swiper-slide-active iframe");
+  }
+
   function activatePortal(portalId, trigger) {
     const sounds = {
       innovation: null, events: "chime", news: "chime", sandbox: "chime",
