@@ -13,10 +13,24 @@
     });
   }
 
-  const VERSION = "portal-js-v25-syntax-fix-20261031";
+  const VERSION = "portal-js-v26-event-bridge-20261031";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
+  const BUILDSPACE_EVENT_CONTEXT_KEY = "ch:portal-event-context";
+  function readPendingBuildspaceEvent() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(BUILDSPACE_EVENT_CONTEXT_KEY) || "null");
+      if (!saved?.event || !Number.isFinite(saved.savedAt) || Date.now() - saved.savedAt > 24 * 60 * 60 * 1000) {
+        localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY);
+        return null;
+      }
+      return saved.event;
+    } catch {
+      localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY);
+      return null;
+    }
+  }
   function consumeBuildspaceReturn() {
     try {
       const requestedAt = Number(localStorage.getItem(BUILDSPACE_RETURN_KEY));
@@ -38,6 +52,64 @@
   let activeFeatureId = "home";
   let updateBuildspaceAccess = () => {};
   let loadEventsIntoPanel = () => {};
+  let pendingBuildspaceEvent = readPendingBuildspaceEvent();
+
+  // Buildspace is a cross-origin iframe, so it reports horizontal gestures
+  // through postMessage instead of relying on parent access to contentDocument.
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://deckerd451.github.io") return;
+    const frame = [...document.querySelectorAll("#portal-feature-slides iframe")]
+      .find((candidate) => candidate.contentWindow === event.source);
+    if (!frame) return;
+
+    if (event.data?.channel === "chs-portal-event-v1" && event.data?.type === "READY") {
+      frame.dataset.portalDeckReady = "true";
+      if (activeFeatureId === "innovation") sendPendingBuildspaceEvent(frame);
+      return;
+    }
+
+    if (activeFeatureId !== "innovation" || !featureSwiper || frame !== slidesContainerForSwipe()) return;
+    if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
+    const step = event.data.direction === "next" ? 1 : event.data.direction === "previous" ? -1 : 0;
+    if (!step) return;
+    const target = featureSwiper.activeIndex + step;
+    if (target >= 0 && target < featureSwiper.slides.length) featureSwiper.slideTo(target);
+  });
+
+  function slidesContainerForSwipe() {
+    return document.querySelector("#portal-feature-slides .swiper-slide-active iframe");
+  }
+
+  function sendPendingBuildspaceEvent(frame = slidesContainerForSwipe()) {
+    if (!pendingBuildspaceEvent || !frame?.contentWindow || frame.dataset.portalDeckReady !== "true") return;
+    frame.contentWindow.postMessage({
+      channel: "chs-portal-event-v1",
+      type: "EVENT_CONTEXT",
+      event: pendingBuildspaceEvent
+    }, "https://deckerd451.github.io");
+    pendingBuildspaceEvent = null;
+    try { localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY); } catch {}
+  }
+
+  window.addEventListener("ch:open-buildspace-event", (event) => {
+    const detail = event.detail?.event;
+    if (!detail || typeof detail.title !== "string") return;
+    pendingBuildspaceEvent = {
+      title: detail.title.slice(0, 200),
+      startDate: String(detail.startDate || "").slice(0, 40),
+      link: String(detail.link || ""),
+      source: String(detail.source || "").slice(0, 80),
+      nearifyJoinUrl: String(detail.nearifyJoinUrl || "")
+    };
+    try {
+      localStorage.setItem(BUILDSPACE_EVENT_CONTEXT_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        event: pendingBuildspaceEvent
+      }));
+    } catch {}
+    window.__CH_SHOW_PORTAL_FEATURE__?.("innovation");
+    sendPendingBuildspaceEvent();
+  });
 
   function activatePortal(portalId, trigger) {
     const sounds = {
@@ -183,7 +255,7 @@
   async function loadEventsFeedModule() {
     if (typeof window.loadUnifiedEvents === "function") return window.loadUnifiedEvents;
 
-    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-20261031-poster-cachefix");
+    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-follow-up-20261031");
     if (module?.loadUnifiedEvents) {
       window.loadUnifiedEvents = module.loadUnifiedEvents;
       return window.loadUnifiedEvents;
@@ -615,6 +687,7 @@
     managerSave?.addEventListener("click", () => {
       if (!draftPreferences) return;
       const nextPreferences = saveDeckPreferences(draftPreferences);
+      window.__CH_SAVE_DECK_PREFERENCES__?.(nextPreferences);
       const currentStillIncluded = !nextPreferences.hidden.includes(activeFeatureId);
       const orderedFeatures = orderedDeckFeatures(nextPreferences);
       const firstOrderedFeature = orderedFeatures[0]?.id;
@@ -759,6 +832,7 @@
         if (feature.id === "events") loadEventsIntoPanel();
         if (feature.id === "innovation") updateBuildspaceAccess();
         const activeCard = slidesContainer.children[activeIndex]?.querySelector(".portal-feature-card");
+        if (feature.id === "innovation") sendPendingBuildspaceEvent(activeCard?.querySelector("iframe"));
         const iframe = activeCard?.querySelector("iframe[data-src]");
         if (iframe && !iframe.hasAttribute("src")) {
           if (feature.id !== "innovation" || window.__CH_MEMBER_AUTH__ === true) {
@@ -793,6 +867,26 @@
           arrivingCard?.classList.remove("portal-card-arriving");
         }, 760);
       }
+    }
+
+    function syncDeckPreferencesFromAccount(detail = {}) {
+      if (detail.authorized !== true) return;
+      if (detail.deckPreferences && typeof detail.deckPreferences === "object") {
+        const previous = JSON.stringify(deckPreferences);
+        const next = saveDeckPreferences(detail.deckPreferences);
+        if (JSON.stringify(next) !== previous) renderDeck(activeFeatureId);
+      } else {
+        // First signed-in use: keep the member's current device order as their
+        // account default. Later devices load the account value above.
+        window.__CH_SAVE_DECK_PREFERENCES__?.(deckPreferences);
+      }
+    }
+    window.addEventListener("ch:member-auth-changed", (event) => syncDeckPreferencesFromAccount(event.detail));
+    if (window.__CH_MEMBER_AUTH__ === true) {
+      syncDeckPreferencesFromAccount({
+        authorized: true,
+        deckPreferences: window.__CH_SESSION__?.user?.user_metadata?.ch_portal_deck_preferences || null
+      });
     }
 
     renderDeck(shouldRestoreBuildspace ? "innovation" : "home");

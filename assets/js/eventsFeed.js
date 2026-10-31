@@ -414,6 +414,25 @@ export async function loadUnifiedEvents({
         view.rel = "noopener noreferrer";
         view.textContent = "View event";
         actions.append(view);
+
+        const followUp = document.createElement("button");
+        followUp.type = "button";
+        followUp.className = "ch-event-buildspace-follow-up";
+        followUp.textContent = "Follow up in Buildspace";
+        followUp.style.cssText = "appearance:none;border:0;background:transparent;color:#a9f6ff;font:inherit;font-size:.88rem;font-weight:700;text-decoration:underline;cursor:pointer;padding:.25rem 0;";
+        followUp.addEventListener("click", () => {
+          window.dispatchEvent(new CustomEvent("ch:open-buildspace-event", {
+            detail: { event: {
+              title: String(event?.title || event?.name || "Event"),
+              startDate: String(event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date ?? ""),
+              link,
+              posterSrc: event?.posterSrc ? String(event.posterSrc) : "",
+              source: isCH ? "CharlestonHacks" : sourceLabel,
+              nearifyJoinUrl: event?.nearifyJoinUrl ? String(event.nearifyJoinUrl) : ""
+            } }
+          }));
+        });
+        actions.append(followUp);
         content.append(actions);
 
         if (event.posterSrc) {

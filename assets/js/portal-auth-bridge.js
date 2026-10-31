@@ -69,6 +69,19 @@ buildspaceGate?.addEventListener("click", async (event) => {
 
 let activeSession = null;
 let activeMember = false;
+
+const DECK_PREFERENCES_KEY = "ch_portal_deck_preferences";
+window.__CH_SAVE_DECK_PREFERENCES__ = async (preferences) => {
+  if (!activeMember || !activeSession?.user?.id) return false;
+  try {
+    const { error } = await supabase.auth.updateUser({ data: { [DECK_PREFERENCES_KEY]: preferences } });
+    if (error) throw error;
+    return true;
+  } catch (error) {
+    console.warn("[PORTAL AUTH] Deck preferences could not be saved to the member account:", error);
+    return false;
+  }
+};
 let activeProfileName = "";
 let pendingNonce = null;
 let authRevision = 0;
@@ -122,7 +135,7 @@ async function refreshMemberAccess(session) {
     signOutButton.textContent = "Sign out";
   }
   window.dispatchEvent(new CustomEvent("ch:member-auth-changed", {
-    detail: { authorized: activeMember }
+    detail: { authorized: activeMember, deckPreferences: activeMember ? (activeSession?.user?.user_metadata?.[DECK_PREFERENCES_KEY] || null) : null }
   }));
 
   if (pendingNonce) {
