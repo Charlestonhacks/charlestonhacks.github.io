@@ -182,12 +182,12 @@
   // Events feed loader (no polling)
   // ------------------------------------------------
   async function loadEventsFeedModule() {
-    if (typeof window.loadEvents === "function") return window.loadEvents;
+    if (typeof window.loadUnifiedEvents === "function") return window.loadUnifiedEvents;
 
-    const module = await import("/assets/js/eventsFeed.js?v=chronological-20261028");
-    if (module?.loadEvents) {
-      window.loadEvents = module.loadEvents;
-      return window.loadEvents;
+    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-20261031");
+    if (module?.loadUnifiedEvents) {
+      window.loadUnifiedEvents = module.loadUnifiedEvents;
+      return window.loadUnifiedEvents;
     }
     return null;
   }
@@ -196,7 +196,7 @@
   // Swipe deck with live feature content inside each card
   // ------------------------------------------------
   const features = [
-    { id: "events", title: "Events", icon: "fas fa-calendar-days", description: "Find upcoming CharlestonHacks events and community meetups.", view: "events" },
+    { id: "events", title: "Events & Posters", icon: "fas fa-calendar-days", description: "Browse upcoming community events and the dated event poster archive.", view: "events" },
     { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
     { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", view: "chat" },
     { id: "discord", title: "Discord", icon: "fa-brands fa-discord", description: "Join the CharlestonHacks Discord community.", view: "discord" },
@@ -205,7 +205,6 @@
     { id: "ie-hackathon", title: "IE Hackathon", icon: "fas fa-laptop-code", description: "Open the Innovation Engine hackathon project.", src: "https://hackathon-chs-git-main-maxs-projects-ff8c32db.vercel.app/" },
     { id: "hacker-theater", title: "Hacker Theater", icon: "fas fa-clapperboard", description: "Explore the interactive presentation demo.", src: "/hackertheater/" },
     { id: "news", title: "News", icon: "fas fa-newspaper", description: "CharlestonHacks updates and community stories.", view: "news" },
-    { id: "poster", title: "Event Poster", icon: "fas fa-image", description: "View the event poster.", src: "/Poster.html" },
     { id: "swag", title: "Swag Vote", icon: "fas fa-shirt", description: "Browse and vote on CharlestonHacks swag.", src: "/swag.html" },
     { id: "game", title: "Avatar Matching Game", icon: "fas fa-gamepad", description: "Play the community avatar matching game.", src: "/cardmatchgame.html" },
   ];
@@ -298,7 +297,7 @@
         if (typeof loadEvents === "function") {
           await loadEvents({
             listId: "portal-events-list",
-            limit: 10,
+            limit: 0,
             emptyText: "No upcoming events found. Check back later!",
             errorText: "The event list could not load. Please try again later.",
           });
@@ -307,12 +306,6 @@
         list.textContent = "The event list could not load. Please try again later.";
       }
     };
-
-    document.getElementById("portal-browse-event-posters")?.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      window.__CH_SHOW_PORTAL_FEATURE__?.("poster");
-    });
 
     window.addEventListener("ch:member-auth-changed", updateBuildspaceAccess);
     return viewNodes;
