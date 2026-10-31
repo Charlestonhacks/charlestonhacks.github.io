@@ -308,6 +308,12 @@
       }
     };
 
+    document.getElementById("portal-browse-event-posters")?.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.__CH_SHOW_PORTAL_FEATURE__?.("poster");
+    });
+
     window.addEventListener("ch:member-auth-changed", updateBuildspaceAccess);
     return viewNodes;
   }
