@@ -266,7 +266,7 @@
         <i class="fas fa-arrow-up-right-from-square external-icon"></i>
       </a>
       <a href="https://www.meetup.com/charlestonhacks/events/315932578/?utm_medium=referral&utm_campaign=share-btn_savedevents_share_modal&utm_source=link&utm_version=v2&member_id=184433601" class="gallery-item external" aria-label="CharlestonHacks Show & Tell at Sugey's Bar on August 11">
-        <img loading="lazy" decoding="async" src="/images/show-and-tell-5.webp" alt="CharlestonHacks: Show & Tell today at Sugey's Bar, Tuesday August 11, 5:30–7:30 PM" />
+        <img loading="lazy" decoding="async" src="/images/show-and-tell-5.webp" alt="CharlestonHacks: Show & Tell at Sugey's Bar, Tuesday August 11, 5:30–7:30 PM" />
         <i class="fas fa-arrow-up-right-from-square external-icon"></i>
       </a>
       <a href="/harborhack-2026/" class="gallery-item" aria-label="HarborHack 2026: Agent in the Loop event archive">
@@ -402,12 +402,20 @@
             const up = document.createElement("button");
             up.type = "button";
             up.textContent = "↑";
-            up.addEventListener("click", () => movePoster(poster, -1));
+            up.addEventListener("click", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              movePoster(poster, -1);
+            });
 
             const down = document.createElement("button");
             down.type = "button";
             down.textContent = "↓";
-            down.addEventListener("click", () => movePoster(poster, 1));
+            down.addEventListener("click", (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              movePoster(poster, 1);
+            });
 
             actions.append(up, down);
             poster.append(actions);
