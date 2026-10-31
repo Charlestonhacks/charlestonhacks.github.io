@@ -11,10 +11,9 @@
     mobilePortalMedia.addEventListener("change", (event) => {
       if (event.matches) window.location.reload();
     });
-    return;
   }
 
-  const VERSION = "portal-js-v23-card-manager-tap-20261031";
+  const VERSION = "portal-js-v24-manager-independent-20261031";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -452,7 +451,7 @@
     const container = document.getElementById("portal-feature-swiper");
     const slidesContainer = document.getElementById("portal-feature-slides");
     const counter = document.getElementById("portal-feature-count");
-    if (!container || !slidesContainer || !counter || typeof window.Swiper !== "function") return;
+    if (!container || !slidesContainer || !counter) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const homeManageButton = document.getElementById("portal-manage-deck");
@@ -622,12 +621,17 @@
       const nextFeatureId = currentStillIncluded ? activeFeatureId : firstOrderedFeature;
       draftPreferences = null;
       closeDeckManager();
-      renderDeck(nextFeatureId || "home", true);
+      if (typeof window.Swiper === "function") renderDeck(nextFeatureId || "home", true);
     });
 
     manager?.addEventListener("click", (event) => {
       if (event.target === manager) closeDeckManager();
     });
+
+    if (typeof window.Swiper !== "function") {
+      console.warn("[PORTAL] Swipe library is unavailable; card manager remains available.");
+      return;
+    }
 
     let shouldRestoreBuildspace = consumeBuildspaceReturn();
 
