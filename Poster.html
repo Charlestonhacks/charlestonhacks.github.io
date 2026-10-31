@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Past CharlestonHacks Events — Charleston Tech Hackathons & Meetups</title>
+  <title>CharlestonHacks Events — Charleston Tech Hackathons & Meetups</title>
   <meta name="description" content="Browse CharlestonHacks hackathons, meetups, posters, and recaps from past years.">
-  <meta property="og:title" content="Past CharlestonHacks Events — Charleston Tech Hackathons & Meetups">
+  <meta property="og:title" content="CharlestonHacks Events — Charleston Tech Hackathons & Meetups">
   <meta property="og:description" content="Browse CharlestonHacks hackathons, meetups, posters, and recaps from past years.">
   <meta property="og:image" content="https://charlestonhacks.com/images/header events.webp">
   <meta property="og:url" content="https://charlestonhacks.com/Poster.html">
@@ -89,6 +89,9 @@
     }
 
     .gallery-item {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
       position: relative;
       width: 100%;
       max-width: 300px;
@@ -107,6 +110,21 @@
       width: 100%;
       height: auto;
       display: block;
+    }
+
+    .poster-event-date {
+      display: block;
+      flex: none;
+      width: 100%;
+      padding: 8px 10px;
+      border-top: 1px solid rgba(201,163,94,0.72);
+      background: linear-gradient(90deg, rgba(24,24,24,0.98), rgba(35,35,35,0.98));
+      color: #ffe4a3;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.2;
+      text-align: center;
     }
 
     .poster-order-toolbar {
@@ -249,7 +267,7 @@
       <img src="images/header events.webp" alt="CharlestonHacks Events" class="events-header-img" />
     </a>
     <a href="index.html" style="text-decoration: none;">
-      <h1 class="page-title">Past CharlestonHacks Events</h1>
+      <h1 class="page-title">CharlestonHacks Events</h1>
     </a>
   </div>
   <div class="poster-order-toolbar" aria-label="Poster order controls">
@@ -261,6 +279,10 @@
   <!-- Gallery -->
   <main class="gallery-container">
     <div id="gallery" class="gallery">
+      <a href="https://www.meetup.com/charlestonhacks/events/317194903/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2026-11-17" aria-label="CharlestonHacks Show &amp; Tell at Freehouse Brewery on November 17, 2026">
+        <img loading="lazy" decoding="async" src="/images/show-and-tell-freehouse-nov-17-2026.webp" alt="CharlestonHacks Show &amp; Tell at Freehouse Brewery — November 17, 2026" />
+        <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
+      </a>
       <a href="https://www.meetup.com/charlestonhacks/events/314775169/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2026-10-23" aria-label="HarborHack 2026: Agent in the Loop on 2026-10-23">
         <img loading="lazy" decoding="async" src="/images/harborhack-2026/harborhack-2026-poster.webp" alt="HarborHack 2026: Agent in the Loop — 2026-10-23" />
         <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
@@ -501,7 +523,7 @@
       const status = document.getElementById("poster-order-status");
       if (!gallery || !toggle || !reset || !status) return;
 
-      const STORAGE_KEY = "charlestonhacks:poster-gallery-order:v2";
+      const STORAGE_KEY = "charlestonhacks:poster-gallery-order:v3";
       const posters = Array.from(gallery.querySelectorAll(".gallery-item"));
       const posterId = (poster) => {
         if (poster.dataset.posterId) return poster.dataset.posterId;
@@ -533,6 +555,17 @@
       function syncControls() {
         const items = Array.from(gallery.querySelectorAll(".gallery-item"));
         items.forEach((poster, index) => {
+          const eventDate = poster.dataset.eventDate;
+          if (eventDate && !poster.querySelector(".poster-event-date")) {
+            const [year, month, day] = eventDate.split("-");
+            const dateLabel = day ? `${month}/${day}/${year}` : `${month}/${year}`;
+            const date = document.createElement("time");
+            date.className = "poster-event-date";
+            date.dateTime = eventDate;
+            date.textContent = dateLabel;
+            poster.append(date);
+          }
+
           let actions = poster.querySelector(".poster-order-actions");
           if (!actions) {
             actions = document.createElement("div");
