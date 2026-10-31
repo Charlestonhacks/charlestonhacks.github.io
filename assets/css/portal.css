@@ -1559,46 +1559,8 @@ button:focus {
 
 .portal-feature-header {
   display: grid;
-  grid-template-columns: auto minmax(0,1fr) 44px auto;
+  grid-template-columns: auto minmax(0,1fr) auto;
 }
-.portal-feature-pin {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  padding: 0;
-  border: 1px solid rgba(0,224,255,0.35);
-  border-radius: 50%;
-  color: rgba(228,246,255,0.72);
-  background: rgba(0,224,255,0.06);
-  font-size: 0.95rem;
-  cursor: pointer;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  transition: color 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(.2,.8,.2,1);
-}
-.portal-feature-pin:hover,
-.portal-feature-pin:focus-visible {
-  border-color: #f3d69a;
-  color: #f3d69a;
-  background: rgba(201,163,94,0.12);
-  outline: 2px solid rgba(0,224,255,0.72);
-  outline-offset: 2px;
-}
-.portal-feature-pin[aria-pressed="true"] {
-  border-color: #f3d69a;
-  color: #081018;
-  background: linear-gradient(145deg, #ffe6a6, #c9a35e);
-  box-shadow: 0 0 18px rgba(201,163,94,0.48);
-}
-.portal-feature-pin.is-pin-pulsing { animation: portalPinPulse 540ms cubic-bezier(.2,.8,.2,1); }
-@keyframes portalPinPulse {
-  0% { transform: scale(1); }
-  42% { transform: scale(1.22) rotate(-12deg); box-shadow: 0 0 30px rgba(201,163,94,.75); }
-  100% { transform: scale(1); }
-}
-
 .portal-deck-manager {
   position: fixed;
   inset: auto 10px max(10px, env(safe-area-inset-bottom));
@@ -1691,10 +1653,6 @@ button:focus {
   background: rgba(255,255,255,.035);
   transition: border-color 220ms ease, background 220ms ease, transform 220ms ease, opacity 220ms ease;
 }
-.portal-deck-option.is-pinned {
-  border-color: rgba(201,163,94,.54);
-  background: linear-gradient(100deg, rgba(201,163,94,.12), rgba(0,224,255,.035));
-}
 .portal-deck-option.is-excluded { opacity: .62; }
 .portal-deck-option.portal-option-changed { animation: portalOptionPop 360ms cubic-bezier(.2,.8,.2,1); }
 @keyframes portalOptionPop {
@@ -1742,25 +1700,8 @@ button:focus {
   color: rgba(235,246,255,.54);
   font-size: .67rem;
 }
-.portal-deck-pin-toggle {
-  min-width: 86px;
-  min-height: 44px;
-  padding: 0 10px;
-  border: 1px solid rgba(0,224,255,.36);
-  border-radius: 999px;
-  color: #dffaff;
-  background: rgba(0,224,255,.07);
-  font: 600 .62rem/1 "Orbitron", sans-serif;
-  cursor: pointer;
-}
-.portal-deck-pin-toggle[aria-pressed="true"] {
-  border-color: rgba(243,214,154,.82);
-  color: #ffe9b5;
-  background: rgba(201,163,94,.15);
-}
-.portal-deck-pin-toggle:disabled { opacity: .45; cursor: not-allowed; }
 .portal-deck-close:focus-visible,
-.portal-deck-pin-toggle:focus-visible,
+.portal-deck-order-button:focus-visible,
 .portal-deck-cancel:focus-visible,
 .portal-deck-save:focus-visible {
   outline: 2px solid #00e0ff;
@@ -1828,14 +1769,15 @@ button:focus {
 
 @media (max-width: 360px) {
   .portal-feature-header {
-    grid-template-columns: auto minmax(0,1fr) 40px auto;
+    grid-template-columns: auto minmax(0,1fr) auto;
     gap: 0.35rem;
   }
-  .portal-feature-pin { width: 40px; height: 40px; flex-basis: 40px; }
   .portal-feature-number { font-size: .46rem !important; }
   .portal-deck-manager-panel { padding-right: 12px; padding-left: 12px; }
-  .portal-deck-option { grid-template-columns: minmax(0,1fr) 78px; gap: 5px; }
-  .portal-deck-pin-toggle { min-width: 76px; padding: 0 6px; font-size: .55rem; }
+  .portal-deck-option { grid-template-columns: minmax(0,1fr) 62px 68px; gap: 5px; padding-right: 6px; padding-left: 7px; }
+  .portal-deck-toggle { min-width: 62px; padding: 0 4px; font-size: .52rem; }
+  .portal-deck-order-button { width: 32px; height: 42px; }
+  .portal-deck-order-controls { min-width: 68px; }
 }
 @media (orientation: landscape) and (max-height: 560px) {
   .portal-deck-manager-panel { max-height: 84dvh; }
@@ -1845,12 +1787,10 @@ button:focus {
   .portal-deck-manager[open],
   .portal-deck-manager[open]::backdrop,
   .portal-deck-option.portal-option-changed,
-  .portal-feature-pin.is-pin-pulsing,
   .portal-deck-restacking .swiper-slide-active .portal-feature-card,
   .portal-feature-card.portal-card-arriving::after {
     animation: none !important;
   }
-  .portal-feature-pin { transition: none !important; }
 }
 
 
@@ -1875,13 +1815,52 @@ button:focus {
   color: #c9f8ff;
   background: rgba(0,224,255,.09);
 }
+.portal-deck-section-heading {
+  margin: 8px 2px 0;
+  color: #9beef8;
+  font: 700 .67rem/1.3 Arial, sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.portal-deck-order-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+.portal-deck-order-button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(0,224,255,.42);
+  border-radius: 12px;
+  color: #dffaff;
+  background: rgba(0,224,255,.08);
+  font: 700 1rem/1 Arial, sans-serif;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.portal-deck-order-button:disabled { opacity: .34; cursor: not-allowed; }
+.portal-deck-order-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
 .portal-deck-toggle:focus-visible {
   outline: 2px solid #00e0ff;
   outline-offset: 3px;
 }
 @media (max-width: 360px) {
   .portal-deck-option {
-    grid-template-columns: minmax(0,1fr) 68px 76px;
+    grid-template-columns: minmax(0,1fr) 68px 68px;
     gap: 5px;
     padding-right: 6px;
     padding-left: 7px;
@@ -1891,4 +1870,6 @@ button:focus {
     padding: 0 5px;
     font-size: .56rem;
   }
+  .portal-deck-order-controls { min-width: 68px; }
+  .portal-deck-order-button { width: 32px; }
 }
