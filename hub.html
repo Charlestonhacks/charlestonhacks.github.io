@@ -270,32 +270,64 @@
     }
   
     .portal-events-intro {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.65rem 1rem;
-      padding: 0.35rem 0.75rem 0.8rem;
+      display: grid;
+      justify-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 0.75rem 0.85rem;
       text-align: center;
     }
     .portal-events-intro .portal-view-intro { margin: 0; }
-    .portal-events-posters-button {
-      border: 1px solid rgba(0,224,255,0.48);
-      border-radius: 999px;
-      padding: 0.5rem 0.95rem;
-      color: #a9f6ff;
-      background: rgba(0,224,255,0.09);
-      font: inherit;
-      font-size: 0.92rem;
-      font-weight: 700;
-      cursor: pointer;
+    .portal-events-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.45rem; }
+    .ch-events-section-title {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      margin: 0;
+      padding: 0.55rem 0.8rem;
+      color: #ffe4a3;
+      background: rgba(3, 12, 22, 0.96);
+      border-bottom: 1px solid rgba(201,163,94,0.4);
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
     }
-    .portal-events-posters-button:hover,
-    .portal-events-posters-button:focus-visible {
-      border-color: #00e0ff;
-      background: rgba(0,224,255,0.18);
-      outline: 2px solid rgba(0,224,255,0.7);
-      outline-offset: 2px;
+    .ch-event-card {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 0.8rem;
+      align-items: start;
+      margin: 0.55rem 0.7rem;
+      padding: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      background: rgba(14, 27, 46, 0.9);
+    }
+    .ch-event-card[data-has-poster="false"] { grid-template-columns: minmax(0, 1fr); }
+    .ch-event-poster { display: block; overflow: hidden; border-radius: 8px; }
+    .ch-event-poster img { display: block; width: 82px; height: 112px; object-fit: cover; }
+    .ch-event-content { min-width: 0; }
+    .ch-event-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; margin-bottom: 0.45rem; }
+    .ch-event-date { color: #00e0ff; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .ch-source-badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      padding: 0.2rem 0.55rem;
+      font-size: 0.72rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .ch-source-charlestonhacks { color: #ffe4a3; background: rgba(201,163,94,0.13); }
+    .ch-source-community { color: #8ef3ff; background: rgba(0,224,255,0.1); }
+    .ch-event-title { margin: 0 0 0.45rem; font-size: 1.05rem; line-height: 1.3; }
+    .ch-event-title a { color: #fff; text-decoration: none; }
+    .ch-event-title a:hover, .ch-event-title a:focus-visible { text-decoration: underline; }
+    .ch-event-location, .ch-event-desc { margin: 0.35rem 0; color: rgba(255,255,255,0.76); font-size: 0.9rem; line-height: 1.35; }
+    .ch-event-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; margin-top: 0.55rem; }
+    .ch-event-cta a { color: #a9f6ff; font-size: 0.88rem; font-weight: 700; }
+    @media (max-width: 390px) {
+      .ch-event-card { grid-template-columns: 68px minmax(0, 1fr); gap: 0.6rem; }
+      .ch-event-poster img { width: 68px; height: 98px; }
     }
     .portal-discord-entry {
       display: grid;
@@ -400,11 +432,14 @@
         <!-- In-card destination views; the home card stays mounted underneath. -->
         <section class="portal-view-panel" id="portal-view-panel" aria-labelledby="portal-view-title" aria-hidden="true" inert hidden>
           <div class="portal-view-body">
-            <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming events" hidden>
+            <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming and past events with posters" hidden>
               <div class="portal-events-intro">
-              <p class="portal-view-intro">Upcoming CharlestonHacks and community events</p>
-              <button type="button" class="portal-events-posters-button swiper-no-swiping" id="portal-browse-event-posters">Browse event posters</button>
-            </div>
+                <p class="portal-view-intro">Upcoming events and past events, with posters where available.</p>
+                <div class="portal-events-legend" aria-label="Event categories">
+                  <span class="ch-source-badge ch-source-charlestonhacks">CharlestonHacks</span>
+                  <span class="ch-source-badge ch-source-community">Community</span>
+                </div>
+              </div>
               <div id="portal-events-list" class="portal-events-list" role="list"></div>
             </section>
             <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
