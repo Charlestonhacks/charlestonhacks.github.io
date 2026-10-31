@@ -17,6 +17,20 @@
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
+  const BUILDSPACE_EVENT_CONTEXT_KEY = "ch:portal-event-context";
+  function readPendingBuildspaceEvent() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(BUILDSPACE_EVENT_CONTEXT_KEY) || "null");
+      if (!saved?.event || !Number.isFinite(saved.savedAt) || Date.now() - saved.savedAt > 24 * 60 * 60 * 1000) {
+        localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY);
+        return null;
+      }
+      return saved.event;
+    } catch {
+      localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY);
+      return null;
+    }
+  }
   function consumeBuildspaceReturn() {
     try {
       const requestedAt = Number(localStorage.getItem(BUILDSPACE_RETURN_KEY));
@@ -38,7 +52,7 @@
   let activeFeatureId = "home";
   let updateBuildspaceAccess = () => {};
   let loadEventsIntoPanel = () => {};
-  let pendingBuildspaceEvent = null;
+  let pendingBuildspaceEvent = readPendingBuildspaceEvent();
 
   // Buildspace is a cross-origin iframe, so it reports horizontal gestures
   // through postMessage instead of relying on parent access to contentDocument.
@@ -74,6 +88,7 @@
       event: pendingBuildspaceEvent
     }, "https://deckerd451.github.io");
     pendingBuildspaceEvent = null;
+    try { localStorage.removeItem(BUILDSPACE_EVENT_CONTEXT_KEY); } catch {}
   }
 
   window.addEventListener("ch:open-buildspace-event", (event) => {
@@ -86,6 +101,12 @@
       source: String(detail.source || "").slice(0, 80),
       nearifyJoinUrl: String(detail.nearifyJoinUrl || "")
     };
+    try {
+      localStorage.setItem(BUILDSPACE_EVENT_CONTEXT_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        event: pendingBuildspaceEvent
+      }));
+    } catch {}
     window.__CH_SHOW_PORTAL_FEATURE__?.("innovation");
     sendPendingBuildspaceEvent();
   });
@@ -851,8 +872,9 @@
     function syncDeckPreferencesFromAccount(detail = {}) {
       if (detail.authorized !== true) return;
       if (detail.deckPreferences && typeof detail.deckPreferences === "object") {
+        const previous = JSON.stringify(deckPreferences);
         const next = saveDeckPreferences(detail.deckPreferences);
-        renderDeck(activeFeatureId);
+        if (JSON.stringify(next) !== previous) renderDeck(activeFeatureId);
       } else {
         // First signed-in use: keep the member's current device order as their
         // account default. Later devices load the account value above.
