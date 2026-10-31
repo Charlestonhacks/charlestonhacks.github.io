@@ -280,7 +280,7 @@
   <main class="gallery-container">
     <div id="gallery" class="gallery">
       <a href="https://www.meetup.com/charlestonhacks/events/317194903/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2026-11-17" aria-label="CharlestonHacks Show &amp; Tell at Freehouse Brewery on November 17, 2026">
-        <img loading="lazy" decoding="async" src="/images/show-and-tell-freehouse-nov-17-2026.webp" alt="CharlestonHacks Show &amp; Tell at Freehouse Brewery — November 17, 2026" />
+        <img loading="lazy" decoding="async" data-poster-base64="/images/show-and-tell-freehouse-nov-17-2026.webp.b64" alt="CharlestonHacks Show &amp; Tell at Freehouse Brewery — November 17, 2026" />
         <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
       </a>
       <a href="https://www.meetup.com/charlestonhacks/events/314775169/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2026-10-23" aria-label="HarborHack 2026: Agent in the Loop on 2026-10-23">
@@ -649,6 +649,23 @@
         const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
         if (Array.isArray(saved)) applyOrder(saved);
       } catch {}
+
+      const meetupPoster = gallery.querySelector("img[data-poster-base64]");
+      if (meetupPoster) {
+        fetch(meetupPoster.dataset.posterBase64, { cache: "force-cache" })
+          .then((response) => {
+            if (!response.ok) throw new Error("Poster image unavailable");
+            return response.text();
+          })
+          .then((encoded) => {
+            const binary = atob(encoded.trim());
+            const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+            meetupPoster.src = URL.createObjectURL(new Blob([bytes], { type: "image/webp" }));
+          })
+          .catch(() => {
+            meetupPoster.alt = "CharlestonHacks Show & Tell at Freehouse Brewery, November 17, 2026";
+          });
+      }
       syncControls();
     })();
   </script>
