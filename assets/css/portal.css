@@ -1563,7 +1563,7 @@ button:focus {
 }
 .portal-deck-manager {
   position: fixed;
-  inset: auto 10px max(10px, env(safe-area-inset-bottom));
+  inset: 0;
   width: min(580px, calc(100vw - 20px));
   max-width: none;
   max-height: min(82vh, 760px);
