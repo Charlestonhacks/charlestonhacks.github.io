@@ -168,6 +168,229 @@ export async function loadEvents({
   }
 }
 
+
+export async function loadUnifiedEvents({
+  listId = "portal-events-list",
+  emptyText = "No events are listed yet.",
+  errorText = "The event list could not load. Please try again later.",
+} = {}) {
+  const list = document.getElementById(listId);
+  if (!list) return;
+  list.textContent = "Loading events and posters…";
+
+  async function getArchiveEvents() {
+    const response = await fetch("/Poster.html", { cache: "force-cache" });
+    if (!response.ok) throw new Error("Poster archive unavailable");
+    const html = await response.text();
+    const archiveDocument = new DOMParser().parseFromString(html, "text/html");
+    const items = Array.from(archiveDocument.querySelectorAll("#gallery .gallery-item"));
+    const archived = items.map((item) => {
+      const image = item.querySelector("img");
+      const date = item.dataset.eventDate || "";
+      const label = image?.alt || item.getAttribute("aria-label") || "CharlestonHacks event";
+      const split = label.lastIndexOf(" — ");
+      const title = split > 0 ? label.slice(0, split) : label.replace(/\s+on\s+\d{4}-\d{2}-\d{2}$/, "");
+      const src = image?.getAttribute("src") || "";
+      return {
+        title,
+        link: new URL(item.getAttribute("href") || "#", location.href).href,
+        startDate: date,
+        location: "",
+        description: "",
+        source: "CharlestonHacks",
+        posterSrc: src ? new URL(src, location.href).href : "",
+        posterDataPath: image?.dataset.posterBase64 || "",
+        isArchiveEvent: true,
+      };
+    });
+
+    await Promise.all(archived.map(async (event) => {
+      if (!event.posterDataPath) return;
+      try {
+        const posterResponse = await fetch(event.posterDataPath, { cache: "force-cache" });
+        if (posterResponse.ok) {
+          const encoded = (await posterResponse.text()).trim();
+          if (encoded) event.posterSrc = "data:image/webp;base64," + encoded;
+        }
+      } catch {}
+    }));
+    return archived;
+  }
+
+  function dateTime(event) {
+    const raw = event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date ?? "";
+    if (!raw) return Number.NaN;
+    const value = String(raw);
+    const normalized = /^\d{4}-\d{2}$/.test(value)
+      ? value + "-01T12:00:00"
+      : (/^\d{4}-\d{2}-\d{2}$/.test(value) ? value + "T12:00:00" : value);
+    const result = new Date(normalized).getTime();
+    return Number.isFinite(result) ? result : Number.NaN;
+  }
+
+  function eventKey(event) {
+    const link = String(event?.link || event?.url || "");
+    const id = link.match(/\/events?\/(\d+)/i)?.[1];
+    return id ? "meetup:" + id : "url:" + link.split("?")[0];
+  }
+
+  try {
+    const [feedResult, archiveResult] = await Promise.allSettled([
+      fetch(FEED_URL).then((response) => {
+        if (!response.ok) throw new Error("Event feed unavailable");
+        return response.json();
+      }),
+      getArchiveEvents(),
+    ]);
+    const feedData = feedResult.status === "fulfilled" ? feedResult.value : [];
+    const feedEvents = Array.isArray(feedData) ? feedData : (feedData?.events || []);
+    const archiveEvents = archiveResult.status === "fulfilled" ? archiveResult.value : [];
+    if (!feedEvents.length && !archiveEvents.length) {
+      list.textContent = safeText(errorText);
+      return;
+    }
+
+    const eventsByKey = new Map();
+    archiveEvents.forEach((event) => eventsByKey.set(eventKey(event), event));
+    feedEvents.forEach((event) => {
+      const key = eventKey(event);
+      const archive = eventsByKey.get(key);
+      eventsByKey.set(key, { ...archive, ...event, posterSrc: archive?.posterSrc || event?.posterSrc || "", isArchiveEvent: !!archive });
+    });
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const upcoming = [];
+    const past = [];
+    for (const event of eventsByKey.values()) {
+      const time = dateTime(event);
+      if (Number.isFinite(time) && time >= today.getTime()) upcoming.push(event);
+      else past.push(event);
+    }
+    upcoming.sort((a, b) => dateTime(a) - dateTime(b));
+    past.sort((a, b) => {
+      const at = dateTime(a), bt = dateTime(b);
+      if (Number.isFinite(at) && Number.isFinite(bt)) return bt - at;
+      if (Number.isFinite(at)) return -1;
+      if (Number.isFinite(bt)) return 1;
+      return String(a.title || "").localeCompare(String(b.title || ""));
+    });
+
+    list.replaceChildren();
+    function appendSection(label, events) {
+      if (!events.length) return;
+      const heading = document.createElement("h3");
+      heading.className = "ch-events-section-title";
+      heading.textContent = label;
+      list.append(heading);
+
+      events.forEach((event) => {
+        const rawLink = event?.link || event?.url || "#";
+        let link = "#";
+        try {
+          const url = new URL(rawLink, location.href);
+          if (url.protocol === "http:" || url.protocol === "https:") link = url.href;
+        } catch {}
+        const isCH = event.isArchiveEvent || isCharlestonHacksEvent(event);
+        const sourceLabel = isCH ? "CharlestonHacks" : getSourceLabel(event);
+        const card = document.createElement("article");
+        card.className = "ch-event-card";
+        card.setAttribute("role", "listitem");
+        card.dataset.source = isCH ? "charlestonhacks" : "community";
+        card.dataset.hasPoster = String(!!event.posterSrc);
+
+        const content = document.createElement("div");
+        content.className = "ch-event-content";
+
+        const meta = document.createElement("div");
+        meta.className = "ch-event-meta";
+        const time = document.createElement("time");
+        time.className = "ch-event-date";
+        const rawDate = String(event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date ?? "");
+        time.dateTime = rawDate;
+        const monthOnly = rawDate.match(/^\d{4}-(\d{2})$/);
+        time.textContent = monthOnly
+          ? monthOnly[1] + "/" + rawDate.slice(0, 4)
+          : (Number.isFinite(dateTime(event))
+              ? new Date(dateTime(event)).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })
+              : "Date to be announced");
+        const badge = document.createElement("span");
+        badge.className = "ch-source-badge " + (isCH ? "ch-source-charlestonhacks" : "ch-source-community");
+        badge.textContent = sourceLabel;
+        meta.append(time, badge);
+        content.append(meta);
+
+        const title = document.createElement("h4");
+        title.className = "ch-event-title";
+        const titleLink = document.createElement("a");
+        titleLink.href = link;
+        titleLink.target = "_blank";
+        titleLink.rel = "noopener noreferrer";
+        titleLink.textContent = String(event?.title || event?.name || "Event");
+        title.append(titleLink);
+        content.append(title);
+
+        if (event?.location) {
+          const locationText = document.createElement("p");
+          locationText.className = "ch-event-location";
+          locationText.textContent = "📍 " + String(event.location);
+          content.append(locationText);
+        }
+        if (event?.description) {
+          const description = document.createElement("p");
+          description.className = "ch-event-desc";
+          description.textContent = String(event.description).slice(0, 180) + (String(event.description).length > 180 ? "…" : "");
+          content.append(description);
+        }
+        const actions = document.createElement("div");
+        actions.className = "ch-event-cta";
+        if (event?.nearifyJoinUrl) {
+          const join = document.createElement("a");
+          join.className = "ch-btn-nearify";
+          join.href = String(event.nearifyJoinUrl);
+          join.target = "_blank";
+          join.rel = "noopener noreferrer";
+          join.textContent = "Join Live Network";
+          actions.append(join);
+        }
+        const view = document.createElement("a");
+        view.className = "ch-link-meetup";
+        view.href = link;
+        view.target = "_blank";
+        view.rel = "noopener noreferrer";
+        view.textContent = "View event";
+        actions.append(view);
+        content.append(actions);
+
+        if (event.posterSrc) {
+          const poster = document.createElement("a");
+          poster.className = "ch-event-poster";
+          poster.href = link;
+          poster.target = "_blank";
+          poster.rel = "noopener noreferrer";
+          poster.setAttribute("aria-label", "Open " + String(event?.title || "event") + " on Meetup");
+          const image = document.createElement("img");
+          image.src = event.posterSrc;
+          image.alt = "Poster for " + String(event?.title || "event");
+          image.loading = "lazy";
+          image.decoding = "async";
+          poster.append(image);
+          card.append(poster);
+        }
+        card.append(content);
+        list.append(card);
+      });
+    }
+
+    appendSection("Upcoming", upcoming);
+    appendSection("Past events", past);
+    if (!upcoming.length && !past.length) list.textContent = safeText(emptyText);
+  } catch (error) {
+    console.error("Unable to load unified event archive:", error);
+    list.textContent = safeText(errorText);
+  }
+}
+
 /**
  * Modal wiring for the calendar
  * - Click #open-calendar to open overlay and load events
