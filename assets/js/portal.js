@@ -13,7 +13,7 @@
     });
   }
 
-  const VERSION = "portal-js-v24-manager-independent-20261031";
+  const VERSION = "portal-js-v25-syntax-fix-20261031";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -686,7 +686,7 @@
           heading.append(openLink);
         }
 
-card pin code        const number = document.createElement("span");
+        const number = document.createElement("span");
         number.className = "portal-feature-number";
         number.textContent = String(index + 1).padStart(2, "0") + " / " + String(deckFeatures.length).padStart(2, "0");
         header.append(iconWrap, heading, number);
