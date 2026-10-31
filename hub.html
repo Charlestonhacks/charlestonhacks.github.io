@@ -269,6 +269,34 @@
       }
     }
   
+    .portal-events-intro {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.65rem 1rem;
+      padding: 0.35rem 0.75rem 0.8rem;
+      text-align: center;
+    }
+    .portal-events-intro .portal-view-intro { margin: 0; }
+    .portal-events-posters-button {
+      border: 1px solid rgba(0,224,255,0.48);
+      border-radius: 999px;
+      padding: 0.5rem 0.95rem;
+      color: #a9f6ff;
+      background: rgba(0,224,255,0.09);
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .portal-events-posters-button:hover,
+    .portal-events-posters-button:focus-visible {
+      border-color: #00e0ff;
+      background: rgba(0,224,255,0.18);
+      outline: 2px solid rgba(0,224,255,0.7);
+      outline-offset: 2px;
+    }
     .portal-discord-entry {
       display: grid;
       grid-template-rows: minmax(0, 1fr);
@@ -373,7 +401,10 @@
         <section class="portal-view-panel" id="portal-view-panel" aria-labelledby="portal-view-title" aria-hidden="true" inert hidden>
           <div class="portal-view-body">
             <section class="portal-view-content portal-events-view" data-view="events" aria-label="Upcoming events" hidden>
+              <div class="portal-events-intro">
               <p class="portal-view-intro">Upcoming CharlestonHacks and community events</p>
+              <button type="button" class="portal-events-posters-button swiper-no-swiping" id="portal-browse-event-posters">Browse event posters</button>
+            </div>
               <div id="portal-events-list" class="portal-events-list" role="list"></div>
             </section>
             <div class="portal-view-content portal-buildspace-view" data-view="buildspace" hidden>
