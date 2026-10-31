@@ -233,7 +233,7 @@ export async function loadUnifiedEvents({
   }
 
   async function getArchiveEvents() {
-    const response = await fetch("/Poster.html", { cache: "force-cache" });
+    const response = await fetch("/Poster.html?v=20261031-poster-v3", { cache: "no-cache" });
     if (!response.ok) throw new Error("Poster archive unavailable");
     const html = await response.text();
     const archiveDocument = new DOMParser().parseFromString(html, "text/html");
