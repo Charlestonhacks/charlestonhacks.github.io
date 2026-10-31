@@ -44,16 +44,17 @@
   // through postMessage instead of relying on parent access to contentDocument.
   window.addEventListener("message", (event) => {
     if (event.origin !== "https://deckerd451.github.io") return;
-    if (activeFeatureId !== "innovation" || !featureSwiper) return;
-    const activeSlide = slidesContainerForSwipe();
-    if (!activeSlide || event.source !== activeSlide.contentWindow) return;
+    const frame = [...document.querySelectorAll("#portal-feature-slides iframe")]
+      .find((candidate) => candidate.contentWindow === event.source);
+    if (!frame) return;
 
     if (event.data?.channel === "chs-portal-event-v1" && event.data?.type === "READY") {
-      activeSlide.dataset.portalDeckReady = "true";
-      sendPendingBuildspaceEvent(activeSlide);
+      frame.dataset.portalDeckReady = "true";
+      if (activeFeatureId === "innovation") sendPendingBuildspaceEvent(frame);
       return;
     }
 
+    if (activeFeatureId !== "innovation" || !featureSwiper || frame !== slidesContainerForSwipe()) return;
     if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
     const step = event.data.direction === "next" ? 1 : event.data.direction === "previous" ? -1 : 0;
     if (!step) return;
