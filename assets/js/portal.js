@@ -13,7 +13,7 @@
     });
   }
 
-  const VERSION = "portal-js-v26-event-bridge-20261031";
+  const VERSION = "portal-js-v27-buildspace-ready-bridge-20261101";
   console.log(`[PORTAL] loaded ${VERSION}`);
 
   const BUILDSPACE_RETURN_KEY = "ch:portal-return-to-buildspace";
@@ -56,11 +56,14 @@
 
   // Buildspace is a cross-origin iframe, so it reports horizontal gestures
   // through postMessage instead of relying on parent access to contentDocument.
+  function buildspaceFrame() {
+    return document.getElementById("portal-buildspace-frame");
+  }
+
   window.addEventListener("message", (event) => {
     if (event.origin !== "https://deckerd451.github.io") return;
-    const frame = [...document.querySelectorAll("#portal-feature-slides iframe")]
-      .find((candidate) => candidate.contentWindow === event.source);
-    if (!frame) return;
+    const frame = buildspaceFrame();
+    if (!frame || frame.contentWindow !== event.source) return;
 
     if (event.data?.channel === "chs-portal-event-v1" && event.data?.type === "READY") {
       frame.dataset.portalDeckReady = "true";
@@ -70,7 +73,7 @@
       return;
     }
 
-    if (activeFeatureId !== "innovation" || !featureSwiper || frame !== slidesContainerForSwipe()) return;
+    if (activeFeatureId !== "innovation" || !featureSwiper) return;
     if (event.data?.channel !== "chs-portal-deck-v1" || event.data?.type !== "SWIPE") return;
     const step = event.data.direction === "next" ? 1 : event.data.direction === "previous" ? -1 : 0;
     if (!step) return;
@@ -78,11 +81,7 @@
     if (target >= 0 && target < featureSwiper.slides.length) featureSwiper.slideTo(target);
   });
 
-  function slidesContainerForSwipe() {
-    return document.querySelector("#portal-feature-slides .swiper-slide-active iframe");
-  }
-
-  function sendPendingBuildspaceEvent(frame = slidesContainerForSwipe()) {
+  function sendPendingBuildspaceEvent(frame = buildspaceFrame()) {
     if (!pendingBuildspaceEvent || !frame?.contentWindow || frame.dataset.portalDeckReady !== "true") return;
     frame.contentWindow.postMessage({
       channel: "chs-portal-event-v1",
@@ -367,7 +366,7 @@
         frame.src = "https://deckerd451.github.io/innovation-engine/";
       }
       if (status) {
-        status.hidden = !authorized || !frame || !frame.hasAttribute("src");
+        status.hidden = !authorized || !frame || !frame.hasAttribute("src") || frame.dataset.portalDeckReady === "true";
         status.textContent = "Loading your signed-in member workspace…";
       }
     };
