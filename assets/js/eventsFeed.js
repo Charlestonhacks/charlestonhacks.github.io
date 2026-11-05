@@ -53,6 +53,21 @@ function formatDateShort(startDate) {
   }
 }
 
+// Mark Nearify event links as browser-only on iOS without altering their event IDs.
+// The Nearify apple-app-site-association excludes ?web=1 from app opening.
+function nearifyBrowserUrl(value) {
+  try {
+    const url = new URL(String(value), window.location.href);
+    if (url.protocol === "https:" && url.hostname === "nearify.org"
+        && /^\/(join|events)\//.test(url.pathname)) {
+      url.searchParams.set("web", "1");
+    }
+    return url.toString();
+  } catch (_) {
+    return String(value);
+  }
+}
+
 export async function loadEvents({
   listId = "events-list",
   limit = 10,
@@ -105,7 +120,7 @@ export async function loadEvents({
       const description = safeText(event?.description || "");
       const location = safeText(event?.location || "");
       const dateStr = safeText(formatDateShort(event?.startDate));
-      const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(event.nearifyJoinUrl) : null;
+      const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(nearifyBrowserUrl(event.nearifyJoinUrl)) : null;
       const isCH = isCharlestonHacksEvent(event);
       const sourceLabel = getSourceLabel(event);
 
@@ -401,7 +416,7 @@ export async function loadUnifiedEvents({
         if (event?.nearifyJoinUrl) {
           const join = document.createElement("a");
           join.className = "ch-btn-nearify";
-          join.href = String(event.nearifyJoinUrl);
+          join.href = nearifyBrowserUrl(event.nearifyJoinUrl);
           join.target = "_blank";
           join.rel = "noopener noreferrer";
           join.textContent = "Join Live Network";
