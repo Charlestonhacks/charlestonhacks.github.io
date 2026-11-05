@@ -1712,6 +1712,21 @@
         return [];
       }
 
+      // Request the browser experience on iOS without changing the event ID.
+      // Nearify's AASA explicitly excludes ?web=1 from Universal Links.
+      function nearifyBrowserUrl(value) {
+        try {
+          const url = new URL(String(value), window.location.href);
+          if (url.protocol === 'https:' && url.hostname === 'nearify.org'
+              && /^\/(join|events)\//.test(url.pathname)) {
+            url.searchParams.set('web', '1');
+          }
+          return url.toString();
+        } catch (_) {
+          return String(value);
+        }
+      }
+
       function renderHero(upcoming) {
         const heroEvent = document.getElementById('hero-event');
         if (!heroEvent) return;
@@ -1783,7 +1798,7 @@
         const heroRsvp = document.getElementById('hero-rsvp');
         if (heroCta && heroRsvp) {
           if (ev.nearifyJoinUrl) {
-            heroRsvp.href = safeText(ev.nearifyJoinUrl);
+            heroRsvp.href = nearifyBrowserUrl(ev.nearifyJoinUrl);
             heroRsvp.textContent = 'Join Live Network';
           } else if (meetupUrl) {
             heroRsvp.href = link;
@@ -1850,7 +1865,7 @@
             ctaHtml =
               '<div class="ch-event-cta">' +
               '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="ch-btn-meetup">View Event</a>' +
-              '<a href="' + nearifyJoinUrl + '" target="_blank" rel="noopener noreferrer" class="ch-link-nearify">Join Live Network</a>' +
+              '<a href="' + safeText(nearifyBrowserUrl(ev.nearifyJoinUrl)) + '" target="_blank" rel="noopener noreferrer" class="ch-link-nearify">Join Live Network</a>' +
               '</div>';
           } else {
             ctaHtml =
