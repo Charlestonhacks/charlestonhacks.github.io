@@ -58,7 +58,6 @@ function primaryAction(event, now) {
 
 function renderHeroMessage(label, title, subtitle, action) {
   heroEvent.replaceChildren(
-    el('h2', 'hero-eyebrow', 'CharlestonHacks Events'),
     el('p', 'events-label', label),
     el('h2', 'hero-title hero-title-message', title),
     el('p', 'hero-sub', subtitle),
@@ -80,7 +79,6 @@ function renderHero(featured, now) {
   }
 
   const ongoing = isOngoing(featured, now);
-  const eyebrow = featured.isCharlestonHacks ? 'CharlestonHacks Events' : 'Community Events';
   const label = el('p', 'events-label', ongoing ? 'Happening now' : 'Next event — ');
   if (!ongoing) {
     const countdown = el('span', 'hero-countdown', formatCountdown(featured.startMs - now).toLowerCase());
@@ -88,7 +86,7 @@ function renderHero(featured, now) {
     label.append(countdown);
   }
 
-  const nodes = [el('h2', 'hero-eyebrow', eyebrow), label, el('h2', 'hero-title', featured.title)];
+  const nodes = [label, el('h2', 'hero-title', featured.title)];
   if (!featured.isCharlestonHacks && featured.hostName) {
     nodes.push(el('p', 'hero-hosted-by', 'Hosted by ' + featured.hostName));
   }
