@@ -12,6 +12,7 @@ import {
   isOngoing,
   loadEventFeed,
   selectHomepageEvents,
+  selectLastCharlestonHacksEvent,
 } from '/assets/js/events-core.js';
 
 const LIST_PREVIEW_COUNT = 6;
@@ -57,6 +58,7 @@ function primaryAction(event, now) {
 
 function renderHeroMessage(label, title, subtitle, action) {
   heroEvent.replaceChildren(
+    el('h2', 'hero-eyebrow', 'CharlestonHacks Events'),
     el('p', 'events-label', label),
     el('h2', 'hero-title hero-title-message', title),
     el('p', 'hero-sub', subtitle),
@@ -78,7 +80,7 @@ function renderHero(featured, now) {
   }
 
   const ongoing = isOngoing(featured, now);
-  const eyebrow = featured.isCharlestonHacks ? 'CharlestonHacks presents' : 'In the ecosystem';
+  const eyebrow = featured.isCharlestonHacks ? 'CharlestonHacks Events' : 'Community Events';
   const label = el('p', 'events-label', ongoing ? 'Happening now' : 'Next event — ');
   if (!ongoing) {
     const countdown = el('span', 'hero-countdown', formatCountdown(featured.startMs - now).toLowerCase());
@@ -86,7 +88,7 @@ function renderHero(featured, now) {
     label.append(countdown);
   }
 
-  const nodes = [el('p', 'hero-eyebrow', eyebrow), label, el('h2', 'hero-title', featured.title)];
+  const nodes = [el('h2', 'hero-eyebrow', eyebrow), label, el('h2', 'hero-title', featured.title)];
   if (!featured.isCharlestonHacks && featured.hostName) {
     nodes.push(el('p', 'hero-hosted-by', 'Hosted by ' + featured.hostName));
   }
@@ -172,17 +174,37 @@ function renderList(featured, others, now) {
   }
 }
 
+function renderLastEvent(event) {
+  const root = document.getElementById('last-event-content');
+  if (!root) return;
+  const archive = el('a', 'harborhack-btn', 'Explore past CharlestonHacks events →');
+  archive.href = '/Poster.html';
+  if (!event) { root.replaceChildren(archive); return; }
+  const card = el('article', 'event-card');
+  const title = el('h3', '', event.title);
+  const date = el('time', 'event-date', formatEventWhen(event));
+  date.dateTime = new Date(event.startMs).toISOString();
+  card.append(title, date);
+  if (event.location) card.append(el('p', 'event-location', event.location));
+  if (event.description) card.append(el('p', 'event-desc', event.description.slice(0, DESCRIPTION_LENGTH)));
+  if (event.link) card.append(externalLink('ch-btn-meetup', event.link, 'View event recap →'));
+  card.append(archive);
+  root.replaceChildren(card);
+}
+
 // Full renders only happen when the feed or an event changes state, so links keep focus and
 // the aria-live regions stay quiet between countdown ticks.
 function update() {
   const now = Date.now();
   const { featured, others } = selectHomepageEvents(feed.events, now);
-  const signature = [feed.status].concat([featured], others).map(function (item) {
+  const lastEvent = selectLastCharlestonHacksEvent(feed.events, now);
+  const signature = [feed.status, lastEvent ? lastEvent.key : "archive"].concat([featured], others).map(function (item) {
     return item && item.key ? item.key + ':' + isOngoing(item, now) : item;
   }).join('|');
 
   if (signature !== renderedSignature) {
     renderedSignature = signature;
+    renderLastEvent(lastEvent);
     renderHero(featured, now);
     renderList(featured, others, now);
     return;

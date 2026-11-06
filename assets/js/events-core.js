@@ -190,6 +190,15 @@ export function activeEvents(rawEvents, now) {
   });
 }
 
+/** Latest completed CharlestonHacks event, visible for seven days after its end. */
+export function selectLastCharlestonHacksEvent(rawEvents, now) {
+  return (rawEvents || []).map(normalizeEvent)
+    .filter(event => event && event.isCharlestonHacks
+      && event.endMs <= now && now < event.endMs + 7 * DAY_MS)
+    .sort((a, b) => b.endMs - a.endMs || b.startMs - a.startMs
+      || a.key.localeCompare(b.key))[0] || null;
+}
+
 export function isOngoing(event, now) {
   return event.startMs <= now && now < event.endMs;
 }
