@@ -8,6 +8,12 @@ export const EVENT_TIME_ZONE = 'America/New_York';
 export const FEATURED_WINDOW_DAYS = 45;
 export const MEETUP_GROUP_URL = 'https://www.meetup.com/charlestonhacks/';
 
+// Retries come at about 15 seconds, 1 minute, 4 minutes, and 16 minutes.
+export const FEED_MAX_RETRIES = 4;
+export const FEED_RETRY_COOLDOWN_MS = 15 * 60 * 1000;
+const FEED_RETRY_BASE_MS = 15000;
+const FEED_RETRY_FACTOR = 4;
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 // The feed has no end times yet. Meetup's own calendar lists these events at two hours.
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000;
@@ -220,8 +226,8 @@ async function fetchJson(url, timeoutMs, fetchImpl) {
   }
 }
 
-// Both workers report failures as HTTP 200 with { events: [], error }, and the
-// primary lists per-calendar failures in sourceResults. A calendar that parsed
+// The primary worker reports failures as HTTP 200 with { events: [], error }, and
+// lists per-calendar failures in sourceResults. A calendar that parsed
 // events but failed its Supabase sync still delivered them, so it doesn't count.
 function readFeed(data) {
   const events = Array.isArray(data) ? data : data && data.events;
@@ -252,12 +258,84 @@ export async function requestEventFeed({
   return { status: 'unavailable', events: [] };
 }
 
-let pendingFeed = null;
+/**
+ * Callers share one request, because every call to the primary worker runs a
+ * Supabase sync. Only { retry: true } replaces a settled 'unavailable' result,
+ * so a failure isn't refetched by whichever caller happens to ask next.
+ */
+export function createFeedLoader(request) {
+  let pending = null;
+  let settled = null;
 
-/** One request per page load: every call to the primary worker runs a Supabase sync. */
-export function loadEventFeed() {
-  if (!pendingFeed) pendingFeed = requestEventFeed();
-  return pendingFeed;
+  return function loadFeed({ retry = false } = {}) {
+    if (!pending || (retry && settled && settled.status === 'unavailable')) {
+      settled = null;
+      pending = request().then(function (result) {
+        settled = result;
+        return result;
+      });
+    }
+    return pending;
+  };
+}
+
+export const loadEventFeed = createFeedLoader(requestEventFeed);
+
+/** Delay before a retry, or null once retries run out. Jitter spreads out open tabs. */
+export function feedRetryDelayMs(attempt, random = Math.random) {
+  if (attempt >= FEED_MAX_RETRIES) return null;
+  return FEED_RETRY_BASE_MS * Math.pow(FEED_RETRY_FACTOR, attempt) * (0.8 + 0.4 * random());
+}
+
+/**
+ * Retries an 'unavailable' feed with backoff. A 'partial' feed isn't retried:
+ * the primary already answered, and asking again repeats its whole sync.
+ * Hidden tabs hold their retry until they're viewed again. After the retries run
+ * out, resume() allows one attempt per cooldown when a tab returns or reconnects.
+ */
+export function createFeedRetrier({
+  load,
+  onResult,
+  isHidden,
+  schedule = setTimeout,
+  now = Date.now,
+  random = Math.random,
+}) {
+  let status = null;
+  let retryCount = 0;
+  let timer = null;
+  let heldWhileHidden = false;
+  let lastRequestAt = now();
+
+  function scheduleNext() {
+    if (status !== 'unavailable') return;
+    const delay = feedRetryDelayMs(retryCount, random);
+    if (delay === null) return;
+    retryCount += 1;
+    timer = schedule(attempt, delay);
+  }
+
+  async function attempt() {
+    timer = null;
+    heldWhileHidden = isHidden();
+    if (heldWhileHidden) return;
+    lastRequestAt = now();
+    const result = await load({ retry: true });
+    status = result.status;
+    onResult(result);
+    scheduleNext();
+  }
+
+  return {
+    start(result) {
+      status = result.status;
+      scheduleNext();
+    },
+    resume() {
+      if (isHidden() || status !== 'unavailable' || timer) return;
+      if (heldWhileHidden || now() - lastRequestAt >= FEED_RETRY_COOLDOWN_MS) attempt();
+    },
+  };
 }
 
 export function countEventsInYear(rawEvents, year) {

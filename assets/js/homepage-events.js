@@ -6,6 +6,7 @@
 
 import {
   MEETUP_GROUP_URL,
+  createFeedRetrier,
   formatCountdown,
   formatEventWhen,
   isOngoing,
@@ -171,13 +172,13 @@ function renderList(featured, others, now) {
   }
 }
 
-// Full renders only happen when an event changes state, so links keep focus and
+// Full renders only happen when the feed or an event changes state, so links keep focus and
 // the aria-live regions stay quiet between countdown ticks.
 function update() {
   const now = Date.now();
   const { featured, others } = selectHomepageEvents(feed.events, now);
-  const signature = [featured].concat(others).map(function (event) {
-    return event ? event.key + ':' + isOngoing(event, now) : '';
+  const signature = [feed.status].concat([featured], others).map(function (item) {
+    return item && item.key ? item.key + ':' + isOngoing(item, now) : item;
   }).join('|');
 
   if (signature !== renderedSignature) {
@@ -195,10 +196,23 @@ function update() {
   });
 }
 
-async function init() {
-  feed = await loadEventFeed();
+function showFeed(next) {
+  feed = next;
   update();
+}
+
+async function init() {
+  const retrier = createFeedRetrier({
+    load: loadEventFeed,
+    onResult: showFeed,
+    isHidden: function () { return document.hidden; },
+  });
+  const firstFeed = await loadEventFeed();
+  showFeed(firstFeed);
   setInterval(update, 60000);
+  document.addEventListener('visibilitychange', retrier.resume);
+  window.addEventListener('online', retrier.resume);
+  retrier.start(firstFeed);
 }
 
 init();

@@ -3,9 +3,14 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import {
+  FEED_MAX_RETRIES,
+  FEED_RETRY_COOLDOWN_MS,
   FEED_SOURCES,
   activeEvents,
   countEventsInYear,
+  createFeedLoader,
+  createFeedRetrier,
+  feedRetryDelayMs,
   formatCountdown,
   formatEventWhen,
   nearifyBrowserUrl,
@@ -121,6 +126,7 @@ function fakeFetch(answers) {
 }
 const SOURCES = [
   { url: 'primary', timeoutMs: 50, authoritative: true },
+  { url: 'fallback', timeoutMs: 50, authoritative: false },
   { url: 'static', timeoutMs: 50, authoritative: false },
 ];
 const load = (answers) => {
@@ -134,9 +140,8 @@ test('primary configuration: only the first source can confirm an empty calendar
   assert.deepEqual(FEED_SOURCES.map((s) => s.authoritative), [true, false]);
 });
 
-test('the ChuckTown scraper worker is not an event source', () => {
-  assert.equal(FEED_SOURCES.some((s) => s.url.includes('deckerdb26354')), false);
-  assert.equal(FEED_SOURCES.filter((s) => s.url.includes('workers.dev')).length, 1);
+test('the retired ChuckTown scraper is excluded from event sources', () => {
+  assert.equal(FEED_SOURCES.some((s) => s.url.includes('charlestonhacks-events-worker')), false);
 });
 
 test('a complete empty primary answer means nothing is scheduled and stops', async () => {
@@ -147,9 +152,15 @@ test('a complete empty primary answer means nothing is scheduled and stops', asy
 });
 
 test('an HTTP 200 error body is a failure, not an empty calendar', async () => {
-  const result = await load({ primary: { events: [], error: 'boom' }, static: { events: [] } });
+  const result = await load({ primary: { events: [], error: 'boom' }, fallback: { events: [] }, static: { events: [] } });
   assert.equal(result.status, 'unavailable');
-  assert.deepEqual(result.calls, ['primary', 'static']);
+  assert.deepEqual(result.calls, ['primary', 'fallback', 'static']);
+});
+
+test('an HTTP 200 error body falls through to a live snapshot', async () => {
+  const result = await load({ primary: { events: [], error: 'boom' }, fallback: { events: [] }, static: { events: [live] } });
+  assert.equal(result.status, 'partial');
+  assert.equal(result.events.length, 1);
 });
 
 test('an empty list with a failed calendar is not trusted', async () => {
@@ -171,16 +182,166 @@ test('events plus a failed calendar are shown as partial', async () => {
 
 test('an empty or expired snapshot cannot stand in for a dead primary', async () => {
   const expired = { events: [ch(1, Date.parse('2025-02-20T17:30:00'))] };
-  assert.equal((await load({ primary: 500, static: expired })).status, 'unavailable');
-  assert.equal((await load({ primary: 500, static: { events: [] } })).status, 'unavailable');
+  assert.equal((await load({ primary: 500, fallback: { events: [] }, static: expired })).status, 'unavailable');
+  assert.equal((await load({ primary: 500, fallback: new Error('timeout'), static: { events: [] } })).status, 'unavailable');
   assert.equal((await load({ static: 404 })).status, 'unavailable');
   assert.equal((await load({ primary: 'not a feed' })).status, 'unavailable');
 });
 
 test('a snapshot with live events is used, marked partial', async () => {
-  const result = await load({ primary: 503, static: { events: [live] } });
+  const result = await load({ primary: 503, fallback: { events: [live] } });
   assert.equal(result.status, 'partial');
-  assert.deepEqual(result.calls, ['primary', 'static']);
+  assert.deepEqual(result.calls, ['primary', 'fallback']);
+});
+
+test('an empty fallback is skipped in favor of the next source', async () => {
+  const result = await load({ primary: 503, fallback: { events: [] }, static: { events: [live] } });
+  assert.equal(result.status, 'partial');
+  assert.deepEqual(result.calls, ['primary', 'fallback', 'static']);
+});
+
+function queuedRequest(results) {
+  const request = () => {
+    request.calls += 1;
+    return Promise.resolve(results.shift());
+  };
+  request.calls = 0;
+  return request;
+}
+
+test('callers share one request, and a failure is not refetched without a retry', async () => {
+  const request = queuedRequest([{ status: 'unavailable' }, { status: 'ok' }]);
+  const loadFeed = createFeedLoader(request);
+  assert.equal(loadFeed(), loadFeed());
+  await loadFeed();
+  assert.equal((await loadFeed()).status, 'unavailable');
+  assert.equal(request.calls, 1);
+});
+
+test('a retry bypasses a cached failure, and later callers get the recovery', async () => {
+  const request = queuedRequest([{ status: 'unavailable' }, { status: 'ok' }]);
+  const loadFeed = createFeedLoader(request);
+  await loadFeed();
+  assert.equal((await loadFeed({ retry: true })).status, 'ok');
+  assert.equal((await loadFeed()).status, 'ok');
+  assert.equal(request.calls, 2);
+});
+
+test('a retry never duplicates a request in flight or replaces a usable result', async () => {
+  const request = queuedRequest([{ status: 'unavailable' }, { status: 'ok' }, { status: 'ok' }]);
+  const loadFeed = createFeedLoader(request);
+  const first = loadFeed();
+  assert.equal(loadFeed({ retry: true }), first);
+  await first;
+  const second = loadFeed({ retry: true });
+  assert.equal(loadFeed({ retry: true }), second);
+  await second;
+  await loadFeed({ retry: true });
+  assert.equal(request.calls, 2);
+
+  const partial = queuedRequest([{ status: 'partial' }, { status: 'ok' }]);
+  const loadPartial = createFeedLoader(partial);
+  await loadPartial();
+  assert.equal((await loadPartial({ retry: true })).status, 'partial');
+  assert.equal(partial.calls, 1);
+});
+
+function retrierHarness(statuses) {
+  const state = { hidden: false, time: 0, due: null, calls: 0, results: [] };
+  state.retrier = createFeedRetrier({
+    load: async () => {
+      state.calls += 1;
+      return { status: statuses.length > 1 ? statuses.shift() : statuses[0] };
+    },
+    onResult: (result) => state.results.push(result.status),
+    isHidden: () => state.hidden,
+    schedule: (run, delay) => { state.due = { run, delay }; return state; },
+    now: () => state.time,
+    random: () => 0.5,
+  });
+  state.fire = async () => {
+    const { run, delay } = state.due;
+    state.due = null;
+    state.time += delay;
+    await run();
+  };
+  return state;
+}
+
+test('retries back off, stop when the feed recovers, and show the recovery', async () => {
+  const h = retrierHarness(['unavailable', 'ok']);
+  h.retrier.start({ status: 'unavailable' });
+  assert.equal(h.due.delay, 15000);
+  await h.fire();
+  assert.equal(h.due.delay, 60000);
+  await h.fire();
+  assert.equal(h.due, null);
+  assert.equal(h.calls, 2);
+  assert.deepEqual(h.results, ['unavailable', 'ok']);
+});
+
+test('an outage stops after the retry limit', async () => {
+  const h = retrierHarness(['unavailable']);
+  h.retrier.start({ status: 'unavailable' });
+  while (h.due) await h.fire();
+  assert.equal(h.calls, FEED_MAX_RETRIES);
+});
+
+test('ok and partial feeds are never retried', () => {
+  for (const status of ['ok', 'partial']) {
+    const h = retrierHarness(['ok']);
+    h.time = FEED_RETRY_COOLDOWN_MS;
+    h.retrier.start({ status });
+    h.retrier.resume();
+    assert.equal(h.due, null);
+    assert.equal(h.calls, 0);
+  }
+});
+
+test('a hidden tab holds its retry until it is viewed', async () => {
+  const h = retrierHarness(['ok']);
+  h.retrier.start({ status: 'unavailable' });
+  h.hidden = true;
+  await h.fire();
+  assert.equal(h.calls, 0);
+  h.retrier.resume();
+  assert.equal(h.calls, 0, 'still hidden');
+  h.hidden = false;
+  h.retrier.resume();
+  assert.equal(h.calls, 1);
+});
+
+test('after the limit, resuming allows one attempt per cooldown', async () => {
+  const h = retrierHarness(['unavailable']);
+  h.retrier.start({ status: 'unavailable' });
+  while (h.due) await h.fire();
+  h.retrier.resume();
+  assert.equal(h.calls, FEED_MAX_RETRIES, 'inside the cooldown');
+  h.time += FEED_RETRY_COOLDOWN_MS;
+  h.retrier.resume();
+  h.retrier.resume();
+  assert.equal(h.calls, FEED_MAX_RETRIES + 1);
+});
+
+test('resuming does not jump ahead of a scheduled retry', () => {
+  const h = retrierHarness(['ok']);
+  h.retrier.start({ status: 'unavailable' });
+  h.time = FEED_RETRY_COOLDOWN_MS;
+  h.retrier.resume();
+  assert.equal(h.calls, 0);
+});
+
+test('retry delays back off, stay within jitter, and run out', () => {
+  const low = () => 0;
+  const high = () => 1;
+  const center = [0, 1, 2, 3].map((attempt) => feedRetryDelayMs(attempt, () => 0.5));
+  assert.deepEqual(center, [15000, 60000, 240000, 960000]);
+  center.forEach((delay, attempt) => {
+    assert.equal(Math.round(feedRetryDelayMs(attempt, low)), delay * 0.8);
+    assert.equal(Math.round(feedRetryDelayMs(attempt, high)), Math.round(delay * 1.2));
+  });
+  assert.equal(FEED_MAX_RETRIES, 4);
+  assert.equal(feedRetryDelayMs(FEED_MAX_RETRIES), null);
 });
 
 test('a hung source is abandoned', async () => {
