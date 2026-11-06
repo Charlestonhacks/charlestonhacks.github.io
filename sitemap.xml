@@ -65,6 +65,13 @@
   </url>
 
   <url>
+    <loc>https://charlestonhacks.com/harborhack-2026/</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://charlestonhacks.com/innovationengine.html</loc>
     <lastmod>2025-06-25</lastmod>
     <changefreq>yearly</changefreq>
@@ -79,6 +86,13 @@
   </url>
 
   <url>
+    <loc>https://charlestonhacks.com/meetupmashup2.html</loc>
+    <lastmod>2026-02-27</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
     <loc>https://charlestonhacks.com/news.html</loc>
     <lastmod>2025-06-25</lastmod>
     <changefreq>weekly</changefreq>
@@ -88,6 +102,20 @@
   <url>
     <loc>https://charlestonhacks.com/profiles.html</loc>
     <lastmod>2025-06-25</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://charlestonhacks.com/showandtell1.html</loc>
+    <lastmod>2026-11-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://charlestonhacks.com/showandtell2.html</loc>
+    <lastmod>2026-11-06</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
   </url>
