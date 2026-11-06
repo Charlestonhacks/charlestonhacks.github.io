@@ -509,11 +509,16 @@ test('homepage markup: permanent headline, archive after upcoming, no hardcoded 
   const home = readFileSync('index.html', 'utf8');
   const script = readFileSync('assets/js/homepage-events.js', 'utf8');
   assert.equal((home.match(/<h1[\s>]/g) || []).length, 1);
-  assert.ok(home.indexOf('class="hero"') < home.indexOf('id="mission-section"'));
+  assert.match(home, /<h1 class="section-title">Building Charleston into a recognized tech hub<\/h1>/);
+  assert.ok(!home.includes('hub for builders, hackers, and makers</h1>'));
+  assert.ok(home.indexOf('class="mission-stats"') < home.indexOf('class="hero"'), 'event follows the whole mission section');
+  assert.ok(home.indexOf('id="events-section"') < home.indexOf('class="hero"'));
+  assert.ok(home.indexOf('class="hero"') < home.indexOf('class="events-list-title"'), 'event sits above the upcoming list');
   assert.ok(home.indexOf('id="homepage-events"') < home.indexOf('class="harborhack-entry"'));
   assert.ok(!home.includes('316558816') && !script.includes('316558816'));
   assert.ok(!home.includes('workers.dev'), 'feed URLs live in events-core.js');
   assert.ok(!script.includes('.nearifyJoinUrl'), 'cards only use the browser-safe URL');
+  assert.ok(script.includes("el('h2', 'hero-title', featured.title)"), 'event title is an h2');
 });
 
 test('homepage wiring: retries pause offline and resume on return or reconnect', () => {

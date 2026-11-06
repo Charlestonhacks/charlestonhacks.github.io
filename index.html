@@ -261,7 +261,6 @@
     }
 
     .hero {
-      padding: 56px 20px 44px;
       text-align: left;
       position: relative;
       z-index: 1;
@@ -352,17 +351,6 @@
       z-index: 1;
     }
 
-    .hero-headline {
-      text-align: left;
-      font-size: clamp(1.1rem, 2.4vw, 1.5rem);
-      font-weight: 700;
-      line-height: 1.35;
-      color: var(--text);
-      margin-bottom: clamp(24px, 4vw, 38px);
-      position: relative;
-      z-index: 1;
-    }
-
     .hero-title-placeholder {
       height: 3.4rem;
       width: min(420px, 80%);
@@ -445,22 +433,6 @@
       background: rgba(0, 224, 255, 0.06);
     }
 
-    .hero-secondary {
-      margin-top: 24px;
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      position: relative;
-      z-index: 1;
-    }
-    .hero-secondary a {
-      color: rgba(255,255,255,0.52);
-      text-decoration: none;
-      transition: color var(--transition), border-color var(--transition);
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-      padding-bottom: 2px;
-    }
-    .hero-secondary a:hover { color: rgba(154, 239, 255, 0.9); border-color: rgba(154, 239, 255, 0.9); }
-
     .btn-primary, .btn-secondary {
       font-family: var(--font-display);
       font-size: 0.82rem;
@@ -521,6 +493,8 @@
       text-transform: uppercase;
       margin-bottom: 10px;
     }
+
+    h1.section-title { margin-top: 0; }
 
     .section-title {
       font-size: clamp(1.3rem, 3vw, 1.9rem);
@@ -1108,13 +1082,11 @@
       .nav-links.open a { padding: 10px 12px; font-size: 0.82rem; }
       .nav-toggle { display: block; }
 
-      .hero { padding: 32px 14px 36px; }
       .hero-inner { padding: 28px 18px; border-radius: 20px; }
       .hero-title { font-size: clamp(2rem, 9vw, 3rem); }
       .hero-cta { flex-direction: column; align-items: stretch; }
       .hero-cta a { width: 100%; max-width: none; box-sizing: border-box; text-align: center; }
       .btn-primary { width: 100%; text-align: center; }
-      .hero-secondary { font-size: 0.84rem; }
       .btn-primary, .btn-secondary { width: 100%; max-width: 290px; text-align: center; padding: 14px 20px; }
       .section { padding: 50px 16px; }
       .events-list { padding-left: 0 !important; padding-right: 0 !important; grid-template-columns: 1fr; }
@@ -1347,21 +1319,6 @@
   </nav>
 
   <main>
-    <section class="hero" id="next-event" aria-label="Next event">
-      <div class="hero-inner">
-        <h1 class="hero-headline">Charleston’s hub for builders, hackers, and makers</h1>
-        <div id="hero-event" aria-live="polite">
-          <p class="events-label">Finding the next event…</p>
-          <div class="hero-title-placeholder skeleton" aria-hidden="true"></div>
-          <noscript><p class="hero-sub"><a href="https://www.meetup.com/charlestonhacks/">See upcoming events on Meetup</a></p></noscript>
-        </div>
-        <div id="hero-cta" class="hero-cta" hidden></div>
-        <p class="hero-secondary">
-          <a href="#events-section">See upcoming events ↓</a>
-        </p>
-      </div>
-    </section>
-
     <section class="section content-section" id="mission-section" aria-label="Our mission" style="padding-top:56px;">
       <div class="nonprofit-badges">
         <span class="nonprofit-badge badge-501c3">501(c)(3) Nonprofit</span>
@@ -1370,7 +1327,7 @@
         <span class="nonprofit-badge badge-ein">EIN 61-2122391</span>
       </div>
       <p class="section-label">Mission</p>
-      <h2 class="section-title">Building Charleston into a recognized tech hub</h2>
+      <h1 class="section-title">Building Charleston into a recognized tech hub</h1>
       <p class="section-sub">CharlestonHacks is a federally recognized 501(c)(3) nonprofit organization dedicated to growing Charleston's technology community through high-quality events, open collaboration, and inclusive membership. We believe a thriving tech ecosystem begins with community — and membership is always free.</p>
       <div class="mission-stats">
         <div class="mission-stat">
@@ -1393,7 +1350,17 @@
     <section class="section content-section" id="events-section" aria-label="Events">
       <h2 class="section-title">Events</h2>
       <p class="section-sub">Find upcoming events and revisit past CharlestonHacks gatherings.</p>
-      <h3 class="events-list-title">Upcoming Events</h3>
+      <section class="hero" id="next-event" aria-label="Next event">
+        <div class="hero-inner">
+          <div id="hero-event" aria-live="polite">
+            <p class="events-label">Finding the next event…</p>
+            <div class="hero-title-placeholder skeleton" aria-hidden="true"></div>
+            <noscript><p class="hero-sub"><a href="https://www.meetup.com/charlestonhacks/">See upcoming events on Meetup</a></p></noscript>
+          </div>
+          <div id="hero-cta" class="hero-cta" hidden></div>
+        </div>
+      </section>
+      <h2 class="events-list-title">Upcoming Events</h2>
       <div class="events-list" id="homepage-events" aria-live="polite">
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
