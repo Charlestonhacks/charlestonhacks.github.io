@@ -290,51 +290,76 @@ export function feedRetryDelayMs(attempt, random = Math.random) {
 /**
  * Retries an 'unavailable' feed with backoff. A 'partial' feed isn't retried:
  * the primary already answered, and asking again repeats its whole sync.
- * Hidden tabs hold their retry until they're viewed again. After the retries run
- * out, resume() allows one attempt per cooldown when a tab returns or reconnects.
+ *
+ * nextAttemptAt is the one record of when a planned retry is due. While paused
+ * (hidden or offline) a due retry waits without spending anything, and resume()
+ * runs it on return. That also covers timers frozen by a sleeping device. After
+ * the retries run out, resume() plans one attempt per cooldown.
  */
 export function createFeedRetrier({
   load,
   onResult,
-  isHidden,
+  isPaused,
   schedule = setTimeout,
+  cancel = clearTimeout,
   now = Date.now,
   random = Math.random,
 }) {
   let status = null;
   let retryCount = 0;
   let timer = null;
-  let heldWhileHidden = false;
+  let running = false;
+  let nextAttemptAt = null;
   let lastRequestAt = now();
 
-  function scheduleNext() {
+  function plan(delay) {
+    nextAttemptAt = now() + delay;
+    timer = schedule(run, delay);
+  }
+
+  function planBackoff() {
     if (status !== 'unavailable') return;
     const delay = feedRetryDelayMs(retryCount, random);
     if (delay === null) return;
     retryCount += 1;
-    timer = schedule(attempt, delay);
+    plan(delay);
   }
 
-  async function attempt() {
+  async function run() {
+    cancel(timer);
     timer = null;
-    heldWhileHidden = isHidden();
-    if (heldWhileHidden) return;
+    if (isPaused()) return;
+    nextAttemptAt = null;
+    running = true;
     lastRequestAt = now();
-    const result = await load({ retry: true });
-    status = result.status;
-    onResult(result);
-    scheduleNext();
+    try {
+      const result = await load({ retry: true });
+      status = result.status;
+      onResult(result);
+    } finally {
+      running = false;
+      planBackoff();
+    }
+  }
+
+  function resume() {
+    if (running || isPaused() || status !== 'unavailable') return;
+    if (nextAttemptAt !== null) {
+      if (!timer || now() >= nextAttemptAt) run();
+      return;
+    }
+    // The clamp keeps a clock moved backward from stretching the wait.
+    const wait = Math.min(lastRequestAt + FEED_RETRY_COOLDOWN_MS - now(), FEED_RETRY_COOLDOWN_MS);
+    if (wait > 0) plan(wait);
+    else run();
   }
 
   return {
     start(result) {
       status = result.status;
-      scheduleNext();
+      planBackoff();
     },
-    resume() {
-      if (isHidden() || status !== 'unavailable' || timer) return;
-      if (heldWhileHidden || now() - lastRequestAt >= FEED_RETRY_COOLDOWN_MS) attempt();
-    },
+    resume,
   };
 }
 

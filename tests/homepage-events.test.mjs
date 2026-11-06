@@ -247,25 +247,54 @@ test('a retry never duplicates a request in flight or replaces a usable result',
 });
 
 function retrierHarness(statuses) {
-  const state = { hidden: false, time: 0, due: null, calls: 0, results: [] };
+  const state = { paused: false, time: 0, due: null, calls: 0, requestTimes: [], results: [], gate: null, failRender: false };
   state.retrier = createFeedRetrier({
     load: async () => {
       state.calls += 1;
+      state.requestTimes.push(state.time);
+      if (state.gate) await state.gate.promise;
       return { status: statuses.length > 1 ? statuses.shift() : statuses[0] };
     },
-    onResult: (result) => state.results.push(result.status),
-    isHidden: () => state.hidden,
-    schedule: (run, delay) => { state.due = { run, delay }; return state; },
+    onResult: (result) => {
+      if (state.failRender) throw new Error('render failed');
+      state.results.push(result.status);
+    },
+    isPaused: () => state.paused,
+    schedule: (run, delay) => {
+      assert.equal(state.due, null, 'only one retry timer at a time');
+      state.due = { run, delay };
+      return state.due;
+    },
+    cancel: (timer) => { if (timer && timer === state.due) state.due = null; },
     now: () => state.time,
     random: () => 0.5,
   });
   state.fire = async () => {
     const { run, delay } = state.due;
-    state.due = null;
     state.time += delay;
     await run();
   };
+  // Starts the scheduled attempt and leaves its request open until release() runs.
+  state.fireAndHold = () => {
+    let release;
+    const promise = new Promise((resolve) => { release = resolve; });
+    state.gate = { promise };
+    const finished = state.fire();
+    return () => {
+      state.gate = null;
+      release();
+      return finished;
+    };
+  };
   return state;
+}
+
+const settle = () => new Promise((resolve) => setImmediate(resolve));
+
+async function exhaustRetries(h) {
+  h.retrier.start({ status: 'unavailable' });
+  while (h.due) await h.fire();
+  assert.equal(h.calls, FEED_MAX_RETRIES);
 }
 
 test('retries back off, stop when the feed recovers, and show the recovery', async () => {
@@ -282,9 +311,8 @@ test('retries back off, stop when the feed recovers, and show the recovery', asy
 
 test('an outage stops after the retry limit', async () => {
   const h = retrierHarness(['unavailable']);
-  h.retrier.start({ status: 'unavailable' });
-  while (h.due) await h.fire();
-  assert.equal(h.calls, FEED_MAX_RETRIES);
+  await exhaustRetries(h);
+  assert.equal(h.due, null);
 });
 
 test('ok and partial feeds are never retried', () => {
@@ -298,37 +326,159 @@ test('ok and partial feeds are never retried', () => {
   }
 });
 
-test('a hidden tab holds its retry until it is viewed', async () => {
-  const h = retrierHarness(['ok']);
+test('a paused tab holds its retry without spending it', async () => {
+  const h = retrierHarness(['unavailable', 'ok']);
   h.retrier.start({ status: 'unavailable' });
-  h.hidden = true;
+  h.paused = true;
   await h.fire();
-  assert.equal(h.calls, 0);
+  h.time += 60 * 60000;
   h.retrier.resume();
-  assert.equal(h.calls, 0, 'still hidden');
-  h.hidden = false;
+  assert.equal(h.calls, 0, 'still paused');
+  h.paused = false;
   h.retrier.resume();
+  h.retrier.resume();
+  await settle();
+  assert.equal(h.calls, 1, 'one request on return');
+  assert.equal(h.due.delay, 60000, 'the next backoff step, not the last');
+});
+
+test('a held retry survives a clock moved backward', async () => {
+  const h = retrierHarness(['unavailable']);
+  h.retrier.start({ status: 'unavailable' });
+  h.paused = true;
+  await h.fire();
+  h.time -= 3 * 60 * 60000;
+  h.paused = false;
+  h.retrier.resume();
+  await settle();
   assert.equal(h.calls, 1);
 });
 
-test('after the limit, resuming allows one attempt per cooldown', async () => {
+test('after the limit, a due resume makes one request and plans nothing further', async () => {
   const h = retrierHarness(['unavailable']);
-  h.retrier.start({ status: 'unavailable' });
-  while (h.due) await h.fire();
-  h.retrier.resume();
-  assert.equal(h.calls, FEED_MAX_RETRIES, 'inside the cooldown');
+  await exhaustRetries(h);
   h.time += FEED_RETRY_COOLDOWN_MS;
   h.retrier.resume();
+  h.retrier.resume();
+  await settle();
+  assert.equal(h.calls, FEED_MAX_RETRIES + 1);
+  assert.equal(h.due, null);
+});
+
+test('reconnecting before the cooldown expires recovers when it ends', async () => {
+  const h = retrierHarness(['unavailable']);
+  await exhaustRetries(h);
+
+  h.time += 9 * 60000;
+  h.retrier.resume();
+  h.retrier.resume();
+  assert.equal(h.calls, FEED_MAX_RETRIES, 'no request inside the cooldown');
+  assert.equal(h.due.delay, FEED_RETRY_COOLDOWN_MS - 9 * 60000);
+
+  await h.fire();
+  assert.equal(h.calls, FEED_MAX_RETRIES + 1);
+  assert.equal(h.due, null, 'a failed cooldown attempt plans nothing further');
+});
+
+test('a reconnect recovery shows the result and stops', async () => {
+  const h = retrierHarness(Array(FEED_MAX_RETRIES).fill('unavailable').concat('ok'));
+  await exhaustRetries(h);
+  h.retrier.resume();
+  await h.fire();
+  assert.equal(h.results.at(-1), 'ok');
+  assert.equal(h.due, null);
+  h.time += FEED_RETRY_COOLDOWN_MS;
   h.retrier.resume();
   assert.equal(h.calls, FEED_MAX_RETRIES + 1);
 });
 
-test('resuming does not jump ahead of a scheduled retry', () => {
+test('a timer frozen by device sleep does not delay recovery on return', async () => {
+  const h = retrierHarness(['unavailable']);
+  await exhaustRetries(h);
+  h.retrier.resume();
+  assert.ok(h.due, 'cooldown timer waiting');
+
+  h.time += 2 * 60 * 60000;
+  h.retrier.resume();
+  await settle();
+  assert.equal(h.calls, FEED_MAX_RETRIES + 1, 'one request right away');
+  assert.equal(h.due, null, 'the frozen timer is cancelled');
+});
+
+test('a clock moved backward cannot stretch the wait past the cooldown', async () => {
+  const h = retrierHarness(['unavailable']);
+  await exhaustRetries(h);
+  h.time -= 3 * 60 * 60000;
+  h.retrier.resume();
+  assert.equal(h.due.delay, FEED_RETRY_COOLDOWN_MS);
+});
+
+test('resuming during a request starts nothing overlapping', async () => {
+  const h = retrierHarness(['unavailable']);
+  h.retrier.start({ status: 'unavailable' });
+  const release = h.fireAndHold();
+  h.time += FEED_RETRY_COOLDOWN_MS + 60000;
+  h.retrier.resume();
+  h.retrier.resume();
+  assert.equal(h.calls, 1, 'still the first request');
+  assert.equal(h.due, null);
+
+  await release();
+  assert.equal(h.calls, 1);
+  assert.equal(h.results.length, 1);
+  assert.equal(h.due.delay, 60000, 'backoff advances one step, with one timer');
+});
+
+test('two events from one wake make one request and leave nothing planned', async () => {
+  const h = retrierHarness(['unavailable']);
+  await exhaustRetries(h);
+  h.time += FEED_RETRY_COOLDOWN_MS;
+  let release;
+  h.gate = { promise: new Promise((resolve) => { release = resolve; }) };
+  h.retrier.resume();
+  h.retrier.resume();
+  h.gate = null;
+  release();
+  await settle();
+  assert.equal(h.calls, FEED_MAX_RETRIES + 1);
+  assert.equal(h.due, null);
+});
+
+test('a resume during a request that recovers plans nothing', async () => {
   const h = retrierHarness(['ok']);
   h.retrier.start({ status: 'unavailable' });
-  h.time = FEED_RETRY_COOLDOWN_MS;
+  const release = h.fireAndHold();
   h.retrier.resume();
-  assert.equal(h.calls, 0);
+  await release();
+  assert.equal(h.due, null);
+  assert.equal(h.calls, 1);
+});
+
+test('a render error does not lose the remaining retries', async () => {
+  const h = retrierHarness(['unavailable']);
+  h.retrier.start({ status: 'unavailable' });
+  h.failRender = true;
+  await assert.rejects(h.fire(), /render failed/);
+  h.failRender = false;
+  assert.equal(h.due.delay, 60000);
+});
+
+test('an outage stays within one request per cooldown however often it resumes', async () => {
+  const h = retrierHarness(['unavailable']);
+  await exhaustRetries(h);
+  const start = h.requestTimes.length;
+  for (let step = 1; step <= 300; step += 1) {
+    h.time += step % 7 ? 60000 : 20 * 60000;
+    h.retrier.resume();
+    h.retrier.resume();
+    await settle();
+    if (h.due) await h.fire();
+  }
+  const extra = h.requestTimes.slice(start);
+  assert.ok(extra.length > 1);
+  extra.slice(1).forEach((time, i) => {
+    assert.ok(time - extra[i] >= FEED_RETRY_COOLDOWN_MS, 'gap ' + (time - extra[i]));
+  });
 });
 
 test('retry delays back off, stay within jitter, and run out', () => {
@@ -364,4 +514,11 @@ test('homepage markup: permanent headline, archive after upcoming, no hardcoded 
   assert.ok(!home.includes('316558816') && !script.includes('316558816'));
   assert.ok(!home.includes('workers.dev'), 'feed URLs live in events-core.js');
   assert.ok(!script.includes('.nearifyJoinUrl'), 'cards only use the browser-safe URL');
+});
+
+test('homepage wiring: retries pause offline and resume on return or reconnect', () => {
+  const script = readFileSync('assets/js/homepage-events.js', 'utf8');
+  assert.ok(script.includes('document.hidden || !navigator.onLine'));
+  assert.ok(script.includes("document.addEventListener('visibilitychange', retrier.resume)"));
+  assert.ok(script.includes("window.addEventListener('online', retrier.resume)"));
 });

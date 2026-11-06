@@ -205,7 +205,7 @@ async function init() {
   const retrier = createFeedRetrier({
     load: loadEventFeed,
     onResult: showFeed,
-    isHidden: function () { return document.hidden; },
+    isPaused: function () { return document.hidden || !navigator.onLine; },
   });
   const firstFeed = await loadEventFeed();
   showFeed(firstFeed);
