@@ -347,6 +347,13 @@
       z-index: 1;
     }
 
+    #hero-event .hero-eyebrow {
+      font-family:var(--font-display); font-size:clamp(1.3rem, 3vw, 1.9rem);
+      font-weight:800; letter-spacing:.03em; color:#fff; margin:0 0 12px;
+    }
+    #last-charlestonhacks-event { margin-top:32px; }
+    #last-event-content .event-card { margin-top:16px; }
+
     .events-label {
       font-size: 0.86rem;
       letter-spacing: 0.03em;
@@ -1362,7 +1369,7 @@
     <hr class="divider">
 
     <section class="section content-section" id="events-section" aria-label="Events">
-      <h2 class="section-title">Events</h2>
+      <p class="section-label">Events</p>
       <p class="section-sub">Find upcoming events and revisit past CharlestonHacks gatherings.</p>
       <section class="hero" id="next-event" aria-label="Next event">
         <div class="hero-inner">
@@ -1374,22 +1381,18 @@
           <div id="hero-cta" class="hero-cta" hidden></div>
         </div>
       </section>
-      <h2 class="events-list-title">Upcoming Events</h2>
+      <h2 class="events-list-title">Community Events</h2>
       <div class="events-list" id="homepage-events" aria-live="polite">
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
         <div class="event-card skeleton" aria-hidden="true" style="height:94px;"></div>
       </div>
       <p class="events-feed-note" id="events-feed-note" hidden>Some calendars couldn’t be reached, so this list may be incomplete.</p>
-      <div class="harborhack-entry" aria-label="HarborHack 2026 recent event">
-        <img class="harborhack-photo" src="/images/harborhack-2026/harborhack-2026-07.webp" alt="HarborHack participants, organizers, and mentors at the College of Charleston." width="1280" height="960" loading="lazy">
-        <div class="harborhack-copy">
-          <p class="section-label">From the community · Event recap</p>
-          <h3>HarborHack 2026</h3>
-          <p id="harborhack-home-dates">October 23–25 · College of Charleston</p>
-          <p>A weekend of building with AI, sharing ideas, and making connections.</p>
-          <a class="harborhack-btn" href="/harborhack-2026/">View recap <span aria-hidden="true">→</span></a>
+      <section id="last-charlestonhacks-event" aria-label="Last CharlestonHacks event">
+        <h2 class="events-list-title">Last CharlestonHacks Event</h2>
+        <div id="last-event-content">
+          <a class="harborhack-btn" href="/Poster.html">Explore past CharlestonHacks events →</a>
         </div>
-      </div>
+      </section>
 
     </section>
 

@@ -19,6 +19,7 @@ import {
   requestEventFeed,
   safeHref,
   selectHomepageEvents,
+  selectLastCharlestonHacksEvent,
 } from '../assets/js/events-core.js';
 
 const NOW = Date.parse('2026-11-05T20:00:00Z');
@@ -514,7 +515,7 @@ test('homepage markup: permanent headline, archive after upcoming, no hardcoded 
   assert.ok(home.indexOf('class="mission-stats"') < home.indexOf('class="hero"'), 'event follows the whole mission section');
   assert.ok(home.indexOf('id="events-section"') < home.indexOf('class="hero"'));
   assert.ok(home.indexOf('class="hero"') < home.indexOf('class="events-list-title"'), 'event sits above the upcoming list');
-  assert.ok(home.indexOf('id="homepage-events"') < home.indexOf('class="harborhack-entry"'));
+  assert.ok(home.indexOf('id="homepage-events"') < home.indexOf('id="last-charlestonhacks-event"'));
   assert.ok(!home.includes('316558816') && !script.includes('316558816'));
   assert.ok(!home.includes('workers.dev'), 'feed URLs live in events-core.js');
   assert.ok(!script.includes('.nearifyJoinUrl'), 'cards only use the browser-safe URL');
@@ -526,4 +527,19 @@ test('homepage wiring: retries pause offline and resume on return or reconnect',
   assert.ok(script.includes('document.hidden || !navigator.onLine'));
   assert.ok(script.includes("document.addEventListener('visibilitychange', retrier.resume)"));
   assert.ok(script.includes("window.addEventListener('online', retrier.resume)"));
+});
+
+
+test('last CharlestonHacks event: most recent completed event, expires exactly seven days after end', () => {
+  const end = NOW - DAY;
+  const latest = ch('recent', end - 3600000, { endDate: at(end) });
+  const older = ch('older', end - DAY - 3600000, { endDate: at(end - DAY) });
+  const future = ch('future', NOW + DAY);
+  const community = { title: 'Community meetup', link: 'https://example.com/event', startDate: at(NOW - 3600000), endDate: at(NOW - 1) };
+  assert.equal(selectLastCharlestonHacksEvent([older, future, community, latest], NOW).key, normalizeEvent(latest).key);
+  assert.ok(selectLastCharlestonHacksEvent([latest], end + 7 * DAY - 1));
+  assert.equal(selectLastCharlestonHacksEvent([latest], end + 7 * DAY), null);
+  assert.equal(selectLastCharlestonHacksEvent([future, community, {}], NOW), null);
+  assert.ok(selectLastCharlestonHacksEvent([latest], end));
+  assert.equal(selectLastCharlestonHacksEvent([latest], end - 1), null);
 });
