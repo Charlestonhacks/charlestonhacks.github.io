@@ -12,13 +12,10 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 // The feed has no end times yet. Meetup's own calendar lists these events at two hours.
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000;
 
-// Only the primary feed can report "nothing is scheduled". As of November 2026
-// the backup worker answers with an empty list even while Meetup has events, and
-// events.json is a static snapshot, so an empty or expired answer from either
-// proves nothing and is skipped.
+// Only the primary feed can report "nothing is scheduled". events.json is a static
+// snapshot, so an empty or expired answer from it proves nothing and is skipped.
 export const FEED_SOURCES = [
   { url: 'https://charlestonhacks-events.dmhamilton1.workers.dev', timeoutMs: 8000, authoritative: true },
-  { url: 'https://charlestonhacks-events-worker.deckerdb26354.workers.dev', timeoutMs: 4000, authoritative: false },
   { url: '/assets/data/events.json', timeoutMs: 4000, authoritative: false },
 ];
 
@@ -237,7 +234,7 @@ function readFeed(data) {
 /**
  * Resolves to { status, events }. It never rejects.
  *   ok          - the primary feed answered in full; empty means nothing is scheduled
- *   partial     - events from an incomplete or backup source
+ *   partial     - events from an incomplete feed or the static snapshot
  *   unavailable - no source could say what is scheduled
  */
 export async function requestEventFeed({

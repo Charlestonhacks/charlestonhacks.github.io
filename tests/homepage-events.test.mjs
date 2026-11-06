@@ -121,7 +121,6 @@ function fakeFetch(answers) {
 }
 const SOURCES = [
   { url: 'primary', timeoutMs: 50, authoritative: true },
-  { url: 'backup', timeoutMs: 50, authoritative: false },
   { url: 'static', timeoutMs: 50, authoritative: false },
 ];
 const load = (answers) => {
@@ -132,7 +131,12 @@ const live = community(1, NOW + DAY);
 const okCalendars = [{ source: 'a', ok: true, parsed: 0 }, { source: 'b', ok: true, parsed: 0 }];
 
 test('primary configuration: only the first source can confirm an empty calendar', () => {
-  assert.deepEqual(FEED_SOURCES.map((s) => s.authoritative), [true, false, false]);
+  assert.deepEqual(FEED_SOURCES.map((s) => s.authoritative), [true, false]);
+});
+
+test('the ChuckTown scraper worker is not an event source', () => {
+  assert.equal(FEED_SOURCES.some((s) => s.url.includes('deckerdb26354')), false);
+  assert.equal(FEED_SOURCES.filter((s) => s.url.includes('workers.dev')).length, 1);
 });
 
 test('a complete empty primary answer means nothing is scheduled and stops', async () => {
@@ -143,9 +147,9 @@ test('a complete empty primary answer means nothing is scheduled and stops', asy
 });
 
 test('an HTTP 200 error body is a failure, not an empty calendar', async () => {
-  const result = await load({ primary: { events: [], error: 'boom' }, backup: { events: [], lastUpdated: 'x' }, static: { events: [] } });
+  const result = await load({ primary: { events: [], error: 'boom' }, static: { events: [] } });
   assert.equal(result.status, 'unavailable');
-  assert.deepEqual(result.calls, ['primary', 'backup', 'static']);
+  assert.deepEqual(result.calls, ['primary', 'static']);
 });
 
 test('an empty list with a failed calendar is not trusted', async () => {
@@ -165,18 +169,18 @@ test('events plus a failed calendar are shown as partial', async () => {
   assert.equal(result.events.length, 1);
 });
 
-test('the empty backup and expired snapshot cannot stand in for a dead primary', async () => {
+test('an empty or expired snapshot cannot stand in for a dead primary', async () => {
   const expired = { events: [ch(1, Date.parse('2025-02-20T17:30:00'))] };
-  assert.equal((await load({ primary: 500, backup: { events: [] }, static: expired })).status, 'unavailable');
-  assert.equal((await load({ backup: new Error('timeout'), static: 404 })).status, 'unavailable');
+  assert.equal((await load({ primary: 500, static: expired })).status, 'unavailable');
+  assert.equal((await load({ primary: 500, static: { events: [] } })).status, 'unavailable');
+  assert.equal((await load({ static: 404 })).status, 'unavailable');
   assert.equal((await load({ primary: 'not a feed' })).status, 'unavailable');
 });
 
-test('a backup with live events is used, marked partial', async () => {
-  const result = await load({ primary: 503, backup: { events: [live] } });
+test('a snapshot with live events is used, marked partial', async () => {
+  const result = await load({ primary: 503, static: { events: [live] } });
   assert.equal(result.status, 'partial');
-  assert.deepEqual(result.calls, ['primary', 'backup']);
-  assert.equal((await load({ primary: 503, backup: { events: [] }, static: { events: [live] } })).status, 'partial');
+  assert.deepEqual(result.calls, ['primary', 'static']);
 });
 
 test('a hung source is abandoned', async () => {
