@@ -7,3 +7,41 @@
 .event-gallery img{display:block;width:100%;height:auto}
 .event-gallery figcaption{padding:.7rem .85rem;color:var(--muted);font-size:.9rem}
 @media(max-width:700px){.event-gallery-grid{grid-template-columns:1fr}}
+
+/* Event archive: a compact introduction and a photo-led recap. */
+main { max-width:1200px; padding-inline:clamp(20px,4vw,48px); }
+.hh-nav { padding:16px max(20px,calc((100vw - 1104px)/2)); }
+.hh-nav .brand { padding:0; border-radius:0; }
+.hh-nav .brand:hover { background:transparent; }
+.hh-nav img { width:180px; }
+.archive-nav-links { display:flex; gap:12px; }
+.archive-hero { display:grid; grid-template-columns:1.1fr 1fr; align-items:center; gap:40px; padding:48px 0; }
+.back-link { font-size:.85rem; color:var(--muted); text-decoration:none; }
+.archive-intro .eyebrow { margin:28px 0 14px; font-size:.68rem; }
+.archive-hero h1 { font-size:clamp(2rem,4vw,3.2rem); letter-spacing:-.03em; overflow-wrap:anywhere; }
+.archive-theme { font-family:var(--display); color:var(--cyan); font-size:clamp(1rem,2vw,1.3rem); margin:12px 0 20px; }
+.archive-hero .tagline { font-size:.9rem; color:var(--muted); }
+.archive-hero .lead { font-size:1rem; line-height:1.8; }
+.archive-cover { margin:0; border:1px solid var(--line); border-radius:18px; overflow:hidden; background:#0b1114; }
+.archive-cover img { display:block; width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; }
+.archive-cover figcaption { padding:12px 18px; font-size:.8rem; color:var(--muted); }
+.hero-actions { gap:10px; }
+.btn { font-size:.85rem; border-radius:9px; }
+.event-gallery { padding-top:32px; }
+.event-gallery h2 { font-size:clamp(1.5rem,3vw,2rem); }
+.event-gallery-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; }
+.event-gallery img { aspect-ratio:4/3; object-fit:cover; }
+.event-gallery figcaption { font-size:.8rem; padding:14px; }
+#gallery-title { scroll-margin-top:110px; }
+@media(max-width:900px) { .archive-hero { gap:24px; } .event-gallery-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:700px) {
+  .archive-hero { grid-template-columns:1fr; padding:28px 0 36px; }
+  .hh-nav img { width:140px; }
+  .archive-nav-links { gap:0; }
+  .hh-nav a { font-size:.72rem; }
+  .archive-intro .eyebrow { margin-top:24px; }
+  .archive-hero h1 { font-size:clamp(1.8rem,7vw,2.6rem); }
+  .event-gallery-grid { grid-template-columns:1fr; }
+  .hero-actions .btn { text-align:center; }
+}
+@media(max-width:380px) { .archive-nav-links a:first-child { display:none; } }

@@ -1287,6 +1287,18 @@
     .harborhack-btn.info { background: rgba(255,255,255,0.06); color: var(--text-muted); border-color: rgba(201,163,94,0.32); }
     .harborhack-btn:hover { border-color: var(--cyan); transform: translateY(-1px); }
 
+    .harborhack-entry { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.4fr); padding:0; overflow:hidden; gap:0; }
+    .harborhack-photo { display:block; width:100%; height:100%; min-height:250px; object-fit:cover; }
+    .harborhack-copy { display:grid; align-content:center; justify-items:start; gap:12px; padding:28px; }
+    .harborhack-copy .section-label { color:var(--cyan); font-size:.72rem; }
+    .harborhack-copy h3 { font-size:clamp(1.35rem, 2.4vw, 1.8rem); }
+    .harborhack-copy .harborhack-btn { gap:16px; margin-top:4px; }
+    @media(max-width:640px) {
+      .harborhack-entry { grid-template-columns:1fr; }
+      .harborhack-photo { height:210px; min-height:0; }
+      .harborhack-copy { padding:22px; }
+    }
+
     @media (max-width: 768px) {
       .donate-cards { grid-template-columns: 1fr; }
       .donate-info-grid { grid-template-columns: 1fr; }
@@ -1369,12 +1381,13 @@
       </div>
       <p class="events-feed-note" id="events-feed-note" hidden>Some calendars couldn’t be reached, so this list may be incomplete.</p>
       <div class="harborhack-entry" aria-label="HarborHack 2026 recent event">
-        <p class="section-label">Recent Event</p>
-        <h3>HarborHack 2026 · Agent in the Loop</h3>
-        <p class="section-label" id="harborhack-home-dates">October 23–25, 2026 · College of Charleston</p>
-        <p>HarborHack 2026 brought teams together to build and experiment with AI tools. The weekend focused on shared direction, technical judgment, and collaboration among participants.</p>
-        <div class="harborhack-actions">
-          <a class="harborhack-btn primary" href="/harborhack-2026/">View the HarborHack 2026 archive</a>
+        <img class="harborhack-photo" src="/images/harborhack-2026/harborhack-2026-07.webp" alt="HarborHack participants, organizers, and mentors at the College of Charleston." width="1280" height="960" loading="lazy">
+        <div class="harborhack-copy">
+          <p class="section-label">From the community · Event recap</p>
+          <h3>HarborHack 2026</h3>
+          <p id="harborhack-home-dates">October 23–25 · College of Charleston</p>
+          <p>A weekend of building with AI, sharing ideas, and making connections.</p>
+          <a class="harborhack-btn" href="/harborhack-2026/">View recap <span aria-hidden="true">→</span></a>
         </div>
       </div>
 
