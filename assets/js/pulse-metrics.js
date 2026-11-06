@@ -13,6 +13,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { countEventsInYear, loadEventFeed } from '/assets/js/events-core.js';
 
 const SUPABASE_URL     = 'https://mqbsjlgnsirqsmfnreqd.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hKGoZiLtCe6BxgQjG23h2Q_hbGC-At3';
@@ -98,35 +99,9 @@ async function loadPulseMetrics() {
       return;
     }
 
-    // ── Events this year — same waterfall the homepage events section uses ──
-    // Try the live Cloudflare Worker first, fall back to the static JSON.
-    const EVENTS_URLS = [
-      'https://charlestonhacks-events.dmhamilton1.workers.dev',
-      'https://charlestonhacks-events-worker.deckerdb26354.workers.dev',
-      '/assets/data/events.json',
-    ];
-    const currentYear = new Date().getFullYear();
-    let eventsThisYear = 0;
-    for (const url of EVENTS_URLS) {
-      try {
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 6000);
-        const resp = await fetch(url, { signal: controller.signal });
-        clearTimeout(timer);
-        if (!resp.ok) continue;
-        const json = await resp.json();
-        const list = Array.isArray(json) ? json : (json.events || []);
-        eventsThisYear = list.filter(e => {
-          try {
-            const d = e.startDate || e.start_date || e.starts_at || e.date || '';
-            return new Date(d).getFullYear() === currentYear;
-          } catch { return false; }
-        }).length;
-        break; // stop at first successful source
-      } catch {
-        // try next URL
-      }
-    }
+    // ── Events this year — shares the homepage's feed request ─────────────
+    const eventFeed = await loadEventFeed();
+    const eventsThisYear = countEventsInYear(eventFeed.events, new Date().getFullYear());
 
     // ── Determine whether the pulse section is already scrolled into view ──
     const pulseSection = document.getElementById('pulse-section');
@@ -136,16 +111,14 @@ async function loadPulseMetrics() {
 
     // ── Push live values to the cards ────────────────────────────────────
     // Only update a card when we have a valid (non-null) value from the DB.
-    // Events fall back to the hardcoded value when the JSON has no entries
-    // for the current year (eventsThisYear === 0 simply means "none found").
     // Members = Supabase community table + Mailchimp active subscribers
     if (metrics.members != null) {
       updateCard('Members', metrics.members + mailchimpCount, inView);
     }
     if (metrics.active_projects != null) updateCard('Active Projects',  metrics.active_projects, inView);
     if (metrics.connections     != null) updateCard('Connections',      metrics.connections,     inView);
-    // Always update Events — show the real count (even if 0)
-    updateCard('Events This Year', eventsThisYear, inView);
+    // A failed feed keeps the hardcoded value; a real count of 0 still shows.
+    if (eventFeed.status !== 'unavailable') updateCard('Events This Year', eventsThisYear, inView);
 
     console.log('[pulse] Live metrics loaded:', {
       membersDB:      metrics.members,

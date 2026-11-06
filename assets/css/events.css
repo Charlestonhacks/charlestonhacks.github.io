@@ -277,6 +277,12 @@ h1 {
   margin-bottom: 6px;
 }
 
+.ch-source-charlestonhacks {
+  color: #00e0ff;
+  background: rgba(0, 224, 255, 0.1);
+  border: 1px solid rgba(0, 224, 255, 0.25);
+}
+
 .ch-source-community {
   color: #fbbf24;
   background: rgba(251, 191, 36, 0.1);
