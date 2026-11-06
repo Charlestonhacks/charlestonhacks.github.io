@@ -337,20 +337,6 @@
       pointer-events: none;
     }
 
-    .hero-eyebrow {
-      font-size: 0.75rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: rgba(226, 245, 255, 0.82);
-      margin-bottom: 4px;
-      position: relative;
-      z-index: 1;
-    }
-
-    #hero-event .hero-eyebrow {
-      font-family:var(--font-display); font-size:clamp(1.3rem, 3vw, 1.9rem);
-      font-weight:800; letter-spacing:.03em; color:#fff; margin:0 0 12px;
-    }
     #last-charlestonhacks-event { margin-top:32px; }
     #last-event-content .event-card { margin-top:16px; }
 
@@ -1371,7 +1357,8 @@
     <section class="section content-section" id="events-section" aria-label="Events">
       <p class="section-label">Events</p>
       <p class="section-sub">Find upcoming events and revisit past CharlestonHacks gatherings.</p>
-      <section class="hero" id="next-event" aria-label="Next event">
+      <h2 class="events-list-title" id="charlestonhacks-events-title">CharlestonHacks Events</h2>
+      <section class="hero" id="next-event" aria-labelledby="charlestonhacks-events-title">
         <div class="hero-inner">
           <div id="hero-event" aria-live="polite">
             <p class="events-label">Finding the next event…</p>

@@ -514,7 +514,7 @@ test('homepage markup: permanent headline, archive after upcoming, no hardcoded 
   assert.ok(!home.includes('hub for builders, hackers, and makers</h1>'));
   assert.ok(home.indexOf('class="mission-stats"') < home.indexOf('class="hero"'), 'event follows the whole mission section');
   assert.ok(home.indexOf('id="events-section"') < home.indexOf('class="hero"'));
-  assert.ok(home.indexOf('class="hero"') < home.indexOf('class="events-list-title"'), 'event sits above the upcoming list');
+  assert.ok(home.indexOf('class="hero"') < home.indexOf('>Community Events</h2>'), 'event sits above the upcoming list');
   assert.ok(home.indexOf('id="homepage-events"') < home.indexOf('id="last-charlestonhacks-event"'));
   assert.ok(!home.includes('316558816') && !script.includes('316558816'));
   assert.ok(!home.includes('workers.dev'), 'feed URLs live in events-core.js');
