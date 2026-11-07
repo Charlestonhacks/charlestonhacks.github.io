@@ -515,7 +515,9 @@ test('homepage markup: permanent headline, archive after upcoming, no hardcoded 
   assert.ok(home.indexOf('class="mission-stats"') < home.indexOf('class="hero"'), 'event follows the whole mission section');
   assert.ok(home.indexOf('id="events-section"') < home.indexOf('class="hero"'));
   assert.ok(home.indexOf('class="hero"') < home.indexOf('>Community Events</h2>'), 'event sits above the upcoming list');
-  assert.ok(home.indexOf('id="homepage-events"') < home.indexOf('id="last-charlestonhacks-event"'));
+  assert.ok(home.indexOf('id="next-event"') < home.indexOf('id="last-charlestonhacks-event"'), 'last-event block follows the featured event');
+  assert.ok(home.indexOf('id="last-charlestonhacks-event"') < home.indexOf('id="homepage-events"'), 'last-event block precedes community events');
+  assert.equal((home.match(/id="last-charlestonhacks-event"/g) || []).length, 1);
   assert.ok(!home.includes('316558816') && !script.includes('316558816'));
   assert.ok(!home.includes('workers.dev'), 'feed URLs live in events-core.js');
   assert.ok(!script.includes('.nearifyJoinUrl'), 'cards only use the browser-safe URL');
