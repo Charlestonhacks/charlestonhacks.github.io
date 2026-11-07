@@ -60,3 +60,27 @@ The SHA-256 column identifies the original file.
 | `images/waterwatch2.JPG` | 6000×4000 | 8,472,187 | 2048×1365 | 380,622 | `69b9b51e394ab30c46df4f1b44fd7c4037364f03d929b7495c2aa95c3a4c221b` |
 | `images/webphoto1.JPG` | 6000×4000 | 804,496 | 2048×1365 | 278,044 | `f0749c4e42771e257a39050c30271703f934aaea6a104338bf3cead66027bef1` |
 | `images/webphoto2.JPG` | 6000×2944 | 908,697 | 2048×1005 | 296,013 | `d2085fe010041798e2eba0ca02118debbdd90911fda46944479bfa596e4c8c2e` |
+
+## Event archive additions
+
+These photos were added to the HarborHack 2023 and Innovation Engine archives and replaced under the same filenames. Each cleaned full-resolution original stays in Git history at commit `f53961cd9acc906c51ee421e00ae2842d2d82f6a`.
+
+Restore one original:
+
+```sh
+git restore --source=f53961cd9acc906c51ee421e00ae2842d2d82f6a -- "images/hm4.jpeg"
+```
+
+Settings: longest edge 2048px, JPEG quality 82, progressive, orientation applied to the pixels, ICC profile kept. The capture date is the only metadata kept.
+
+| File | Archive | Original | Original size | New | New size | Original SHA-256 |
+|---|---|---|---:|---|---:|---|
+| `images/Aiden.JPG` | HarborHack 2023 | 5583×2299 | 1,763,893 | 2048×843 | 215,565 | `26ee31e3cf31e23bf02c02ff08e26c63de1362e189703ce7cd762859d4f9147d` |
+| `images/The team.JPG` | HarborHack 2023 | 6000×4000 | 8,103,185 | 2048×1365 | 348,461 | `51f62536f96c7d68c06ef79a09784b94068417f338dd7cbf147ba3b833ee82cc` |
+| `images/Balcony.JPG` | HarborHack 2023 | 6000×4000 | 7,513,147 | 2048×1365 | 365,527 | `749d3a720fb9fef46b320f9cc70106c74a8890a521db5e95d89e18595a3eacf8` |
+| `images/willlancie.JPG` | HarborHack 2023 | 4314×3592 | 2,042,293 | 2048×1705 | 325,506 | `30bb5eb993d8645fea52ce9c1fb9f2f44fce1e03a22aac9b3753323eccdfd2a9` |
+| `images/Venkat.JPG` | HarborHack 2023 | 6000×4000 | 7,918,736 | 2048×1365 | 298,750 | `3527b1c8816a441cdb4dd0d192b9c60a10fa33815b5e5516e2efeb1a755240a2` |
+| `images/judges.JPG` | HarborHack 2023 | 6000×4000 | 7,672,231 | 2048×1365 | 228,704 | `11fcf74c27f102c4a155a8cef92a50b2d87136de36de0bdeaeaec177c7877240` |
+| `images/conservancy2.jpeg` | Innovation Engine | 4284×5712 | 4,985,236 | 1536×2048 | 458,243 | `21a4a889b0935ceac8fbda9a227e4bd18c0e2dfdba6d678b1ed59b763fdb1cd5` |
+| `images/conservancy3.jpeg` | Innovation Engine | 4032×3024 | 2,675,972 | 2048×1536 | 503,872 | `570cc4b5b5eace86faca0738fbdb4ddd4282092477f21b6dfd3e463e4d50304b` |
+| `images/hm4.jpeg` | Innovation Engine | 5712×4284 | 5,393,342 | 2048×1536 | 512,383 | `5c82edfe21e11b032017b8776489f6ca13cb2f4e0583e5a0a5f1352e3752e2ac` |
