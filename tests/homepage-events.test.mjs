@@ -543,3 +543,12 @@ test('last CharlestonHacks event: most recent completed event, expires exactly s
   assert.ok(selectLastCharlestonHacksEvent([latest], end));
   assert.equal(selectLastCharlestonHacksEvent([latest], end - 1), null);
 });
+
+test('labels the homepage last-event section for both states', () => {
+  const home = readFileSync('index.html', 'utf8');
+  const script = readFileSync('assets/js/homepage-events.js', 'utf8');
+  assert.match(home, /<h2 class="events-list-title" id="last-event-heading">Explore CharlestonHacks Events<\/h2>/);
+  assert.match(home, /<a class="harborhack-btn" href="\/Poster\.html">Upcoming events and past recaps →<\/a>/);
+  assert.ok(script.includes("event ? 'Last CharlestonHacks Event' : 'Explore CharlestonHacks Events'"));
+  assert.ok(script.includes("'Upcoming events and past recaps →'"));
+});
