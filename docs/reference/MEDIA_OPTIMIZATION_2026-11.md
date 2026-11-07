@@ -84,3 +84,51 @@ Settings: longest edge 2048px, JPEG quality 82, progressive, orientation applied
 | `images/conservancy2.jpeg` | Innovation Engine | 4284×5712 | 4,985,236 | 1536×2048 | 458,243 | `21a4a889b0935ceac8fbda9a227e4bd18c0e2dfdba6d678b1ed59b763fdb1cd5` |
 | `images/conservancy3.jpeg` | Innovation Engine | 4032×3024 | 2,675,972 | 2048×1536 | 503,872 | `570cc4b5b5eace86faca0738fbdb4ddd4282092477f21b6dfd3e463e4d50304b` |
 | `images/hm4.jpeg` | Innovation Engine | 5712×4284 | 5,393,342 | 2048×1536 | 512,383 | `5c82edfe21e11b032017b8776489f6ca13cb2f4e0583e5a0a5f1352e3752e2ac` |
+
+## Used media optimization
+
+These files were replaced under the same filenames. Each previous version stays in Git history at commit `3f8e27aa0f3030695514d041fe90a35505bdeef2`.
+
+Restore one original:
+
+```sh
+git restore --source=3f8e27aa0f3030695514d041fe90a35505bdeef2 -- "images/ieteam.jpg"
+```
+
+Settings: JPEG photos have a longest edge of 2048px at quality 82, with orientation applied to the pixels and only the capture date kept as metadata. WebP photos keep their dimensions at quality 86. PNG files are lossless, with identical pixels. A file was replaced only if it saved at least 20%, or 5% for PNG. HDR photos and catalog posters were left unchanged.
+
+| File | Original | Original size | New | New size | Original SHA-256 |
+|---|---|---:|---|---:|---|
+| `images/Anya.jpg` | 4000×1868 | 1,352,098 | 2048×956 | 257,491 | `4b08bd2265d01b42057991cc8b0ce8c0653c423ba72955d4923db982d36ddddb` |
+| `images/firstplace.jpg` | 3024×4032 | 2,493,384 | 1536×2048 | 436,714 | `6ba1f9d690aae5c1b7928c8dffc7592b93e0736b2db0459aa697f04dd9688da5` |
+| `images/geoff.jpg` | 1868×4000 | 1,952,437 | 956×2048 | 302,401 | `05309f1f6649ac61dd98142770f948817fe36c492c8c4a268800a25bb6dedf58` |
+| `images/Harborwalk.jpg` | 4000×1868 | 1,843,810 | 2048×956 | 253,275 | `6f0ca53d06fb532def504b7ddb2afdf1da8e62f44528a052ccf3f8a998ff366e` |
+| `images/hm1.jpg` | 1440×1440 | 636,093 | 1440×1440 | 314,788 | `394ba474fa1278c8a9f570589535dbbd459d471f1cb7febc329e3743483773a1` |
+| `images/hm3.jpg` | 1440×1440 | 577,591 | 1440×1440 | 269,136 | `0219c1c275d1612d465fc4d60a8935e4af983feb8621a8c5e672eff3bb55c164` |
+| `images/Home Bridge.jpg` | 4000×1868 | 1,709,919 | 2048×956 | 202,611 | `6ca347a5d22a9547a0a586c70be704710eaeafb31a2361c33759f5d8e2c643f3` |
+| `images/ieteam.jpg` | 5712×4284 | 4,917,135 | 2048×1536 | 471,623 | `4bcef110662bf08b80499e17fa006969902e8b99655f3961ff5345da4d21fb36` |
+| `images/Judges Good.jpg` | 4000×1868 | 968,618 | 2048×956 | 227,924 | `81cfc7988c85ece96fde2ed7a6fd1b2a7335f287c44fdbbe4697ca0e013e4142` |
+| `images/Make it Real.png` | 2738×2739 | 2,308,573 | 2738×2739 | 2,115,932 | `a5f4f5bbc0108f39fb9d6c8aa8a6fce4cda7bd24d5cf3443856075e1d15c8c3c` |
+| `images/secondplace.jpg` | 4000×2252 | 2,009,374 | 2048×1153 | 318,550 | `ef4f043686d6b0c34ac0029f5ca58d124711d429d9a9485e2c03af4aaa06fe9d` |
+| `images/squarebanner.jpg` | 5100×5100 | 808,513 | 2048×2048 | 436,066 | `3d736c36f02663b24efe208a56554af647e47f3a498ca7a2557c1e7e6462acff` |
+| `images/st1.webp` | 1206×2111 | 1,106,050 | 1206×2111 | 65,186 | `52141d32bf8d7c400dac7931cb5d147ef21351ae8d4453515308e5c9e4ace5d0` |
+| `images/st2.webp` | 1206×1579 | 1,575,888 | 1206×1579 | 162,558 | `caa5a928832064895c978bbaa3968549a585d2bf7dc63c67edc1fd2e992bece6` |
+| `images/st3.webp` | 1206×2084 | 1,344,370 | 1206×2084 | 109,596 | `a549f3a948044de9008675cd13acd6f4b4b1f9312a367052a52817a3f6a54adc` |
+| `images/st4.webp` | 1206×2119 | 1,468,510 | 1206×2119 | 111,412 | `db00437538b06acab2ff4f8e2af7e19e021d3f7694e1c47a35fc562083efcd9c` |
+| `images/st5.webp` | 1206×1715 | 1,809,732 | 1206×1715 | 169,788 | `bf60ab57e06aa5b00ed9bbe1df20cf4074570e4cff1e5a6545facf225f045848` |
+| `images/Team photo.jpg` | 4000×1868 | 1,747,754 | 2048×956 | 165,680 | `b9d12e2216295b121273fb30e28566c677d1ebde05ce6f71592cd52f09682cf0` |
+| `images/tejas.jpg` | 1440×1440 | 714,307 | 1440×1440 | 347,458 | `c2e88014d3f6e618f352c3cc95752759a973023749850f238710fb2aae76f65a` |
+| `images/wizard.JPG` | 4480×6720 | 7,731,802 | 1365×2048 | 299,035 | `b7a82af013783388f1e36a53082570799822e5053723aeb685be3bd71847bd47` |
+
+## Media manifest
+
+`docs/reference/media-manifest.csv` lists every media file with its size, references, event and status. It records repository references only, so "no reference" does not mean a file is safe to remove.
+
+| Status | Meaning |
+|---|---|
+| `used` | Referenced by a page or script reachable from the site |
+| `used-on-unlinked-page` | Referenced by a page with no link from the homepage |
+| `associated-not-displayed` | Strong evidence for one event, not shown on a page |
+| `alternate-version` | Another version or copy of a file |
+| `brand-or-interface` | Logo, game, button or background art, not event media |
+| `unresolved` | Event or use not established |
