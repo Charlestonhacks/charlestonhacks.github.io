@@ -125,6 +125,7 @@
       letter-spacing: 0.06em;
       line-height: 1.2;
       text-align: center;
+      text-wrap: balance;
     }
 
     .poster-order-toolbar {
@@ -375,9 +376,6 @@
         <img loading="lazy" decoding="async" src="/images/chrc.webp" alt="CharlestonHacks Running Club — 2025-07-01" />
         <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
       </a>
-      <a href="innovationengine.html" class="gallery-item" data-event-date="2025-06-29" aria-label="CharlestonHacks Innovation Engine Award Night on 2025-06-29">
-        <img loading="lazy" decoding="async" src="https://secure.meetupstatic.com/photos/event/5/f/2/3/highres_528384355.jpeg" alt="CharlestonHacks Innovation Engine Award Night — 2025-06-29" />
-      </a>
       <a href="https://www.meetup.com/charlestonhacks/events/308597228/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2025-06-24" aria-label="CharlestonHacks Running Club on 2025-06-24">
         <img loading="lazy" decoding="async" src="/images/chrc.webp" alt="CharlestonHacks Running Club — 2025-06-24" />
         <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
@@ -390,8 +388,8 @@
         <img loading="lazy" decoding="async" src="/images/dn%20poster%20dave.webp" alt="Digital Nomad: Innovation Engine Edition at Crush Yard — 2025-06-04" />
         <i class="fas fa-arrow-up-right-from-square external-icon" aria-hidden="true"></i>
       </a>
-      <a href="innovationengine.html" class="gallery-item" data-event-date="2025-06-01" aria-label="Innovation Engine Hackathon kickoff on 2025-06-01">
-        <img loading="lazy" decoding="async" src="/images/ieposter.jpg" alt="Innovation Engine Hackathon kickoff — 2025-06-01" />
+      <a href="innovationengine.html" class="gallery-item" data-event-date="2025-06-01" data-event-date-label="Hackathon: June 1–28, 2025 · Award Night: June 29" aria-label="CharlestonHacks Innovation Engine. Hackathon: June 1–28, 2025 · Award Night: June 29">
+        <img loading="lazy" decoding="async" src="/images/ieposter.jpg" alt="CharlestonHacks Innovation Engine Hackathon poster. Hackathon: June 1–28, 2025 · Award Night: June 29" />
       </a>
       <a href="https://www.meetup.com/charlestonhacks/events/307802261/" class="gallery-item external" target="_blank" rel="noopener noreferrer" data-event-date="2025-05-20" aria-label="CharlestonHacks Tech Happy Hour on 2025-05-20">
         <img loading="lazy" decoding="async" src="https://secure.meetupstatic.com/photos/event/7/a/2/f/highres_521851279.jpeg" alt="CharlestonHacks Tech Happy Hour — 2025-05-20" />
@@ -549,7 +547,7 @@
             const date = document.createElement("time");
             date.className = "poster-event-date";
             date.dateTime = eventDate;
-            date.textContent = dateLabel;
+            date.textContent = poster.dataset.eventDateLabel || dateLabel;
             poster.append(date);
           }
 
