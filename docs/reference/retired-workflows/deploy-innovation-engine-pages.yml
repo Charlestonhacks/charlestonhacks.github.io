@@ -1,3 +1,16 @@
+# RETIRED — HISTORICAL RECORD ONLY. THIS FILE IS NOT AN ACTIVE WORKFLOW.
+#
+# This was .github/workflows/deploy-innovation-engine-pages.yml ("Deploy
+# Innovation Engine to Pages"). It was retired on 2026-11-07 and moved here,
+# outside .github/workflows/, so GitHub Actions no longer offers or runs it.
+# It published a deckerd451/innovation-engine commit to this repository's
+# github-pages environment, which also serves the charlestonhacks.com homepage.
+# Running it replaced the homepage; its only run was 32543379969 (2026-08-22).
+#
+# Everything below this header is the workflow exactly as last committed
+# (5916881e, #397). Do not copy it back into .github/workflows/ without a new,
+# reviewed production cutover plan. See docs/INNOVATION_ENGINE_PRODUCTION_DEPLOYMENT.md.
+
 name: Deploy Innovation Engine to Pages
 
 on:
