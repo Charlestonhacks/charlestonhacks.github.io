@@ -1,3 +1,5 @@
+> Historical documentation: stylesheet links below describe the retired dashboard, not current site setup. See [retired stylesheets](../RETIRED_STYLESHEETS.md) before following these instructions.
+
 # UI/UX Fixes Implementation Plan
 
 ## Summary of Issues & Solutions

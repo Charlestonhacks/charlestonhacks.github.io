@@ -1,3 +1,5 @@
+> Historical documentation: stylesheet links below describe the retired dashboard, not current site setup. See [retired stylesheets](../reference/RETIRED_STYLESHEETS.md) before following these instructions.
+
 # Quiet Mode v1 Integration Complete
 
 **Date**: 2026-02-04  
