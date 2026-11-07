@@ -11,11 +11,13 @@ The site uses **June 1–28, 2025** as the hackathon dates. Award Night followed
 | Finale photos in `innovationengine.html` | June 29, 2025 | Capture times are in the evening, Eastern time |
 | `images/ieposter.jpg` artwork | June 1st-29th | **Conflicts with the hackathon dates. It covers Award Night.** Artwork not edited |
 
-## Why the card shows June 1–28
+## Why there is one card
 
 Kickoff and Award Night were sessions of one event, so `Poster.html` shows one card, using the poster. The Digital Nomad co-working days keep their own cards.
 
-The poster still reads June 1st-29th. A corrected poster would need new artwork, and is a separate decision.
+The poster stays as the original artwork and still reads June 1st-29th. The gallery card and the archive page add this clarification beside it:
+
+> Hackathon: June 1–28, 2025 · Award Night: June 29
 
 ## Removed card image
 
