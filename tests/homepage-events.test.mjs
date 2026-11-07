@@ -551,4 +551,5 @@ test('labels the homepage last-event section for both states', () => {
   assert.match(home, /<a class="harborhack-btn" href="\/Poster\.html">Upcoming events and past recaps →<\/a>/);
   assert.ok(script.includes("event ? 'Last CharlestonHacks Event' : 'Explore CharlestonHacks Events'"));
   assert.ok(script.includes("'Upcoming events and past recaps →'"));
+  assert.ok(script.includes("event.link.includes('meetup.com') ? 'View event →' : 'View event recap →'"));
 });

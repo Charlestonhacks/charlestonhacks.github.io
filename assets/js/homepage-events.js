@@ -186,7 +186,7 @@ function renderLastEvent(event) {
   card.append(title, date);
   if (event.location) card.append(el('p', 'event-location', event.location));
   if (event.description) card.append(el('p', 'event-desc', event.description.slice(0, DESCRIPTION_LENGTH)));
-  if (event.link) card.append(externalLink('ch-btn-meetup', event.link, 'View event recap →'));
+  if (event.link) card.append(externalLink('ch-btn-meetup', event.link, event.link.includes('meetup.com') ? 'View event →' : 'View event recap →'));
   card.append(archive);
   root.replaceChildren(card);
 }
