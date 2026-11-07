@@ -1,0 +1,418 @@
+file,type,size_bytes,width,height,status,event,archive_page,references,confidence,evidence,notes
+assets/chbackbuttonred.png,image,70464,1742,611,used,,,Poster.html; cardmatchgame.html; docs.html; experimental.html; meetupmashup2.html; news.html; showandtell1.html; showandtell2.html; techweek.html,,,
+assets/chime.mp3,audio,18807,,,used,,,cardmatchgame.html; hub.html,,,
+assets/events.mp4,video,7267564,,,unresolved,,,,,"Card-framed social clip of real gatherings. Real event or community footage, but nothing establishes which event",
+assets/hh.mp4,video,4761584,,,unresolved,,,,,"Card-framed social clip of real gatherings. Real event or community footage, but nothing establishes which event",
+assets/images/nearify-footer-icon.png,image,8695,128,128,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html; index.html,High,Displayed on this archive page,
+assets/meet.mp4,video,4403093,,,unresolved,,,,Medium,"Frame reads CharlestonHacks Meetup 9, shown in a card frame. Series numbering does not resolve to a date",Possible event: Tech Happy Hour series (date unresolved)
+assets/music.mp3,audio,3954939,,,used-on-unlinked-page,,,cardmatchgame.html,,,
+assets/st2.jpg,image,143328,800,999,alternate-version,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,,High,"Same name as a file in use, in another format",Version of images/st2.webp
+assets/techvideo.mp4,video,1583898,,,unresolved,,,,,"Card-framed social clip of real gatherings. Real event or community footage, but nothing establishes which event",
+assets/trailer.mp4,video,8843403,,,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Vertical AI Film Fest title trailer,
+assets/viramiller.mp3,audio,856390,,,used-on-unlinked-page,,,cardmatchgame.html,,,
+assets/webfonts/fa-brands-400.svg,vector,747927,,,used,,,assets/css/fontawesome-all.min.css,,,
+assets/webfonts/fa-regular-400.svg,vector,144714,,,used,,,assets/css/fontawesome-all.min.css,,,
+assets/webfonts/fa-solid-900.svg,vector,918991,,,used,,,assets/css/fontawesome-all.min.css,,,
+charlestonhackslogo.svg,vector,48030,,,used-on-unlinked-page,,,hackertheater/display.html; hackertheater/index.html,,,
+favicon.ico,image,15086,48,48,used,,,Poster.html; admin/index.html; assets/js/notification-system.js; assets/js/video-chat-integration.js; bbs.html; cardmatchgame.html; dashboard.html; docs.html; experimental.html; hackertheater/index.html; hub.html; index.html; news.html; organization-admin.html; organization-profile.html; organizations.html; swag.html,,,
+h-favicon-01.png,image,29329,134,134,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+icons/card.png,image,522485,840,1260,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+icons/gauntlet.webp,image,263708,584,584,used-on-unlinked-page,,,swag.html,,,
+icons/hat1.webp,image,19514,1081,1080,used-on-unlinked-page,,,swag.html,,,
+icons/hat2.webp,image,22114,1081,1080,used-on-unlinked-page,,,swag.html,,,
+icons/header swag.webp,image,39324,1753,717,used-on-unlinked-page,,,swag.html,,,
+icons/hoodie.webp,image,255386,1081,1080,used-on-unlinked-page,,,swag.html,,,
+icons/mug1.webp,image,77602,1081,1080,used-on-unlinked-page,,,swag.html,,,
+icons/mug2.webp,image,79028,1081,1080,used-on-unlinked-page,,,swag.html,,,
+icons/skill.png,image,36716,800,800,used,,,assets/js/leaderboard.js,,,
+icons/sticker.webp,image,30724,584,584,used-on-unlinked-page,,,swag.html,,,
+icons/tshirt.webp,image,184380,584,584,used-on-unlinked-page,,,swag.html,,,
+ieheader.webp,image,20332,841,344,alternate-version,,,,,Exact byte copy of images/ieheader.webp,Version of images/ieheader.webp
+images/2card-background.webp,image,189746,2560,1440,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/AIFF.jpg,image,254913,1944,2880,used,30 Second AI Film Fest,,Poster.html,High,Poster.html card uses this image,
+images/Aegis.png,image,312208,375,525,used,,,assets/js/config.js,,,
+images/Aiden.JPG,image,215565,2048,843,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Alexandor.png,image,246916,375,525,used,,,assets/js/config.js,,,
+images/Alexandorvideo.mp4,video,613020,,,used,,,assets/js/config.js; assets/js/portal-reveal.js; cardmatchgame.html,,,
+images/All Tech.jpeg,image,213597,1280,1700,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Text reads harborHack(23), Fri-Sun Oct 6-8, 14 days left. Unique countdown promo",
+images/Anya.jpg,image,257491,2048,956,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 1,352,098 bytes"
+images/Astrid.png,image,1015548,750,1050,used,,,assets/js/config.js,,,Not optimized: png saves under 5% (0.98)
+images/Astridstory.png,image,1239866,2500,1250,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Auditorium.jpg,image,1727090,4000,1868,unresolved,,,,Medium,"Empty rooms. Location metadata matches Harborwalk.jpg, but capture date (Aug 15, 2023) predates both events, so this is venue evidence, not event coverage",Possible event: Harbor Walk venue (HarborHack 2023/2024)
+images/Balcony.JPG,image,365527,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Big-team.jpg,image,1216279,6000,4000,unresolved,,,,Medium,"No capture date. Same lecture room, camera format and a participant seen in judges.JPG","Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/Breakout spaces.jpeg,image,559005,4000,1868,unresolved,,,,Medium,"Empty rooms. Location metadata matches Harborwalk.jpg, but capture date (Aug 15, 2023) predates both events, so this is venue evidence, not event coverage",Possible event: Harbor Walk venue (HarborHack 2023/2024)
+images/CHARLESTONHACKS GREY SMALL LOGO ONLY left.png,image,44111,1685,264,alternate-version,,,,,Exact byte copy of the logo used on event pages,Version of images/CHARLESTONHACKS Grey off center-01-01.png
+images/CHARLESTONHACKS Grey off center-01-01.png,image,44111,1685,264,used,,,hacknights24.html; hackops.html; harborhack23.html; harborhack24.html; innovationengine.html; meetupmashup.html; summerhack.html,,,
+images/CTC rendering_Page_01.jpg,image,255855,1100,850,unresolved,,,,,Third-party architectural rendering of the Charleston Tech Center,
+images/Centered_Charlestonhacks_with_right_arrow-03.png,image,44127,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Circular classroom.jpg,image,1721675,4000,1868,unresolved,,,,Medium,"Empty rooms. Location metadata matches Harborwalk.jpg, but capture date (Aug 15, 2023) predates both events, so this is venue evidence, not event coverage",Possible event: Harbor Walk venue (HarborHack 2023/2024)
+images/Citadeldave.JPG,image,420890,2048,1632,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Descartes.png,image,278131,375,525,used,,,assets/js/config.js,,,
+images/Descartesbackstory.png,image,1026003,2500,1250,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Descartesbackstoryv.png,image,1484840,1563,3125,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Descartesvideo.mp4,video,793070,,,used,,,assets/js/config.js; assets/js/portal-reveal.js; cardmatchgame.html,,,
+images/Devpost Logo-01.png,image,30475,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Devpost Logo-check it out-01.png,image,15268,843,133,used,,,hacknights24.html; hackops.html; harborhack23.html; harborhack24.html; innovationengine.html; summerhack.html,,,
+images/Discord Logo-02.png,image,23557,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Elara.png,image,291728,375,525,used,,,assets/js/config.js,,,
+images/Elarastory.png,image,1089023,2500,1250,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Elaravideo.mp4,video,696719,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/Good Bradley and Aya.jpg,image,372125,1868,1868,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/H Wide-02.png,image,788540,2551,2550,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/H.png,image,350046,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/HACK ONE PAGER4-01.jpg,image,382340,2550,3300,used,CharlestonHacks Summer Hack,,Poster.html,High,Poster.html card uses this image,Not optimized: catalog poster
+images/HACK ONE PAGER4-01.png,image,2223683,2550,3300,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.98)
+images/HACKATHON POSTER2.jpg,image,1215933,1275,1650,alternate-version,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,,High,Near-identical to the catalog poster hh24poster.png; reads Fall 2024,Version of images/hh24poster.png
+images/Hackers Wanted.jpeg,image,205258,1080,1434,used,HarborHack 2023,,Poster.html,High,Poster.html card uses this image,
+images/Harborhack left-01.png,image,30408,1685,149,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Harborwalk.jpg,image,253275,2048,956,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 1,843,810 bytes"
+images/Harborwalks.jpg,image,575871,4000,1868,alternate-version,Harbor Walk venue (HarborHack 2023/2024),,,High,"Near-identical to Harborwalk.jpg, used on harborhack24.html",Version of images/Harborwalk.jpg
+images/Hermes.png,image,1223922,750,1050,used,,,cardmatchgame.html (built at runtime),,,Not optimized: png saves under 5% (0.98)
+images/Home Bridge.jpg,image,202611,2048,956,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 1,709,919 bytes"
+images/IE Button.webp,image,71412,720,720,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/IE.svg,vector,33424,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/IEB.webp,image,188494,2560,1440,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/IMG_6162.jpg,image,396115,4032,3024,used,,,news.html,,,Not optimized: saves under 20% (0.96)
+images/Image1.png,image,3034571,1920,1080,unresolved,,,,,"Group at a bar with a QR table tent. Probably a happy hour, but no date or venue evidence",
+images/Jeds.mov,video,15474242,,,unresolved,,,,,"Real event or community footage, but nothing establishes which event. Its date is days after HackOps, so it may not be HackOps",Appears to show the HackOps venue courtyard; event not confirmed
+images/Jeds.mp4,video,2632285,,,alternate-version,,,,,Smaller copy of Jeds.mov,Version of images/Jeds.mov; Appears to show the HackOps venue courtyard; event not confirmed
+images/Judges Good.jpg,image,227924,2048,956,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 968,618 bytes"
+images/MM.png,image,360167,943,624,unresolved,,,,Medium,Same wordmark as the Meetup Mashup poster; artwork does not establish the year,Possible event: Halloween Meetup Mashup (year unresolved)
+images/Make it Real.png,image,2115932,2738,2739,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,"Optimized from 2,308,573 bytes"
+images/Medusa.png,image,305690,375,525,used,,,assets/js/config.js,,,
+images/Medusastory.png,image,1120746,2500,1250,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Medusavideo.mp4,video,1833643,,,unresolved,,,,,Happy Hour Tomorrow promo. Its date matches no listed happy hour,
+images/Merlin.png,image,344283,375,525,used,,,cardmatchgame.html (built at runtime),,,
+images/More Info right-02.png,image,26500,1685,150,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Mystery.mp4,video,580041,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/Mystery.png,image,253601,375,525,used,,,cardmatchgame.html (built at runtime),,,
+images/News Article.png,image,7404530,1868,2577,unresolved,,,,Medium,Newspaper clipping on a hack-a-thon quoting the CharlestonHacks president. Inset photo shows the same scene as news1. Publication and date not readable,"Possible event: Hack Nights (Jun 24, 26, 27, 2024)"
+images/Other hackathons tab-02.png,image,45299,1685,149,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/Possum Poster 5.jpeg,image,81300,800,1063,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,Carries the >harborHack(23) mark. Unique promo art,
+images/Poster 3.jpeg,image,83447,613,793,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/harborHack poster print.png
+images/Poster for Webpage.png,image,1712311,2551,3300,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/Website_Poster-01.png
+images/SUMMER 2025.png,image,701728,2250,2250,unresolved,,,,Medium,"Reads Innovation Engine, Summer 2025. Promo art","Possible event: Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)"
+images/Skeep.JPG,image,354910,2048,1536,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Splash Screen.png,image,492537,1469,744,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Team photo.jpg,image,165680,2048,956,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 1,747,754 bytes"
+images/The team.JPG,image,348461,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Transformer H web formatted-01.png,image,529530,5692,3200,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Transformer-H-Small-orange.jpg,image,69040,1125,799,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/Tron H no background.png,image,338292,1747,2532,brand-or-interface,,,,,H logo artwork; not event media. Confirm no external use,
+images/Untitled.mp4,video,21398488,,,unresolved,,,,,Social-style edit of the H logo; Untitled.mp4 also contains the dougaya.mp4 interview,
+images/VID_40430923_151654_462.mp4,video,5400833,,,unresolved,,,,,Social-style edit of the H logo; Untitled.mp4 also contains the dougaya.mp4 interview,
+images/Venkat.JPG,image,298750,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Vintage.mp4,video,8400282,,,unresolved,,,,Medium,Same AI-generated film-noir cast as the Film Fest promos; ends on a CharlestonHacks card,"Possible event: 30 Second AI Film Fest (May 1, 2025)"
+images/Water Watch.JPG,image,349305,1635,2048,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/Web H poster-01.png,image,1682854,2551,3300,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/Web H poster-2.png
+images/Web H poster-2.png,image,1677519,2551,3300,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/Web H poster-01.png
+images/Website_Poster-01.png,image,1710580,2551,3300,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/Poster for Webpage.png
+images/Wolf.png,image,302197,375,525,used,,,cardmatchgame.html (built at runtime),,,
+images/about us dark.webp,image,50816,1753,717,used-on-unlinked-page,,,cardmatchgame.html,,,
+images/about us light.webp,image,51122,1753,717,used-on-unlinked-page,,,cardmatchgame.html,,,
+images/about us.webp,image,50816,1753,717,used-on-unlinked-page,,,cardmatchgame.html,,,
+images/adventurercard.png,image,323429,375,525,used,,,assets/js/config.js,,,
+images/aegisbackstory.png,image,386000,1200,600,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/aegisvideo.mp4,video,896599,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/aiffbanner.png,image,1296378,4117,2129,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Film Fest artwork with Charleston Tech Week text,
+images/aiffcard.png,image,303861,375,525,unresolved,,,,Medium,Film Fest themed game card,"Possible event: 30 Second AI Film Fest (May 1, 2025)"
+images/aiffcardvideo.mp4,video,6418942,,,alternate-version,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,"Same size, length and frames as aiffcv.mp4, different bytes",Version of images/aiffcv.mp4
+images/aiffcv.mp4,video,6429633,,,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Film Fest Medusa card animation,
+images/aiffspin.svg,vector,14278,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/aiffteam.mp4,video,3484406,,,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,"Frames state the venue, Room 180, and May 1, 6-9pm",
+images/aiffwindow.jpg,image,345737,1584,1584,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Film Fest artwork with Charleston Tech Week text,
+images/andymegan.jpg,image,519463,1536,2048,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/apple-touch-icon.png,image,475730,1067,1067,used,,,Poster.html; bbs.html; cardmatchgame.html; docs.html; experimental.html; hub.html; index.html; news.html; swag.html,,,
+images/astridvideo.mp4,video,1083476,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/awards.jpg,image,560842,3024,4032,unresolved,,,,,"Trophy setup with a Devpost gallery on screen, like goodaward.jpg. Possibly Summer Hack; not established",
+images/ayajulian.jpg,image,4584145,4284,5712,associated-not-displayed,"Innovation Engine Award Night (Jun 29, 2025)",innovationengine.html,,High,"Capture date matches the Jun 29, 2025 Award Night; same PARKS marquee letters and location metadata as assigned photos",
+images/background for mobile ie.jpg,image,395478,1080,1920,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/background.jpg,image,101225,1920,1080,used,,,cardmatchgame.html; index.html; styles.css,,,
+images/background.webp,image,744050,1920,1080,used-on-unlinked-page,,,swag.html,,,Not optimized: alpha webp
+images/backgroundie.jpg,image,377557,1920,1080,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/backgroundmobile.jpg,image,359331,1080,1920,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/ballonanimal2.png,image,147969,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/banner.png,image,211440,1976,1022,used,"30 Second AI Film Fest (May 1, 2025)",techweek.html,techweek.html,High,Displayed on this archive page,
+images/bigposter.png,image,442692,844,1914,associated-not-displayed,"CharlestonHacks x Dig South Happy Hour (Jan 14, 2025)",https://www.meetup.com/charlestonhacks/events/305284075/,,High,"Reads #13 Happy Hour, 14th of Jan, 5-7pm, Harbor Entrepreneur Center. Catalog date matches. Also announces the AI Film Fest",
+images/bit.png,image,10484,409,400,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/bitcoin-coin.svg,vector,1934,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/boardroom.jpg,image,250870,2048,933,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/boatwright.jpeg,image,155242,1200,799,used,,,news.html,,,
+images/boatwright.webp,image,1250650,1200,799,alternate-version,,,,,"Same name as a file in use, in another format",Version of images/boatwright.jpeg
+images/btcbutton.webp,image,42388,720,720,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/bubbleh.png,image,169979,400,400,used,,,manifest.json,,,
+images/bubbleh512.png,image,475730,1067,1067,used,,,manifest.json,,,
+images/cardback.png,image,798260,1335,1935,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/cardflip.mp3,audio,13959,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/cardframe.png,image,576798,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/cardframe2.svg,vector,824987,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/case.webp,image,104214,1500,1500,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/charlestonhackslogo.svg,vector,48030,,,used,,,Poster.html; bbs.html; harborhack-2026/index.html; hub.html; index.html,,,
+images/chback.png,image,28822,834,308,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/chrc.webp,image,340936,900,900,used,CharlestonHacks Running Club,,Poster.html,High,Poster.html card uses this image,
+images/chred.png,image,68925,1742,611,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/collaboratorcard.png,image,303202,375,525,used,,,assets/js/config.js,,,
+images/coming2024.jpg,image,182389,1312,1312,unresolved,,,,,Generic Coming in 2024 teaser,
+images/conservancy2.jpeg,image,458243,1536,2048,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,
+images/conservancy3.jpeg,image,503872,2048,1536,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,
+images/consevancy.jpeg,image,5250036,5712,4284,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,Not optimized: HDR gain map
+images/construction.jpg,image,151087,2534,1734,unresolved,,,,Medium,"Reads Innovation Engine Team Builder under construction. Platform notice, not event media","Possible event: Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)"
+images/crestb.svg,vector,540521,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/crestl.svg,vector,548619,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/crestn.svg,vector,534104,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/davedoug.jpg,image,130195,800,1422,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,
+images/davestory.png,image,306084,1200,600,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/decarteswolf.mp4,video,1415751,,,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/default-avatar.png,image,15990,1600,1600,used,,,assets/js/teamBuilder.js,,,
+images/definition.png,image,284355,394,563,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/dn poster dave.webp,image,572670,6000,7500,used,Digital Nomad: Innovation Engine Edition at Crush Yard,,Poster.html,High,Poster.html card uses this image,
+images/dn.jpg,image,252977,1080,1350,used,Digital Nomad at Crush Yard,,Poster.html,High,Poster.html card uses this image,
+images/donateheader.webp,image,19192,841,344,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/doug-presenting good.jpg,image,347450,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/doug.jpg,image,340034,1609,1536,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,
+images/dougaya.mp4,video,15247250,,,unresolved,,,,,"Seated interview. Real event or community footage, but nothing establishes which event",
+images/dougbackstory.png,image,338413,1200,600,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/dougexplaining.jpg,image,312695,1920,1280,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/dougmegan.jpg,image,247739,1536,2048,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/dougmeganmike.jpg,image,546831,1536,2048,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/elara rage.mp4,video,3621726,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/elarabio.mp4,video,2895929,,,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/email.svg,vector,4635,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/engine.webp,image,41076,1500,1500,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/envelope.svg,vector,2747,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/enveloped.svg,vector,3218,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/envelopeg.svg,vector,4940,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/envelopen.svg,vector,4944,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/experiment.webp,image,115340,1500,1500,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/ez.png,image,66529,1752,709,used,,,experimental.html,,,
+images/fall button.png,image,17509,843,132,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/fall.png,image,37941,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/finalcard.png,image,402465,668,968,used,,,hub.html,,,
+images/finalcard2.png,image,452204,668,968,alternate-version,,,,,"Same art as finalcard.png, which is in use",Version of images/finalcard.png
+images/firstplace.jpg,image,436714,1536,2048,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 2,493,384 bytes"
+images/firstplace.png,image,2577671,1440,1440,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.97)
+images/food.jpg,image,475303,2048,1536,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/full2.jpg,image,289722,2250,2813,used,Digital Nomad: Innovation Engine Edition at Ripple Fund,,Poster.html,High,Poster.html card uses this image,
+images/full2.png,image,1382935,2250,2813,alternate-version,"Digital Nomad at Ripple Fund (Jun 11, 2025)",https://www.meetup.com/charlestonhacks/events/308305047/,,High,"Same name as a file in use, in another format",Version of images/full2.jpg
+images/gallery/dougexplaining.webp,image,36900,800,533,used,,,index.html,,,
+images/gallery/goodaward.webp,image,29350,600,800,alternate-version,Summer Hack (2023),summerhack.html,,High,"Same name as a file in use, in another format",Version of images/goodaward.jpg
+images/gallery/goodpartyshot-recap.webp,image,37644,900,675,alternate-version,Summer Hack (2023),summerhack.html,,High,Reduced copy of goodpartyshot.jpg,Version of images/goodpartyshot.jpg
+images/gallery/goodpartyshot.webp,image,29994,800,600,used,,,index.html,,,
+images/gallery/goodworking.webp,image,28106,800,533,used,,,index.html,,,
+images/gallery/hnphotos-03.webp,image,33974,800,454,alternate-version,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,,High,"Same name as a file in use, in another format",Version of images/hnphotos-03.jpg
+images/gallery/hnphotos-07.webp,image,43150,800,372,alternate-version,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,,High,"Same name as a file in use, in another format",Version of images/hnphotos-07.jpg
+images/gallery/hnwinners.webp,image,62128,800,436,used,,,index.html,,,
+images/gallery/st2group1.webp,image,66668,800,600,used,,,index.html,,,
+images/gallery/st2mike.webp,image,39076,600,800,alternate-version,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,,High,"Same name as a file in use, in another format",Version of images/st2mike.jpg
+images/gallery/venkatandteam.webp,image,28588,800,533,used,,,index.html,,,
+images/geoff.jpg,image,302401,956,2048,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 1,952,437 bytes"
+images/gh.png,image,8930,409,400,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/goodaward.jpg,image,337163,1536,2048,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/goodaward2.jpg,image,382054,1467,2048,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/goodpartyshot.jpg,image,316707,2048,1536,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/goodworking.jpg,image,238642,1920,1280,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/h.svg,vector,427781,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/hacker.png,image,173486,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hackerdiscoverylogo.webp,image,53848,1738,642,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hacknights.png,image,1820409,2750,1500,alternate-version,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,,High,"Higher-resolution version of hnadvert.jpg. Text gives Jun 24, 26, 27 at The Ripple Fund, Cigar Factory",Version of images/hnadvert.jpg
+images/hackops-01.jpg,image,324772,1334,620,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,
+images/hackops-02.jpg,image,373186,1334,620,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,
+images/hackops-03.jpg,image,298584,1334,620,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,
+images/hackops-04.jpg,image,370961,1334,620,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,
+images/hackops-05.jpg,image,219270,1334,620,used,"HackOps (Apr 19-21, 2024)",hackops.html,hackops.html,High,Displayed on this archive page,
+images/harborHack LOGO ONLY-01.png,image,97005,2013,332,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,HarborHack 2023 wordmark,
+images/harborHack poster print.png,image,2255754,2551,3301,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Print version of the same artwork",
+images/harborHack poster web.png,image,457413,613,793,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,"Poster text gives >harborHack, Oct 6-8 2023, 360 Concord St. Variant of the same poster design; none is the catalog poster (Hackers Wanted.jpeg)",Version of images/harborHack poster print.png
+images/harborhack-2026/harborhack-2026-01.webp,image,225514,1536,2048,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-02.webp,image,112340,1600,1200,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-03.webp,image,245254,1600,1200,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-04.webp,image,74880,1600,1200,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-05.webp,image,166708,1600,1200,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-06.webp,image,111084,960,1280,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-07.webp,image,84816,1280,960,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html,High,Displayed on this archive page,
+images/harborhack-2026/harborhack-2026-poster.webp,image,102658,800,1185,used,HarborHack 2026: Agent in the Loop,,Poster.html,High,Poster.html card uses this image,
+images/harborwalkeast.jpg,image,312799,2048,956,used,"HarborHack 2023 (Oct 6-8, 2023); HarborHack 2024 (Oct 18-20, 2024)",,harborhack23.html; harborhack24.html,High,Displayed on these archive pages,
+images/hcard.png,image,684189,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcard1.png,image,641453,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcard2.png,image,603734,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcardbest.png,image,624297,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcardblank.svg,vector,896726,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/hcardff.svg,vector,1622507,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/hcardfront.png,image,747967,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcardn.png,image,519752,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcardsimple1.png,image,632215,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hcardtest.png,image,626358,750,1050,alternate-version,,,,,Same art as hcardbest.png,Version of images/hcardbest.png
+images/header docs.webp,image,39036,1753,717,used-on-unlinked-page,,,docs.html,,,
+images/header events.webp,image,18814,841,344,used,,,Poster.html; meetupmashup2.html; showandtell1.html; showandtell2.html,,,
+images/header ie.webp,image,21554,841,375,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/header news.webp,image,18866,841,344,used,,,news.html,,,
+images/hecfront.jpeg,image,739474,2048,1365,unresolved,,,,Medium,"Filename and building suggest the Harbor Entrepreneur Center, the HackOps venue. Exterior shot with a third-party image mark","Possible event: HackOps (Apr 19-21, 2024)"
+images/hermesvideo.mp4,video,994636,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/hh.png,image,69589,2438,325,unresolved,,,,Medium,Metal wordmark matches the HarborHack 2024 poster style,"Possible event: HarborHack 2024 (Oct 18-20, 2024)"
+images/hh24poster.png,image,206822,1275,1650,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,Poster.html; harborhack24.html,High,Displayed on this archive page,
+images/hh25.jpg,image,351230,2700,3600,used,CharlestonHacks HarborHack Hackathon,,Poster.html,High,Poster.html card uses this image,Not optimized: catalog poster
+images/hivr.JPG,image,280034,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/hivr2.JPG,image,282678,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/hm1.jpg,image,314788,1440,1440,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 636,093 bytes"
+images/hm2.jpg,image,714307,1440,1440,alternate-version,"Innovation Engine Award Night (Jun 29, 2025)",innovationengine.html,,High,"Exact byte copy of tejas.jpg, used on innovationengine.html",Version of images/tejas.jpg
+images/hm3.jpg,image,269136,1440,1440,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 577,591 bytes"
+images/hm4.jpeg,image,512383,2048,1536,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,
+images/hmystery.png,image,312564,481,594,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/hnadvert.jpg,image,491855,1136,620,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hncommunity.jpg,image,882100,2250,2250,associated-not-displayed,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,,High,"Reads CharlestonHacks Hack Nights, Engage Experiment Evolve",
+images/hnphotos-01.jpg,image,258584,1265,1292,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-02.jpg,image,336824,2004,1292,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-03.jpg,image,294364,2048,1163,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-04.jpg,image,282960,2048,1135,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-05.jpg,image,184974,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-06.jpg,image,266829,1769,1292,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-07.jpg,image,334790,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-08.jpg,image,290358,2048,1162,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-09.jpg,image,319879,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-10.jpg,image,330033,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-11.jpg,image,152267,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-12.jpg,image,339291,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-13.jpg,image,233321,2048,952,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnphotos-14.jpg,image,301439,1329,1292,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/hnposter24.jpg,image,406508,816,1054,used,Hack Nights,,Poster.html,High,Poster.html card uses this image,
+images/hnwinners.jpg,image,404876,1980,1080,used,"Hack Nights (Jun 24, 26, 27, 2024)",hacknights24.html,hacknights24.html,High,Displayed on this archive page,
+images/holiday.png,image,43840,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/hoposter24.jpg,image,525013,816,1055,used,"HackOps (Apr 19-21, 2024)",hackops.html,Poster.html; hackops.html,High,Displayed on this archive page,Not optimized: catalog poster
+images/hsoftest.png,image,577832,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/humanitariancard.png,image,282678,375,525,used,,,assets/js/config.js,,,
+images/ieback.webp,image,713198,2550,1430,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/ieexperimentalcard.png,image,152522,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/iegold.png,image,287642,2386,2386,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/iegold.svg,vector,24609,,,alternate-version,,,,,Exact byte copy of ielogo.svg,Version of images/ielogo.svg
+images/ieheader.webp,image,20332,841,344,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/ielogo.svg,vector,24609,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/ieposter-1.jpg,image,250890,1944,2880,alternate-version,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,,High,"Same artwork as ieposter.jpg, used by Poster.html",Version of images/ieposter.jpg
+images/ieposter.jpg,image,251797,1944,2880,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,Poster.html; innovationengine.html,High,Displayed on this archive page,
+images/ieposter.png,image,1261537,1944,2880,alternate-version,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,,High,"Same name as a file in use, in another format",Version of images/ieposter.jpg
+images/ieteam.jpg,image,471623,2048,1536,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 4,917,135 bytes"
+images/info.svg,vector,3970,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/infod.svg,vector,3071,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/infon.svg,vector,4598,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/informationbutton.webp,image,39298,720,720,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/innovationenginebutton.webp,image,20732,587,640,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/judges.JPG,image,228704,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/judgessmiling.jpg,image,2884471,4080,3072,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,Not optimized: HDR gain map
+images/keysb.svg,vector,280413,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/keysl.svg,vector,283528,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/keysn.svg,vector,276074,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/kismetcard.jpg,image,95853,375,525,alternate-version,,,,,Same art as kismetcard.png,Version of images/kismetcard.png
+images/kismetcard.png,image,129836,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/lanceandteam.jpg,image,205229,1920,732,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/lancielaughing.jpg,image,243806,1920,1280,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/largeclass.jpg,image,268859,2048,956,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/letter.png,image,114074,1275,1650,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,
+images/logo.png,image,28488,761,310,used-on-unlinked-page,,,organization-admin.html,,,
+images/lookinginterested.jpg,image,204293,1464,967,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/m8.mp4,video,2285282,,,unresolved,,,,Medium,Filename and meet.mp4 suggest the numbered meetups; Charleston Tech Center signage visible. The series numbering does not resolve to a date,Possible event: Tech Happy Hour series (date unresolved)
+images/mashup1.jpg,image,409701,477,738,used,Halloween Tech Meetup Mashup,,Poster.html,High,Poster.html card uses this image,
+images/mashupposter.jpg,image,190716,800,1237,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,
+images/medusa 1.mp4,video,749129,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/medusa best.mp4,video,764299,,,used,,,assets/js/config.js; assets/js/portal-reveal.js; cardmatchgame.html,,,
+images/medusaback.jpg,image,369786,648,1152,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Film Fest artwork with Charleston Tech Week text,
+images/megan.jpg,image,412484,2048,1494,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/merlin.mp4,video,870067,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/mikeexplaining.jpg,image,395427,2048,1219,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/mission04.png,image,57038,180,252,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/mission05.png,image,57855,180,252,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/mission06.png,image,62224,180,252,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/mm25.jpg,image,355649,2245,3480,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,Poster.html; meetupmashup2.html,High,Displayed on this archive page,Not optimized: catalog poster
+images/mmc1.jpg,image,266742,1250,1959,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,meetupmashup2.html,High,Displayed on this archive page,
+images/mmc2.jpg,image,286634,1250,1959,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,meetupmashup2.html,High,Displayed on this archive page,
+images/mmc3.jpg,image,286058,1250,1959,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,meetupmashup2.html,High,Displayed on this archive page,
+images/mmc4.jpg,image,290836,1250,1959,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,meetupmashup2.html,High,Displayed on this archive page,
+images/mmc5.jpg,image,260891,1244,1957,used,"Halloween Meetup Mashup (Oct 29, 2025)",meetupmashup2.html,meetupmashup2.html,High,Displayed on this archive page,
+images/mmcomic.png,image,1015747,1250,1959,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.98)
+images/mmcomic2.png,image,3709073,1250,1959,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.98)
+images/mmcomic3.png,image,2247700,1250,1959,used,"Halloween Tech Meetup Mashup (Oct 30, 2024)",meetupmashup.html,meetupmashup.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.98)
+images/moback.webp,image,432104,831,1484,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/mural.jpg,image,146012,1548,1008,used,,,news.html,,,
+images/mural.png,image,2867767,1548,1008,alternate-version,,,,,"Same name as a file in use, in another format",Version of images/mural.jpg
+images/navigate.svg,vector,4059,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/news.svg,vector,5269,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/news1.jpg,image,145528,1558,982,used,,,news.html,,,
+images/news1.png,image,3021570,1558,982,alternate-version,,,,Medium,"Same name as a file in use, in another format","Version of images/news1.jpg; Possible event: Hack Nights (Jun 24, 26, 27, 2024)"
+images/newsbutton.webp,image,43794,720,720,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/newsd.svg,vector,2818,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/newsn.svg,vector,5504,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/nextcard.png,image,310362,375,525,used,,,assets/js/config.js,,,
+images/nicolecard.png,image,295658,375,525,used,,,assets/js/config.js,,,
+images/orangehnobackground.png,image,455306,1501,1501,brand-or-interface,,,,,H logo artwork; not event media. Confirm no external use,
+images/orangehweb.jpg,image,87338,720,720,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/overlay.png,image,2807,512,512,used,,,assets/css/main.css,,,
+images/participants.jpeg,image,310469,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/participants2.jpeg,image,330027,2048,1251,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/peoplebutton.webp,image,46940,720,720,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/peoplen.svg,vector,8290,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/placeholder.png,image,19691,1944,1080,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/reactiveh.png,image,731665,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/redscullcard.png,image,89171,375,525,used,,,assets/js/config.js,,,
+images/resilientcard.png,image,296666,375,525,used,,,assets/js/config.js,,,
+images/roots.jpg,image,279422,1332,612,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,
+images/secondcloseup.png,image,2775560,1440,1440,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,Not optimized: png saves under 5% (0.97)
+images/secondplace.jpg,image,318550,2048,1153,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 2,009,374 bytes"
+images/show-and-tell-5.webp,image,73344,700,875,used,CharlestonHacks Show & Tell at Sugey’s Bar,,Poster.html,High,Poster.html card uses this image,
+images/show-and-tell-6.webp,image,73682,700,875,used,CharlestonHacks Show & Tell at Center for Intentionality,,Poster.html,High,Poster.html card uses this image,
+images/show-and-tell-freehouse-nov-17-2026-v3.webp,image,48988,480,600,used,CharlestonHacks Show & Tell at Freehouse Brewery,,Poster.html,High,Poster.html card uses this image,
+images/showandtell.webp,image,222592,1080,1350,used,CharlestonHacks: Show & Tell at Sugey’s Bar,,Poster.html,High,Poster.html card uses this image,
+images/spin.mp4,video,2843435,,,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/splash.png,image,967750,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/spotamin.jpg,image,352416,1318,1318,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,Sheet carries the >harborHack(23) mark and organizer bio,
+images/spotaya.jpg,image,560876,1500,1500,unresolved,,,,Medium,Same Spotlight layout as the marked sheets; no event mark read on this sheet,"Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/spotbradley.jpg,image,1668951,1500,1500,unresolved,,,,Medium,Same Spotlight layout as the marked sheets; no event mark read on this sheet,"Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/spotdave.jpg,image,372793,1318,1311,unresolved,,,,Medium,Same Spotlight layout as the marked sheets; no event mark read on this sheet,"Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/spotdoug.jpg,image,421989,1314,1746,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,Sheet carries the >harborHack(23) mark and organizer bio,
+images/spotwill.jpg,image,314034,1318,1318,associated-not-displayed,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,Sheet carries the >harborHack(23) mark and organizer bio,
+images/squarebanner.jpg,image,436066,2048,2048,used,"30 Second AI Film Fest (May 1, 2025)",techweek.html,techweek.html,High,Displayed on this archive page,"Optimized from 808,513 bytes"
+images/st1.webp,image,65186,1206,2111,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,"Optimized from 1,106,050 bytes"
+images/st2.webp,image,162558,1206,1579,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,"Optimized from 1,575,888 bytes"
+images/st2dave.jpg,image,845806,3024,4032,used,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,showandtell2.html,High,Displayed on this archive page,Not optimized: HDR gain map
+images/st2group1.jpg,image,1424131,5712,4284,used,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,showandtell2.html,High,Displayed on this archive page,Not optimized: HDR gain map
+images/st2mike.jpg,image,697700,3024,4032,used,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,showandtell2.html,High,Displayed on this archive page,Not optimized: HDR gain map
+images/st2pan.MOV,video,2,,,unresolved,,,,,2-byte stub. Never held video in Git history,"2-byte placeholder, never held video"
+images/st2poster.jpg,image,143328,800,999,used,CharlestonHacks Show & Tell at Starlight Motor Inn,,Poster.html,High,Poster.html card uses this image,
+images/st3.webp,image,109596,1206,2084,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,"Optimized from 1,344,370 bytes"
+images/st3pic.jpeg,image,141760,800,1067,used,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,showandtell2.html,High,Displayed on this archive page,
+images/st4.webp,image,111412,1206,2119,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,"Optimized from 1,468,510 bytes"
+images/st5.webp,image,169788,1206,1715,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,"Optimized from 1,809,732 bytes"
+images/st6.webp,image,261794,492,369,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,
+images/stage.mp4,video,7970527,,,unresolved,,,,Medium,Same AI-generated film-noir cast as the Film Fest promos; ends on a CharlestonHacks card,"Possible event: 30 Second AI Film Fest (May 1, 2025)"
+images/stallwart.JPG,image,244633,2048,1933,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/stallwart2.JPG,image,441603,2048,2044,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/stallwart3.JPG,image,298121,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/stcomic.webp,image,426460,600,940,used,"Show & Tell at Sugey's Bar (Jan 27, 2026)",showandtell1.html,showandtell1.html,High,Displayed on this archive page,
+images/summer button.png,image,27002,843,133,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/summer.png,image,41331,1685,264,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/summerhack.jpeg,image,260718,2048,1536,alternate-version,Summer Hack (2023),summerhack.html,,High,Reduced copy of goodpartyshot.jpg,Version of images/goodpartyshot.jpg
+images/synapsecard.png,image,146530,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/teams.mp4,video,1098521,,,unresolved,,,,Medium,"No capture date. Same lecture hall as Venkat.JPG with uniformed cadets, whom the page names as participants","Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/teamspace.jpg,image,223282,1920,1280,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/teamvideo.mp4,video,2959692,,,associated-not-displayed,"30 Second AI Film Fest (May 1, 2025)",techweek.html,,High,Film Fest artwork with Charleston Tech Week end card,
+images/tejas.jpg,image,347458,1440,1440,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,"Optimized from 714,307 bytes"
+images/theteam.jpg,image,964872,6000,4000,alternate-version,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,,High,Web-sized copy of The team.JPG (same image),Version of images/The team.JPG
+images/universalcard-01.png,image,273038,375,525,used-on-unlinked-page,,,cardmatchgame.html,,,
+images/universalcard-02.png,image,338778,375,525,unresolved,,,,Medium,Film Fest themed game card,"Possible event: 30 Second AI Film Fest (May 1, 2025)"
+images/universalcard-light-01.png,image,430043,750,1050,used-on-unlinked-page,,,cardmatchgame.html,,,
+images/universe.mp4,video,3469538,,,unresolved,,,,Medium,"Animated Innovation Engine logo. Promotional, not event footage","Possible event: Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)"
+images/venkat.MOV,video,13623615,,,associated-not-displayed,"Innovation Engine Hackathon (Jun 1-28, 2025)",innovationengine.html,,High,"Location metadata matches assigned Innovation Engine photos, and the hexagon table and carpet match consevancy.jpeg. Capture date also equals the Crush Yard listing, so it may be that session held here; confirm the title",
+images/venkatandteam.jpg,image,276021,1920,1280,used,Summer Hack (2023),summerhack.html,summerhack.html,High,Displayed on this archive page,
+images/waterwatch2.JPG,image,380622,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/weback.webp,image,432194,831,1484,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/webphoto1.JPG,image,278044,2048,1365,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/webphoto2.JPG,image,296013,2048,1005,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/website panel.webp,image,801226,1500,2100,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/whoweare1.JPG,image,683328,5833,3107,unresolved,,,,Medium,"No capture date. Same computer lab as Aiden.JPG, dated within the event","Possible event: HarborHack 2023 (Oct 6-8, 2023)"
+images/willlancie.JPG,image,325506,2048,1705,used,"HarborHack 2023 (Oct 6-8, 2023)",harborhack23.html,harborhack23.html,High,Displayed on this archive page,
+images/wizard.JPG,image,299035,1365,2048,used,"HarborHack 2024 (Oct 18-20, 2024)",harborhack24.html,harborhack24.html,High,Displayed on this archive page,"Optimized from 7,731,802 bytes"
+images/wolfvideo.mp4,video,763183,,,used,,,assets/js/config.js; cardmatchgame.html,,,
+images/workshop.png,image,182372,750,1050,used-on-unlinked-page,,,docs.html,,,
+images/x2.png,image,156332,375,525,used,,,experimental.html,,,
+images/xcard.png,image,156619,375,525,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/xweb.webp,image,107876,1080,1920,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
+images/yellowscullcard.png,image,111803,375,525,used,,,assets/js/config.js,,,
+images/young medusa.mp4,video,3373354,,,used,,,assets/js/config.js; cardmatchgame.html,,,
