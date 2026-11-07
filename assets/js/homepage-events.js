@@ -175,7 +175,9 @@ function renderList(featured, others, now) {
 function renderLastEvent(event) {
   const root = document.getElementById('last-event-content');
   if (!root) return;
-  document.getElementById('last-event-heading').textContent = event ? 'Last CharlestonHacks Event' : 'Explore CharlestonHacks Events';
+  const heading = document.getElementById('last-event-heading');
+  heading.textContent = event ? 'Last CharlestonHacks Event' : 'Explore CharlestonHacks Events';
+  heading.hidden = !event;
   const archive = el('a', 'harborhack-btn', 'Upcoming events and past recaps →');
   archive.href = '/Poster.html';
   if (!event) { root.replaceChildren(archive); return; }
