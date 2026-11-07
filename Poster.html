@@ -703,8 +703,9 @@
       // Dates may stop at a month, so only compare the precision the event has.
       const isUpcoming = (card) => card.dataset.end >= today.slice(0, card.dataset.end.length);
       const newestFirst = (a, b) => b.dataset.start.localeCompare(a.dataset.start);
+      const soonestFirst = (a, b) => a.dataset.start.localeCompare(b.dataset.start);
 
-      const upcoming = cards.filter(isUpcoming).sort(newestFirst);
+      const upcoming = cards.filter(isUpcoming).sort(soonestFirst);
       const past = cards.filter((card) => !isUpcoming(card)).sort(newestFirst);
       upcomingGrid.replaceChildren(...upcoming);
       pastGrid.replaceChildren(...past);
