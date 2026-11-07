@@ -1,3 +1,5 @@
+> Historical documentation: stylesheet links below describe the retired dashboard, not current site setup. See [retired stylesheets](../reference/RETIRED_STYLESHEETS.md) before following these instructions.
+
 # Synapse Progressive Disclosure - Integration Guide
 
 ## Quick Start
