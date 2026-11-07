@@ -1,9 +1,13 @@
 file,type,size_bytes,width,height,status,event,archive_page,references,confidence,evidence,notes
+assets/atmospherel.m4a,audio,42489,,,used,,,hub.html,,Literal repository reference,
 assets/chbackbuttonred.png,image,70464,1742,611,used,,,Poster.html; cardmatchgame.html; docs.html; experimental.html; meetupmashup2.html; news.html; showandtell1.html; showandtell2.html; techweek.html,,,
 assets/chime.mp3,audio,18807,,,used,,,cardmatchgame.html; hub.html,,,
+assets/dooropen.m4a,audio,31302,,,unresolved,,,,,Audio format newly covered by manifest checker; usage unconfirmed,
 assets/events.mp4,video,7267564,,,unresolved,,,,,"Card-framed social clip of real gatherings. Real event or community footage, but nothing establishes which event",
+assets/flipsound.m4a,audio,8788,,,unresolved,,,,,Audio format newly covered by manifest checker; usage unconfirmed,
 assets/hh.mp4,video,4761584,,,unresolved,,,,,"Card-framed social clip of real gatherings. Real event or community footage, but nothing establishes which event",
 assets/images/nearify-footer-icon.png,image,8695,128,128,used,"HarborHack 2026 (Oct 23-25, 2026)",harborhack-2026/,harborhack-2026/index.html; index.html,High,Displayed on this archive page,
+assets/keys.m4a,audio,10586,,,used,,,hub.html,,Literal repository reference,
 assets/meet.mp4,video,4403093,,,unresolved,,,,Medium,"Frame reads CharlestonHacks Meetup 9, shown in a card frame. Series numbering does not resolve to a date",Possible event: Tech Happy Hour series (date unresolved)
 assets/music.mp3,audio,3954939,,,used-on-unlinked-page,,,cardmatchgame.html,,,
 assets/st2.jpg,image,143328,800,999,alternate-version,"Show & Tell at Starlight Motor Inn (Mar 11, 2026)",showandtell2.html,,High,"Same name as a file in use, in another format",Version of images/st2.webp
@@ -128,7 +132,7 @@ images/astridvideo.mp4,video,1083476,,,used,,,assets/js/config.js; cardmatchgame
 images/awards.jpg,image,560842,3024,4032,unresolved,,,,,"Trophy setup with a Devpost gallery on screen, like goodaward.jpg. Possibly Summer Hack; not established",
 images/ayajulian.jpg,image,4584145,4284,5712,associated-not-displayed,"Innovation Engine Award Night (Jun 29, 2025)",innovationengine.html,,High,"Capture date matches the Jun 29, 2025 Award Night; same PARKS marquee letters and location metadata as assigned photos",
 images/background for mobile ie.jpg,image,395478,1080,1920,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
-images/background.jpg,image,101225,1920,1080,used,,,cardmatchgame.html; index.html; styles.css,,,
+images/background.jpg,image,101225,1920,1080,used,,,cardmatchgame.html; assets/css/homepage.css; styles.css,,,
 images/background.webp,image,744050,1920,1080,used-on-unlinked-page,,,swag.html,,,Not optimized: alpha webp
 images/backgroundie.jpg,image,377557,1920,1080,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
 images/backgroundmobile.jpg,image,359331,1080,1920,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
@@ -144,6 +148,7 @@ images/btcbutton.webp,image,42388,720,720,brand-or-interface,,,,,"Interface grap
 images/bubbleh.png,image,169979,400,400,used,,,manifest.json,,,
 images/bubbleh512.png,image,475730,1067,1067,used,,,manifest.json,,,
 images/cardback.png,image,798260,1335,1935,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
+images/cardflip.m4a,audio,6319,,,unresolved,,,,,Audio format newly covered by manifest checker; usage unconfirmed,
 images/cardflip.mp3,audio,13959,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
 images/cardframe.png,image,576798,750,1050,brand-or-interface,,,,,"Game card, character or logo art; not event media. Confirm no external or in-game use",
 images/cardframe2.svg,vector,824987,,,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",

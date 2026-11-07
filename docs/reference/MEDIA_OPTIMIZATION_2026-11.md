@@ -132,3 +132,15 @@ Settings: JPEG photos have a longest edge of 2048px at quality 82, with orientat
 | `alternate-version` | Another version or copy of a file |
 | `brand-or-interface` | Logo, game, button or background art, not event media |
 | `unresolved` | Event or use not established |
+
+### Maintaining the inventory
+
+Run `python3 scripts/check_media_manifest.py` from the checkout (or invoke it by absolute path). It uses tracked files in the working tree, including staged additions, to check coverage, duplicate entries, missing/untracked files, and recorded byte sizes. Its format list includes images, video, audio (including M4A), and PDFs; fonts and base64 source copies are not inventory media. Extend the explicit format list when introducing another format. Stage a newly added asset before checking coverage.
+
+For existing media whose bytes changed, `python3 scripts/check_media_manifest.py --refresh-sizes` refreshes only `size_bytes`, refusing structural problems such as missing or unlisted files. It preserves row order and all curated fields. It does not infer event associations, update dimensions, alter references, or add/delete rows. Review the CSV diff after refreshing. Dimensions must be updated explicitly when resizing or rotating an image, and references must be updated when code or styles move.
+
+New media needs an explicit record with its actual format, size and dimensions (when applicable), references, and supporting evidence. Mark uncertain associations unresolved. The five M4A audio records added during the stylesheet maintenance pass were previously omitted from the inventory; no audio was changed.
+
+References and reachability are evidence requiring maintenance, not a guarantee of usage: JavaScript can construct paths, and email, database records, or external sites can use direct URLs. A passing checker does not establish visual quality, metadata removal, or permission to delete anything. Preserve high-confidence event mappings, confidence, evidence, and notes when editing machine-derived fields.
+
+Test the checker with `python3 -m unittest discover -s tests -p 'test_media_manifest.py'`. No external Python packages are required.
