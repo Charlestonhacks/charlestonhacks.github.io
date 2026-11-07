@@ -94,3 +94,9 @@ Some features (Supabase auth, API calls) require the site to be served from `loc
 
 - **Email:** hello@charlestonhacks.com
 - **Issues:** [GitHub Issues](https://github.com/Charlestonhacks/charlestonhacks.github.io/issues)
+
+## Homepage maintenance
+
+See [Homepage events and deployment](docs/events-and-deployment.md) for stylesheet order, event sources and timing, validation, and deployment recovery. Publishing can take longer than the typical 1–2 minutes mentioned above; verify deployment and live content separately.
+
+For media changes, follow the [media inventory maintenance instructions](docs/reference/MEDIA_OPTIMIZATION_2026-11.md#maintaining-the-inventory). Keep curated event associations and original-file recovery records intact.
