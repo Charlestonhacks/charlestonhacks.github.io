@@ -357,6 +357,7 @@
     <p class="copyright">© 2025 CharlestonHacks. All rights reserved.</p>
   </footer>
 
+  <script src="assets/js/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
   <script>
     // Lightbox behavior tuned to feel more “app-like”
@@ -369,6 +370,18 @@
         disableScrolling: true,
         alwaysShowNavOnTouchDevices: true
       });
+
+      // Return keyboard focus to the frame that opened the overlay.
+      var lastFrame = null;
+      document.addEventListener("click", function (event) {
+        var frame = event.target.closest("[data-lightbox]");
+        if (frame) lastFrame = frame;
+      }, true);
+      var closeLightbox = lightbox.end;
+      lightbox.end = function () {
+        closeLightbox.apply(this, arguments);
+        if (lastFrame) lastFrame.focus({ preventScroll: true });
+      };
     }
   </script>
 </body>
