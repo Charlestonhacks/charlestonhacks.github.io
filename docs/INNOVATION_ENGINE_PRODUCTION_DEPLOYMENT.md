@@ -1,11 +1,13 @@
 # Innovation Engine production deployment
 
+> **Retired 2026-11-07. This page is a historical record, not a current procedure.** The deployment workflow it describes has been moved out of `.github/workflows/` to [`reference/retired-workflows/deploy-innovation-engine-pages.yml`](reference/retired-workflows/deploy-innovation-engine-pages.yml), so it can no longer be run from **Actions**. The steps below no longer work as written; do not follow them. Pages settings and the `deckerd451/innovation-engine` repository were not changed by the retirement. Publishing Innovation Engine again needs a new, reviewed plan. See [Homepage events and deployment](events-and-deployment.md#publishing-and-recovery) for why: that workflow published to the same site as the homepage.
+
 ## Topology
 
 - `deckerd451/innovation-engine` is the canonical application source. Production releases are immutable commits from that repository.
 - `Charlestonhacks/charlestonhacks.github.io` is the GitHub Pages host for `charlestonhacks.com`. Its `main` branch remains the legacy HarborHack/public-site rollback source and is not synchronized with or replaced by the Innovation Engine history.
-- `.github/workflows/deploy-innovation-engine-pages.yml` promotes one explicit, full Innovation Engine commit SHA. It never deploys files from this repository's `main` branch.
-- That workflow is separate from the homepage deployment, which publishes this repository's `main` branch automatically after each push. Both publish to the same `github-pages` environment and `charlestonhacks.com`, and each deployment replaces the whole site. See [Homepage events and deployment](events-and-deployment.md#publishing-and-recovery). Do not run this workflow to publish, fix, or retry the homepage.
+- The retired workflow, formerly `.github/workflows/deploy-innovation-engine-pages.yml`, promoted one explicit, full Innovation Engine commit SHA. It never deployed files from this repository's `main` branch.
+- That workflow was separate from the homepage deployment, which publishes this repository's `main` branch automatically after each push. Both published to the same `github-pages` environment and `charlestonhacks.com`, and each deployment replaces the whole site. See [Homepage events and deployment](events-and-deployment.md#publishing-and-recovery). Do not restore this workflow to publish, fix, or retry the homepage.
 
 ## Manual promotion
 
