@@ -100,3 +100,5 @@ Some features (Supabase auth, API calls) require the site to be served from `loc
 See [Homepage events and deployment](docs/events-and-deployment.md) for stylesheet order, event sources and timing, validation, and deployment recovery. Publishing can take longer than the typical 1–2 minutes mentioned above; verify deployment and live content separately.
 
 For media changes, follow the [media inventory maintenance instructions](docs/reference/MEDIA_OPTIMIZATION_2026-11.md#maintaining-the-inventory). Keep curated event associations and original-file recovery records intact.
+
+See [PR validation](docs/pr-validation.md) for the automated event, media-inventory, and local-path checks, their local commands, and how existing legacy path failures are handled.
