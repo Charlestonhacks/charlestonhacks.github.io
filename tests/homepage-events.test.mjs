@@ -13,6 +13,8 @@ import {
   feedRetryDelayMs,
   formatCountdown,
   formatEventWhen,
+  summarizeEventDescription,
+  eventLinkLabel,
   nearifyBrowserUrl,
   normalizeEvent,
   parseEventTime,
@@ -555,4 +557,21 @@ test('labels the homepage last-event section for both states', () => {
   assert.ok(script.includes("heading.hidden = !event"));
   assert.ok(script.includes("'Upcoming events and past recaps →'"));
   assert.ok(script.includes("event.link.includes('meetup.com') ? 'View event →' : 'View event recap →'"));
+});
+
+
+test('community previews remove formatting and repeated host/title without losing venue text', () => {
+  assert.equal(summarizeEventDescription({hostName:'TechYeet', title:'Happy Hour', description:"TechYeet **Happy Hour** Join us at [Edmund’s Oast](https://example.com/venue) for **conversation** &amp; connections."}), 'Join us at Edmund’s Oast for conversation & connections.');
+  assert.equal(summarizeEventDescription({description:'## Meet the community\n- Bring ideas\n* Share projects'}), 'Meet the community Bring ideas Share projects');
+  assert.equal(summarizeEventDescription({description:'TechYeetology welcomes everyone',hostName:'TechYeet'}), 'TechYeetology welcomes everyone');
+  assert.equal(summarizeEventDescription({description:'Ask the TechYeet hosts for help',hostName:'TechYeet'}), 'Ask the TechYeet hosts for help');
+  assert.equal(summarizeEventDescription({description:''}), '');
+  assert.equal(summarizeEventDescription({description:'One two three four five'}, 16), 'One two three…');
+});
+
+test('event action labels identify real destinations', () => {
+  assert.equal(eventLinkLabel('https://www.meetup.com/group/events/1/'), 'View on Meetup');
+  assert.equal(eventLinkLabel('https://meetup.com.evil.example/event'), 'View on meetup.com.evil.example');
+  assert.equal(eventLinkLabel('https://example.org/event'), 'View on example.org');
+  assert.equal(eventLinkLabel(''), 'View event details');
 });

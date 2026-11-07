@@ -149,6 +149,47 @@ export function nearifyBrowserUrl(value) {
   return url.href;
 }
 
+/** Plain-text card preview: keep link text, remove markup, and avoid cut-off words. */
+export function summarizeEventDescription(event, limit = 130) {
+  let text = String(event.description || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/(^|\n)\s{0,3}(?:#{1,6}\s+|[-*+]\s+|>\s*)/g, ' ')
+    .replace(/\*\*|__|`/g, '')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/&(?:amp|nbsp|quot|apos|lt|gt);/g, entity => ({
+      '&amp;': '&', '&nbsp;': ' ', '&quot;': '"', '&apos;': "'", '&lt;': '<', '&gt;': '>',
+    })[entity])
+    .replace(/\s+/g, ' ').trim();
+  // These fields already appear above the preview. Remove only exact leading repeats.
+  const prefixes = [event.hostName, event.title].filter(Boolean);
+  for (let pass = 0; pass < 3; pass++) {
+    const before = text;
+    for (const prefix of prefixes) {
+      if (text.slice(0, prefix.length).toLowerCase() === prefix.toLowerCase()
+        && (!text[prefix.length] || /[\s:—–-]/.test(text[prefix.length]))) {
+        text = text.slice(prefix.length).replace(/^[\s:—–-]+/, '');
+      }
+    }
+    if (before === text) break;
+  }
+  if (text.length <= limit) return text;
+  const slice = text.slice(0, limit - 1);
+  const boundary = slice.lastIndexOf(' ');
+  return (boundary > 0 ? slice.slice(0, boundary) : slice).trimEnd() + '…';
+}
+
+/** Name the actual destination without changing the link. */
+export function eventLinkLabel(href) {
+  try {
+    const host = new URL(href).hostname.replace(/^www\./, '');
+    if (host === 'meetup.com' || host.endsWith('.meetup.com')) return 'View on Meetup';
+    return 'View on ' + host;
+  } catch (_) { return 'View event details'; }
+}
+
 /** Returns the fields the homepage uses, or null when the event has no usable start. */
 export function normalizeEvent(raw) {
   if (!raw || typeof raw !== 'object') return null;

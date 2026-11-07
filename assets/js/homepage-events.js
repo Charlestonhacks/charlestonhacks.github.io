@@ -9,6 +9,8 @@ import {
   createFeedRetrier,
   formatCountdown,
   formatEventWhen,
+  summarizeEventDescription,
+  eventLinkLabel,
   isOngoing,
   loadEventFeed,
   selectHomepageEvents,
@@ -125,13 +127,14 @@ function eventCard(event, now) {
     card.append(el('p', 'event-location', 'Hosted by ' + event.hostName));
   }
   if (event.location) card.append(el('p', 'event-location', '📍 ' + event.location));
-  if (event.description) {
-    const truncated = event.description.length > DESCRIPTION_LENGTH;
-    card.append(el('p', 'event-desc', event.description.slice(0, DESCRIPTION_LENGTH) + (truncated ? '…' : '')));
-  }
+  const summary = event.isCharlestonHacks
+    ? event.description.slice(0, DESCRIPTION_LENGTH) + (event.description.length > DESCRIPTION_LENGTH ? '…' : '')
+    : summarizeEventDescription(event, DESCRIPTION_LENGTH);
+  if (summary) card.append(el('p', 'event-desc', summary));
 
   const actions = el('div', 'ch-event-cta');
-  actions.append(externalLink('ch-btn-meetup', event.link || MEETUP_GROUP_URL, 'View Event'));
+  const eventHref = event.link || MEETUP_GROUP_URL;
+  actions.append(externalLink('ch-btn-meetup', eventHref, eventLinkLabel(eventHref)));
   if (event.nearifyUrl) actions.append(externalLink('ch-link-nearify', event.nearifyUrl, 'Join Live Network'));
   card.append(actions);
   return card;
