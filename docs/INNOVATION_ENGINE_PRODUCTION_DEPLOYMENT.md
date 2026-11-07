@@ -5,6 +5,7 @@
 - `deckerd451/innovation-engine` is the canonical application source. Production releases are immutable commits from that repository.
 - `Charlestonhacks/charlestonhacks.github.io` is the GitHub Pages host for `charlestonhacks.com`. Its `main` branch remains the legacy HarborHack/public-site rollback source and is not synchronized with or replaced by the Innovation Engine history.
 - `.github/workflows/deploy-innovation-engine-pages.yml` promotes one explicit, full Innovation Engine commit SHA. It never deploys files from this repository's `main` branch.
+- That workflow is separate from the homepage deployment, which publishes this repository's `main` branch automatically after each push. Both publish to the same `github-pages` environment and `charlestonhacks.com`, and each deployment replaces the whole site. See [Homepage events and deployment](events-and-deployment.md#publishing-and-recovery). Do not run this workflow to publish, fix, or retry the homepage.
 
 ## Manual promotion
 

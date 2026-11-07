@@ -56,6 +56,18 @@ The observed homepage publishing setup builds from this repository's `main` bran
 
 **Do not use `.github/workflows/deploy-innovation-engine-pages.yml` for routine homepage publishing.** It is a separate, manually dispatched workflow that checks out a specified `deckerd451/innovation-engine` release. It is not the branch-source homepage build.
 
+The two processes differ in how they start and what they publish, but not in where they publish:
+
+| | Homepage deployment | Innovation Engine workflow |
+|---|---|---|
+| Starts | Automatically after a push to `main` (`pages-build-deployment`) | Only by **Actions → Deploy Innovation Engine to Pages → Run workflow** |
+| Publishes | This repository's `main` branch, root directory | One `deckerd451/innovation-engine` commit given as `release_sha` |
+| Destination | This repository's `github-pages` environment, served at `charlestonhacks.com` | The same `github-pages` environment and domain |
+
+Each Pages deployment replaces the whole published site. Running the Innovation Engine workflow therefore replaces the homepage on `charlestonhacks.com`, and a later homepage deployment replaces it again. Treat a manual run as a production cutover under [Innovation Engine production deployment](INNOVATION_ENGINE_PRODUCTION_DEPLOYMENT.md), never as a homepage fix or retry. Its Pages-source step is a manual instruction that the workflow does not check: on 2026-08-22, run `32543379969` reported a successful deployment while the Pages source was still **Deploy from a branch**.
+
+Routine homepage work never requires this workflow. Merging, retrying a stalled homepage deployment, and the PR checks in [PR validation](pr-validation.md) do not run it.
+
 A merge, a successful build/upload, a successful deployment, and verified live content are distinct results. Publish only when authorized. Avoid overlapping merges/deployments because later publishing can cancel earlier work.
 
 After deployment:
