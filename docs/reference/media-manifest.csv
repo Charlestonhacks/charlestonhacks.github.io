@@ -158,6 +158,7 @@ images/chback.png,image,28822,834,308,brand-or-interface,,,,,"Interface graphic,
 images/chrc.webp,image,340936,900,900,used,CharlestonHacks Running Club,,Poster.html,High,Poster.html card uses this image,
 images/chred.png,image,68925,1742,611,brand-or-interface,,,,,"Interface graphic, icon or background; not event media",
 images/city-paper-ai-comparison-2026-10-16.webp,image,32310,600,400,used,,,news.html,,"Article image supplied by user for October 16, 2026 City Paper story",Resized from 1200x800 WebP; source filename 261016MikeAstle3_softwaredeveloper-provided.webp; linked source: https://charlestoncitypaper.com/2026/10/16/compare-and-contrast-city-paper-squares-up-against-ai-generator/
+images/city-paper-ai-july-2026.webp,image,52510,600,411,used,,,news.html,,"Photo supplied by user for July 9, 2026 City Paper news card","Resized from 1024x701 WebP; original filename 251003_hackathon.webp. Article date comes from the linked news story, not the image filename."
 images/collaboratorcard.png,image,303202,375,525,used,,,assets/js/config.js,,,
 images/coming2024.jpg,image,182389,1312,1312,unresolved,,,,,Generic Coming in 2024 teaser,
 images/conservancy2.jpeg,image,458243,1536,2048,used,"Innovation Engine (Hackathon Jun 1-28, 2025; Award Night Jun 29, 2025)",innovationengine.html,innovationengine.html,High,Displayed on this archive page,
