@@ -58,6 +58,10 @@
             justify-items: center;
         }
         .gallery-item {
+            display: flex;
+            flex-direction: column;
+            color: inherit;
+            text-decoration: none;
             width: 100%;
             max-width: 300px;
             transition: transform 0.3s ease;
@@ -74,9 +78,10 @@
             height: auto;
             display: block;
         }
-        .news-story-caption { padding: 16px; }
+        .news-story-caption { padding: 16px; display: flex; flex: 1; flex-direction: column; }
         .news-story-caption h2 { font-size: 1rem; line-height: 1.4; color: #fff; }
-        .news-story-caption p { margin-top: 10px; font-size: 0.8rem; line-height: 1.5; color: #ccc; }
+        .news-story-caption p { margin-top: auto; padding-top: 10px; font-size: 0.8rem; line-height: 1.5; color: #ccc; }
+        .gallery-item:hover h2, .gallery-item:focus-visible h2 { text-decoration: underline; }
         footer {
             background-color: transparent;
             text-align: center;
@@ -144,17 +149,33 @@
                     <p>Charleston City Paper · <time datetime="2026-10-16">October 16, 2026</time></p>
                 </div>
             </a>
-            <a href="https://charlestoncitypaper.com/2024/11/22/deteriorating-mural-to-be-restored-possibly-find-new-home/" class="gallery-item" target="_blank" rel="noopener">
-                <img loading="lazy" src="images/boatwright.jpeg" alt="boatwright article">
+            <a href="https://charlestoncitypaper.com/2024/11/22/deteriorating-mural-to-be-restored-possibly-find-new-home/" class="gallery-item" target="_blank" rel="noopener noreferrer" aria-label="Read Deteriorating mural to be restored, possibly find new home in Charleston City Paper, November 22, 2024">
+                <img loading="lazy" decoding="async" src="images/boatwright.jpeg" width="1200" height="799" alt="Mural depicting a person holding an oar.">
+                <div class="news-story-caption">
+                    <h2>Deteriorating mural to be restored, possibly find new home</h2>
+                    <p>Charleston City Paper · <time datetime="2024-11-22">November 22, 2024</time></p>
+                </div>
             </a>
-            <a href="https://charlestoncitypaper.com/2024/06/13/pair-digitally-preserves-remaining-shepard-fairey-murals/" class="gallery-item" target="_blank" rel="noopener">
-                <img loading="lazy" src="images/mural.jpg" alt="mural article">
+            <a href="https://charlestoncitypaper.com/2024/06/13/pair-digitally-preserves-remaining-shepard-fairey-murals/" class="gallery-item" target="_blank" rel="noopener noreferrer" aria-label="Read Pair digitally preserves remaining Shepard Fairey murals in Charleston City Paper, June 13, 2024">
+                <img loading="lazy" decoding="async" src="images/mural.jpg" width="1548" height="1008" alt="Shepard Fairey mural on a Charleston building.">
+                <div class="news-story-caption">
+                    <h2>Pair digitally preserves remaining Shepard Fairey murals</h2>
+                    <p>Charleston City Paper · <time datetime="2024-06-13">June 13, 2024</time></p>
+                </div>
             </a>
-            <a href="https://charlestoncitypaper.com/2024/07/04/locals-looking-to-ai-to-solve-present-future-problems/" class="gallery-item" target="_blank" rel="noopener">
-                <img loading="lazy" src="images/news1.jpg" alt="AI article">
+            <a href="https://charlestoncitypaper.com/2024/07/04/locals-looking-to-ai-to-solve-present-future-problems/" class="gallery-item" target="_blank" rel="noopener noreferrer" aria-label="Read Locals looking to AI to solve present, future problems in Charleston City Paper, July 4, 2024">
+                <img loading="lazy" decoding="async" src="images/news1.jpg" width="1558" height="982" alt="Community members presenting beside a digital display.">
+                <div class="news-story-caption">
+                    <h2>Locals looking to AI to solve present, future problems</h2>
+                    <p>Charleston City Paper · <time datetime="2024-07-04">July 4, 2024</time></p>
+                </div>
             </a>
-            <a href="https://charlestoncitypaper.com/2025/10/02/weekend-hackathon-to-push-power-of-vibe-coding-to-edge/" class="gallery-item" target="_blank" rel="noopener">
-                <img loading="lazy" src="images/IMG_6162.jpg" alt="Hackathon article">
+            <a href="https://charlestoncitypaper.com/2025/10/02/weekend-hackathon-to-push-power-of-vibe-coding-to-edge/" class="gallery-item" target="_blank" rel="noopener noreferrer" aria-label="Read Weekend hackathon to push power of vibe coding to edge in Charleston City Paper, October 2, 2025">
+                <img loading="lazy" decoding="async" src="images/IMG_6162.jpg" width="4032" height="3024" alt="Participants collaborating around tables at a hackathon.">
+                <div class="news-story-caption">
+                    <h2>Weekend hackathon to push power of vibe coding to edge</h2>
+                    <p>Charleston City Paper · <time datetime="2025-10-02">October 2, 2025</time></p>
+                </div>
             </a>
         </div>
     </main>
