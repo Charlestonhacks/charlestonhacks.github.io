@@ -386,6 +386,12 @@
       letter-spacing: 0.04em;
       transition: color var(--transition), border-color var(--transition), background var(--transition);
     }
+    .hero-nearify-link {
+      color: #e9e3ff;
+      border-color: rgba(167, 139, 250, 0.7);
+      background: rgba(124, 92, 255, 0.14);
+      font-weight: 600;
+    }
     .hero-meetup-link:hover {
       color: var(--cyan);
       border-color: var(--cyan);

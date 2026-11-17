@@ -52,7 +52,7 @@ function countdownBadge(event, now) {
 }
 
 function primaryAction(event, now) {
-  if (isOngoing(event, now) && event.nearifyUrl) return { href: event.nearifyUrl, text: 'Join Live Network' };
+  if (isOngoing(event, now) && event.nearifyUrl) return { href: event.nearifyUrl, text: 'Check in on Nearify' };
   const href = event.link || MEETUP_GROUP_URL;
   if (isOngoing(event, now)) return { href, text: 'View Event' };
   return { href, text: href.includes('meetup.com') ? 'RSVP on Meetup' : 'Get Event Details' };
@@ -99,7 +99,7 @@ function renderHero(featured, now) {
   const links = [externalLink('btn-primary', action.href, action.text)];
   links[0].id = 'hero-rsvp';
   if (featured.nearifyUrl && action.href !== featured.nearifyUrl) {
-    links.push(externalLink('hero-meetup-link', featured.nearifyUrl, 'Join Live Network'));
+    links.push(externalLink('hero-meetup-link hero-nearify-link', featured.nearifyUrl, 'Check in on Nearify'));
   } else if (featured.link && action.href !== featured.link) {
     links.push(externalLink('hero-meetup-link', featured.link, 'View on Meetup'));
   }
@@ -135,7 +135,7 @@ function eventCard(event, now) {
   const actions = el('div', 'ch-event-cta');
   const eventHref = event.link || MEETUP_GROUP_URL;
   actions.append(externalLink('ch-btn-meetup', eventHref, eventLinkLabel(eventHref)));
-  if (event.nearifyUrl) actions.append(externalLink('ch-link-nearify', event.nearifyUrl, 'Join Live Network'));
+  if (event.nearifyUrl) actions.append(externalLink('ch-link-nearify', event.nearifyUrl, 'Check in on Nearify'));
   card.append(actions);
   return card;
 }
