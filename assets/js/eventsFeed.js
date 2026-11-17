@@ -141,7 +141,7 @@ export async function loadEvents({
           <div class="ch-event-cta">
             <span class="ch-nearify-badge">Live Nearify Experience Available</span>
             <a href="${nearifyJoinUrl}" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">
-              Join Live Network
+              Check in on Nearify
             </a>
             <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">
               View on Meetup
@@ -419,7 +419,7 @@ export async function loadUnifiedEvents({
           join.href = nearifyBrowserUrl(event.nearifyJoinUrl);
           join.target = "_blank";
           join.rel = "noopener noreferrer";
-          join.textContent = "Join Live Network";
+          join.textContent = "Check in on Nearify";
           actions.append(join);
         }
         const view = document.createElement("a");
