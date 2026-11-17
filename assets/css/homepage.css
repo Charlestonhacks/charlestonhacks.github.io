@@ -1270,3 +1270,29 @@
     @media (min-width: 480px) and (max-width: 768px) {
       .donate-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
+
+    /* ── Spacing consistency (2026-11-17) ─────────────────────────── */
+    /* Events: the first heading follows the label like every other section. */
+    #events-section > .section-label + .events-list-title {
+      margin-top: 0;
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      font-weight: 800;
+      letter-spacing: 0.03em;
+    }
+    /* Moments: room between the photos and the button. */
+    #photo-reel > .btn-secondary { margin-top: 18px; }
+    /* Board: names line up with the section text; hover area unchanged. */
+    .leaders-list { margin-left: -16px; margin-right: -16px; }
+    @media (max-width: 768px) {
+      /* Link buttons span the content width like the cards around them. */
+      #last-event-content .harborhack-btn,
+      #photo-reel > .btn-secondary {
+        display: flex; justify-content: center;
+        width: 100%; max-width: none; box-sizing: border-box;
+      }
+      /* Mission stats: one compact row instead of three tall cards. */
+      .mission-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 24px; }
+      .mission-stat { padding: 14px 6px; }
+      .mission-stat-value { font-size: clamp(1.15rem, 5.4vw, 1.6rem); margin-bottom: 4px; }
+      .mission-stat-label { font-size: 0.7rem; }
+    }
