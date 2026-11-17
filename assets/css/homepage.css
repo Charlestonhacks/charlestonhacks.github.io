@@ -442,7 +442,15 @@
     }
     .btn-secondary:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-1px); }
 
-    .divider { border: none; border-top: 1px solid var(--border); margin: 0; }
+    /* Section divider: visible on desktop and phone, and only as wide as the
+       content so it reads as a break between sections, not a page edge. */
+    .divider {
+      border: none;
+      border-top: 1px solid rgba(255, 255, 255, 0.16);
+      width: calc(100% - 32px);
+      max-width: 960px;
+      margin: 0 auto;
+    }
 
     .section {
       max-width: 1000px;
