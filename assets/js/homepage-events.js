@@ -17,6 +17,16 @@ import {
   selectLastCharlestonHacksEvent,
 } from '/assets/js/events-core.js';
 
+// Defined here rather than imported so a cached older events-core.js can't
+// break the whole events section. Same rule as nearifyLinkLabel in events-core.js.
+function nearifyLinkLabel(isCharlestonHacks, startMs, now) {
+  if (isCharlestonHacks) return 'Check in on Nearify';
+  if (!Number.isFinite(startMs)) return null;
+  return new Date(startMs).toDateString() === new Date(now).toDateString()
+    ? 'Remember who you meet (Nearify)'
+    : null;
+}
+
 const LIST_PREVIEW_COUNT = 6;
 const DESCRIPTION_LENGTH = 130;
 
@@ -118,7 +128,8 @@ function eventCard(event, now) {
   dateRow.append(date, countdownBadge(event, now));
   card.append(dateRow);
 
-  const href = event.nearifyUrl || event.link || MEETUP_GROUP_URL;
+  const nearifyLabel = event.nearifyUrl ? nearifyLinkLabel(event.isCharlestonHacks, event.startMs, now) : null;
+  const href = (event.isCharlestonHacks && event.nearifyUrl) || event.link || MEETUP_GROUP_URL;
   const title = el('h3');
   title.append(externalLink('', href, event.title));
   card.append(title);
@@ -135,7 +146,7 @@ function eventCard(event, now) {
   const actions = el('div', 'ch-event-cta');
   const eventHref = event.link || MEETUP_GROUP_URL;
   actions.append(externalLink('ch-btn-meetup', eventHref, eventLinkLabel(eventHref)));
-  if (event.nearifyUrl) actions.append(externalLink('ch-link-nearify', event.nearifyUrl, 'Check in on Nearify'));
+  if (nearifyLabel) actions.append(externalLink('ch-link-nearify', event.nearifyUrl, nearifyLabel));
   card.append(actions);
   return card;
 }

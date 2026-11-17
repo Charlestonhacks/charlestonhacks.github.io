@@ -10,6 +10,17 @@ console.log("📜 eventsFeed.js loaded");
 
 const FEED_URL = "https://charlestonhacks-events.dmhamilton1.workers.dev";
 
+// CharlestonHacks events always offer check-in; other organizers' events only
+// show an optional Nearify link on the day itself. Keep in sync with events-core.js.
+function nearifyLinkLabel(isCH, startValue, now = Date.now()) {
+  if (isCH) return "Check in on Nearify";
+  const start = new Date(startValue).getTime();
+  if (!Number.isFinite(start)) return null;
+  return new Date(start).toDateString() === new Date(now).toDateString()
+    ? "Remember who you meet (Nearify)"
+    : null;
+}
+
 // ── Source detection ────────────────────────────────────────────────────
 
 function isCharlestonHacksEvent(ev) {
@@ -120,8 +131,11 @@ export async function loadEvents({
       const description = safeText(event?.description || "");
       const location = safeText(event?.location || "");
       const dateStr = safeText(formatDateShort(event?.startDate));
-      const nearifyJoinUrl = event?.nearifyJoinUrl ? safeText(nearifyBrowserUrl(event.nearifyJoinUrl)) : null;
       const isCH = isCharlestonHacksEvent(event);
+      const nearifyLabel = event?.nearifyJoinUrl
+        ? nearifyLinkLabel(isCH, event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date)
+        : null;
+      const nearifyJoinUrl = nearifyLabel ? safeText(nearifyBrowserUrl(event.nearifyJoinUrl)) : null;
       const sourceLabel = getSourceLabel(event);
 
       console.log("[EventsFeed]", event?.title, "| Source:", sourceLabel, "| nearifyJoinUrl:", nearifyJoinUrl || "(none)");
@@ -139,9 +153,8 @@ export async function loadEvents({
       if (nearifyJoinUrl) {
         ctaHtml = `
           <div class="ch-event-cta">
-            <span class="ch-nearify-badge">Live Nearify Experience Available</span>
             <a href="${nearifyJoinUrl}" target="_blank" rel="noopener noreferrer" class="ch-btn-nearify">
-              Check in on Nearify
+              ${nearifyLabel}
             </a>
             <a href="${link}" target="_blank" rel="noopener noreferrer" class="ch-link-meetup">
               View on Meetup
@@ -162,7 +175,7 @@ export async function loadEvents({
         ${sourceBadgeHtml}
         <div class="ch-event-date">${dateStr}</div>
         <h3 class="ch-event-title">
-          <a href="${nearifyJoinUrl || link}" target="_blank" rel="noopener noreferrer">${title}</a>
+          <a href="${(isCH && nearifyJoinUrl) || link}" target="_blank" rel="noopener noreferrer">${title}</a>
         </h3>
         ${location ? `<p class="ch-event-location">📍 ${location}</p>` : ""}
         ${
@@ -413,13 +426,16 @@ export async function loadUnifiedEvents({
         }
         const actions = document.createElement("div");
         actions.className = "ch-event-cta";
-        if (event?.nearifyJoinUrl) {
+        const nearifyLabel = event?.nearifyJoinUrl
+          ? nearifyLinkLabel(isCH, event?.startDate ?? event?.start_date ?? event?.starts_at ?? event?.date)
+          : null;
+        if (nearifyLabel) {
           const join = document.createElement("a");
           join.className = "ch-btn-nearify";
           join.href = nearifyBrowserUrl(event.nearifyJoinUrl);
           join.target = "_blank";
           join.rel = "noopener noreferrer";
-          join.textContent = "Check in on Nearify";
+          join.textContent = nearifyLabel;
           actions.append(join);
         }
         const view = document.createElement("a");
