@@ -419,3 +419,17 @@ export function countEventsInYear(rawEvents, year) {
     return event && Number(eventDateParts(event.startMs).year) === year;
   }).length;
 }
+
+/**
+ * Label for an event's Nearify link, or null to hide it.
+ * CharlestonHacks events always offer check-in. Other organizers' events only
+ * show an optional link on the day itself, so it never reads as their check-in.
+ */
+export function nearifyLinkLabel(isCharlestonHacks, startValue, now = Date.now()) {
+  if (isCharlestonHacks) return 'Check in on Nearify';
+  const start = typeof startValue === 'number' ? startValue : new Date(startValue).getTime();
+  if (!Number.isFinite(start)) return null;
+  return new Date(start).toDateString() === new Date(now).toDateString()
+    ? 'Remember who you meet (Nearify)'
+    : null;
+}
