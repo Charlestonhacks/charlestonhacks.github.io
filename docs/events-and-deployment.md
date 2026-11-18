@@ -22,7 +22,7 @@ Results are `ok`, `partial`, or `unavailable`. The UI distinguishes unavailable 
 - All display and zone-less timestamps use `America/New_York`. Timestamp aliases are handled in `normalizeEvent`.
 - A valid supplied end time wins. Otherwise timed events last two hours and all-day events last 24 hours. These are estimates, not confirmed schedules.
 - Active events have an end strictly after now. Duplicates are removed by event identity; the timeline sorts by start date.
-- Feature the next CharlestonHacks event starting within 45 days. Otherwise feature the next community event; if none exists, use the remaining first event (including a later CharlestonHacks event).
+- Feature the next CharlestonHacks event, however far out. Community events are never featured; they appear only in the Community Events list.
 - CharlestonHacks classification uses the event link, title, and source. The featured event is excluded from the remaining list. Despite its “Community Events” heading, that list can also contain other CharlestonHacks events; this is the current implementation.
 - Upcoming card summaries are presentation text; source descriptions and destinations are not rewritten. Links identify Meetup or the destination host.
 

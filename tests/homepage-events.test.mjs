@@ -47,16 +47,16 @@ test('features the next CharlestonHacks event over a sooner community event', ()
   assert.deepEqual(others.map((e) => e.key), ['meetup:1']);
 });
 
-test('the 45-day window is inclusive and falls back to community past it', () => {
-  const inside = selectHomepageEvents([community(1, NOW + DAY), ch(2, NOW + 45 * DAY)], NOW);
-  assert.equal(inside.featured.key, 'meetup:2');
-  const outside = selectHomepageEvents([community(1, NOW + DAY), ch(2, NOW + 45 * DAY + 1)], NOW);
-  assert.equal(outside.featured.key, 'meetup:1');
-  assert.deepEqual(outside.others.map((e) => e.key), ['meetup:2']);
+test('features a distant CharlestonHacks event over any community event', () => {
+  const { featured, others } = selectHomepageEvents([community(1, NOW + DAY), ch(2, NOW + 61 * DAY)], NOW);
+  assert.equal(featured.key, 'meetup:2');
+  assert.deepEqual(others.map((e) => e.key), ['meetup:1']);
 });
 
-test('uses a distant CharlestonHacks event when no community event exists', () => {
-  assert.equal(selectHomepageEvents([ch(2, NOW + 90 * DAY)], NOW).featured.key, 'meetup:2');
+test('never features a community event', () => {
+  const { featured, others } = selectHomepageEvents([community(1, NOW + DAY), community(2, NOW + 2 * DAY)], NOW);
+  assert.equal(featured, null);
+  assert.deepEqual(others.map((e) => e.key), ['meetup:1', 'meetup:2']);
   assert.equal(selectHomepageEvents([], NOW).featured, null);
 });
 

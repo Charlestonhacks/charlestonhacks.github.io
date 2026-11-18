@@ -15,7 +15,7 @@ import {
   loadEventFeed,
   selectHomepageEvents,
   selectLastCharlestonHacksEvent,
-} from '/assets/js/events-core.js';
+} from '/assets/js/events-core.js?v=20261118a';
 
 // Defined here rather than imported so a cached older events-core.js can't
 // break the whole events section. Same rule as nearifyLinkLabel in events-core.js.
@@ -84,7 +84,7 @@ function renderHero(featured, now) {
       renderHeroMessage('Events are temporarily unavailable', 'We couldn’t load the next event',
         'The calendar may still have events. Meetup has the latest schedule.', 'See Events on Meetup');
     } else {
-      renderHeroMessage('Nothing on the calendar yet', 'No events are scheduled right now',
+      renderHeroMessage('Nothing on the calendar yet', 'No CharlestonHacks events are scheduled right now',
         'Follow us on Meetup to hear about the next one first.', 'Follow on Meetup');
     }
     return;
