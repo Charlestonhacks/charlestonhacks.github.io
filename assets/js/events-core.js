@@ -5,7 +5,6 @@
  */
 
 export const EVENT_TIME_ZONE = 'America/New_York';
-export const FEATURED_WINDOW_DAYS = 45;
 export const MEETUP_GROUP_URL = 'https://www.meetup.com/charlestonhacks/';
 
 // Retries come at about 15 seconds, 1 minute, 4 minutes, and 16 minutes.
@@ -245,17 +244,12 @@ export function isOngoing(event, now) {
 }
 
 /**
- * Features the next CharlestonHacks event inside the window, then the next
- * community event. A CharlestonHacks event beyond the window is used only
- * when no community event is listed.
+ * Features the next CharlestonHacks event, however far out. Community
+ * events are never featured; they only appear in the list.
  */
 export function selectHomepageEvents(rawEvents, now) {
   const timeline = activeEvents(rawEvents, now);
-  const windowEnd = now + FEATURED_WINDOW_DAYS * DAY_MS;
-  const featured = timeline.find(function (ev) { return ev.isCharlestonHacks && ev.startMs <= windowEnd; })
-    || timeline.find(function (ev) { return !ev.isCharlestonHacks; })
-    || timeline[0]
-    || null;
+  const featured = timeline.find(function (ev) { return ev.isCharlestonHacks; }) || null;
   return {
     featured,
     others: timeline.filter(function (ev) { return ev !== featured; }),
