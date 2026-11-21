@@ -269,7 +269,7 @@
   // ------------------------------------------------
   const features = [
     { id: "events", title: "Events & Posters", icon: "fas fa-calendar-days", description: "Browse upcoming community events and the dated event poster archive.", view: "events" },
-    { id: "innovation", title: "Buildspace", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
+    { id: "innovation", title: "Innovation Engine", icon: "fas fa-people-arrows", description: "Projects, connections, and collaboration.", view: "buildspace" },
     { id: "chat", title: "Community Chat", icon: "fas fa-comments", description: "Meet other builders and continue the conversation.", view: "chat" },
     { id: "discord", title: "Discord", icon: "fa-brands fa-discord", description: "Join the CharlestonHacks Discord community.", view: "discord" },
     { id: "nearify", title: "Nearify", icon: "fas fa-user-group", description: "Meet people at events and follow up with context.", src: "https://nearify.org/" },
