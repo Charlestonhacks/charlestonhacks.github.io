@@ -1068,7 +1068,7 @@
       .cta-grid { grid-template-columns: 1fr; }
       .hacks-grid { grid-template-columns: 1fr; grid-template-rows: auto; gap: 10px; }
       .buildspace-feature { grid-row: auto; min-height: 0; padding: 24px 20px; }
-      .buildspace-feature h3 { font-size: clamp(1.65rem, 9vw, 2.2rem); }
+      .buildspace-feature h3 { font-size: clamp(1.4rem, 6vw, 2.2rem); }
       .buildspace-lead { font-size: 0.96rem; }
       .buildspace-copy { font-size: 0.82rem; }
       .buildspace-feature .hack-cta { margin-top: 16px; }
