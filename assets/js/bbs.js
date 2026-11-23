@@ -1,5 +1,5 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
-import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js";
+import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123";
 import { supabase } from "./supabaseClient.js";
 
 const HISTORY_PAGE_SIZE = 150;
@@ -25,6 +25,10 @@ let realtimeStatus = "connecting";
 let wasDisconnected = false;
 let baseTitle = "";
 let els = {};
+let zorkSession = 0;        // increments per game so late engine output is dropped after exit
+let zorkChatPending = 0;    // chat messages that arrived during a game
+let zorkHistory = [];
+let zorkHistoryIndex = -1;
 
 function returnToBuildspaceAfterAuthFailure() {
   try {
@@ -65,19 +69,15 @@ export async function initBBS() {
   const olderBtn = modal.querySelector("#bbs-older");
   const jumpBtn = modal.querySelector("#bbs-jump");
   const counter = modal.querySelector("#bbs-count");
-  els = { screen, input, sendButton, olderBtn, jumpBtn, liveDiv, counter, feedbackDiv };
+  const zorkNote = modal.querySelector("#bbs-zork-note");
+  els = { screen, input, sendButton, olderBtn, jumpBtn, liveDiv, counter, feedbackDiv, zorkNote };
   baseTitle = document.title;
 
   const guestName = loadOrGenerateUsername();
   window.bbsUsername = guestName;
 
   closeBtn.addEventListener("click", () => {
-    if (currentMode === "zork") {
-      stopZork();
-      write(screen, "Exited ZORK mode.\n");
-      currentMode = "chat";
-      setBbsInputMode(input, sendButton, false);
-    }
+    if (currentMode === "zork") leaveZork("Exited ZORK mode.");
     modal.style.display = "none";
   });
 
@@ -234,6 +234,33 @@ export async function initBBS() {
   olderBtn.addEventListener("click", () => loadOlderMessages(feedbackDiv));
 
   input.addEventListener("input", renderCounter);
+  input.addEventListener("keydown", (event) => {
+    if (currentMode !== "zork" || !zorkHistory.length) return;
+    if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+    event.preventDefault();
+    if (event.key === "ArrowUp") {
+      zorkHistoryIndex = zorkHistoryIndex < 0 ? zorkHistory.length - 1 : Math.max(0, zorkHistoryIndex - 1);
+    } else if (zorkHistoryIndex >= 0) {
+      zorkHistoryIndex += 1;
+      if (zorkHistoryIndex >= zorkHistory.length) zorkHistoryIndex = -1;
+    }
+    input.value = zorkHistoryIndex < 0 ? "" : zorkHistory[zorkHistoryIndex];
+    const end = input.value.length;
+    requestAnimationFrame(() => input.setSelectionRange(end, end));
+  });
+
+  leaveZork = (note, { keepScreen = false } = {}) => {
+    const wasPlaying = currentMode === "zork";
+    currentMode = "chat";
+    zorkSession += 1;
+    if (wasPlaying) stopZork();
+    zorkChatPending = 0;
+    renderZorkNote();
+    // Back to a clean chat view, including anything posted during the game.
+    if (!keepScreen) renderAllMessages();
+    if (note) write(screen, note);
+    setBbsInputMode(input, sendButton, false);
+  };
 
   // Admin moderation is enforced by RLS; this delegated handler only exposes the control.
   screen.addEventListener("click", async (event) => {
@@ -262,39 +289,40 @@ export async function initBBS() {
     renderCounter();
 
     if (currentMode === "zork") {
-      if (text === "/exit") {
-        stopZork();
-        write(screen, "Exited ZORK mode.\n");
-        currentMode = "chat";
-        setBbsInputMode(input, sendButton, false);
+      rememberZorkCommand(text);
+      if (text.toLowerCase() === "/exit") {
+        leaveZork("Exited ZORK mode. Type zork to play again.");
         return;
       }
       if (text.toLowerCase() === "/chs") {
         write(screen, "A signal resolves: CHARLESTONHACKS, CHARLESTON, SC.\nBy the harbor, builders, designers, and curious minds gather for hackathons—to form teams, share skills, and make things together.\nThe next challenge is aboveground; yours waits below.\n");
         return;
       }
-      sendZorkCommand(text);
+      if (sendZorkCommand(text)) echoZorkCommand(screen, text);
       return;
     }
 
     if (["zork", "play zork", "/zork"].includes(text.toLowerCase())) {
-      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat; /chs for a CharlestonHacks signal.\nSave with save; later, start Zork and type restore.\nYour save is tied to this browser guest name; each new save replaces the last.\n");
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
+      const session = ++zorkSession;
       currentMode = "zork";
+      zorkChatPending = 0;
+      zorkHistoryIndex = -1;
+      renderZorkNote();
       olderBtn.hidden = true;
+      unseenCount = 0;
+      renderJumpButton();
       setBbsInputMode(input, sendButton, true);
       input.disabled = true;
-      const started = await startZork((output) => write(screen, output), {
+      const active = () => currentMode === "zork" && session === zorkSession;
+      const started = await startZork((output) => { if (active()) write(screen, output); }, {
         username: guestName,
-        onEnd: () => {
-          currentMode = "chat";
-          setBbsInputMode(input, sendButton, false);
-        }
+        onEnd: () => { if (active()) leaveZork("ZORK ended. Type zork to play again."); }
       });
+      if (!active()) return;
       input.disabled = false;
-      if (!started) {
-        currentMode = "chat";
-        setBbsInputMode(input, sendButton, false);
-      }
+      input.focus();
+      if (!started) leaveZork(null, { keepScreen: true });
       return;
     }
 
@@ -330,6 +358,38 @@ export async function initBBS() {
   });
 }
 
+let leaveZork = () => {};
+
+function rememberZorkCommand(text) {
+  if (zorkHistory[zorkHistory.length - 1] !== text) zorkHistory.push(text);
+  if (zorkHistory.length > 50) zorkHistory.shift();
+  zorkHistoryIndex = -1;
+}
+
+// The Z-machine never echoes input, so show the typed command after its ">" prompt.
+function echoZorkCommand(screen, text) {
+  const last = screen.lastElementChild;
+  const span = document.createElement("span");
+  span.className = "bbs-zork-cmd";
+  span.textContent = text;
+  if (last && last.textContent.trimEnd().endsWith(">") && !last.querySelector(".bbs-zork-cmd")) {
+    last.appendChild(span);
+  } else {
+    const line = document.createElement("div");
+    line.textContent = ">";
+    line.appendChild(span);
+    screen.appendChild(line);
+  }
+  screen.scrollTop = screen.scrollHeight;
+}
+
+function renderZorkNote() {
+  const note = els.zorkNote;
+  if (!note) return;
+  note.hidden = !(currentMode === "zork" && zorkChatPending > 0);
+  note.textContent = `💬 ${zorkChatPending} new chat message${zorkChatPending === 1 ? "" : "s"} — type /exit to read`;
+}
+
 function canPost() {
   return Boolean(currentAuthUser && currentProfile && !currentProfile.is_disabled);
 }
@@ -363,7 +423,7 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
   input.disabled = !postAllowed;
   sendButton.disabled = !postAllowed;
   input.placeholder = currentMode === "zork"
-    ? "Zork command (or /exit)..."
+    ? "Zork command…"
     : (postAllowed ? "Type a message…" : "Sign in to post…");
   if (postAllowed) {
     authDiv.innerHTML = `<span>Posting as <strong></strong></span> <button type="button" data-bbs-sign-out aria-label="Sign out of Community Chat">Sign out</button>`;
@@ -434,6 +494,11 @@ const BBS_STYLES = `
     box-shadow: 0 0 10px rgba(0,255,0,0.5);
   }
   .bbs-jump:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .bbs-zork-cmd { color: #fff; font-weight: bold; margin-left: 0.5ch; }
+  .bbs-zork-note {
+    align-self: center; margin: -4px 0 10px; padding: 3px 10px; border: 1px solid rgba(0,224,255,0.5);
+    border-radius: 999px; color: #00e0ff; font-size: 0.8rem;
+  }
   #bbs-send:disabled { opacity: 0.5; cursor: not-allowed; }
   #bbs-input:disabled { opacity: 0.6; }
   #bbs-input:focus-visible { outline: 2px solid #9cff9c; outline-offset: 1px; }
@@ -460,6 +525,7 @@ const BBS_HTML = `
     <div id="bbs-auth" style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; color:#9cff9c; font:0.9rem monospace;" aria-live="polite"></div>
     <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
     <button id="bbs-jump" class="bbs-jump" type="button" hidden></button>
+    <div id="bbs-zork-note" class="bbs-zork-note" role="status" hidden></div>
     <form id="bbs-form" style="display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:stretch; width:100%; min-width:0; gap:10px;">
       <input id="bbs-input" type="text" maxlength="${MAX_MESSAGE_LENGTH}" autocomplete="off" enterkeyhint="send" aria-label="Type a public message" aria-describedby="bbs-count" placeholder="Sign in to post…" style="width:100%; min-width:0; background:black; color:#0f0; border:2px solid #0f0; padding:8px; font-family:monospace; font-size:16px; line-height:1.4;" />
       <button id="bbs-send" type="submit" style="padding:8px 16px; background:#0f0; color:black; border:none; font-family:monospace; font-weight:bold; cursor:pointer; white-space:nowrap;">Send</button>
@@ -474,7 +540,7 @@ const BBS_HTML = `
 
 function setBbsInputMode(input, sendButton, isZork) {
   input.placeholder = isZork
-    ? "Zork command (or /exit)..."
+    ? "Zork command…"
     : (canPost() ? "Type a message…" : "Sign in to post…");
   input.setAttribute("aria-label", isZork ? "Enter a Zork command" : "Type a public message");
   input.maxLength = isZork ? 78 : MAX_MESSAGE_LENGTH;
@@ -669,6 +735,14 @@ function addIncomingMessage(msg, { forceScroll = false } = {}) {
   const index = insertSorted(msg);
   if (index < 0) return;
 
+  if (currentMode === "zork") {
+    // Keep the game screen clean; the message shows when the player exits.
+    zorkChatPending += 1;
+    renderZorkNote();
+    if (document.hidden) { unreadCount += 1; updateDocumentTitle(); }
+    return;
+  }
+
   if (index !== messages.length - 1 && currentMode !== "zork") {
     // Arrived out of order: rebuild so separators stay correct.
     const stick = isNearBottom(screen);
@@ -749,7 +823,7 @@ function updateDocumentTitle() {
 function write(screen, text) {
   text.split("\n").forEach((line) => {
     const div = document.createElement("div");
-    div.textContent = line;
+    div.textContent = line || "\u00a0"; // keep blank lines visible
     screen.appendChild(div);
   });
   screen.scrollTop = screen.scrollHeight;
