@@ -27,19 +27,27 @@ class BbsIOAdapter {
     this._buffer = "";
   }
 
+  // Emit only complete lines so text printed in pieces isn't split mid-line.
+  _flushLines() {
+    const end = this._buffer.lastIndexOf("\n");
+    if (end < 0) return;
+    this._write(this._buffer.slice(0, end));
+    this._buffer = this._buffer.slice(end + 1);
+  }
+
   print(text) {
     this._buffer += text;
-    if (this._buffer.includes("\n")) this._flush();
+    this._flushLines();
   }
 
   printLine(text) {
     this._buffer += (text || "") + "\n";
-    this._flush();
+    this._flushLines();
   }
 
   newLine() {
     this._buffer += "\n";
-    this._flush();
+    this._flushLines();
   }
 
   readLine(maxLength = 78) {
