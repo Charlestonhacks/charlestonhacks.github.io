@@ -2,11 +2,29 @@
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js";
 import { supabase } from "./supabaseClient.js";
 
+const HISTORY_PAGE_SIZE = 150;
+const MAX_MESSAGE_LENGTH = 500;
+const COUNTER_THRESHOLD = 400;
+const HEARTBEAT_MS = 10000;
+const PRESENCE_MS = 7000;
+const MESSAGE_FIELDS = "id, user_id, username, text, created_at";
+
 let initialized = false;
 let currentMode = "chat";
-let renderedMessageIds = new Set();
 let currentAuthUser = null;
 let currentProfile = null;
+
+// Chat state: every loaded message, sorted oldest → newest.
+let messages = [];
+let messageIds = new Set();
+let hasOlderHistory = false;
+let loadingOlder = false;
+let unseenCount = 0;   // arrived while scrolled up
+let unreadCount = 0;   // arrived while the tab was hidden
+let realtimeStatus = "connecting";
+let wasDisconnected = false;
+let baseTitle = "";
+let els = {};
 
 function returnToBuildspaceAfterAuthFailure() {
   try {
@@ -40,9 +58,16 @@ export async function initBBS() {
   const input = modal.querySelector("#bbs-input");
   const sendButton = modal.querySelector("#bbs-send");
   const onlineDiv = modal.querySelector("#bbs-online");
+  const liveDiv = modal.querySelector("#bbs-live");
   const feedbackDiv = modal.querySelector("#bbs-feedback");
   const authDiv = modal.querySelector("#bbs-auth");
   const closeBtn = modal.querySelector("#bbs-close");
+  const olderBtn = modal.querySelector("#bbs-older");
+  const jumpBtn = modal.querySelector("#bbs-jump");
+  const counter = modal.querySelector("#bbs-count");
+  els = { screen, input, sendButton, olderBtn, jumpBtn, liveDiv, counter, feedbackDiv };
+  baseTitle = document.title;
+
   const guestName = loadOrGenerateUsername();
   window.bbsUsername = guestName;
 
@@ -157,22 +182,63 @@ export async function initBBS() {
   supabase
     .channel("bbs_messages_channel")
     .on("postgres_changes", { event: "INSERT", schema: "public", table: "bbs_messages" }, ({ new: msg }) => {
-      writeChatMessage(screen, msg, currentProfile?.user_role === "Admin");
+      addIncomingMessage(msg);
     })
     .on("postgres_changes", { event: "DELETE", schema: "public", table: "bbs_messages" }, ({ old: msg }) => {
       removeChatMessage(screen, msg.id);
     })
-    .subscribe();
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+        realtimeStatus = "live";
+        // Fill any gap left while the realtime connection was down.
+        if (wasDisconnected) catchUpMessages();
+        wasDisconnected = false;
+      } else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        realtimeStatus = "reconnecting";
+        wasDisconnected = true;
+      }
+      renderLiveStatus();
+    });
 
-  heartbeat(guestName);
-  window.setInterval(() => heartbeat(guestName), 10000);
-  loadOnlineUsers(onlineDiv);
-  window.setInterval(() => loadOnlineUsers(onlineDiv), 7000);
+  // Presence: skip network work while the tab is hidden and refresh on return.
+  const pollPresence = (force = false) => {
+    if (document.hidden && !force) return;
+    heartbeat(guestName);
+    loadOnlineUsers(onlineDiv);
+  };
+  pollPresence(true);
+  window.setInterval(() => { if (!document.hidden) heartbeat(guestName); }, HEARTBEAT_MS);
+  window.setInterval(() => { if (!document.hidden) loadOnlineUsers(onlineDiv); }, PRESENCE_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) return;
+    unreadCount = 0;
+    updateDocumentTitle();
+    pollPresence(true);
+    if (realtimeStatus !== "live") catchUpMessages();
+  });
+
+  screen.addEventListener("scroll", () => {
+    if (isNearBottom(screen)) {
+      unseenCount = 0;
+      renderJumpButton();
+    }
+  }, { passive: true });
+
+  jumpBtn.addEventListener("click", () => {
+    scrollToBottom(screen);
+    unseenCount = 0;
+    renderJumpButton();
+    if (!input.disabled) input.focus();
+  });
+
+  olderBtn.addEventListener("click", () => loadOlderMessages(feedbackDiv));
+
+  input.addEventListener("input", renderCounter);
 
   // Admin moderation is enforced by RLS; this delegated handler only exposes the control.
   screen.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-delete-message]");
-    if (!button || currentProfile?.user_role !== "Admin") return;
+    if (!button || !isAdmin()) return;
     if (!window.confirm("Remove this public message? This cannot be undone.")) return;
     button.disabled = true;
     const { error } = await supabase.from("bbs_messages").delete().eq("id", button.dataset.deleteMessage);
@@ -186,11 +252,14 @@ export async function initBBS() {
     }
   });
 
+  let sending = false;
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
+    if (sending) return;
     const text = input.value.trim();
     if (!text) return;
     input.value = "";
+    renderCounter();
 
     if (currentMode === "zork") {
       if (text === "/exit") {
@@ -211,6 +280,7 @@ export async function initBBS() {
     if (["zork", "play zork", "/zork"].includes(text.toLowerCase())) {
       write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\nType /exit to return to chat; /chs for a CharlestonHacks signal.\nSave with save; later, start Zork and type restore.\nYour save is tied to this browser guest name; each new save replaces the last.\n");
       currentMode = "zork";
+      olderBtn.hidden = true;
       setBbsInputMode(input, sendButton, true);
       input.disabled = true;
       const started = await startZork((output) => write(screen, output), {
@@ -228,25 +298,44 @@ export async function initBBS() {
       return;
     }
 
-    if (!currentAuthUser || !currentProfile || currentProfile.is_disabled) {
+    if (!canPost()) {
+      input.value = text;
+      renderCounter();
       feedbackDiv.textContent = "Sign in with an active member account to post.";
       return;
     }
     feedbackDiv.textContent = "";
+    sending = true;
     sendButton.disabled = true;
+    sendButton.textContent = "Sending…";
     const { data: message, error } = await supabase.from("bbs_messages").insert({
       user_id: currentAuthUser.id,
       username: currentProfile.name,
       text
-    }).select("id, user_id, username, text, created_at").single();
-    sendButton.disabled = false;
+    }).select(MESSAGE_FIELDS).single();
+    sending = false;
+    sendButton.disabled = !canPost();
+    sendButton.textContent = "Send";
     if (error) {
       console.error("[BBS] Insert error:", error);
-      feedbackDiv.textContent = "Message not sent. Please try again.";
+      // Give the draft back so nothing typed is lost.
+      if (!input.value) input.value = text;
+      renderCounter();
+      feedbackDiv.textContent = "Message not sent. Your text is still in the box — press Send to try again.";
+      input.focus();
       return;
     }
-    writeChatMessage(screen, message, currentProfile.user_role === "Admin");
+    addIncomingMessage(message, { forceScroll: true });
+    input.focus();
   });
+}
+
+function canPost() {
+  return Boolean(currentAuthUser && currentProfile && !currentProfile.is_disabled);
+}
+
+function isAdmin() {
+  return currentProfile?.user_role === "Admin";
 }
 
 async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv, userOverride) {
@@ -256,6 +345,8 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
     if (error) console.error("[BBS] Session lookup error:", error);
     user = data?.session?.user || null;
   }
+  const previousUserId = currentAuthUser?.id || null;
+  const previousRole = currentProfile?.user_role || null;
   currentAuthUser = user;
   currentProfile = null;
   if (user) {
@@ -268,18 +359,18 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
     currentProfile = profile || null;
   }
 
-  const canPost = Boolean(user && currentProfile && !currentProfile.is_disabled);
-  input.disabled = !canPost;
-  sendButton.disabled = !canPost;
+  const postAllowed = canPost();
+  input.disabled = !postAllowed;
+  sendButton.disabled = !postAllowed;
   input.placeholder = currentMode === "zork"
     ? "Zork command (or /exit)..."
-    : (canPost ? "type message..." : "Sign in to post…");
-  if (canPost) {
+    : (postAllowed ? "Type a message…" : "Sign in to post…");
+  if (postAllowed) {
     authDiv.innerHTML = `<span>Posting as <strong></strong></span> <button type="button" data-bbs-sign-out aria-label="Sign out of Community Chat">Sign out</button>`;
     authDiv.querySelector("strong").textContent = currentProfile.name;
-    feedbackDiv.textContent = currentProfile.user_role === "Admin" ? "Admin tools enabled." : "";
+    feedbackDiv.textContent = isAdmin() ? "Admin tools enabled." : "";
   } else {
-    authDiv.innerHTML = `<span>Sign in to post:</span> <button type="button" data-provider="google">Google</button> <button type="button" data-provider="github">GitHub</button>`;
+    authDiv.innerHTML = `<span>Sign in to post:</span> <button type="button" data-provider="google"><i class="fab fa-google" aria-hidden="true"></i> Google</button> <button type="button" data-provider="github"><i class="fab fa-github" aria-hidden="true"></i> GitHub</button>`;
     if (user && !currentProfile) feedbackDiv.textContent = "An active CharlestonHacks member profile is required to post.";
     else if (user && currentProfile?.is_disabled) feedbackDiv.textContent = "This account cannot post messages.";
   }
@@ -288,73 +379,371 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
     input.disabled = false;
     sendButton.disabled = false;
   }
-  form.setAttribute("aria-label", canPost ? "Send a public message" : "Sign in required to post a public message");
+  form.setAttribute("aria-label", postAllowed ? "Send a public message" : "Sign in required to post a public message");
+
+  // Own-message highlighting and admin Remove buttons depend on who is signed in.
+  const identityChanged = previousUserId !== (currentAuthUser?.id || null) ||
+    previousRole !== (currentProfile?.user_role || null);
+  if (identityChanged) refreshMessageDecorations();
 }
 
+const BBS_STYLES = `
+  #bbs-wrapper button { font-family: monospace; }
+  #bbs-auth button[data-provider] {
+    padding: 4px 10px; background: #000; color: #0f0; border: 1px solid #0f0;
+    border-radius: 5px; cursor: pointer; font-size: 0.85rem;
+  }
+  #bbs-auth button[data-provider]:hover, #bbs-auth button[data-provider]:focus-visible {
+    background: rgba(0,255,0,0.12); outline: 2px solid #0f0; outline-offset: 2px;
+  }
+  #bbs-auth button[data-provider]:disabled { opacity: 0.6; cursor: wait; }
+  #bbs-screen:focus-visible { outline: 2px solid #9cff9c; outline-offset: 2px; }
+  #bbs-screen::-webkit-scrollbar { width: 8px; }
+  #bbs-screen::-webkit-scrollbar-thumb { background: rgba(0,255,0,0.35); border-radius: 4px; }
+  #bbs-screen { scrollbar-color: rgba(0,255,0,0.35) transparent; }
+  .bbs-older {
+    display: block; margin: 0 auto 8px; padding: 3px 10px; background: #000; color: #9cff9c;
+    border: 1px dashed rgba(0,255,0,0.5); border-radius: 4px; cursor: pointer; font-size: 0.8rem;
+  }
+  .bbs-older:hover, .bbs-older:focus-visible { background: rgba(0,255,0,0.1); outline: none; }
+  .bbs-older:disabled { opacity: 0.6; cursor: wait; }
+  .bbs-day {
+    display: flex; align-items: center; gap: 8px; margin: 10px 0 6px;
+    color: rgba(156,255,156,0.75); font-size: 0.78em; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .bbs-day::before, .bbs-day::after { content: ""; flex: 1; border-top: 1px dashed rgba(0,255,0,0.25); }
+  .bbs-chat-message {
+    padding: 2px 6px; margin: 0 -6px; border-left: 2px solid transparent; border-radius: 2px;
+    overflow-wrap: anywhere;
+  }
+  .bbs-chat-message:hover { background: rgba(0,255,0,0.05); }
+  .bbs-chat-message.is-own { border-left-color: rgba(0,224,255,0.6); }
+  .bbs-chat-message.is-mention { background: rgba(255,209,102,0.08); border-left-color: #ffd166; }
+  .bbs-chat-message time { color: rgba(0,255,0,0.55); margin-right: 6px; font-size: 0.85em; }
+  .bbs-name { font-weight: bold; margin-right: 6px; }
+  .bbs-chat-message a { color: #00e0ff; text-decoration: underline; text-underline-offset: 2px; }
+  .bbs-chat-message a:hover, .bbs-chat-message a:focus-visible { color: #fff; }
+  .bbs-remove {
+    margin-left: 8px; padding: 1px 5px; color: #ffd166; background: #000; border: 1px solid #775;
+    cursor: pointer; font-size: 0.7rem; line-height: 1; opacity: 0.45;
+  }
+  .bbs-chat-message:hover .bbs-remove, .bbs-remove:focus-visible { opacity: 1; }
+  .bbs-jump {
+    align-self: center; margin: -4px 0 10px; padding: 4px 12px; border-radius: 999px;
+    background: #0f0; color: #000; border: none; font-weight: bold; cursor: pointer; font-size: 0.85rem;
+    box-shadow: 0 0 10px rgba(0,255,0,0.5);
+  }
+  .bbs-jump:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  #bbs-send:disabled { opacity: 0.5; cursor: not-allowed; }
+  #bbs-input:disabled { opacity: 0.6; }
+  #bbs-input:focus-visible { outline: 2px solid #9cff9c; outline-offset: 1px; }
+  .bbs-count { text-align: right; color: rgba(156,255,156,0.75); font-size: 0.78rem; margin-top: 4px; }
+  .bbs-count.is-near { color: #ffd166; }
+  .bbs-status-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px;
+    margin-top: 12px; color: #0f0; font-size: 0.9rem;
+  }
+  .bbs-live::before { content: "●"; margin-right: 5px; }
+  .bbs-live[data-state="live"] { color: #0f0; }
+  .bbs-live[data-state="connecting"], .bbs-live[data-state="reconnecting"] { color: #ffd166; }
+  @media (prefers-reduced-motion: no-preference) {
+    .bbs-chat-message.is-new { animation: bbs-flash 1.2s ease-out; }
+    @keyframes bbs-flash { from { background: rgba(0,255,0,0.18); } to { background: transparent; } }
+  }
+`;
+
 const BBS_HTML = `
+  <style>${BBS_STYLES}</style>
   <div id="bbs-wrapper" style="background:black; border:3px solid #0f0; padding:20px; width:min(90vw, 600px); max-height:90vh; border-radius:12px; box-shadow:0 0 20px #0f0; position:relative; margin:auto; display:flex; flex-direction:column;">
     <button id="bbs-close" aria-label="Close chat" style="position:absolute; top:8px; right:10px; background:black; color:#0f0; border:1px solid #0f0; font-family:monospace; cursor:pointer; padding:4px 8px; font-size:1rem; line-height:1;">✕</button>
     <h2 style="color:#0f0; text-align:center; margin-bottom:12px; font-family:monospace; font-size:clamp(1.2rem, 3vw, 1.5rem);">CharlestonHacks BBS</h2>
     <div id="bbs-auth" style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; color:#9cff9c; font:0.9rem monospace;" aria-live="polite"></div>
-    <div id="bbs-screen" role="region" aria-label="Public chat messages" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.4;"></div>
+    <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
+    <button id="bbs-jump" class="bbs-jump" type="button" hidden></button>
     <form id="bbs-form" style="display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:stretch; width:100%; min-width:0; gap:10px;">
-      <input id="bbs-input" type="text" maxlength="500" autocomplete="off" aria-label="Type a public message" placeholder="Sign in to post…" style="width:100%; min-width:0; background:black; color:#0f0; border:2px solid #0f0; padding:8px; font-family:monospace; font-size:16px; line-height:1.4;" />
+      <input id="bbs-input" type="text" maxlength="${MAX_MESSAGE_LENGTH}" autocomplete="off" enterkeyhint="send" aria-label="Type a public message" aria-describedby="bbs-count" placeholder="Sign in to post…" style="width:100%; min-width:0; background:black; color:#0f0; border:2px solid #0f0; padding:8px; font-family:monospace; font-size:16px; line-height:1.4;" />
       <button id="bbs-send" type="submit" style="padding:8px 16px; background:#0f0; color:black; border:none; font-family:monospace; font-weight:bold; cursor:pointer; white-space:nowrap;">Send</button>
     </form>
+    <div id="bbs-count" class="bbs-count" aria-live="polite" hidden></div>
     <div id="bbs-feedback" role="status" aria-live="polite" style="min-height:1.3em; margin-top:8px; color:#ffd166; font:0.85rem monospace;"></div>
-    <div style="margin-top:12px; color:#0f0; font-family:monospace; font-size:0.9rem;">Chat activity: <span id="bbs-online" aria-live="polite">Checking…</span></div>
+    <div class="bbs-status-row" style="font-family:monospace;">
+      <span>Chat activity: <span id="bbs-online" aria-live="polite">Checking…</span></span>
+      <span id="bbs-live" class="bbs-live" data-state="connecting">Connecting…</span>
+    </div>
   </div>`;
 
 function setBbsInputMode(input, sendButton, isZork) {
-  input.placeholder = isZork ? "Zork command (or /exit)..." : (currentAuthUser ? "type message..." : "Sign in to post…");
+  input.placeholder = isZork
+    ? "Zork command (or /exit)..."
+    : (canPost() ? "Type a message…" : "Sign in to post…");
   input.setAttribute("aria-label", isZork ? "Enter a Zork command" : "Type a public message");
-  input.maxLength = isZork ? 78 : 500;
+  input.maxLength = isZork ? 78 : MAX_MESSAGE_LENGTH;
   if (isZork) {
     input.disabled = false;
     sendButton.disabled = false;
   } else {
-    const canPost = Boolean(currentAuthUser && currentProfile && !currentProfile.is_disabled);
-    input.disabled = !canPost;
-    sendButton.disabled = !canPost;
+    input.disabled = !canPost();
+    sendButton.disabled = !canPost();
+    if (els.olderBtn) els.olderBtn.hidden = !hasOlderHistory;
   }
+  renderCounter();
   input.focus();
 }
 
-function writeChatMessage(screen, msg, isAdmin) {
-  if (!msg || msg.id === undefined || renderedMessageIds.has(String(msg.id))) return;
-  renderedMessageIds.add(String(msg.id));
+/* ---------- Message rendering ---------- */
+
+function parseDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+}
+
+function dayKey(date) {
+  return date ? `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}` : "unknown";
+}
+
+function dayLabel(date) {
+  if (!date) return "Earlier";
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (dayKey(date) === dayKey(today)) return "Today";
+  if (dayKey(date) === dayKey(yesterday)) return "Yesterday";
+  const sameYear = date.getFullYear() === today.getFullYear();
+  return date.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }) });
+}
+
+function makeDaySeparator(date) {
+  const sep = document.createElement("div");
+  sep.className = "bbs-day";
+  sep.setAttribute("role", "separator");
+  sep.dataset.day = dayKey(date);
+  sep.textContent = dayLabel(date);
+  return sep;
+}
+
+// Stable, readable color per member name.
+function nameColor(name) {
+  let hash = 0;
+  for (const ch of String(name)) hash = (hash * 31 + ch.codePointAt(0)) >>> 0;
+  const hue = 70 + (hash % 220); // skip reds that read as errors on black
+  return `hsl(${hue}, 85%, 66%)`;
+}
+
+const URL_PATTERN = /\bhttps?:\/\/[^\s<>"']+/gi;
+
+// Builds text with safe, clickable http(s) links. Never uses innerHTML.
+function appendLinkifiedText(parent, text) {
+  let last = 0;
+  for (const match of text.matchAll(URL_PATTERN)) {
+    let href = match[0];
+    // Trailing punctuation usually belongs to the sentence, not the URL.
+    const trimmed = href.replace(/[.,!?;:)\]}]+$/, "");
+    const start = match.index;
+    href = trimmed;
+    let parsed = null;
+    try { parsed = new URL(href); } catch (_) {}
+    if (!parsed || !/^https?:$/.test(parsed.protocol)) continue;
+    if (start > last) parent.appendChild(document.createTextNode(text.slice(last, start)));
+    const a = document.createElement("a");
+    a.href = parsed.href;
+    a.textContent = href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer nofollow ugc";
+    parent.appendChild(a);
+    last = start + href.length;
+  }
+  if (last < text.length) parent.appendChild(document.createTextNode(text.slice(last)));
+}
+
+function mentionsMe(msg) {
+  const name = currentProfile?.name?.trim();
+  if (!name || !msg.text || msg.user_id === currentAuthUser?.id) return false;
+  return msg.text.toLowerCase().includes(`@${name.toLowerCase()}`) ||
+    msg.text.toLowerCase().includes(`@${name.split(/\s+/)[0].toLowerCase()}`);
+}
+
+function buildMessageRow(msg) {
   const row = document.createElement("div");
   row.className = "bbs-chat-message";
   row.dataset.messageId = msg.id;
-  const date = msg.created_at ? new Date(msg.created_at) : null;
-  if (date && !Number.isNaN(date.getTime())) {
+  const date = parseDate(msg.created_at);
+  if (date) {
     const time = document.createElement("time");
     time.dateTime = date.toISOString();
-    time.textContent = `[${date.toLocaleString([], { dateStyle: "short", timeStyle: "short" })}] `;
-    time.style.color = "rgba(0, 255, 0, 0.68)";
+    time.title = date.toLocaleString([], { dateStyle: "full", timeStyle: "short" });
+    time.textContent = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
     row.appendChild(time);
   }
-  const message = document.createElement("span");
-  message.textContent = `[${msg.username || "Member"}] ${msg.text || ""}`;
-  row.appendChild(message);
-  if (isAdmin) {
+  const name = document.createElement("span");
+  name.className = "bbs-name";
+  name.textContent = msg.username || "Member";
+  name.style.color = nameColor(msg.username || "Member");
+  row.appendChild(name);
+  const body = document.createElement("span");
+  body.className = "bbs-text";
+  appendLinkifiedText(body, msg.text || "");
+  row.appendChild(body);
+  decorateRow(row, msg);
+  return row;
+}
+
+function decorateRow(row, msg) {
+  row.classList.toggle("is-own", Boolean(currentAuthUser && msg.user_id === currentAuthUser.id));
+  row.classList.toggle("is-mention", mentionsMe(msg));
+  const existing = row.querySelector("[data-delete-message]");
+  if (isAdmin() && !existing) {
     const removeButton = document.createElement("button");
     removeButton.type = "button";
+    removeButton.className = "bbs-remove";
     removeButton.dataset.deleteMessage = msg.id;
-    removeButton.textContent = "Remove";
-    removeButton.setAttribute("aria-label", "Remove this message");
-    removeButton.style.cssText = "margin-left:8px; padding:1px 5px; color:#ffd166; background:#000; border:1px solid #775; cursor:pointer; font:0.75rem monospace;";
+    removeButton.textContent = "✕";
+    removeButton.title = "Remove message";
+    removeButton.setAttribute("aria-label", `Remove message from ${msg.username || "member"}`);
     row.appendChild(removeButton);
+  } else if (!isAdmin() && existing) {
+    existing.remove();
   }
-  const wasNearBottom = screen.scrollHeight - screen.scrollTop - screen.clientHeight < 32;
+}
+
+function refreshMessageDecorations() {
+  const { screen } = els;
+  if (!screen) return;
+  const byId = new Map(messages.map((m) => [String(m.id), m]));
+  screen.querySelectorAll("[data-message-id]").forEach((row) => {
+    const msg = byId.get(row.dataset.messageId);
+    if (msg) decorateRow(row, msg);
+  });
+}
+
+function lastChatDayKey(screen) {
+  const rows = screen.querySelectorAll(".bbs-day");
+  return rows.length ? rows[rows.length - 1].dataset.day : null;
+}
+
+function isNearBottom(screen) {
+  return screen.scrollHeight - screen.scrollTop - screen.clientHeight < 48;
+}
+
+function scrollToBottom(screen) {
+  screen.scrollTop = screen.scrollHeight;
+}
+
+function insertSorted(msg) {
+  const id = String(msg.id);
+  if (messageIds.has(id)) return -1;
+  messageIds.add(id);
+  const t = parseDate(msg.created_at)?.getTime() ?? Infinity;
+  let i = messages.length;
+  while (i > 0 && (parseDate(messages[i - 1].created_at)?.getTime() ?? Infinity) > t) i--;
+  messages.splice(i, 0, msg);
+  return i;
+}
+
+// Fully rebuilds the chat transcript from state. Used for history loads.
+function renderAllMessages({ keepBottomOffset = false } = {}) {
+  const { screen, olderBtn } = els;
+  const bottomOffset = screen.scrollHeight - screen.scrollTop;
+  const frag = document.createDocumentFragment();
+  frag.appendChild(olderBtn);
+  olderBtn.hidden = !hasOlderHistory || currentMode === "zork";
+  let lastDay = null;
+  for (const msg of messages) {
+    const date = parseDate(msg.created_at);
+    const key = dayKey(date);
+    if (key !== lastDay) {
+      frag.appendChild(makeDaySeparator(date));
+      lastDay = key;
+    }
+    frag.appendChild(buildMessageRow(msg));
+  }
+  screen.replaceChildren(frag);
+  if (!messages.length) write(screen, "Welcome! Say hi to start the conversation, or type zork to play.");
+  if (keepBottomOffset) screen.scrollTop = screen.scrollHeight - bottomOffset;
+  else scrollToBottom(screen);
+}
+
+// Adds one message (realtime, own send, or catch-up) without disturbing Zork output.
+function addIncomingMessage(msg, { forceScroll = false } = {}) {
+  if (!msg || msg.id === undefined) return;
+  const { screen } = els;
+  const index = insertSorted(msg);
+  if (index < 0) return;
+
+  if (index !== messages.length - 1 && currentMode !== "zork") {
+    // Arrived out of order: rebuild so separators stay correct.
+    const stick = isNearBottom(screen);
+    renderAllMessages({ keepBottomOffset: !stick });
+    return;
+  }
+
+  const wasNearBottom = isNearBottom(screen);
+  // Drop the empty-state welcome line once the first real message arrives.
+  if (messages.length === 1) {
+    screen.querySelectorAll(":scope > div:not(.bbs-chat-message):not(.bbs-day)").forEach((el) => {
+      if (el.textContent.startsWith("Welcome!")) el.remove();
+    });
+  }
+  const date = parseDate(msg.created_at);
+  if (lastChatDayKey(screen) !== dayKey(date)) screen.appendChild(makeDaySeparator(date));
+  const row = buildMessageRow(msg);
+  row.classList.add("is-new");
   screen.appendChild(row);
-  if (wasNearBottom) screen.scrollTop = screen.scrollHeight;
+
+  const fromMe = currentAuthUser && msg.user_id === currentAuthUser.id;
+  if (forceScroll || wasNearBottom || fromMe) {
+    scrollToBottom(screen);
+  } else {
+    unseenCount += 1;
+    renderJumpButton();
+  }
+  if (document.hidden && !fromMe) {
+    unreadCount += 1;
+    updateDocumentTitle();
+  }
 }
 
 function removeChatMessage(screen, id) {
-  renderedMessageIds.delete(String(id));
-  Array.from(screen.querySelectorAll("[data-message-id]"))
-    .find((row) => row.dataset.messageId === String(id))?.remove();
+  const key = String(id);
+  messageIds.delete(key);
+  messages = messages.filter((m) => String(m.id) !== key);
+  const row = Array.from(screen.querySelectorAll("[data-message-id]"))
+    .find((el) => el.dataset.messageId === key);
+  if (!row) return;
+  const prev = row.previousElementSibling;
+  const next = row.nextElementSibling;
+  row.remove();
+  // Remove a day separator left with no messages under it.
+  if (prev?.classList.contains("bbs-day") && (!next || next.classList.contains("bbs-day"))) prev.remove();
+}
+
+function renderJumpButton() {
+  const { jumpBtn } = els;
+  if (!jumpBtn) return;
+  jumpBtn.hidden = unseenCount === 0;
+  jumpBtn.textContent = `↓ ${unseenCount} new message${unseenCount === 1 ? "" : "s"}`;
+}
+
+function renderCounter() {
+  const { input, counter } = els;
+  if (!input || !counter) return;
+  const len = input.value.length;
+  const show = currentMode === "chat" && len >= COUNTER_THRESHOLD;
+  counter.hidden = !show;
+  counter.textContent = show ? `${MAX_MESSAGE_LENGTH - len} characters left` : "";
+  counter.classList.toggle("is-near", len >= MAX_MESSAGE_LENGTH - 25);
+}
+
+function renderLiveStatus() {
+  const { liveDiv } = els;
+  if (!liveDiv) return;
+  liveDiv.dataset.state = realtimeStatus;
+  liveDiv.textContent = realtimeStatus === "live" ? "Live"
+    : realtimeStatus === "reconnecting" ? "Reconnecting…" : "Connecting…";
+}
+
+function updateDocumentTitle() {
+  if (!baseTitle) return;
+  document.title = unreadCount > 0 ? `(${unreadCount}) ${baseTitle}` : baseTitle;
 }
 
 function write(screen, text) {
@@ -366,20 +755,64 @@ function write(screen, text) {
   screen.scrollTop = screen.scrollHeight;
 }
 
+/* ---------- Data loading ---------- */
+
 async function loadMessages(screen, feedbackDiv) {
+  // Newest page only; older history loads on request instead of all at once.
   const { data, error } = await supabase.from("bbs_messages")
-    .select("id, user_id, username, text, created_at")
-    .order("created_at", { ascending: true });
-  screen.replaceChildren();
-  renderedMessageIds = new Set();
+    .select(MESSAGE_FIELDS)
+    .order("created_at", { ascending: false })
+    .limit(HISTORY_PAGE_SIZE);
+  messages = [];
+  messageIds = new Set();
   if (error) {
     console.error("[BBS] History load error:", error);
+    hasOlderHistory = false;
+    screen.replaceChildren();
     feedbackDiv.textContent = "Chat history could not be loaded.";
     return;
   }
-  data?.forEach((msg) => writeChatMessage(screen, msg, currentProfile?.user_role === "Admin"));
-  if (!data?.length) write(screen, "Welcome! Start the conversation or type zork to play.");
-  screen.scrollTop = screen.scrollHeight;
+  (data || []).forEach(insertSorted);
+  hasOlderHistory = (data || []).length === HISTORY_PAGE_SIZE;
+  renderAllMessages();
+}
+
+async function loadOlderMessages(feedbackDiv) {
+  if (loadingOlder || !messages.length || currentMode === "zork") return;
+  const { olderBtn } = els;
+  loadingOlder = true;
+  olderBtn.disabled = true;
+  olderBtn.textContent = "Loading…";
+  const { data, error } = await supabase.from("bbs_messages")
+    .select(MESSAGE_FIELDS)
+    .lt("created_at", messages[0].created_at)
+    .order("created_at", { ascending: false })
+    .limit(HISTORY_PAGE_SIZE);
+  loadingOlder = false;
+  olderBtn.disabled = false;
+  olderBtn.textContent = "Load older messages";
+  if (error) {
+    console.error("[BBS] Older history error:", error);
+    feedbackDiv.textContent = "Older messages could not be loaded.";
+    return;
+  }
+  (data || []).forEach(insertSorted);
+  hasOlderHistory = (data || []).length === HISTORY_PAGE_SIZE;
+  if (currentMode !== "zork") renderAllMessages({ keepBottomOffset: true });
+}
+
+async function catchUpMessages() {
+  const newest = messages[messages.length - 1];
+  let query = supabase.from("bbs_messages").select(MESSAGE_FIELDS)
+    .order("created_at", { ascending: true })
+    .limit(HISTORY_PAGE_SIZE);
+  if (newest?.created_at) query = query.gte("created_at", newest.created_at);
+  const { data, error } = await query;
+  if (error) {
+    console.error("[BBS] Catch-up error:", error);
+    return;
+  }
+  (data || []).forEach((msg) => addIncomingMessage(msg));
 }
 
 async function loadOnlineUsers(div) {
