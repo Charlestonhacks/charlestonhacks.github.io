@@ -165,7 +165,10 @@ export function createZorkMap({ storageKey }) {
       (state.exits[prevId] ||= {})[dir] = id;
       if (state.blocked[prevId]) delete state.blocked[prevId][dir];
       changed = true;
-    } else if (dir && prevId === id && /can't go that way|cannot go that way|no way to go/i.test(output)) {
+    } else if (dir && prevId === id && !died) {
+      // Any compass move that leaves you where you were was refused, whatever
+      // the message ("You can't go that way", "The mountains are impassable",
+      // "The door is closed"…). It clears if that direction works later.
       (state.blocked[id] ||= {})[dir] = true;
       changed = true;
     }

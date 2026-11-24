@@ -1,7 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
-import { createZorkMap } from "./zorkMap.js?v=20261123d";
+import { createZorkMap } from "./zorkMap.js?v=20261123e";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
