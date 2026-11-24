@@ -11,7 +11,7 @@
   "identity": {
     "name": "CharlestonHacks",
     "url": "https://charlestonhacks.com",
-    "summary": "CharlestonHacks is a 501(c)(3) nonprofit growing South Carolina's technology community through free events, open collaboration, and inclusive membership. It is governed by a statewide board and led regionally in Charleston and the Upstate.",
+    "summary": "CharlestonHacks is a 501(c)(3) nonprofit growing South Carolina's technology community through free events, open collaboration, and inclusive membership.",
     "mission": "Grow Charleston's technology community through high-quality events, open collaboration, and inclusive membership. Membership is always free.",
     "values": [
       "Independent: community-led, so decisions serve members first",
@@ -31,7 +31,6 @@
       "country": "US",
       "areaServed": [
         "Charleston metro",
-        "Upstate South Carolina",
         "South Carolina"
       ]
     },
