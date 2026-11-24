@@ -1,7 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
-import { createZorkMap } from "./zorkMap.js?v=20261123c";
+import { createZorkMap } from "./zorkMap.js?v=20261123d";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
@@ -86,8 +86,13 @@ export async function initBBS() {
   const mapPanel = modal.querySelector("#bbs-map");
   const mapWrap = modal.querySelector("#bbs-map-wrap");
   const compass = modal.querySelector("#bbs-compass");
+  const herePanel = modal.querySelector("#bbs-here");
+  const mapViewBtn = modal.querySelector("#bbs-map-view");
+  let mapView = "here";
+  try { mapView = localStorage.getItem("ch:zork-map-view") === "full" ? "full" : "here"; } catch (_) {}
   const zorkMap = createZorkMap({ storageKey: `ch:zork-map:${guestName}` });
   let mapOpen = false;
+  let tapMove = false;
   let lastZorkCommand = null;
   let lastTurn = null;
 
@@ -96,13 +101,45 @@ export async function initBBS() {
     mapToggle.textContent = mapOpen ? "Hide map" : `🗺 Map${count ? ` (${count})` : ""}`;
     mapToggle.setAttribute("aria-expanded", String(mapOpen));
     const where = zorkMap.currentName();
+    const hereView = mapView === "here";
     mapWhere.textContent = where ? `📍 ${where}` : "";
-    mapClear.hidden = !mapOpen || !count;
-    if (mapOpen) {
+    // The Here view names the room in its centre, so the label isn't needed then.
+    mapWhere.hidden = mapOpen && hereView;
+    mapViewBtn.hidden = !mapOpen;
+    mapViewBtn.textContent = hereView ? "Full map" : "Here";
+    mapViewBtn.setAttribute("aria-label", hereView ? "Show the full map" : "Show exits from here");
+    mapClear.hidden = !mapOpen || hereView || !count;
+    herePanel.hidden = !hereView;
+    mapPanel.hidden = hereView;
+    compass.hidden = hereView;
+    if (!mapOpen) return;
+    if (hereView) {
+      renderHere(herePanel, zorkMap.hereInfo());
+    } else {
       zorkMap.render(mapPanel);
       renderCompass(compass, zorkMap.knownExits(), zorkMap.blockedExits(), where);
     }
   };
+  mapViewBtn.addEventListener("click", () => {
+    mapView = mapView === "here" ? "full" : "here";
+    try { localStorage.setItem("ch:zork-map-view", mapView); } catch (_) {}
+    updateMapUi();
+  });
+  // Tap an exit to move. Doesn't open the keyboard if it's closed, and keeps
+  // it open if it already is.
+  herePanel.addEventListener("mousedown", (event) => {
+    if (event.target.closest("[data-move]") && document.activeElement === input) event.preventDefault();
+  });
+  herePanel.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-move]");
+    if (!button || currentMode !== "zork") return;
+    const keepFocus = document.activeElement === input;
+    tapMove = !keepFocus;
+    input.value = button.dataset.move;
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.dispatchEvent(new Event("submit", { cancelable: true }));
+    tapMove = false;
+  });
   const setMapOpen = (open) => {
     mapOpen = open;
     mapWrap.hidden = !open;
@@ -159,7 +196,7 @@ export async function initBBS() {
     updateMapUi();
   });
   // Keep the phone keyboard up when tapping map controls mid-game.
-  [mapToggle, mapClear, zorkExit].forEach((btn) => btn.addEventListener("mousedown", (event) => {
+  [mapToggle, mapClear, zorkExit, mapViewBtn].forEach((btn) => btn.addEventListener("mousedown", (event) => {
     if (document.activeElement === input) event.preventDefault();
   }));
 
@@ -414,12 +451,12 @@ export async function initBBS() {
       }
       lastZorkCommand = text;
       if (sendZorkCommand(text)) echoZorkCommand(screen, text);
-      input.focus({ preventScroll: true });
+      if (!tapMove) input.focus({ preventScroll: true });
       return;
     }
 
     if (["zork", "play zork", "/zork"].includes(text.toLowerCase())) {
-      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands. Tap Map (or type /map) to see where you've been.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands. Tap Map (or type /map) to see exits — tap one to move.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
       const session = ++zorkSession;
       currentMode = "zork";
       zorkChatPending = 0;
@@ -561,6 +598,78 @@ function renderCompass(compass, exits, blocked, where) {
   ].filter(Boolean).join(" "));
 }
 
+// "Here" view: the current room in the middle, each direction around it.
+// Known exits name where they lead; untried ones can be tapped to explore.
+const HERE_GRID = ["nw", "n", "ne", "w", null, "e", "sw", "s", "se"];
+const HERE_ARROWS = { n: "↑", ne: "↗", e: "→", se: "↘", s: "↓", sw: "↙", w: "←", nw: "↖", up: "⇡", down: "⇣", in: "⇥", out: "⇤" };
+const HERE_SHORT = { n: "N", ne: "NE", e: "E", se: "SE", s: "S", sw: "SW", w: "W", nw: "NW", up: "Up", down: "Down", in: "In", out: "Out" };
+const HERE_COMMAND = { n: "north", ne: "northeast", e: "east", se: "southeast", s: "south", sw: "southwest", w: "west", nw: "northwest", up: "up", down: "down", in: "in", out: "out" };
+
+function hereCell(dir, info) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.dataset.move = HERE_COMMAND[dir];
+  const label = document.createElement("span");
+  label.className = "bbs-here-dir";
+  const name = document.createElement("span");
+  name.className = "bbs-here-name";
+  const exit = info.exits[dir];
+  const fullDir = COMPASS_NAMES[dir] || dir;
+  if (exit) {
+    button.className = "bbs-here-exit is-known";
+    label.textContent = `${HERE_ARROWS[dir]} ${HERE_SHORT[dir]}`;
+    name.textContent = exit.name;
+    button.setAttribute("aria-label", `Go ${fullDir} to ${exit.name}`);
+  } else if (info.blocked.has(dir)) {
+    button.className = "bbs-here-exit is-blocked";
+    label.textContent = `✕ ${HERE_SHORT[dir]}`;
+    name.textContent = "blocked";
+    button.setAttribute("aria-label", `${fullDir}: blocked last time. Tap to try again`);
+  } else {
+    button.className = "bbs-here-exit is-unknown";
+    label.textContent = `${HERE_ARROWS[dir]} ${HERE_SHORT[dir]}`;
+    name.textContent = "?";
+    button.setAttribute("aria-label", `Try going ${fullDir}`);
+  }
+  button.append(label, name);
+  return button;
+}
+
+function renderHere(panel, info) {
+  panel.replaceChildren();
+  if (!info.name) {
+    const empty = document.createElement("p");
+    empty.className = "bbs-map-empty";
+    empty.textContent = "Exits appear here as you explore.";
+    panel.appendChild(empty);
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "bbs-here-grid";
+  for (const dir of HERE_GRID) {
+    if (!dir) {
+      const center = document.createElement("div");
+      center.className = "bbs-here-center";
+      const small = document.createElement("span");
+      small.textContent = "You are in";
+      const strong = document.createElement("strong");
+      strong.textContent = info.name;
+      center.append(small, strong);
+      grid.appendChild(center);
+    } else {
+      grid.appendChild(hereCell(dir, info));
+    }
+  }
+  const vert = document.createElement("div");
+  vert.className = "bbs-here-vert";
+  for (const dir of ["up", "down", "in", "out"]) {
+    // In/out only matter where the game has used them.
+    if ((dir === "in" || dir === "out") && !info.exits[dir] && !info.blocked.has(dir)) continue;
+    vert.appendChild(hereCell(dir, info));
+  }
+  panel.append(grid, vert);
+}
+
 function canPost() {
   return Boolean(currentAuthUser && currentProfile && !currentProfile.is_disabled);
 }
@@ -681,6 +790,38 @@ const BBS_STYLES = `
   }
   .bbs-map:focus-visible { outline: 2px solid #9cff9c; outline-offset: 2px; }
   .bbs-map svg { display: block; margin-right: 80px; } /* room to scroll rooms out from under the compass */
+  .bbs-here {
+    height: 100%; display: flex; flex-direction: column; gap: 4px; padding: 4px; overflow: auto;
+    border: 2px solid #0f0; background: #000;
+  }
+  .bbs-here[hidden], .bbs-map[hidden], .bbs-compass[hidden] { display: none; }
+  .bbs-here-grid {
+    flex: 1 1 auto; display: grid; gap: 4px;
+    grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(34px, 1fr));
+  }
+  .bbs-here-vert { flex: 0 0 auto; display: grid; gap: 4px; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+  .bbs-here-vert .bbs-here-exit { min-height: 30px; flex-direction: row; gap: 6px; }
+  .bbs-here-exit, .bbs-here-center {
+    min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2px 4px; border-radius: 6px; font: 11px/1.2 monospace; text-align: center; overflow: hidden;
+  }
+  .bbs-here-exit { background: #000; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .bbs-here-exit:active { transform: scale(0.97); }
+  .bbs-here-exit:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+  .bbs-here-dir { font-weight: bold; white-space: nowrap; }
+  .bbs-here-name {
+    max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+  }
+  .bbs-here-exit.is-known { border: 1.5px solid #0f0; color: #0f0; background: rgba(0,255,0,0.1); }
+  .bbs-here-exit.is-known .bbs-here-name { color: #caffca; }
+  .bbs-here-exit.is-unknown { border: 1px dashed rgba(0,255,0,0.3); color: rgba(0,255,0,0.5); }
+  .bbs-here-exit.is-blocked { border: 1px dashed rgba(255,90,90,0.6); color: #ff8a8a; }
+  .bbs-here-center { border: 2px solid #fff; background: #0f0; color: #000; box-shadow: 0 0 8px rgba(0,255,0,0.6); }
+  .bbs-here-center span { font-size: 9px; opacity: 0.75; }
+  .bbs-here-center strong {
+    max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
   .bbs-compass {
     position: absolute; top: 6px; right: 6px; pointer-events: none;
     display: flex; flex-direction: column; align-items: center; gap: 1px;
@@ -766,10 +907,12 @@ const BBS_HTML = `
     <div id="bbs-zork-tools" class="bbs-zork-tools" hidden>
       <button id="bbs-map-toggle" type="button" aria-expanded="false" aria-controls="bbs-map">🗺 Map</button>
       <span id="bbs-map-where" class="bbs-map-where" aria-live="polite"></span>
+      <button id="bbs-map-view" type="button" hidden>Full map</button>
       <button id="bbs-map-clear" type="button" hidden>Clear</button>
       <button id="bbs-zork-exit" type="button" aria-label="Exit Zork and return to chat">Exit</button>
     </div>
     <div id="bbs-map-wrap" class="bbs-map-wrap" hidden>
+      <div id="bbs-here" class="bbs-here" role="region" aria-label="Exits from here"></div>
       <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0"></div>
       <div id="bbs-compass" class="bbs-compass" role="img"></div>
     </div>

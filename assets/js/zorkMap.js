@@ -298,5 +298,21 @@ export function createZorkMap({ storageKey }) {
     return new Set(Object.keys(state.blocked[state.current] || {}));
   }
 
-  return { recordTurn, render, clear, roomCount, currentName, knownExits, blockedExits };
+  /** The current room plus where each direction tried from it leads. */
+  function hereInfo() {
+    const here = state.current;
+    const room = here ? state.rooms[here] : null;
+    const exits = {};
+    for (const [dir, toId] of Object.entries(state.exits[here] || {})) {
+      const to = state.rooms[toId];
+      exits[dir] = { id: toId, name: to ? (to.name || "Dark place") : "?" };
+    }
+    return {
+      name: room ? (room.name || "Dark place") : "",
+      exits,
+      blocked: blockedExits()
+    };
+  }
+
+  return { recordTurn, render, clear, roomCount, currentName, knownExits, blockedExits, hereInfo };
 }
