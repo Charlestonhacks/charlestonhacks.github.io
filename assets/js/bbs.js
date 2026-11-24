@@ -105,12 +105,48 @@ export async function initBBS() {
     updateMapUi();
     if (!open) screen.scrollTop = screen.scrollHeight;
   };
+  // On phones the game fills the visible screen (above the keyboard) so the
+  // map, game text, and input all stay in view and the page never jumps.
+  const phoneLayout = window.matchMedia("(max-width: 768px)");
+  const vv = window.visualViewport;
+  let fitFrame = 0;
+  const fitToViewport = () => {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      if (!wrapper.classList.contains("zork-fullscreen")) return;
+      const height = vv ? vv.height : window.innerHeight;
+      const top = vv ? vv.offsetTop : 0;
+      wrapper.style.setProperty("--bbs-vv-height", `${Math.round(height)}px`);
+      wrapper.style.setProperty("--bbs-vv-top", `${Math.round(top)}px`);
+      screen.scrollTop = screen.scrollHeight;
+      if (mapOpen) zorkMap.render(mapPanel);
+    });
+  };
+  const setFullscreen = (on) => {
+    wrapper.classList.toggle("zork-fullscreen", on);
+    document.documentElement.classList.toggle("bbs-zork-lock", on);
+    if (on) {
+      fitToViewport();
+      vv?.addEventListener("resize", fitToViewport);
+      vv?.addEventListener("scroll", fitToViewport);
+      window.addEventListener("resize", fitToViewport);
+    } else {
+      vv?.removeEventListener("resize", fitToViewport);
+      vv?.removeEventListener("scroll", fitToViewport);
+      window.removeEventListener("resize", fitToViewport);
+      wrapper.style.removeProperty("--bbs-vv-height");
+      wrapper.style.removeProperty("--bbs-vv-top");
+    }
+  };
   const showZorkTools = (show) => {
     zorkTools.hidden = !show;
+    setFullscreen(show && phoneLayout.matches);
     if (!show) setMapOpen(false);
     else updateMapUi();
   };
   mapToggle.addEventListener("click", () => setMapOpen(!mapOpen));
+  const zorkExit = modal.querySelector("#bbs-zork-exit");
+  zorkExit.addEventListener("click", () => leaveZork("Exited ZORK mode. Type zork to play again."));
   mapClear.addEventListener("click", () => {
     if (!window.confirm("Clear your Zork map? Rooms you've found will be forgotten.")) return;
     zorkMap.clear();
@@ -118,7 +154,7 @@ export async function initBBS() {
     updateMapUi();
   });
   // Keep the phone keyboard up when tapping map controls mid-game.
-  [mapToggle, mapClear].forEach((btn) => btn.addEventListener("mousedown", (event) => {
+  [mapToggle, mapClear, zorkExit].forEach((btn) => btn.addEventListener("mousedown", (event) => {
     if (document.activeElement === input) event.preventDefault();
   }));
 
@@ -582,6 +618,7 @@ const BBS_STYLES = `
   }
   .bbs-zork-tools button:hover, .bbs-zork-tools button:focus-visible { background: rgba(0,255,0,0.12); outline: none; }
   #bbs-map-clear { margin-left: auto; color: #ffd166; border-color: #775; }
+  #bbs-map-clear[hidden] + #bbs-zork-exit { margin-left: auto; }
   .bbs-map-where { color: #9cff9c; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .bbs-map {
     height: min(240px, 32vh); overflow: auto; margin-bottom: 10px; border: 2px solid #0f0;
@@ -602,6 +639,26 @@ const BBS_STYLES = `
   .bbs-map-room.is-current rect { fill: #0f0; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 6px rgba(0,255,0,0.8)); }
   .bbs-map-room.is-current text { fill: #000; font-weight: bold; }
   #bbs-wrapper.map-open #bbs-screen { height: min(260px, 30vh) !important; }
+  /* Phone game layout: fill the visible area above the keyboard. */
+  html.bbs-zork-lock, html.bbs-zork-lock body { overflow: hidden; overscroll-behavior: none; }
+  #bbs-modal #bbs-wrapper.zork-fullscreen {
+    position: fixed !important; left: 0; right: 0; top: var(--bbs-vv-top, 0px);
+    width: 100% !important; height: var(--bbs-vv-height, 100dvh) !important; max-height: none !important;
+    margin: 0 !important; padding: 10px 12px calc(8px + env(safe-area-inset-bottom)) !important;
+    border: 0 !important; border-radius: 0 !important; box-shadow: none !important; z-index: 2000;
+  }
+  #bbs-modal #bbs-wrapper.zork-fullscreen > h2,
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-auth,
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-close,
+  #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-status-row,
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-count,
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-feedback { display: none !important; }
+  #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-map { flex: 0 1 46%; height: auto; min-height: 80px; margin-bottom: 8px; }
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-screen {
+    flex: 1 1 0; height: auto !important; min-height: 64px; margin-bottom: 8px;
+  }
+  #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-form { flex: 0 0 auto; }
+  #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-zork-note { margin: 0 0 6px; }
   .bbs-zork-cmd { color: #fff; font-weight: bold; margin-left: 0.5ch; }
   .bbs-zork-note {
     align-self: center; margin: -4px 0 10px; padding: 3px 10px; border: 1px solid rgba(0,224,255,0.5);
@@ -634,7 +691,8 @@ const BBS_HTML = `
     <div id="bbs-zork-tools" class="bbs-zork-tools" hidden>
       <button id="bbs-map-toggle" type="button" aria-expanded="false" aria-controls="bbs-map">🗺 Map</button>
       <span id="bbs-map-where" class="bbs-map-where" aria-live="polite"></span>
-      <button id="bbs-map-clear" type="button" hidden>Clear map</button>
+      <button id="bbs-map-clear" type="button" hidden>Clear</button>
+      <button id="bbs-zork-exit" type="button" aria-label="Exit Zork and return to chat">Exit</button>
     </div>
     <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0" hidden></div>
     <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
