@@ -2,7 +2,7 @@
   "$schema": "https://charlestonhacks.com/schemas/community-capability-profile/v0.2.json",
   "specVersion": "0.2.0",
   "id": "https://charlestonhacks.com/.well-known/community-profile.json",
-  "updatedAt": "2026-11-24T21:26:00Z",
+  "updatedAt": "2026-11-24T22:10:00Z",
   "inLanguage": "en",
   "assertion": {
     "type": "self-published",
@@ -245,7 +245,7 @@
     {
       "id": "partner:dig-south",
       "name": "Dig South",
-      "relationship": "Collaborator: co-hosted a happy hour (Jan 2025); the AI Film Fest was part of Dig South and Charleston Tech Week (2025)."
+      "relationship": "Collaborator: CharlestonHacks takes part in Dig South's Charleston Tech Week every year; also co-hosted a happy hour (Jan 2025)."
     },
     {
       "id": "partner:techyeet",
