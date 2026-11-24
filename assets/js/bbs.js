@@ -1,7 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
-import { createZorkMap } from "./zorkMap.js?v=20261123e";
+import { createZorkMap } from "./zorkMap.js?v=20261123f";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
@@ -83,13 +83,8 @@ export async function initBBS() {
   const mapToggle = modal.querySelector("#bbs-map-toggle");
   const mapClear = modal.querySelector("#bbs-map-clear");
   const mapWhere = modal.querySelector("#bbs-map-where");
-  const mapPanel = modal.querySelector("#bbs-map");
   const mapWrap = modal.querySelector("#bbs-map-wrap");
-  const compass = modal.querySelector("#bbs-compass");
   const herePanel = modal.querySelector("#bbs-here");
-  const mapViewBtn = modal.querySelector("#bbs-map-view");
-  let mapView = "here";
-  try { mapView = localStorage.getItem("ch:zork-map-view") === "full" ? "full" : "here"; } catch (_) {}
   const zorkMap = createZorkMap({ storageKey: `ch:zork-map:${guestName}` });
   let mapOpen = false;
   let tapMove = false;
@@ -101,30 +96,12 @@ export async function initBBS() {
     mapToggle.textContent = mapOpen ? "Hide map" : `🗺 Map${count ? ` (${count})` : ""}`;
     mapToggle.setAttribute("aria-expanded", String(mapOpen));
     const where = zorkMap.currentName();
-    const hereView = mapView === "here";
     mapWhere.textContent = where ? `📍 ${where}` : "";
-    // The Here view names the room in its centre, so the label isn't needed then.
-    mapWhere.hidden = mapOpen && hereView;
-    mapViewBtn.hidden = !mapOpen;
-    mapViewBtn.textContent = hereView ? "Full map" : "Here";
-    mapViewBtn.setAttribute("aria-label", hereView ? "Show the full map" : "Show exits from here");
-    mapClear.hidden = !mapOpen || hereView || !count;
-    herePanel.hidden = !hereView;
-    mapPanel.hidden = hereView;
-    compass.hidden = hereView;
-    if (!mapOpen) return;
-    if (hereView) {
-      renderHere(herePanel, zorkMap.hereInfo());
-    } else {
-      zorkMap.render(mapPanel);
-      renderCompass(compass, zorkMap.knownExits(), zorkMap.blockedExits(), where);
-    }
+    // The map names the room in its centre, so the label isn't needed then.
+    mapWhere.hidden = mapOpen;
+    mapClear.hidden = !mapOpen || !count;
+    if (mapOpen) renderHere(herePanel, zorkMap.hereInfo());
   };
-  mapViewBtn.addEventListener("click", () => {
-    mapView = mapView === "here" ? "full" : "here";
-    try { localStorage.setItem("ch:zork-map-view", mapView); } catch (_) {}
-    updateMapUi();
-  });
   // Tap an exit to move. Doesn't open the keyboard if it's closed, and keeps
   // it open if it already is.
   herePanel.addEventListener("mousedown", (event) => {
@@ -161,7 +138,6 @@ export async function initBBS() {
       wrapper.style.setProperty("--bbs-vv-height", `${Math.round(height)}px`);
       wrapper.style.setProperty("--bbs-vv-top", `${Math.round(top)}px`);
       screen.scrollTop = screen.scrollHeight;
-      if (mapOpen) zorkMap.render(mapPanel);
     });
   };
   const setFullscreen = (on) => {
@@ -196,7 +172,7 @@ export async function initBBS() {
     updateMapUi();
   });
   // Keep the phone keyboard up when tapping map controls mid-game.
-  [mapToggle, mapClear, zorkExit, mapViewBtn].forEach((btn) => btn.addEventListener("mousedown", (event) => {
+  [mapToggle, mapClear, zorkExit].forEach((btn) => btn.addEventListener("mousedown", (event) => {
     if (document.activeElement === input) event.preventDefault();
   }));
 
@@ -552,51 +528,8 @@ function renderZorkNote() {
 }
 
 
-// Fixed compass for the Zork map. North is up, matching the map's layout.
-// Directions already travelled from the current room light up.
-const COMPASS_POINTS = [
-  ["n", 0, "N"], ["ne", 45], ["e", 90, "E"], ["se", 135],
-  ["s", 180, "S"], ["sw", 225], ["w", 270, "W"], ["nw", 315]
-];
-const COMPASS_NAMES = { n: "north", ne: "northeast", e: "east", se: "southeast", s: "south", sw: "southwest", w: "west", nw: "northwest", up: "up", down: "down", in: "in", out: "out" };
+const DIRECTION_NAMES = { n: "north", ne: "northeast", e: "east", se: "southeast", s: "south", sw: "southwest", w: "west", nw: "northwest", up: "up", down: "down", in: "in", out: "out" };
 
-function buildCompassSvg() {
-  const spokes = COMPASS_POINTS.map(([dir, deg, label]) => {
-    const major = Boolean(label);
-    const len = major ? 17 : 12;
-    const rad = (deg - 90) * Math.PI / 180;
-    const x = (Math.cos(rad) * len).toFixed(1), y = (Math.sin(rad) * len).toFixed(1);
-    const lx = (Math.cos(rad) * 25).toFixed(1), ly = (Math.sin(rad) * 25 + 3.5).toFixed(1);
-    return `<g class="bbs-compass-point${major ? " is-major" : ""}" data-dir="${dir}">
-      <line x1="0" y1="0" x2="${x}" y2="${y}" />
-      <circle cx="${x}" cy="${y}" r="${major ? 2.6 : 2}" />
-      ${label ? `<text x="${lx}" y="${ly}" text-anchor="middle">${label}</text>` : ""}
-    </g>`;
-  }).join("");
-  return `<svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true" focusable="false">
-    <circle class="bbs-compass-ring" r="30" />
-    ${spokes}
-    <circle class="bbs-compass-you" r="3.2" />
-  </svg>
-  <div class="bbs-compass-vert"><span data-dir="up">↑ up</span><span data-dir="down">↓ dn</span></div>`;
-}
-
-function renderCompass(compass, exits, blocked, where) {
-  if (!compass) return;
-  if (!compass.firstChild) compass.innerHTML = buildCompassSvg();
-  compass.querySelectorAll("[data-dir]").forEach((node) => {
-    const dir = node.dataset.dir;
-    node.classList.toggle("is-known", exits.has(dir));
-    node.classList.toggle("is-blocked", !exits.has(dir) && blocked.has(dir));
-  });
-  const names = (set) => [...set].map((d) => COMPASS_NAMES[d] || d).join(", ");
-  compass.setAttribute("aria-label", [
-    "Compass: north is up.",
-    where ? `You are in ${where}.` : "",
-    exits.size ? `Ways you've gone from here: ${names(exits)}.` : "You haven't left this room yet.",
-    blocked.size ? `Tried but blocked: ${names(blocked)}.` : ""
-  ].filter(Boolean).join(" "));
-}
 
 // "Here" view: the current room in the middle, each direction around it.
 // Known exits name where they lead; untried ones can be tapped to explore.
@@ -614,7 +547,7 @@ function hereCell(dir, info) {
   const name = document.createElement("span");
   name.className = "bbs-here-name";
   const exit = info.exits[dir];
-  const fullDir = COMPASS_NAMES[dir] || dir;
+  const fullDir = DIRECTION_NAMES[dir] || dir;
   if (exit) {
     button.className = "bbs-here-exit is-known";
     label.textContent = `${HERE_ARROWS[dir]} ${HERE_SHORT[dir]}`;
@@ -783,18 +716,11 @@ const BBS_STYLES = `
   .bbs-map-where { color: #9cff9c; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
   .bbs-map-wrap { position: relative; height: min(240px, 32vh); margin-bottom: 10px; }
   .bbs-map-wrap[hidden] { display: none; }
-  .bbs-map {
-    height: 100%; overflow: auto; border: 2px solid #0f0;
-    background: #000 radial-gradient(rgba(0,255,0,0.12) 1px, transparent 1px) 0 0 / 16px 16px;
-    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
-  }
-  .bbs-map:focus-visible { outline: 2px solid #9cff9c; outline-offset: 2px; }
-  .bbs-map svg { display: block; margin-right: 80px; } /* room to scroll rooms out from under the compass */
   .bbs-here {
     height: 100%; display: flex; flex-direction: column; gap: 4px; padding: 4px; overflow: auto;
     border: 2px solid #0f0; background: #000;
   }
-  .bbs-here[hidden], .bbs-map[hidden], .bbs-compass[hidden] { display: none; }
+
   .bbs-here-grid {
     flex: 1 1 auto; display: grid; gap: 4px;
     grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(34px, 1fr));
@@ -822,38 +748,7 @@ const BBS_STYLES = `
   .bbs-here-center strong {
     max-width: 100%; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
   }
-  .bbs-compass {
-    position: absolute; top: 6px; right: 6px; pointer-events: none;
-    display: flex; flex-direction: column; align-items: center; gap: 1px;
-    padding: 3px; border-radius: 10px; background: rgba(0,0,0,0.72);
-  }
-  .bbs-compass svg { display: block; }
-  .bbs-compass-ring { fill: rgba(0,20,0,0.6); stroke: rgba(0,255,0,0.35); stroke-width: 1; }
-  .bbs-compass-point line { stroke: rgba(0,255,0,0.28); stroke-width: 1.5; }
-  .bbs-compass-point circle { fill: rgba(0,255,0,0.28); }
-  .bbs-compass-point text { fill: rgba(0,255,0,0.55); font: bold 8px monospace; }
-  .bbs-compass-point[data-dir="n"] text { fill: #ffd166; }
-  .bbs-compass-point.is-known line { stroke: #0f0; stroke-width: 2.2; }
-  .bbs-compass-point.is-known circle { fill: #0f0; }
-  .bbs-compass-point.is-known text { fill: #fff; }
-  .bbs-compass-point.is-blocked line { stroke: rgba(255,90,90,0.75); stroke-width: 1.5; stroke-dasharray: 2 2; }
-  .bbs-compass-point.is-blocked circle { fill: #ff5a5a; }
-  .bbs-compass-point.is-blocked text { fill: #ff8a8a; }
-  .bbs-compass-vert .is-blocked { color: #ff8a8a; text-decoration: line-through; }
-  .bbs-compass-you { fill: #fff; filter: drop-shadow(0 0 3px #0f0); }
-  .bbs-compass-vert { display: flex; gap: 6px; font: bold 8px monospace; color: rgba(0,255,0,0.35); }
-  .bbs-compass-vert .is-known { color: #00e0ff; }
   .bbs-map-empty { padding: 16px; color: #9cff9c; font-size: 0.85rem; }
-  .bbs-map-edge { stroke: rgba(0,255,0,0.55); stroke-width: 2; }
-  .bbs-map-edge.is-special { stroke-dasharray: 4 4; stroke: rgba(0,224,255,0.6); }
-  .bbs-map-room text.bbs-map-badge { fill: #00e0ff; font: bold 9px monospace; font-style: normal; }
-  .bbs-map-room.is-current text.bbs-map-badge { fill: #003a44; }
-  .bbs-map-room rect { fill: #000; stroke: #0f0; stroke-width: 1.5; }
-  .bbs-map-room text { fill: #0f0; font: 11px monospace; }
-  .bbs-map-room.is-dark rect { stroke-dasharray: 3 3; stroke: rgba(0,255,0,0.5); }
-  .bbs-map-room.is-dark text { fill: rgba(0,255,0,0.6); font-style: italic; }
-  .bbs-map-room.is-current rect { fill: #0f0; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 6px rgba(0,255,0,0.8)); }
-  .bbs-map-room.is-current text { fill: #000; font-weight: bold; }
   #bbs-wrapper.map-open #bbs-screen { height: min(260px, 30vh) !important; }
   /* Phone game layout: fill the visible area above the keyboard. */
   html.bbs-zork-lock, html.bbs-zork-lock body { overflow: hidden; overscroll-behavior: none; }
@@ -905,16 +800,13 @@ const BBS_HTML = `
     <h2 style="color:#0f0; text-align:center; margin-bottom:12px; font-family:monospace; font-size:clamp(1.2rem, 3vw, 1.5rem);">CharlestonHacks BBS</h2>
     <div id="bbs-auth" style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; color:#9cff9c; font:0.9rem monospace;" aria-live="polite"></div>
     <div id="bbs-zork-tools" class="bbs-zork-tools" hidden>
-      <button id="bbs-map-toggle" type="button" aria-expanded="false" aria-controls="bbs-map">🗺 Map</button>
+      <button id="bbs-map-toggle" type="button" aria-expanded="false" aria-controls="bbs-map-wrap">🗺 Map</button>
       <span id="bbs-map-where" class="bbs-map-where" aria-live="polite"></span>
-      <button id="bbs-map-view" type="button" hidden>Full map</button>
-      <button id="bbs-map-clear" type="button" hidden>Clear</button>
+      <button id="bbs-map-clear" type="button" hidden aria-label="Clear the map">Clear</button>
       <button id="bbs-zork-exit" type="button" aria-label="Exit Zork and return to chat">Exit</button>
     </div>
     <div id="bbs-map-wrap" class="bbs-map-wrap" hidden>
       <div id="bbs-here" class="bbs-here" role="region" aria-label="Exits from here"></div>
-      <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0"></div>
-      <div id="bbs-compass" class="bbs-compass" role="img"></div>
     </div>
     <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
     <button id="bbs-jump" class="bbs-jump" type="button" hidden></button>

@@ -1,12 +1,6 @@
-// Self-drawing Zork map for the CharlestonHacks BBS.
-// Rooms appear as the player discovers them and are saved in this browser only.
-
-const CELL_W = 128;
-const CELL_H = 64;
-const BOX_W = 108;
-const BOX_H = 40;
-const PAD = 24;
-const SVG_NS = "http://www.w3.org/2000/svg";
+// Zork map data for the CharlestonHacks BBS: rooms visited and the exits
+// tried from each. Saved in this browser only. Grid positions are kept so an
+// overview could be drawn again later.
 
 const DIRECTIONS = {
   n: "n", north: "n", s: "s", south: "s", e: "e", east: "e", w: "w", west: "w",
@@ -26,7 +20,6 @@ const OPPOSITE = { n: "s", s: "n", e: "w", w: "e", ne: "sw", sw: "ne", nw: "se",
 // Commands that change rooms without walking there; never draw a connection for them.
 const NON_TRAVEL = /^(restore|restart|undo|quit|load)\b/;
 
-const BADGES = { up: "↑", down: "↓", in: "in", out: "out" };
 
 function emptyState() {
   // exits: directions actually taken out of each room; blocked: tried and refused.
@@ -192,105 +185,6 @@ export function createZorkMap({ storageKey }) {
     return room ? (room.name || "a dark place") : "";
   }
 
-  function wrapName(name) {
-    const words = (name || "Dark place").split(/\s+/);
-    const lines = [""];
-    for (const word of words) {
-      const line = lines[lines.length - 1];
-      if ((line + " " + word).trim().length > 13 && line) lines.push(word);
-      else lines[lines.length - 1] = (line + " " + word).trim();
-    }
-    if (lines.length > 2) lines.splice(2, lines.length - 2, lines.slice(1).join(" ").slice(0, 12) + "…");
-    return lines;
-  }
-
-  function el(tag, attrs = {}, text) {
-    const node = document.createElementNS(SVG_NS, tag);
-    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
-
-  /** Draw the map into `container` and scroll the current room into view. */
-  function render(container) {
-    const rooms = Object.entries(state.rooms).filter(([, r]) => r);
-    container.replaceChildren();
-    if (!rooms.length) {
-      const empty = document.createElement("p");
-      empty.className = "bbs-map-empty";
-      empty.textContent = "Your map fills in as you explore. Try moving: n, s, e, w, up, down.";
-      container.appendChild(empty);
-      return;
-    }
-    const xs = rooms.map(([, r]) => r.x);
-    const ys = rooms.map(([, r]) => r.y);
-    const minX = Math.min(...xs), maxX = Math.max(...xs);
-    const minY = Math.min(...ys), maxY = Math.max(...ys);
-    const width = (maxX - minX) * CELL_W + BOX_W + PAD * 2;
-    const height = (maxY - minY) * CELL_H + BOX_H + PAD * 2;
-    const cx = (r) => PAD + (r.x - minX) * CELL_W + BOX_W / 2;
-    const cy = (r) => PAD + (r.y - minY) * CELL_H + BOX_H / 2;
-
-    // Shrink to fit narrow screens, but never so small the names are unreadable.
-    const available = Math.max(0, container.clientWidth - 4);
-    const scale = available ? Math.min(1, Math.max(0.68, available / width)) : 1;
-    const svg = el("svg", {
-      width: Math.round(width * scale), height: Math.round(height * scale), viewBox: `0 0 ${width} ${height}`, role: "img",
-      "aria-label": `Map of ${rooms.length} explored room${rooms.length === 1 ? "" : "s"}. You are in ${currentName()}.`
-    });
-
-    const edgeLayer = el("g", { class: "bbs-map-edges" });
-    for (const edge of Object.values(state.edges)) {
-      const a = state.rooms[edge.a], b = state.rooms[edge.b];
-      if (!a || !b) continue;
-      const grid = edge.dir && VECTORS[edge.dir];
-      const line = el("line", {
-        x1: cx(a), y1: cy(a), x2: cx(b), y2: cy(b),
-        class: grid ? "bbs-map-edge" : "bbs-map-edge is-special"
-      });
-      edgeLayer.appendChild(line);
-    }
-    svg.appendChild(edgeLayer);
-
-    // Non-compass exits (up, down, in, out) show as small badges on each room.
-    const badges = {};
-    const addBadge = (id, text) => { (badges[id] ||= new Set()).add(text); };
-    for (const edge of Object.values(state.edges)) {
-      if (VECTORS[edge.dir]) continue;
-      addBadge(edge.a, BADGES[edge.dir] || "⋯");
-      addBadge(edge.b, BADGES[OPPOSITE[edge.dir]] || "⋯");
-    }
-
-    let currentNode = null;
-    for (const [id, room] of rooms) {
-      const isCurrent = id === state.current;
-      const g = el("g", { class: `bbs-map-room${isCurrent ? " is-current" : ""}${room.name ? "" : " is-dark"}` });
-      g.appendChild(el("title", {}, room.name || "Dark place"));
-      g.appendChild(el("rect", {
-        x: cx(room) - BOX_W / 2, y: cy(room) - BOX_H / 2, width: BOX_W, height: BOX_H, rx: 6
-      }));
-      const lines = wrapName(room.name);
-      lines.forEach((line, i) => {
-        const offset = (i - (lines.length - 1) / 2) * 13;
-        g.appendChild(el("text", { x: cx(room), y: cy(room) + offset + 4, "text-anchor": "middle" }, line));
-      });
-      if (badges[id]) {
-        g.appendChild(el("text", {
-          x: cx(room) + BOX_W / 2 - 4, y: cy(room) - BOX_H / 2 + 11,
-          "text-anchor": "end", class: "bbs-map-badge"
-        }, [...badges[id]].join(" ")));
-      }
-      svg.appendChild(g);
-      if (isCurrent) currentNode = { x: cx(room), y: cy(room) };
-    }
-
-    container.appendChild(svg);
-    if (currentNode) {
-      container.scrollLeft = Math.max(0, currentNode.x * scale - container.clientWidth / 2);
-      container.scrollTop = Math.max(0, currentNode.y * scale - container.clientHeight / 2);
-    }
-  }
-
   /** Directions the player has actually taken out of the current room. */
   function knownExits() {
     return new Set(Object.keys(state.exits[state.current] || {}));
@@ -317,5 +211,5 @@ export function createZorkMap({ storageKey }) {
     };
   }
 
-  return { recordTurn, render, clear, roomCount, currentName, knownExits, blockedExits, hereInfo };
+  return { recordTurn, clear, roomCount, currentName, knownExits, blockedExits, hereInfo };
 }
