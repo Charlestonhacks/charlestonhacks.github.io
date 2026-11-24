@@ -75,6 +75,11 @@
           "type": "event",
           "url": "https://charlestonhacks.com/harborhack-2026/",
           "description": "HarborHack 2026: Agent in the Loop (event archive)"
+        },
+        {
+          "type": "media",
+          "url": "https://charlestoncitypaper.com/2025/10/02/weekend-hackathon-to-push-power-of-vibe-coding-to-edge/",
+          "description": "Charleston City Paper coverage of HarborHack 2025 (October 2025)"
         }
       ]
     },
@@ -97,6 +102,11 @@
           "type": "event",
           "url": "https://charlestonhacks.com/hackops.html",
           "description": "HackOps, April 2024"
+        },
+        {
+          "type": "media",
+          "url": "https://charlestongrit.com/hackathon-winning-app-connects-volunteers-charleston%E2%80%99s-parks-ai",
+          "description": "Charleston Grit: winning app from the 2025 Innovation Engine hackathon (July 2025)"
         }
       ]
     },
