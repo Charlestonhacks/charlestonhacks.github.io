@@ -456,12 +456,12 @@
             <a class="event-action" href="https://www.meetup.com/charlestonhacks/events/307916870/" target="_blank" rel="noopener noreferrer"><span class="event-action-text">View Event</span><span class="sr-only">: Digital Nomad: Innovation Engine Edition at Crush Yard (opens in a new tab)</span> <span aria-hidden="true">↗</span></a>
           </div>
         </article>
-        <article class="event-card" data-start="2025-06-01" data-end="2025-06-29" data-link="recap">
+        <article class="event-card" data-start="2025-06-01" data-end="2025-06-29" data-link="devpost">
           <div class="event-poster"><img loading="lazy" decoding="async" src="/images/ieposter.jpg" alt="CharlestonHacks Innovation Engine Hackathon poster. Hackathon: June 1–28, 2025 · Award Night: June 29" /></div>
           <div class="event-body">
             <h3>CharlestonHacks Innovation Engine</h3>
             <p class="event-date"><time datetime="2025-06-01">Hackathon: June 1–28, 2025 · Award Night: June 29</time></p>
-            <a class="event-action" href="innovationengine.html"><span class="event-action-text">View Recap</span><span class="sr-only">: CharlestonHacks Innovation Engine</span></a>
+            <a class="event-action" href="https://innovation-engine.devpost.com/" target="_blank" rel="noopener noreferrer"><span class="event-action-text">View Devpost</span><span class="sr-only">: CharlestonHacks Innovation Engine (opens in a new tab)</span> <span aria-hidden="true">↗</span></a>
           </div>
         </article>
         <article class="event-card" data-start="2025-05-20" data-end="2025-05-20" data-link="listing">
@@ -717,7 +717,7 @@
         card.querySelector(".event-action-text").textContent = onMeetup ? "RSVP on Meetup" : "View Event";
       });
       past.forEach((card) => {
-        card.querySelector(".event-action-text").textContent = card.dataset.link === "recap" ? "View Recap" : "View Event";
+        card.querySelector(".event-action-text").textContent = card.dataset.link === "devpost" ? "View Devpost" : card.dataset.link === "recap" ? "View Recap" : "View Event";
       });
 
       const filter = document.getElementById("year-filter");
