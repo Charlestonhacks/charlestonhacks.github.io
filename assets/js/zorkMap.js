@@ -271,5 +271,18 @@ export function createZorkMap({ storageKey }) {
     }
   }
 
-  return { recordTurn, render, clear, roomCount, currentName };
+  /** Directions the player has already used to leave (or arrive at) the current room. */
+  function knownExits() {
+    const exits = new Set();
+    const here = state.current;
+    if (!here) return exits;
+    for (const edge of Object.values(state.edges)) {
+      if (!edge.dir) continue;
+      if (edge.a === here) exits.add(edge.dir);
+      else if (edge.b === here && OPPOSITE[edge.dir]) exits.add(OPPOSITE[edge.dir]);
+    }
+    return exits;
+  }
+
+  return { recordTurn, render, clear, roomCount, currentName, knownExits };
 }
