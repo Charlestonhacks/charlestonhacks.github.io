@@ -1,0 +1,603 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://charlestonhacks.com/schemas/community-capability-profile/v0.2.json",
+  "title": "Community Capability Profile v0.2",
+  "description": "Organization-approved, public-only description of a community. Must not contain member-derived data of any kind.",
+  "type": "object",
+  "required": [
+    "specVersion",
+    "id",
+    "updatedAt",
+    "assertion",
+    "identity",
+    "accessibility"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri"
+    },
+    "specVersion": {
+      "type": "string",
+      "pattern": "^0\\.2\\.\\d+$"
+    },
+    "id": {
+      "$ref": "#/$defs/httpsUrl"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "inLanguage": {
+      "type": "string"
+    },
+    "assertion": {
+      "$ref": "#/$defs/assertion"
+    },
+    "identity": {
+      "$ref": "#/$defs/identity"
+    },
+    "focusAreas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 100
+      }
+    },
+    "offers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/offer"
+      }
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/need"
+      }
+    },
+    "openTo": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 300
+      }
+    },
+    "activities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/activity"
+      }
+    },
+    "showcase": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/showcase"
+      }
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/opportunity"
+      }
+    },
+    "partners": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/partner"
+      }
+    },
+    "accessibility": {
+      "$ref": "#/$defs/accessibility"
+    }
+  },
+  "$defs": {
+    "httpsUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "retrievedAt"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "retrievedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "type",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "event",
+            "publication",
+            "project",
+            "media"
+          ]
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^(offer|need|activity|showcase|opp|partner):[a-z0-9._-]+$"
+    },
+    "assertion": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "self-published",
+            "inferred"
+          ]
+        },
+        "publisher": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "compiledBy": {
+          "type": "string"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "participation": {
+          "enum": [
+            "confirmed",
+            "not-confirmed"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "inferred"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "compiledBy",
+              "sources",
+              "confidence",
+              "participation"
+            ],
+            "properties": {
+              "participation": {
+                "const": "not-confirmed"
+              },
+              "sources": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "self-published"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "publisher"
+            ]
+          }
+        }
+      ]
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "name",
+        "url",
+        "summary"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "alternateNames": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "mission": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "audience": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "location": {
+          "type": "object",
+          "required": [],
+          "additionalProperties": false,
+          "properties": {
+            "locality": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "country": {
+              "type": "string",
+              "pattern": "^[A-Z]{2}$"
+            },
+            "areaServed": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "founded": {
+          "type": "string"
+        },
+        "organizationType": {
+          "type": "string"
+        },
+        "culture": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "logo": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "sameAs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/httpsUrl"
+          }
+        }
+      }
+    },
+    "offer": {
+      "type": "object",
+      "required": [
+        "id",
+        "label"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "label": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        }
+      }
+    },
+    "need": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "description"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "kind": {
+          "enum": [
+            "sponsor",
+            "venue",
+            "mentor",
+            "partner",
+            "volunteer",
+            "funding",
+            "other"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        }
+      }
+    },
+    "activity": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "recurrence": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "eventAttendanceMode": {
+          "enum": [
+            "offline",
+            "online",
+            "mixed"
+          ]
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        }
+      }
+    },
+    "showcase": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "opportunity": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "type": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "summary": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "partner": {
+      "type": "object",
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/id"
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "relationship": {
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "required": [
+        "type",
+        "url"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "ccp-json",
+            "jsonld",
+            "ical",
+            "rss",
+            "html",
+            "ard-catalog"
+          ]
+        },
+        "url": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 300
+        }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "required": [
+        "humanUrl"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "humanUrl": {
+          "$ref": "#/$defs/httpsUrl"
+        },
+        "join": {
+          "type": "object",
+          "required": [],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "$ref": "#/$defs/httpsUrl"
+            },
+            "summary": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        },
+        "contact": {
+          "type": "object",
+          "required": [],
+          "additionalProperties": false,
+          "properties": {
+            "url": {
+              "$ref": "#/$defs/httpsUrl"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "description": "An organizational mailbox (e.g. hello@). Never a personal address."
+            }
+          }
+        },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/endpoint"
+          }
+        },
+        "collaborationRequests": {
+          "type": "object",
+          "required": [
+            "supported"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "supported": {
+              "type": "boolean"
+            },
+            "url": {
+              "$ref": "#/$defs/httpsUrl"
+            },
+            "description": {
+              "type": "string",
+              "maxLength": 300
+            }
+          }
+        },
+        "agentPolicy": {
+          "$ref": "#/$defs/httpsUrl"
+        }
+      }
+    }
+  }
+}
