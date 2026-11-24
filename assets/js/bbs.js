@@ -1,7 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
-import { createZorkMap } from "./zorkMap.js?v=20261123b";
+import { createZorkMap } from "./zorkMap.js?v=20261123c";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
@@ -100,7 +100,7 @@ export async function initBBS() {
     mapClear.hidden = !mapOpen || !count;
     if (mapOpen) {
       zorkMap.render(mapPanel);
-      renderCompass(compass, zorkMap.knownExits(), where);
+      renderCompass(compass, zorkMap.knownExits(), zorkMap.blockedExits(), where);
     }
   };
   const setMapOpen = (open) => {
@@ -544,14 +544,21 @@ function buildCompassSvg() {
   <div class="bbs-compass-vert"><span data-dir="up">↑ up</span><span data-dir="down">↓ dn</span></div>`;
 }
 
-function renderCompass(compass, exits, where) {
+function renderCompass(compass, exits, blocked, where) {
   if (!compass) return;
   if (!compass.firstChild) compass.innerHTML = buildCompassSvg();
   compass.querySelectorAll("[data-dir]").forEach((node) => {
-    node.classList.toggle("is-known", exits.has(node.dataset.dir));
+    const dir = node.dataset.dir;
+    node.classList.toggle("is-known", exits.has(dir));
+    node.classList.toggle("is-blocked", !exits.has(dir) && blocked.has(dir));
   });
-  const known = [...exits].map((d) => COMPASS_NAMES[d] || d);
-  compass.setAttribute("aria-label", `Compass: north is up.${where ? ` You are in ${where}.` : ""} ${known.length ? `Exits you've used here: ${known.join(", ")}.` : "No exits used from here yet."}`);
+  const names = (set) => [...set].map((d) => COMPASS_NAMES[d] || d).join(", ");
+  compass.setAttribute("aria-label", [
+    "Compass: north is up.",
+    where ? `You are in ${where}.` : "",
+    exits.size ? `Ways you've gone from here: ${names(exits)}.` : "You haven't left this room yet.",
+    blocked.size ? `Tried but blocked: ${names(blocked)}.` : ""
+  ].filter(Boolean).join(" "));
 }
 
 function canPost() {
@@ -688,6 +695,10 @@ const BBS_STYLES = `
   .bbs-compass-point.is-known line { stroke: #0f0; stroke-width: 2.2; }
   .bbs-compass-point.is-known circle { fill: #0f0; }
   .bbs-compass-point.is-known text { fill: #fff; }
+  .bbs-compass-point.is-blocked line { stroke: rgba(255,90,90,0.75); stroke-width: 1.5; stroke-dasharray: 2 2; }
+  .bbs-compass-point.is-blocked circle { fill: #ff5a5a; }
+  .bbs-compass-point.is-blocked text { fill: #ff8a8a; }
+  .bbs-compass-vert .is-blocked { color: #ff8a8a; text-decoration: line-through; }
   .bbs-compass-you { fill: #fff; filter: drop-shadow(0 0 3px #0f0); }
   .bbs-compass-vert { display: flex; gap: 6px; font: bold 8px monospace; color: rgba(0,255,0,0.35); }
   .bbs-compass-vert .is-known { color: #00e0ff; }
