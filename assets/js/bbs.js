@@ -1,7 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
 import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
-import { createZorkMap } from "./zorkMap.js?v=20261123";
+import { createZorkMap } from "./zorkMap.js?v=20261123b";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
@@ -84,6 +84,8 @@ export async function initBBS() {
   const mapClear = modal.querySelector("#bbs-map-clear");
   const mapWhere = modal.querySelector("#bbs-map-where");
   const mapPanel = modal.querySelector("#bbs-map");
+  const mapWrap = modal.querySelector("#bbs-map-wrap");
+  const compass = modal.querySelector("#bbs-compass");
   const zorkMap = createZorkMap({ storageKey: `ch:zork-map:${guestName}` });
   let mapOpen = false;
   let lastZorkCommand = null;
@@ -96,11 +98,14 @@ export async function initBBS() {
     const where = zorkMap.currentName();
     mapWhere.textContent = where ? `📍 ${where}` : "";
     mapClear.hidden = !mapOpen || !count;
-    if (mapOpen) zorkMap.render(mapPanel);
+    if (mapOpen) {
+      zorkMap.render(mapPanel);
+      renderCompass(compass, zorkMap.knownExits(), where);
+    }
   };
   const setMapOpen = (open) => {
     mapOpen = open;
-    mapPanel.hidden = !open;
+    mapWrap.hidden = !open;
     wrapper.classList.toggle("map-open", open);
     updateMapUi();
     if (!open) screen.scrollTop = screen.scrollHeight;
@@ -509,6 +514,46 @@ function renderZorkNote() {
   note.textContent = `💬 ${zorkChatPending} new chat message${zorkChatPending === 1 ? "" : "s"} — type /exit to read`;
 }
 
+
+// Fixed compass for the Zork map. North is up, matching the map's layout.
+// Directions already travelled from the current room light up.
+const COMPASS_POINTS = [
+  ["n", 0, "N"], ["ne", 45], ["e", 90, "E"], ["se", 135],
+  ["s", 180, "S"], ["sw", 225], ["w", 270, "W"], ["nw", 315]
+];
+const COMPASS_NAMES = { n: "north", ne: "northeast", e: "east", se: "southeast", s: "south", sw: "southwest", w: "west", nw: "northwest", up: "up", down: "down", in: "in", out: "out" };
+
+function buildCompassSvg() {
+  const spokes = COMPASS_POINTS.map(([dir, deg, label]) => {
+    const major = Boolean(label);
+    const len = major ? 17 : 12;
+    const rad = (deg - 90) * Math.PI / 180;
+    const x = (Math.cos(rad) * len).toFixed(1), y = (Math.sin(rad) * len).toFixed(1);
+    const lx = (Math.cos(rad) * 25).toFixed(1), ly = (Math.sin(rad) * 25 + 3.5).toFixed(1);
+    return `<g class="bbs-compass-point${major ? " is-major" : ""}" data-dir="${dir}">
+      <line x1="0" y1="0" x2="${x}" y2="${y}" />
+      <circle cx="${x}" cy="${y}" r="${major ? 2.6 : 2}" />
+      ${label ? `<text x="${lx}" y="${ly}" text-anchor="middle">${label}</text>` : ""}
+    </g>`;
+  }).join("");
+  return `<svg viewBox="-32 -32 64 64" width="64" height="64" aria-hidden="true" focusable="false">
+    <circle class="bbs-compass-ring" r="30" />
+    ${spokes}
+    <circle class="bbs-compass-you" r="3.2" />
+  </svg>
+  <div class="bbs-compass-vert"><span data-dir="up">↑ up</span><span data-dir="down">↓ dn</span></div>`;
+}
+
+function renderCompass(compass, exits, where) {
+  if (!compass) return;
+  if (!compass.firstChild) compass.innerHTML = buildCompassSvg();
+  compass.querySelectorAll("[data-dir]").forEach((node) => {
+    node.classList.toggle("is-known", exits.has(node.dataset.dir));
+  });
+  const known = [...exits].map((d) => COMPASS_NAMES[d] || d);
+  compass.setAttribute("aria-label", `Compass: north is up.${where ? ` You are in ${where}.` : ""} ${known.length ? `Exits you've used here: ${known.join(", ")}.` : "No exits used from here yet."}`);
+}
+
 function canPost() {
   return Boolean(currentAuthUser && currentProfile && !currentProfile.is_disabled);
 }
@@ -620,13 +665,32 @@ const BBS_STYLES = `
   #bbs-map-clear { margin-left: auto; color: #ffd166; border-color: #775; }
   #bbs-map-clear[hidden] + #bbs-zork-exit { margin-left: auto; }
   .bbs-map-where { color: #9cff9c; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .bbs-map-wrap { position: relative; height: min(240px, 32vh); margin-bottom: 10px; }
+  .bbs-map-wrap[hidden] { display: none; }
   .bbs-map {
-    height: min(240px, 32vh); overflow: auto; margin-bottom: 10px; border: 2px solid #0f0;
+    height: 100%; overflow: auto; border: 2px solid #0f0;
     background: #000 radial-gradient(rgba(0,255,0,0.12) 1px, transparent 1px) 0 0 / 16px 16px;
     -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
   }
   .bbs-map:focus-visible { outline: 2px solid #9cff9c; outline-offset: 2px; }
-  .bbs-map svg { display: block; }
+  .bbs-map svg { display: block; margin-right: 80px; } /* room to scroll rooms out from under the compass */
+  .bbs-compass {
+    position: absolute; top: 6px; right: 6px; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    padding: 3px; border-radius: 10px; background: rgba(0,0,0,0.72);
+  }
+  .bbs-compass svg { display: block; }
+  .bbs-compass-ring { fill: rgba(0,20,0,0.6); stroke: rgba(0,255,0,0.35); stroke-width: 1; }
+  .bbs-compass-point line { stroke: rgba(0,255,0,0.28); stroke-width: 1.5; }
+  .bbs-compass-point circle { fill: rgba(0,255,0,0.28); }
+  .bbs-compass-point text { fill: rgba(0,255,0,0.55); font: bold 8px monospace; }
+  .bbs-compass-point[data-dir="n"] text { fill: #ffd166; }
+  .bbs-compass-point.is-known line { stroke: #0f0; stroke-width: 2.2; }
+  .bbs-compass-point.is-known circle { fill: #0f0; }
+  .bbs-compass-point.is-known text { fill: #fff; }
+  .bbs-compass-you { fill: #fff; filter: drop-shadow(0 0 3px #0f0); }
+  .bbs-compass-vert { display: flex; gap: 6px; font: bold 8px monospace; color: rgba(0,255,0,0.35); }
+  .bbs-compass-vert .is-known { color: #00e0ff; }
   .bbs-map-empty { padding: 16px; color: #9cff9c; font-size: 0.85rem; }
   .bbs-map-edge { stroke: rgba(0,255,0,0.55); stroke-width: 2; }
   .bbs-map-edge.is-special { stroke-dasharray: 4 4; stroke: rgba(0,224,255,0.6); }
@@ -653,7 +717,7 @@ const BBS_STYLES = `
   #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-status-row,
   #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-count,
   #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-feedback { display: none !important; }
-  #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-map { flex: 0 1 46%; height: auto; min-height: 80px; margin-bottom: 8px; }
+  #bbs-modal #bbs-wrapper.zork-fullscreen .bbs-map-wrap { flex: 0 1 46%; height: auto; min-height: 80px; margin-bottom: 8px; }
   #bbs-modal #bbs-wrapper.zork-fullscreen #bbs-screen {
     flex: 1 1 0; height: auto !important; min-height: 64px; margin-bottom: 8px;
   }
@@ -694,7 +758,10 @@ const BBS_HTML = `
       <button id="bbs-map-clear" type="button" hidden>Clear</button>
       <button id="bbs-zork-exit" type="button" aria-label="Exit Zork and return to chat">Exit</button>
     </div>
-    <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0" hidden></div>
+    <div id="bbs-map-wrap" class="bbs-map-wrap" hidden>
+      <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0"></div>
+      <div id="bbs-compass" class="bbs-compass" role="img"></div>
+    </div>
     <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
     <button id="bbs-jump" class="bbs-jump" type="button" hidden></button>
     <div id="bbs-zork-note" class="bbs-zork-note" role="status" hidden></div>
