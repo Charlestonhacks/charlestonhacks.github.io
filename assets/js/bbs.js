@@ -234,6 +234,19 @@ export async function initBBS() {
   olderBtn.addEventListener("click", () => loadOlderMessages(feedbackDiv));
 
   input.addEventListener("input", renderCounter);
+
+  // Keep the on-screen keyboard open between messages and Zork commands.
+  // Phones close it when a form submits via the return key or when a tap moves
+  // focus to the Send button, which makes the page jump on every command.
+  input.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" || event.isComposing || event.shiftKey) return;
+    event.preventDefault();
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.dispatchEvent(new Event("submit", { cancelable: true }));
+  });
+  sendButton.addEventListener("mousedown", (event) => {
+    if (document.activeElement === input) event.preventDefault();
+  });
   input.addEventListener("keydown", (event) => {
     if (currentMode !== "zork" || !zorkHistory.length) return;
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
@@ -299,6 +312,7 @@ export async function initBBS() {
         return;
       }
       if (sendZorkCommand(text)) echoZorkCommand(screen, text);
+      input.focus({ preventScroll: true });
       return;
     }
 
@@ -354,7 +368,7 @@ export async function initBBS() {
       return;
     }
     addIncomingMessage(message, { forceScroll: true });
-    input.focus();
+    input.focus({ preventScroll: true });
   });
 }
 
