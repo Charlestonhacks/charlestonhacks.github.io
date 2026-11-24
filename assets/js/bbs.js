@@ -247,6 +247,14 @@ export async function initBBS() {
   sendButton.addEventListener("mousedown", (event) => {
     if (document.activeElement === input) event.preventDefault();
   });
+  // On iPhone a tap can still pull focus off the input. Handling the touch
+  // directly (and cancelling it) keeps focus, so the keyboard stays up.
+  sendButton.addEventListener("touchstart", (event) => {
+    if (document.activeElement !== input || sendButton.disabled) return;
+    event.preventDefault();
+    if (typeof form.requestSubmit === "function") form.requestSubmit();
+    else form.dispatchEvent(new Event("submit", { cancelable: true }));
+  }, { passive: false });
   input.addEventListener("keydown", (event) => {
     if (currentMode !== "zork" || !zorkHistory.length) return;
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
@@ -434,8 +442,10 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
   }
 
   const postAllowed = canPost();
-  input.disabled = !postAllowed;
-  sendButton.disabled = !postAllowed;
+  // Set the final state once: briefly disabling a focused input closes a phone keyboard.
+  const lockInput = currentMode === "zork" ? false : !postAllowed;
+  if (input.disabled !== lockInput) input.disabled = lockInput;
+  if (sendButton.disabled !== lockInput) sendButton.disabled = lockInput;
   input.placeholder = currentMode === "zork"
     ? "Zork command…"
     : (postAllowed ? "Type a message…" : "Sign in to post…");
@@ -447,11 +457,6 @@ async function refreshBbsIdentity(authDiv, form, input, sendButton, feedbackDiv,
     authDiv.innerHTML = `<span>Sign in to post:</span> <button type="button" data-provider="google"><i class="fab fa-google" aria-hidden="true"></i> Google</button> <button type="button" data-provider="github"><i class="fab fa-github" aria-hidden="true"></i> GitHub</button>`;
     if (user && !currentProfile) feedbackDiv.textContent = "An active CharlestonHacks member profile is required to post.";
     else if (user && currentProfile?.is_disabled) feedbackDiv.textContent = "This account cannot post messages.";
-  }
-  // The Zork command prompt remains usable to guests.
-  if (currentMode === "zork") {
-    input.disabled = false;
-    sendButton.disabled = false;
   }
   form.setAttribute("aria-label", postAllowed ? "Send a public message" : "Sign in required to post a public message");
 
