@@ -24,7 +24,7 @@
 | 4 | No public database function, view or endpoint is added. Matching stays in Innovation Engine's signed-in app. |
 | 5 | Phase 5 only: an organizational request form stored inside Innovation Engine, shown to members who choose to look. No member is named or contacted automatically. |
 | 6 | Neither repo calls an external AI service today. New code must not send member data to one; the public profile is the only thing AI agents receive. |
-| 7 | Innovation Engine PR #362 closes signed-out reads of member data; `zork_saves` and unclassified tables follow. |
+| 7 | Public database access is reviewed and corrected in Innovation Engine before the profile is published; findings are kept private. |
 | 8 | Signed-in access is unchanged and tested; every database change ships with a rollback and a review gate. |
 
 ## What changed from the Phase 1 draft
