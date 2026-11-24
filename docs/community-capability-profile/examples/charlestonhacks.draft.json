@@ -11,7 +11,7 @@
   "identity": {
     "name": "CharlestonHacks",
     "url": "https://charlestonhacks.com",
-    "summary": "CharlestonHacks is a 501(c)(3) nonprofit growing Charleston, South Carolina's technology community through free events, open collaboration, and inclusive membership.",
+    "summary": "CharlestonHacks is a 501(c)(3) nonprofit growing South Carolina's technology community through free events, open collaboration, and inclusive membership. It is governed by a statewide board and led regionally in Charleston and the Upstate.",
     "mission": "Grow Charleston's technology community through high-quality events, open collaboration, and inclusive membership. Membership is always free.",
     "values": [
       "Independent: community-led, so decisions serve members first",
@@ -31,6 +31,7 @@
       "country": "US",
       "areaServed": [
         "Charleston metro",
+        "Upstate South Carolina",
         "South Carolina"
       ]
     },
@@ -141,13 +142,35 @@
           "description": "CharlestonHacks Presents: Hacker Theater, June 2026"
         }
       ]
+    },
+    {
+      "id": "offer:tech-week",
+      "label": "Charleston Tech Week events",
+      "description": "Community events during Charleston Tech Week, such as the 30 Second AI Film Fest.",
+      "evidence": [
+        {
+          "type": "event",
+          "url": "https://charlestonhacks.com/techweek.html",
+          "description": "CharlestonHacks at Charleston Tech Week"
+        }
+      ]
     }
   ],
   "needs": [
     {
+      "id": "need:venues-challenges",
+      "kind": "partner",
+      "description": "Venues and challenge partners for hackathons across South Carolina."
+    },
+    {
+      "id": "need:mentors-judges",
+      "kind": "mentor",
+      "description": "Mentors and expert judges for hackathons."
+    },
+    {
       "id": "need:sponsors",
       "kind": "sponsor",
-      "description": "Corporate sponsors for free community events (DRAFT: organizers to confirm)."
+      "description": "Sponsors for free community events, cash or in-kind."
     }
   ],
   "openTo": [
