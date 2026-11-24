@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Community Profiles | CharlestonHacks</title>
+  <meta name="description" content="Read public community profiles and see where one community's needs fit another's offers. Organization information only; no member data.">
+  <link rel="canonical" href="https://charlestonhacks.com/communities.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#05070d; --panel:#0d1220; --line:#1f2a44; --text:#e8ecf5; --muted:#9aa6bf; --accent:#16d9f5; --gold:#f5c66b; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.55 Inter, system-ui, sans-serif; }
+    main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
+    a { color: var(--accent); }
+    h1 { font-family: Orbitron, sans-serif; font-size: clamp(1.6rem, 4vw, 2.3rem); margin: 8px 0 6px; }
+    h2 { font-family: Orbitron, sans-serif; font-size: 1.15rem; margin: 36px 0 12px; }
+    .lede { color: var(--muted); max-width: 720px; }
+    .note { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:12px 16px; color:var(--muted); font-size:.92rem; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:16px; }
+    .card { border:1px solid var(--line); background:var(--panel); border-radius:14px; padding:18px; }
+    .card h3 { margin:0 0 4px; font-size:1.15rem; }
+    .meta { color:var(--muted); font-size:.85rem; margin-bottom:10px; }
+    .label { color:var(--gold); font-size:.75rem; letter-spacing:.08em; text-transform:uppercase; margin:12px 0 4px; }
+    ul { margin:0; padding-left:18px; }
+    li { margin: 2px 0; }
+    .badge { display:inline-block; font-size:.72rem; border:1px solid var(--line); border-radius:999px; padding:1px 8px; color:var(--muted); }
+    .match { border-left:3px solid var(--accent); padding:8px 12px; margin:8px 0; background:var(--panel); border-radius:0 10px 10px 0; }
+    form { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    input[type=url] { flex:1 1 360px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:#0a0f1b; color:var(--text); }
+    button { padding:10px 14px; border-radius:10px; border:1px solid var(--accent); background:transparent; color:var(--accent); font-weight:600; cursor:pointer; }
+    .err { color:#ff8a8a; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="/">← CharlestonHacks</a>
+    <h1>Community Profiles</h1>
+    <p class="lede">Communities publish a small public file describing what they run, what they need and how to reach them. This page reads those files and suggests where one community's needs fit another's offers.</p>
+    <p class="note">Organization information only: no member data. Matches are suggestions for organizers to consider; nobody is contacted automatically. Want your community here? See the <a href="https://github.com/Charlestonhacks/charlestonhacks.github.io/blob/main/docs/community-capability-profile/ADOPTING.md">adoption guide</a> or email <a href="mailto:hello@charlestonhacks.com">hello@charlestonhacks.com</a>.</p>
+
+    <h2>Possible matches</h2>
+    <div id="matches"><p class="meta">Matches appear when two or more communities are loaded.</p></div>
+
+    <h2>Communities</h2>
+    <div id="cards" class="grid" aria-live="polite"><p class="meta">Loading profiles…</p></div>
+
+    <h2>Try another profile</h2>
+    <p class="meta">Paste the address of any public community profile to compare it here. It is read in your browser only and not saved.</p>
+    <form id="add">
+      <input id="add-url" type="url" required placeholder="https://example.org/.well-known/community-profile.json" aria-label="Profile URL">
+      <button type="submit">Load</button>
+    </form>
+    <p id="add-msg" class="meta" role="status"></p>
+  </main>
+
+  <script type="module">
+    import { PROFILE_URLS, loadProfile, suggestMatches, safeHttpsUrl } from './assets/js/community-reader.js';
+
+    const profiles = [];
+    const el = (tag, attrs = {}, text) => {
+      const n = document.createElement(tag);
+      for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+      if (text != null) n.textContent = text;
+      return n;
+    };
+    const link = (href, text) => {
+      const safe = safeHttpsUrl(href);
+      return safe ? el('a', { href: safe, rel: 'noopener noreferrer' }, text) : el('span', {}, text);
+    };
+    const list = (items) => { const ul = el('ul'); items.forEach((t) => ul.append(el('li', {}, t))); return ul; };
+
+    function card(p, source) {
+      const c = el('article', { class: 'card' });
+      const h = el('h3'); h.append(link(p.identity.url, p.identity.name)); c.append(h);
+      const loc = p.identity.location || {};
+      c.append(el('div', { class: 'meta' }, [loc.locality, loc.region].filter(Boolean).join(', ')
+        + (p.updatedAt ? ` · updated ${p.updatedAt.slice(0, 10)}` : '')));
+      c.append(el('span', { class: 'badge' }, p.assertion?.type === 'inferred' ? 'Inferred, not confirmed' : 'Self-published'));
+      c.append(el('p', {}, p.identity.summary || ''));
+      if (p.offers?.length) { c.append(el('div', { class: 'label' }, 'Offers')); c.append(list(p.offers.map((o) => o.label))); }
+      if (p.needs?.length) { c.append(el('div', { class: 'label' }, 'Needs')); c.append(list(p.needs.map((n) => n.description))); }
+      if (p.openTo?.length) { c.append(el('div', { class: 'label' }, 'Open to')); c.append(list(p.openTo)); }
+      const a = p.accessibility || {};
+      c.append(el('div', { class: 'label' }, 'Contact'));
+      const contact = el('p');
+      const email = /^[^\s@<>"'()]+@[^\s@<>"'()]+\.[a-z]{2,}$/i.test(a.contact?.email || '') ? a.contact.email : null;
+      if (email) contact.append(el('a', { href: `mailto:${email}` }, email));
+      else if (a.contact?.url) contact.append(link(a.contact.url, 'Contact page'));
+      else contact.append(link(a.humanUrl || p.identity.url, 'Website'));
+      c.append(contact);
+      c.append(el('div', { class: 'meta' })).append(link(source, 'View profile file'));
+      return c;
+    }
+
+    function render() {
+      const cards = document.getElementById('cards'); cards.replaceChildren();
+      profiles.forEach(({ p, url }) => cards.append(card(p, url)));
+      const m = document.getElementById('matches'); m.replaceChildren();
+      const found = [];
+      for (const a of profiles) for (const b of profiles) {
+        for (const r of suggestMatches(a.p, b.p)) found.push({ seeker: a.p.identity.name, provider: b.p.identity.name, ...r });
+      }
+      if (profiles.length < 2) { m.append(el('p', { class: 'meta' }, 'Matches appear when two or more communities are loaded.')); return; }
+      if (!found.length) { m.append(el('p', { class: 'meta' }, 'No obvious matches between the loaded profiles.')); return; }
+      for (const f of found) {
+        const d = el('div', { class: 'match' });
+        d.append(el('strong', {}, `${f.seeker} needs: `), document.createTextNode(f.need.description));
+        d.append(el('br'), el('span', {}, `${f.provider} offers: ${f.offer}`));
+        d.append(el('div', { class: 'meta' }, `Possible fit (shared terms: ${f.reasons.join(', ')}). Organizers decide whether to connect.`));
+        m.append(d);
+      }
+    }
+
+    async function add(url) {
+      const p = await loadProfile(url);
+      if (!profiles.some((x) => x.url === url)) profiles.push({ p, url });
+      render();
+    }
+
+    (async () => {
+      for (const url of PROFILE_URLS) { try { await add(url); } catch (e) { /* skip unavailable */ } }
+      if (!profiles.length) document.getElementById('cards').replaceChildren(el('p', { class: 'err' }, 'Could not load profiles right now.'));
+    })();
+
+    document.getElementById('add').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('add-msg');
+      const url = safeHttpsUrl(document.getElementById('add-url').value.trim());
+      if (!url) { msg.textContent = 'Please enter an https:// address.'; return; }
+      msg.textContent = 'Loading…';
+      try { await add(url); msg.textContent = 'Loaded. It is shown in your browser only.'; }
+      catch (err) {
+        msg.textContent = `Could not load that profile (${err.message}). If the file opens in your browser but not here, its website may not allow other sites to read it.`;
+      }
+    });
+  </script>
+</body>
+</html>

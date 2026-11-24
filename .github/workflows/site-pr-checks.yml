@@ -33,6 +33,8 @@ jobs:
         run: git fetch --no-tags --depth=1 origin "$BASE_SHA"
       - name: Event tests
         run: node tests/homepage-events.test.mjs
+      - name: Community reader tests
+        run: node --test tests/community-reader.test.mjs
       - name: Checker tests
         env:
           PYTHONDONTWRITEBYTECODE: '1'
