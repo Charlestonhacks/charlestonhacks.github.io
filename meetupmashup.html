@@ -1,125 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeetupMashup</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-        }
-
-        .scroll-container {
-            width: 100%;
-            height: 400px; /* Adjust height as needed */
-            overflow-x: scroll;
-            overflow-y: hidden;
-            white-space: nowrap;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            margin: 20px auto;
-            padding: 10px;
-            background-color: #fff;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .scroll-container a {
-            display: inline-block;
-            height: 100%;
-            margin-right: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .scroll-container a:last-child {
-            margin-right: 0;
-        }
-
-        .scroll-container img {
-            height: 100%;
-            border-radius: 5px;
-        }
-
-        .logo-container {
-            display: flex;
-            justify-content: center; /* Centers the logo */
-            align-items: center;
-            width: 100%; /* Ensures it scales across all screen sizes */
-            margin-top: 20px; /* Adjust spacing as needed */
-        }
-
-        .responsive-logo {
-            width: 50%; /* Adjusts to 50% of the parent container */
-            max-width: 400px; /* Prevents it from being too large on big screens */
-            height: auto; /* Maintains aspect ratio */
-        }
-
-        /* Adjustments for smaller screens */
-        @media (max-width: 768px) {
-            .responsive-logo {
-                width: 80%; /* Takes up more space on smaller screens */
-                max-width: 300px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .responsive-logo {
-                width: 90%; /* Almost full width on very small screens */
-                max-width: 250px;
-            }
-        }
-    </style>
-</head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Halloween Tech Meetup Mashup | CharlestonHacks</title><meta name="description" content="Halloween Tech Meetup Mashup event archive: Community connections and creative storytelling."><link rel="canonical" href="https://charlestonhacks.com/meetupmashup.html"><link rel="stylesheet" href="assets/css/event-archive.css"><meta property="og:title" content="Halloween Tech Meetup Mashup | CharlestonHacks"><meta property="og:image" content="https://charlestonhacks.com/images/mashupposter.jpg"><script async src="https://www.googletagmanager.com/gtag/js?id=G-6NDKG07DY6"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'G-6NDKG07DY6');
-</script>
-<body>
-
-    <h1 style="text-align: center; margin-top: 20px;">Welcome to MeetupMashup #1</h1>
-    <p style="text-align: center;">Explore our highlights below:</p>
-
-    <div class="scroll-container">
-        <a href="images/mashupposter.jpg" data-lightbox="mashup" data-title="Meetup Mashup Poster"><img src="images/mashupposter.jpg" alt="Meetup Mashup Poster"></a>
-        <a href="images/davedoug.jpg" data-lightbox="mashup" data-title="Doug and Dave"><img src="images/davedoug.jpg" alt="Doug and Dave"></a>
-        <a href="images/mmcomic.png" data-lightbox="mashup" data-title="Comic 1"><img src="images/mmcomic.png" alt="Comic 1"></a>
-        <a href="images/mmcomic2.png" data-lightbox="mashup" data-title="Comic 2"><img src="images/mmcomic2.png" alt="Comic 2"></a>
-        <a href="images/mmcomic3.png" data-lightbox="mashup" data-title="Comic 3"><img src="images/mmcomic3.png" alt="Comic 3"></a>
-        <a href="images/letter.png" data-lightbox="mashup" data-title="Letter"><img src="images/letter.png" alt="Letter"></a>
-    </div>
-
-    <!-- Footer -->
-    <footer id="footer" style="text-align: center; padding: 20px; background-color: #f4f4f9; margin-top: 20px; border-top: 2px solid #ddd;">
-        <a class="logo-container" href="index.html">
-            <img src="images/CHARLESTONHACKS Grey off center-01-01.png" alt="Charleston Hacks Logo" class="responsive-logo">
-        </a>
-        <p style="margin-top: 10px; font-size: 16px; color: #333;">© 2025 MeetupMashup. All rights reserved.</p>
-    </footer>
-
-    <script src="assets/js/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
-    <script>
-      if (window.lightbox) {
-        // Return keyboard focus to the frame that opened the overlay.
-        var lastFrame = null;
-        document.addEventListener("click", function (event) {
-          var frame = event.target.closest("[data-lightbox]");
-          if (frame) lastFrame = frame;
-        }, true);
-        var closeLightbox = lightbox.end;
-        lightbox.end = function () {
-          closeLightbox.apply(this, arguments);
-          if (lastFrame) lastFrame.focus({ preventScroll: true });
-        };
-      }
-    </script>
-</body>
-</html>
+</script></head><body><header><nav aria-label="Site navigation"><a href="index.html"><img src="images/CHARLESTONHACKS Grey off center-01-01.png" alt="CharlestonHacks"></a><a href="Poster.html">← All events</a></nav></header><main><section class="hero"><a href="images/mashupposter.jpg"><img src="images/mashupposter.jpg" alt="Halloween Tech Meetup Mashup event artwork"></a><div><p class="eyebrow">Event archive</p><h1>Halloween Tech Meetup Mashup</h1><p>Community connections and creative storytelling</p><p class="muted">October 30, 2024</p><div class="actions"><a class="button" href="#photos">View gallery</a></div></div></section><section class="archive-section"><h2>About the event</h2><p>Explore the original event poster, comic pages and letter from the first Halloween Meetup Mashup.</p></section><section class="archive-section" id="photos"><h2>Event gallery</h2><p>Select an image to view the original.</p><div class="gallery"><figure><a href="images/davedoug.jpg"><img src="images/davedoug.jpg" alt="Doug and Dave"  loading="lazy" decoding="async"></a></figure>
+<figure><a href="images/mmcomic.png"><img src="images/mmcomic.png" alt="Comic 1"  loading="lazy" decoding="async"></a></figure>
+<figure><a href="images/mmcomic2.png"><img src="images/mmcomic2.png" alt="Comic 2"  loading="lazy" decoding="async"></a></figure>
+<figure><a href="images/mmcomic3.png"><img src="images/mmcomic3.png" alt="Comic 3"  loading="lazy" decoding="async"></a></figure>
+<figure><a href="images/letter.png"><img src="images/letter.png" alt="Letter"  loading="lazy" decoding="async"></a></figure></div></section></main><footer><a href="Poster.html">Explore more CharlestonHacks events</a> · <a href="news.html">News</a></footer></body></html>
