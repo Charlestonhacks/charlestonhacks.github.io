@@ -449,7 +449,7 @@ export async function loadUnifiedEvents({
         const followUp = document.createElement("button");
         followUp.type = "button";
         followUp.className = "ch-event-buildspace-follow-up";
-        followUp.textContent = "Follow up in Buildspace";
+        followUp.textContent = "Follow up in Innovation Engine";
         followUp.style.cssText = "appearance:none;border:0;background:transparent;color:#a9f6ff;font:inherit;font-size:.88rem;font-weight:700;text-decoration:underline;cursor:pointer;padding:.25rem 0;";
         followUp.addEventListener("click", () => {
           window.dispatchEvent(new CustomEvent("ch:open-buildspace-event", {
