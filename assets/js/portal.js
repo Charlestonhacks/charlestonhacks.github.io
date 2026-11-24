@@ -256,7 +256,7 @@
   async function loadEventsFeedModule() {
     if (typeof window.loadUnifiedEvents === "function") return window.loadUnifiedEvents;
 
-    const module = await import("/assets/js/eventsFeed.js?v=unified-events-posters-follow-up-20261031");
+    const module = await import("/assets/js/eventsFeed.js?v=innovation-engine-label-20261124");
     if (module?.loadUnifiedEvents) {
       window.loadUnifiedEvents = module.loadUnifiedEvents;
       return window.loadUnifiedEvents;
