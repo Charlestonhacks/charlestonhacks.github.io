@@ -6,8 +6,11 @@ let activeSession = null;
 let pendingStart = null;
 
 class BbsIOAdapter {
-  constructor(write, username, onEnd) {
-    this._write = write;
+  constructor(write, username, onEnd, onTurn) {
+    this._turnText = "";
+    this._write = (text) => { this._turnText += text + "\n"; write(text); };
+    this._onTurn = onTurn;
+    this.machine = null;
     this._username = username;
     this._onEnd = onEnd;
     this._buffer = "";
@@ -50,8 +53,25 @@ class BbsIOAdapter {
     this._flushLines();
   }
 
+  // Tell the BBS where the player is each time the game waits for a command.
+  _reportTurn() {
+    const output = this._turnText;
+    this._turnText = "";
+    if (!this._onTurn || !this.machine) return;
+    try {
+      // Zork I keeps the current room in the first global (the status-line location).
+      const roomId = this.machine.variables.peek(16);
+      const { address, lengthBytes } = this.machine.objectTable.getShortNameAddress(roomId);
+      const roomName = lengthBytes ? this.machine.textDecoder.decode(address).text : "";
+      this._onTurn({ roomId, roomName, output });
+    } catch (error) {
+      console.warn("[ZORK] Could not read location:", error);
+    }
+  }
+
   readLine(maxLength = 78) {
     this._flush();
+    if (!this._stopRequested) this._reportTurn();
     if (this._stopRequested && !this._stopQuitSent) {
       this._stopQuitSent = true;
       return Promise.resolve({ text: "quit", terminator: 13 });
@@ -159,7 +179,7 @@ class BbsIOAdapter {
   verify() { return true; }
 }
 
-export async function startZork(write, { username = "Guest", onEnd } = {}) {
+export async function startZork(write, { username = "Guest", onEnd, onTurn } = {}) {
   if (activeSession || pendingStart) {
     write("[ZORK is already running — type /exit to return to chat.]\n");
     return false;
@@ -197,10 +217,11 @@ export async function startZork(write, { username = "Guest", onEnd } = {}) {
     return false;
   }
 
-  const io = new BbsIOAdapter(write, username, onEnd);
+  const io = new BbsIOAdapter(write, username, onEnd, onTurn);
   let machine;
   try {
     machine = ZMachine.load(storyBuffer, io);
+    io.machine = machine;
     io.initialize(machine.version);
   } catch (error) {
     if (pendingStart === request) pendingStart = null;

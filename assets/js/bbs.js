@@ -1,6 +1,7 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
-import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123";
+import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
 import { supabase } from "./supabaseClient.js";
+import { createZorkMap } from "./zorkMap.js?v=20261123";
 
 const HISTORY_PAGE_SIZE = 150;
 const MAX_MESSAGE_LENGTH = 500;
@@ -75,6 +76,51 @@ export async function initBBS() {
 
   const guestName = loadOrGenerateUsername();
   window.bbsUsername = guestName;
+
+  // Zork auto-map (saved in this browser, per guest name).
+  const wrapper = modal.querySelector("#bbs-wrapper");
+  const zorkTools = modal.querySelector("#bbs-zork-tools");
+  const mapToggle = modal.querySelector("#bbs-map-toggle");
+  const mapClear = modal.querySelector("#bbs-map-clear");
+  const mapWhere = modal.querySelector("#bbs-map-where");
+  const mapPanel = modal.querySelector("#bbs-map");
+  const zorkMap = createZorkMap({ storageKey: `ch:zork-map:${guestName}` });
+  let mapOpen = false;
+  let lastZorkCommand = null;
+  let lastTurn = null;
+
+  const updateMapUi = () => {
+    const count = zorkMap.roomCount();
+    mapToggle.textContent = mapOpen ? "Hide map" : `🗺 Map${count ? ` (${count})` : ""}`;
+    mapToggle.setAttribute("aria-expanded", String(mapOpen));
+    const where = zorkMap.currentName();
+    mapWhere.textContent = where ? `📍 ${where}` : "";
+    mapClear.hidden = !mapOpen || !count;
+    if (mapOpen) zorkMap.render(mapPanel);
+  };
+  const setMapOpen = (open) => {
+    mapOpen = open;
+    mapPanel.hidden = !open;
+    wrapper.classList.toggle("map-open", open);
+    updateMapUi();
+    if (!open) screen.scrollTop = screen.scrollHeight;
+  };
+  const showZorkTools = (show) => {
+    zorkTools.hidden = !show;
+    if (!show) setMapOpen(false);
+    else updateMapUi();
+  };
+  mapToggle.addEventListener("click", () => setMapOpen(!mapOpen));
+  mapClear.addEventListener("click", () => {
+    if (!window.confirm("Clear your Zork map? Rooms you've found will be forgotten.")) return;
+    zorkMap.clear();
+    if (lastTurn) zorkMap.recordTurn(null, lastTurn);
+    updateMapUi();
+  });
+  // Keep the phone keyboard up when tapping map controls mid-game.
+  [mapToggle, mapClear].forEach((btn) => btn.addEventListener("mousedown", (event) => {
+    if (document.activeElement === input) event.preventDefault();
+  }));
 
   closeBtn.addEventListener("click", () => {
     if (currentMode === "zork") leaveZork("Exited ZORK mode.");
@@ -277,6 +323,7 @@ export async function initBBS() {
     if (wasPlaying) stopZork();
     zorkChatPending = 0;
     renderZorkNote();
+    showZorkTools(false);
     // Back to a clean chat view, including anything posted during the game.
     if (!keepScreen) renderAllMessages();
     if (note) write(screen, note);
@@ -315,17 +362,23 @@ export async function initBBS() {
         leaveZork("Exited ZORK mode. Type zork to play again.");
         return;
       }
+      if (["/map", "map"].includes(text.toLowerCase())) {
+        setMapOpen(!mapOpen);
+        input.focus({ preventScroll: true });
+        return;
+      }
       if (text.toLowerCase() === "/chs") {
         write(screen, "A signal resolves: CHARLESTONHACKS, CHARLESTON, SC.\nBy the harbor, builders, designers, and curious minds gather for hackathons—to form teams, share skills, and make things together.\nThe next challenge is aboveground; yours waits below.\n");
         return;
       }
+      lastZorkCommand = text;
       if (sendZorkCommand(text)) echoZorkCommand(screen, text);
       input.focus({ preventScroll: true });
       return;
     }
 
     if (["zork", "play zork", "/zork"].includes(text.toLowerCase())) {
-      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands. Tap Map (or type /map) to see where you've been.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
       const session = ++zorkSession;
       currentMode = "zork";
       zorkChatPending = 0;
@@ -339,9 +392,17 @@ export async function initBBS() {
       const active = () => currentMode === "zork" && session === zorkSession;
       const started = await startZork((output) => { if (active()) write(screen, output); }, {
         username: guestName,
-        onEnd: () => { if (active()) leaveZork("ZORK ended. Type zork to play again."); }
+        onEnd: () => { if (active()) leaveZork("ZORK ended. Type zork to play again."); },
+        onTurn: (info) => {
+          if (!active()) return;
+          zorkMap.recordTurn(lastZorkCommand, info);
+          lastTurn = info;
+          lastZorkCommand = null;
+          updateMapUi();
+        }
       });
       if (!active()) return;
+      if (started) showZorkTools(true);
       input.disabled = false;
       input.focus();
       if (!started) leaveZork(null, { keepScreen: true });
@@ -513,6 +574,34 @@ const BBS_STYLES = `
     box-shadow: 0 0 10px rgba(0,255,0,0.5);
   }
   .bbs-jump:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .bbs-zork-tools { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; min-width: 0; }
+  .bbs-zork-tools[hidden] { display: none; }
+  .bbs-zork-tools button {
+    padding: 4px 10px; background: #000; color: #0f0; border: 1px solid #0f0; border-radius: 5px;
+    cursor: pointer; font-size: 0.85rem; white-space: nowrap;
+  }
+  .bbs-zork-tools button:hover, .bbs-zork-tools button:focus-visible { background: rgba(0,255,0,0.12); outline: none; }
+  #bbs-map-clear { margin-left: auto; color: #ffd166; border-color: #775; }
+  .bbs-map-where { color: #9cff9c; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .bbs-map {
+    height: min(240px, 32vh); overflow: auto; margin-bottom: 10px; border: 2px solid #0f0;
+    background: #000 radial-gradient(rgba(0,255,0,0.12) 1px, transparent 1px) 0 0 / 16px 16px;
+    -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  }
+  .bbs-map:focus-visible { outline: 2px solid #9cff9c; outline-offset: 2px; }
+  .bbs-map svg { display: block; }
+  .bbs-map-empty { padding: 16px; color: #9cff9c; font-size: 0.85rem; }
+  .bbs-map-edge { stroke: rgba(0,255,0,0.55); stroke-width: 2; }
+  .bbs-map-edge.is-special { stroke-dasharray: 4 4; stroke: rgba(0,224,255,0.6); }
+  .bbs-map-room text.bbs-map-badge { fill: #00e0ff; font: bold 9px monospace; font-style: normal; }
+  .bbs-map-room.is-current text.bbs-map-badge { fill: #003a44; }
+  .bbs-map-room rect { fill: #000; stroke: #0f0; stroke-width: 1.5; }
+  .bbs-map-room text { fill: #0f0; font: 11px monospace; }
+  .bbs-map-room.is-dark rect { stroke-dasharray: 3 3; stroke: rgba(0,255,0,0.5); }
+  .bbs-map-room.is-dark text { fill: rgba(0,255,0,0.6); font-style: italic; }
+  .bbs-map-room.is-current rect { fill: #0f0; stroke: #fff; stroke-width: 2; filter: drop-shadow(0 0 6px rgba(0,255,0,0.8)); }
+  .bbs-map-room.is-current text { fill: #000; font-weight: bold; }
+  #bbs-wrapper.map-open #bbs-screen { height: min(260px, 30vh) !important; }
   .bbs-zork-cmd { color: #fff; font-weight: bold; margin-left: 0.5ch; }
   .bbs-zork-note {
     align-self: center; margin: -4px 0 10px; padding: 3px 10px; border: 1px solid rgba(0,224,255,0.5);
@@ -542,6 +631,12 @@ const BBS_HTML = `
     <button id="bbs-close" aria-label="Close chat" style="position:absolute; top:8px; right:10px; background:black; color:#0f0; border:1px solid #0f0; font-family:monospace; cursor:pointer; padding:4px 8px; font-size:1rem; line-height:1;">✕</button>
     <h2 style="color:#0f0; text-align:center; margin-bottom:12px; font-family:monospace; font-size:clamp(1.2rem, 3vw, 1.5rem);">CharlestonHacks BBS</h2>
     <div id="bbs-auth" style="display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; color:#9cff9c; font:0.9rem monospace;" aria-live="polite"></div>
+    <div id="bbs-zork-tools" class="bbs-zork-tools" hidden>
+      <button id="bbs-map-toggle" type="button" aria-expanded="false" aria-controls="bbs-map">🗺 Map</button>
+      <span id="bbs-map-where" class="bbs-map-where" aria-live="polite"></span>
+      <button id="bbs-map-clear" type="button" hidden>Clear map</button>
+    </div>
+    <div id="bbs-map" class="bbs-map" role="region" aria-label="Zork map" tabindex="0" hidden></div>
     <div id="bbs-screen" role="log" aria-label="Public chat messages" aria-live="polite" aria-relevant="additions" tabindex="0" style="background:#000; color:#0f0; height:min(300px, 40vh); overflow-y:auto; padding:10px; border:2px solid #0f0; margin-bottom:10px; font-family:monospace; font-size:clamp(0.85rem, 2vw, 1rem); line-height:1.45;"><button id="bbs-older" class="bbs-older" type="button" hidden>Load older messages</button></div>
     <button id="bbs-jump" class="bbs-jump" type="button" hidden></button>
     <div id="bbs-zork-note" class="bbs-zork-note" role="status" hidden></div>
