@@ -1,73 +1,54 @@
-# 1. Repository and database assessment
+# Repository and database assessment (revised 2026-11-24)
 
-Date: 2026-11-24. **No live database access was available.** Findings are marked:
+Sources, in order of confidence:
 
-- **Verified (repo):** read directly from code or SQL in a repository.
-- **Verified (dump):** from the production schema dump `supabase/sql/reference/buildspace_schema.sql`
-  in `deckerd451/innovation-engine` (last committed 2026-11-22). Innovation Engine's own docs warn that
-  repository definitions are not proof of what is deployed, so every item below should be confirmed
-  against the live project before migrations run (see `PLAN.md`, step 0).
-- **Assumption:** inferred, not checked.
+- **Live (anonymous):** requests made with the website's public key, one row and the `id` column only,
+  plus zero-row (`limit=0`) requests to check which columns are exposed without reading data.
+  This shows what any visitor can read today. It cannot show policy definitions.
+- **Repo:** Innovation Engine's schema dump (`supabase/sql/reference/buildspace_schema.sql`,
+  committed 2026-11-22) and migrations. The dump is older than some applied migrations (see below).
 
 ## Systems
 
-| System | Repo | Role | Database |
-|---|---|---|---|
-| CharlestonHacks website | `Charlestonhacks/charlestonhacks.github.io` (GitHub Pages) | Public site, BBS chat, member portal (`hub.html`), events feed | Reads Innovation Engine Supabase for chat/members |
-| Innovation Engine (formerly Buildspace) | `deckerd451/innovation-engine` (GitHub Pages at `/innovation-engine/`) | Members, projects, organizations, opportunities, themes, endorsements, capability memory | Supabase `mqbsjlgnsirqsmfnreqd` |
-| Nearify | separate | Event presence, saved people, follow-up | Separate Supabase project `unndeygygkgodmmdnlup`; IDs must never be mixed (`SYSTEM_BOUNDARIES.md`) |
-| Events worker | `workers/events-worker.js` in the website repo (Cloudflare) | Merges Meetup iCal feeds (CharlestonHacks, CHS AWS, TechYeet, First Friday, CHS InfoSec) into `external_events` | Writes with the service role key |
-
-The website embeds Innovation Engine in an iframe and still uses `buildspace` in internal identifiers
-(`portal-buildspace-frame`, `ch:portal-return-to-buildspace`, …). These are not user-visible and are left
-as is; renaming them would break saved state and the cross-frame auth bridge. One user-visible label
-("Follow up in Buildspace" on the events feed) is renamed in a separate change.
-
-## Data relevant to the profile (Verified: dump)
-
-| Table | Useful columns | Notes |
+| System | Role | Database |
 |---|---|---|
-| `community` | `skills` (comma-separated text, optional "(level)" suffix), `interests` (text[]), `availability` (text from a fixed list), `bio`, `is_hidden`, `is_disabled` | Also holds `email`, XP, streaks, login times. Must never be exposed. |
-| `endorsements` | `endorsed_community_id`, `endorser_community_id`, `skill` | Member-to-member attestations |
-| `projects` | `title`, `description`, `status` (`open/active/completed/…`), `required_skills` (text[]), `tags`, `theme_id`, `creator_id` | **No visibility field.** Also `budget`, `timeline`. |
-| `project_members` | `project_id`, `user_id` (= `community.id`), `left_at` | Basis for "demonstrated" evidence |
-| `capability_packages` | `project_id`, `evidence_status` (`untested/tested/proven`), `permission_mode` (`private/community`) | Existing evidence model from real project work |
-| `theme_circles` / `theme_participants` | title, description, tags, status, expiry / membership | Areas being explored |
-| `organizations` | `name`, `slug`, `website`, `description`, `verified`, `status` | |
-| `opportunities` | `title`, `opportunity_type`, `summary`, `skills` (jsonb), `status`, `application_deadline`, `url`, `is_public`, **`contact_email`** | `is_public` **defaults to true** and controls the members' Explore list. It is not consent to outside publication. |
-| `skills` | `name`, `category`, `usage_count` | Partial vocabulary |
-| `user_achievements`, XP fields | | Engagement, not competence: excluded by design |
+| CharlestonHacks website (`Charlestonhacks/charlestonhacks.github.io`) | Public site, chat, member portal, events feed | Reads Innovation Engine Supabase |
+| Innovation Engine, formerly Buildspace (`deckerd451/innovation-engine`) | Members, projects, organizations, opportunities, themes, endorsements, matching | Supabase `mqbsjlgnsirqsmfnreqd` |
+| Nearify | Event presence and follow-up | Separate Supabase project; IDs never mixed |
+| Events worker (Cloudflare) | Merges public Meetup calendars | Writes with the service role key |
 
-Not in the database: the community's identity (mission, values, culture). It lives only in page text.
+No code in either repository sends member data to an external AI service (searched for OpenAI,
+Anthropic, Google Gemini, Groq, OpenRouter, Mistral, Hugging Face and Replicate endpoints).
 
-## Current public (logged-out) access (Verified: dump; confirm live)
+## What a signed-out visitor can read
 
-What an anonymous visitor using the website's public key can read today:
-
-| Data | Logged-out access | Assessment |
+| Data | Live | Notes |
 |---|---|---|
-| Member profiles (`community`) | **None.** RLS allows `authenticated` only; `email` has no column grant to anyone. | Good. Hardened 2026-10-27. |
-| `endorsements` | **All rows** (`USING (true)`): endorser and endorsed member ids plus skill | Pseudonymous, but reveals individual skill attestations |
-| `project_members` | **All rows** | Reveals who works on what (by id) |
-| `theme_participants` | **All rows** | Reveals who follows which theme (by id) |
-| `projects` | **All open/active/completed projects**, every column including `creator_id`, `budget`, `timeline` | Conflicts with "projects private by default" |
-| `organizations`, `organization_members` | Active organizations; all memberships (`allow_select USING (true)`), including member titles/bios | Organization data is reasonably public; member rows less so |
-| `theme_circles` | Active themes | Fine |
-| `opportunities` | **None** (authenticated only) | Fine |
+| Member profiles (`community`) | **No** | Email has no grant to anyone |
+| `opportunities` | **No** | |
+| Chat history (`bbs_messages`), presence, online lists | **No** | Closed by Innovation Engine migration `20261115d` (appears applied) |
+| Most database functions (e.g. `get_pulse_metrics`) | **No** | Closed by `20261115c` (appears applied) |
+| `theme_participants` | **No rows** | Repo still shows a public policy; live returns nothing |
+| `endorsements` | **Yes** | Who endorsed whom, for which skill |
+| `project_members` | **Yes** | Who works on which project |
+| `projects` | **Yes** | Includes `creator_id`, `budget`, `timeline`, `description` (column check) |
+| `organization_members` | **Yes** | Includes `title`, `bio`, `role`, permissions (column check); `allow_select USING (true)` overrides the narrower rules and also exposes pending requests |
+| `organization_followers` | **Yes** | Who follows which organization |
+| `team_members` | **Yes** | Sign-in account ids, community ids, join messages |
+| `zork_saves` | **Yes, read and write** | Any visitor can read, overwrite or delete any guest's game save (guest names, not member data) |
+| `organizations`, `theme_circles` | Yes | Organization-level information; intended |
 
-The ids above can be joined across tables, so the exposure is wider than any single table suggests.
-These rules predate this project; they are not changed by the proposed migrations. Tightening them is
-offered separately in `sql/003_optional_tighten_public_access.PROPOSAL.sql` (decision D4).
+Fix for everything above except `zork_saves`:
+[Innovation Engine PR #362](https://github.com/deckerd451/innovation-engine/pull/362) (draft, not applied).
 
-Supabase grants table-level privileges (including `TRUNCATE`) to `anon` by default and relies on RLS.
-`TRUNCATE` is not reachable through the REST API, so this is a hardening note, not an exposure.
+## Other public tables to classify (repo only, not yet checked live)
 
-## Gaps for the profile
+The dump shows public read rules on member-generated content whose intent is unclear:
+`ideas`, `idea_comments`, `idea_upvotes`, `project_comments`, `project_upvotes`, `signals`,
+`theme_actions`, `swag_votes`, `zork_events`, `cynq_cards`. `project_comments` and `signals`
+returned no rows live. Each needs an owner decision: intentionally public, or signed-in only.
 
-1. No member consent for outside discovery.
-2. No project visibility setting; the opportunity flag means something else.
-3. No structured identity statement.
-4. Skills are free text, so the same skill appears in many spellings.
-5. No public read path that returns aggregates without reading raw rows.
+## Consequences of applied migrations for the website
 
-All five are addressed by the proposed specification, migrations, and endpoint.
+Because `20261115d` restricted chat history to signed-in members, logged-out visitors to the
+website's chat see an empty history. That is consistent with the privacy goals and needs no change.
