@@ -109,7 +109,7 @@ class BbsIOAdapter {
 
   async save(data) {
     try {
-      const { saveZorkState } = await import("./zork-supabase.js");
+      const { saveZorkState } = await import("./zork-supabase.js?v=private-keys-20261124");
       await saveZorkState(this._username, data);
       this._write("\n[Game saved for this guest name.]\n");
       return true;
@@ -122,7 +122,7 @@ class BbsIOAdapter {
 
   async restore() {
     try {
-      const { loadZorkState } = await import("./zork-supabase.js");
+      const { loadZorkState } = await import("./zork-supabase.js?v=private-keys-20261124");
       const data = await loadZorkState(this._username);
       if (!data) this._write("\n[No saved game was found for this guest name.]\n");
       return data;
