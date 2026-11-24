@@ -148,4 +148,7 @@
     <priority>0.7</priority>
   </url>
 
+  <url>
+    <loc>https://charlestonhacks.com/.well-known/community-profile.json</loc>
+  </url>
 </urlset>

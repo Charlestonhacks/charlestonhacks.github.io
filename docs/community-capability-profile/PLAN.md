@@ -9,13 +9,13 @@
 
 ## Steps
 
-| Step | What | Gate |
+| Step | What | Status |
 |---|---|---|
-| 1 | Complete and verify the Innovation Engine security work | Maintainer approval, live verification |
-| 2 | Organizers approve the profile text (`examples/charlestonhacks.draft.json`), needs and partners | Organizer approval |
-| 3 | Publish `/.well-known/community-profile.json`, the GitHub Pages include and a discovery link on a branch; check the preview | Preview check |
-| 4 | Merge | Approval |
-| 5 | Agent check: ask several AI assistants about CharlestonHacks; confirm accurate answers and that none name members | — |
+| 1 | Complete and verify the Innovation Engine security work | Done 2026-11-24 (signed-out access verified live) |
+| 2 | Organizers approve the profile text, needs and partners | Approved in principle 2026-11-24 |
+| 3 | Publish `/.well-known/community-profile.json`, the GitHub Pages include and a discovery link | Live 2026-11-24 (#556); schema live (#557) |
+| 4 | Final review: accuracy corrections, past vs current wording, partner evidence, discoverability, adoption guide | Prepared for approval |
+| 5 | Agent check (see [TESTING_DISCOVERY.md](TESTING_DISCOVERY.md)) | After step 4 |
 
 ## Later
 

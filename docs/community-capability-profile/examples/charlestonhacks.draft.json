@@ -82,7 +82,7 @@
     {
       "id": "offer:hackathons",
       "label": "Other hackathons",
-      "description": "Additional free hackathons, including a month-long online hackathon and multi-night build events.",
+      "description": "Additional free hackathons, including a month-long hackathon in June 2025 (teams formed in person and online) and multi-day build events in 2024.",
       "evidence": [
         {
           "type": "event",
@@ -104,7 +104,7 @@
     {
       "id": "offer:show-and-tell",
       "label": "Show & Tell",
-      "description": "Monthly evening where community members demo what they are building, held at rotating Charleston venues.",
+      "description": "Recurring evening, held about every one to two months, where community members demo what they are building, at rotating venues in the Charleston area.",
       "evidence": [
         {
           "type": "event",
@@ -115,20 +115,30 @@
     },
     {
       "id": "offer:meetups",
-      "label": "Tech Happy Hours and community meetups",
-      "description": "Recurring free social meetups for Charleston's tech and creative community, including joint events with other local groups.",
+      "label": "Tech Happy Hours and joint community meetups",
+      "description": "Free social meetups for Charleston's tech and creative community. Tech Happy Hours ran regularly from 2024 to early 2026; joint events with other local groups are held from time to time.",
       "evidence": [
         {
           "type": "event",
           "url": "https://charlestonhacks.com/Poster.html",
           "description": "Archive of CharlestonHacks public events since October 2023"
+        },
+        {
+          "type": "event",
+          "url": "https://www.meetup.com/charlestonhacks/events/305284075/",
+          "description": "CharlestonHacks x Dig South Happy Hour, January 2025 (co-hosted)"
+        },
+        {
+          "type": "event",
+          "url": "https://www.meetup.com/charlestonhacks/events/306534856/",
+          "description": "CharlestonHacks and TechYeet Happy Hour Mashup, March 2025 (co-hosted)"
         }
       ]
     },
     {
       "id": "offer:creative-tech",
       "label": "Creative technology events",
-      "description": "Events at the intersection of technology and the arts, such as an AI film festival and a hacker theater night.",
+      "description": "Past events at the intersection of technology and the arts: the 30 Second AI Film Fest (2025) and Hacker Theater (2026).",
       "evidence": [
         {
           "type": "event",
@@ -145,7 +155,7 @@
     {
       "id": "offer:tech-week",
       "label": "Charleston Tech Week events",
-      "description": "Community events during Charleston Tech Week, such as the 30 Second AI Film Fest.",
+      "description": "Took part in Charleston Tech Week 2025 with the 30 Second AI Film Fest, presented as part of Dig South and Charleston Tech Week.",
       "evidence": [
         {
           "type": "event",
@@ -181,8 +191,8 @@
     {
       "id": "activity:show-and-tell",
       "name": "CharlestonHacks Show & Tell",
-      "recurrence": "Monthly",
-      "location": "Rotating venues, Charleston, SC",
+      "recurrence": "About every one to two months",
+      "location": "Rotating venues, Charleston area, SC",
       "eventAttendanceMode": "offline",
       "url": "https://www.meetup.com/charlestonhacks/"
     },
@@ -199,12 +209,12 @@
     {
       "id": "partner:dig-south",
       "name": "Dig South",
-      "relationship": "Collaborator: co-hosted a community happy hour (January 2025)"
+      "relationship": "Past collaborator: co-hosted a happy hour (Jan 2025); the AI Film Fest was part of Dig South and Charleston Tech Week (May 2025). No ongoing commitment implied."
     },
     {
       "id": "partner:techyeet",
       "name": "TechYeet",
-      "relationship": "Collaborator: co-hosted a happy hour mashup (March 2025)"
+      "relationship": "Past collaborator: co-hosted a happy hour mashup (March 2025). No ongoing commitment implied."
     }
   ],
   "accessibility": {
