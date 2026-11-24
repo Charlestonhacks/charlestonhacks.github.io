@@ -29,7 +29,8 @@ const NON_TRAVEL = /^(restore|restart|undo|quit|load)\b/;
 const BADGES = { up: "↑", down: "↓", in: "in", out: "out" };
 
 function emptyState() {
-  return { version: 2, rooms: {}, edges: {}, current: null };
+  // exits: directions actually taken out of each room; blocked: tried and refused.
+  return { version: 2, rooms: {}, edges: {}, exits: {}, blocked: {}, current: null };
 }
 
 export function parseDirection(command) {
@@ -47,7 +48,11 @@ export function createZorkMap({ storageKey }) {
     try {
       const raw = localStorage.getItem(storageKey);
       const parsed = raw ? JSON.parse(raw) : null;
-      if (parsed?.version === 2 && parsed.rooms && parsed.edges) return parsed;
+      if (parsed?.version === 2 && parsed.rooms && parsed.edges) {
+        parsed.exits ||= {};
+        parsed.blocked ||= {};
+        return parsed;
+      }
     } catch (_) { /* storage unavailable or corrupt: start fresh */ }
     return emptyState();
   }
@@ -151,6 +156,18 @@ export function createZorkMap({ storageKey }) {
         state.edges[key] = { a: prevId, b: id, dir: parseDirection(command) };
         changed = true;
       }
+    }
+
+    // Remember which directions work (or don't) from each room. Zork's paths
+    // aren't always two-way, so only directions actually tried count.
+    const dir = command ? parseDirection(command) : null;
+    if (dir && travelled) {
+      (state.exits[prevId] ||= {})[dir] = id;
+      if (state.blocked[prevId]) delete state.blocked[prevId][dir];
+      changed = true;
+    } else if (dir && prevId === id && /can't go that way|cannot go that way|no way to go/i.test(output)) {
+      (state.blocked[id] ||= {})[dir] = true;
+      changed = true;
     }
 
     if (state.current !== id) { state.current = id; changed = true; }
@@ -271,18 +288,15 @@ export function createZorkMap({ storageKey }) {
     }
   }
 
-  /** Directions the player has already used to leave (or arrive at) the current room. */
+  /** Directions the player has actually taken out of the current room. */
   function knownExits() {
-    const exits = new Set();
-    const here = state.current;
-    if (!here) return exits;
-    for (const edge of Object.values(state.edges)) {
-      if (!edge.dir) continue;
-      if (edge.a === here) exits.add(edge.dir);
-      else if (edge.b === here && OPPOSITE[edge.dir]) exits.add(OPPOSITE[edge.dir]);
-    }
-    return exits;
+    return new Set(Object.keys(state.exits[state.current] || {}));
   }
 
-  return { recordTurn, render, clear, roomCount, currentName, knownExits };
+  /** Directions tried from the current room that the game refused. */
+  function blockedExits() {
+    return new Set(Object.keys(state.blocked[state.current] || {}));
+  }
+
+  return { recordTurn, render, clear, roomCount, currentName, knownExits, blockedExits };
 }
