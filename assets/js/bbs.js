@@ -1,5 +1,5 @@
 // CharlestonHacks public BBS, authenticated posting, and Zork mode.
-import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=20261123b";
+import { startZork, sendZorkCommand, stopZork } from "./zorkLoader.js?v=private-keys-20261124";
 import { supabase } from "./supabaseClient.js";
 import { createZorkMap } from "./zorkMap.js?v=20261123e";
 
@@ -456,7 +456,7 @@ export async function initBBS() {
     }
 
     if (["zork", "play zork", "/zork"].includes(text.toLowerCase())) {
-      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands. Tap Map (or type /map) to see exits — tap one to move.\nType save to save, restore to load, /exit to return to chat.\nYour save is tied to this browser's guest name; each new save replaces the last.\n");
+      write(screen, "CHARLESTONHACKS BBS PRESENTS: ZORK I\nA classic Great Underground Empire adventure.\n\nHOW TO PLAY: type short commands like look, inventory (or i),\nn / s / e / w / up / down, open mailbox, take leaflet, read leaflet.\nPress ↑ / ↓ to reuse earlier commands. Tap Map (or type /map) to see exits — tap one to move.\nType save to save, restore to load, /exit to return to chat.\nYour save stays private to this browser; each new save replaces the last.\n");
       const session = ++zorkSession;
       currentMode = "zork";
       zorkChatPending = 0;
