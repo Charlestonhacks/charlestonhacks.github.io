@@ -2,7 +2,7 @@
   "$schema": "https://charlestonhacks.com/schemas/community-capability-profile/v0.2.json",
   "specVersion": "0.2.0",
   "id": "https://charlestonhacks.com/.well-known/community-profile.json",
-  "updatedAt": "2026-11-24T18:30:00Z",
+  "updatedAt": "2026-11-24T19:30:00Z",
   "inLanguage": "en",
   "assertion": {
     "type": "self-published",
@@ -47,7 +47,6 @@
   "focusAreas": [
     "Hackathons",
     "Software and AI",
-    "Hardware and making",
     "Startups",
     "Creative technology"
   ],
@@ -82,12 +81,12 @@
     {
       "id": "offer:hackathons",
       "label": "Other hackathons",
-      "description": "Additional free hackathons, including a month-long online hackathon and multi-night build events.",
+      "description": "Additional free, in-person hackathons, including a month-long hackathon in June 2025 and multi-day build events in 2024.",
       "evidence": [
         {
           "type": "event",
           "url": "https://charlestonhacks.com/innovationengine.html",
-          "description": "CharlestonHacks Innovation Engine online hackathon, June 2025"
+          "description": "CharlestonHacks Innovation Engine hackathon, June 2025"
         },
         {
           "type": "event",
@@ -104,7 +103,7 @@
     {
       "id": "offer:show-and-tell",
       "label": "Show & Tell",
-      "description": "Monthly evening where community members demo what they are building, held at rotating Charleston venues.",
+      "description": "Monthly evening where community members demo what they are building, held at rotating venues in the Charleston area.",
       "evidence": [
         {
           "type": "event",
@@ -115,20 +114,30 @@
     },
     {
       "id": "offer:meetups",
-      "label": "Tech Happy Hours and community meetups",
-      "description": "Recurring free social meetups for Charleston's tech and creative community, including joint events with other local groups.",
+      "label": "Tech Happy Hours and joint community meetups",
+      "description": "Monthly free Tech Happy Hours for Charleston's tech and creative community, plus joint events with other local groups.",
       "evidence": [
         {
           "type": "event",
           "url": "https://charlestonhacks.com/Poster.html",
           "description": "Archive of CharlestonHacks public events since October 2023"
+        },
+        {
+          "type": "event",
+          "url": "https://www.meetup.com/charlestonhacks/events/305284075/",
+          "description": "CharlestonHacks x Dig South Happy Hour, January 2025 (co-hosted)"
+        },
+        {
+          "type": "event",
+          "url": "https://www.meetup.com/charlestonhacks/events/306534856/",
+          "description": "CharlestonHacks and TechYeet Happy Hour Mashup, March 2025 (co-hosted)"
         }
       ]
     },
     {
       "id": "offer:creative-tech",
       "label": "Creative technology events",
-      "description": "Events at the intersection of technology and the arts, such as an AI film festival and a hacker theater night.",
+      "description": "Events at the intersection of technology and the arts, such as the 30 Second AI Film Fest (2025) and Hacker Theater (2026).",
       "evidence": [
         {
           "type": "event",
@@ -145,7 +154,7 @@
     {
       "id": "offer:tech-week",
       "label": "Charleston Tech Week events",
-      "description": "Community events during Charleston Tech Week, such as the 30 Second AI Film Fest.",
+      "description": "CharlestonHacks takes part in Charleston Tech Week every year, for example with the 30 Second AI Film Fest in 2025.",
       "evidence": [
         {
           "type": "event",
@@ -167,6 +176,11 @@
       "description": "Mentors and expert judges for hackathons."
     },
     {
+      "id": "need:speakers",
+      "kind": "other",
+      "description": "Speakers for meetups and community events."
+    },
+    {
       "id": "need:sponsors",
       "kind": "sponsor",
       "description": "Sponsors for free community events, cash or in-kind."
@@ -182,7 +196,15 @@
       "id": "activity:show-and-tell",
       "name": "CharlestonHacks Show & Tell",
       "recurrence": "Monthly",
-      "location": "Rotating venues, Charleston, SC",
+      "location": "Rotating venues, Charleston area, SC",
+      "eventAttendanceMode": "offline",
+      "url": "https://www.meetup.com/charlestonhacks/"
+    },
+    {
+      "id": "activity:tech-happy-hour",
+      "name": "CharlestonHacks Tech Happy Hour",
+      "recurrence": "Monthly",
+      "location": "Charleston area, SC",
       "eventAttendanceMode": "offline",
       "url": "https://www.meetup.com/charlestonhacks/"
     },
@@ -193,25 +215,39 @@
       "location": "Charleston, SC",
       "eventAttendanceMode": "offline",
       "url": "https://charlestonhacks.com/harborhack-2026/"
+    },
+    {
+      "id": "activity:tech-week",
+      "name": "Charleston Tech Week",
+      "recurrence": "Annually",
+      "location": "Charleston, SC",
+      "eventAttendanceMode": "offline",
+      "url": "https://charlestonhacks.com/techweek.html"
     }
   ],
   "partners": [
     {
+      "id": "partner:college-of-charleston",
+      "name": "College of Charleston",
+      "url": "https://charleston.edu",
+      "relationship": "Collaborator: has hosted HarborHack every year since 2023, and hosted the 30 Second AI Film Fest (2025)."
+    },
+    {
       "id": "partner:dig-south",
       "name": "Dig South",
-      "relationship": "Collaborator: co-hosted a community happy hour (January 2025)"
+      "relationship": "Collaborator: co-hosted a happy hour (Jan 2025); the AI Film Fest was part of Dig South and Charleston Tech Week (2025)."
     },
     {
       "id": "partner:techyeet",
       "name": "TechYeet",
-      "relationship": "Collaborator: co-hosted a happy hour mashup (March 2025)"
+      "relationship": "Collaborator: co-hosted a happy hour mashup (March 2025)."
     }
   ],
   "accessibility": {
     "humanUrl": "https://charlestonhacks.com",
     "join": {
       "url": "https://charlestonhacks.com/hub.html",
-      "summary": "Sign in with Google or GitHub. Membership is always free."
+      "summary": "Sign in with Google or GitHub. Membership is always free. Event updates by newsletter: sign up at charlestonhacks.com."
     },
     "contact": {
       "email": "hello@charlestonhacks.com"
@@ -230,6 +266,11 @@
         "type": "ical",
         "url": "https://www.meetup.com/charlestonhacks/events/ical/",
         "description": "Public CharlestonHacks event calendar"
+      },
+      {
+        "type": "html",
+        "url": "https://charlestonhacks.com/#subscribe",
+        "description": "Newsletter sign-up for event updates and community news"
       }
     ],
     "collaborationRequests": {
