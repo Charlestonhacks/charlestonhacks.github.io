@@ -151,4 +151,9 @@
   <url>
     <loc>https://charlestonhacks.com/.well-known/community-profile.json</loc>
   </url>
+  <url>
+    <loc>https://charlestonhacks.com/communities.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
